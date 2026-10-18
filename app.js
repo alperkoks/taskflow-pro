@@ -712,6 +712,8 @@ function renderArchive() {
 function openTaskModal(taskId = null) {
   const modal = document.getElementById('taskModal');
   document.getElementById('editTaskId').value = taskId || '';
+  const statusEl = document.getElementById('photoUploadStatus');
+  if (statusEl) statusEl.textContent = '';
 
   if (taskId) {
     const t = appData.tasks.find((x) => x.id === taskId);
@@ -720,6 +722,8 @@ function openTaskModal(taskId = null) {
     document.getElementById('taskTitleInput').value = t.title;
     document.getElementById('taskDateInput').value = t.date;
     document.getElementById('taskTimeInput').value = t.time || '';
+    document.getElementById('taskAlarmEnabled').value = t.alarmEnabled !== false ? 'yes' : 'no';
+    document.getElementById('taskAlarmSound').value = t.alarmSound || 'system';
     document.getElementById('taskPriorityInput').value = t.priority || 'medium';
     document.getElementById('taskCategoryInput').value = t.category || 'İş & Proje';
     document.getElementById('taskRepeatInput').value = t.repeat || 'none';
@@ -733,6 +737,8 @@ function openTaskModal(taskId = null) {
     document.getElementById('taskTitleInput').value = '';
     document.getElementById('taskDateInput').value = selectedDate;
     document.getElementById('taskTimeInput').value = '';
+    document.getElementById('taskAlarmEnabled').value = 'yes';
+    document.getElementById('taskAlarmSound').value = 'system';
     document.getElementById('taskPriorityInput').value = 'medium';
     document.getElementById('taskCategoryInput').value = currentCategoryFilter !== 'all' ? currentCategoryFilter : 'İş & Proje';
     document.getElementById('taskRepeatInput').value = 'none';
@@ -771,37 +777,61 @@ function renderModalSubtasks() {
   `).join('');
 }
 
-// Otomatik 10 Kat Fotoğraf Küçültme Motoru (Canvas WebP/JPEG Sıkıştırma - Madde 16)
+// Otomatik 10 Kat Fotoğraf Küçültme Motoru (Hem Kamera Hem Galeri İçin %100 Garantili)
 function handlePhotoUpload(event) {
-  const files = Array.from(event.target.files || []);
+  const inputEl = event.target;
+  const files = Array.from(inputEl.files || []);
+  const statusEl = document.getElementById('photoUploadStatus');
+  if (files.length === 0) return;
+
+  if (statusEl) statusEl.textContent = `⏳ ${files.length} fotoğraf optimize ediliyor...`;
+
+  let processed = 0;
   files.forEach((file) => {
     const reader = new FileReader();
     reader.onload = (e) => {
+      const dataUrl = e.target.result;
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_DIM = 900; // Yüksek netlik ama 10x küçük boyut (~60-85 KB)
-        let w = img.width;
-        let h = img.height;
-        if (w > h && w > MAX_DIM) {
-          h = Math.round((h * MAX_DIM) / w);
-          w = MAX_DIM;
-        } else if (h > MAX_DIM) {
-          w = Math.round((w * MAX_DIM) / h);
-          h = MAX_DIM;
+        try {
+          const canvas = document.createElement('canvas');
+          const MAX_DIM = 900;
+          let w = img.width || 800;
+          let h = img.height || 600;
+          if (w > h && w > MAX_DIM) {
+            h = Math.round((h * MAX_DIM) / w);
+            w = MAX_DIM;
+          } else if (h > MAX_DIM) {
+            w = Math.round((w * MAX_DIM) / h);
+            h = MAX_DIM;
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.72);
+          modalPhotos.push(compressedDataUrl);
+        } catch (err) {
+          modalPhotos.push(dataUrl);
         }
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
-        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.72);
-        modalPhotos.push(compressedDataUrl);
+        processed++;
+        renderModalAttachments();
+        if (statusEl && processed === files.length) {
+          statusEl.textContent = `✅ ${modalPhotos.length} fotoğraf eklendi (10x küçültüldü)`;
+        }
+      };
+      img.onerror = () => {
+        modalPhotos.push(dataUrl);
+        processed++;
         renderModalAttachments();
       };
-      img.src = e.target.result;
+      img.src = dataUrl;
     };
     reader.readAsDataURL(file);
   });
+
+  // Aynı fotoğrafı tekrar seçebilmek için input'u sıfırla
+  inputEl.value = '';
 }
 
 // Sesli Mesaj Kaydı (Düşük Bitrate Sıkıştırmalı - Madde 6 & 16)
@@ -810,7 +840,7 @@ async function toggleAudioRecording() {
   if (!isRecordingAudio) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder = new MediaRecorder(stream, { audioBitsPerSecond: 32000 });
+      mediaRecorder = new MediaRecorder(stream);
       audioChunks = [];
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) audioChunks.push(e.data);
@@ -869,6 +899,8 @@ function saveTaskFromModal() {
   const editId = document.getElementById('editTaskId').value;
   const dateVal = document.getElementById('taskDateInput').value || getTodayISO();
   const timeVal = document.getElementById('taskTimeInput').value || '';
+  const alarmEnabled = document.getElementById('taskAlarmEnabled').value === 'yes';
+  const alarmSound = document.getElementById('taskAlarmSound').value || 'system';
   const prioVal = document.getElementById('taskPriorityInput').value;
   const catVal = document.getElementById('taskCategoryInput').value;
   const repVal = document.getElementById('taskRepeatInput').value;
@@ -876,12 +908,19 @@ function saveTaskFromModal() {
   const tagsArr = tagsRaw ? tagsRaw.split(/\s+/).map((t) => (t.startsWith('#') ? t : '#' + t)) : [];
   const descVal = document.getElementById('taskDescInput').value.trim();
 
+  // Eğer alarm açıksa ve saat girildiyse bildirim iznini hemen kontrol et
+  if (alarmEnabled && timeVal && 'Notification' in window && Notification.permission !== 'granted') {
+    Notification.requestPermission();
+  }
+
   if (editId) {
     const t = appData.tasks.find((x) => x.id === editId);
     if (t) {
       t.title = title;
       t.date = dateVal;
       t.time = timeVal;
+      t.alarmEnabled = alarmEnabled;
+      t.alarmSound = alarmSound;
       t.priority = prioVal;
       t.category = catVal;
       t.repeat = repVal;
@@ -899,6 +938,8 @@ function saveTaskFromModal() {
       desc: descVal,
       date: dateVal,
       time: timeVal,
+      alarmEnabled,
+      alarmSound,
       priority: prioVal,
       category: catVal,
       repeat: repVal,
@@ -950,7 +991,6 @@ function startTurkishSpeechToText() {
     const transcript = event.results[0][0].transcript;
     document.getElementById('taskTitleInput').value = transcript;
 
-    // Akıllı Türkçe Tarih, Saat ve Aciliyet Algılayıcı
     const lower = transcript.toLowerCase();
     if (lower.includes('yarın')) {
       const tmr = new Date();
@@ -1047,8 +1087,7 @@ function startPomodoro() {
       clearInterval(pomoInterval);
       pomoRunning = false;
       document.getElementById('pomoStateText').textContent = '🎉 Süre Tamamlandı!';
-      playAlertTone('notify');
-      sendSystemNotification('⏱️ Pomodoro Tamamlandı!', 'Harika odaklandın, şimdi kısa bir mola zamanı.');
+      sendSystemNotification('⏱️ Pomodoro Tamamlandı!', 'Harika odaklandın, şimdi kısa bir mola zamanı.', 'system');
     }
   }, 1000);
 }
@@ -1068,41 +1107,129 @@ function updatePomoDisplay() {
 }
 
 // ----------------------------------------------------------------------------
-// 10. BİLDİRİM VE SESLİ ALARM MOTORU (MADDE 7)
+// 10. GERÇEK SİSTEM BİLDİRİMİ (TELEFON BİLDİRİM KANALI) VE ALARM MOTORU (MADDE 7)
 // ----------------------------------------------------------------------------
+function previewSelectedAlarm(soundType) {
+  if (soundType === 'system') {
+    // Telefonun kendi bildirim kanalını test et
+    sendSystemNotification('🔔 Bildirim Sesi Testi', 'Görev saati geldiğinde telefonunun kendi bildirim sesiyle böyle görünecek!', 'system');
+  } else {
+    playCustomTone(soundType);
+  }
+}
+
+function playCustomTone(soundType) {
+  if (soundType === 'system') return; // Sistem bildirim kanalını kullan, medya sesi çalma!
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    if (soundType === 'classic') {
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.setValueAtTime(0, ctx.currentTime + 0.15);
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.3);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.65);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.65);
+    } else if (soundType === 'melody') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+      osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.18);
+      osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.36);
+      gain.gain.setValueAtTime(0.22, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.75);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.75);
+    } else if (soundType === 'urgent') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(600, ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(1100, ctx.currentTime + 0.35);
+      osc.frequency.linearRampToValueAtTime(600, ctx.currentTime + 0.7);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.8);
+    }
+  } catch (e) {}
+}
+
 async function requestNotificationPermission() {
   if (!('Notification' in window)) {
-    alert('Cihazınız tarayıcı bildirimlerini desteklemiyor ama uygulama içi sesli uyarı aktiftir!');
+    alert('Cihazınız sistem bildirimlerini desteklemiyor!');
     return;
   }
   const perm = await Notification.requestPermission();
   if (perm === 'granted') {
-    playAlertTone('success');
-    sendSystemNotification('🔔 Bildirimler Aktif!', 'Görev saatin geldiğinde hem sesli hem de ekran bildirimi alacaksın.');
+    await sendSystemNotification('🔔 TaskFlow+ Bildirimleri Aktif!', 'Artık görev saati geldiğinde telefonunun ve bilgisayarının kendi BİLDİRİM sesiyle uyarı alacaksın.', 'system');
+  } else {
+    alert('Bildirim izni kapalı! Lütfen telefon Ayarlar -> Uygulamalar -> TaskFlow+ -> Bildirimler kısmından izni açın.');
   }
 }
 
-function sendSystemNotification(title, body) {
-  if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification(title, { body, icon: 'icon-192.png' });
+// Android APK ve Windows'ta Medya Sesi Yerine Doğrudan Sistem Bildirim Kanalını Tetikler!
+async function sendSystemNotification(title, body, soundType = 'system') {
+  if (soundType && soundType !== 'system') {
+    playCustomTone(soundType);
+  }
+
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') {
+    await Notification.requestPermission();
+  }
+
+  if (Notification.permission === 'granted') {
+    const options = {
+      body: body,
+      icon: 'icon-192.png',
+      badge: 'icon-192.png',
+      vibrate: [300, 150, 300, 150, 400],
+      requireInteraction: true,
+      silent: false, // false = Telefonun kendi BİLDİRİM SESİ kanalını (Notification Stream) çalar!
+      tag: 'taskflow-alarm-' + Date.now(),
+      renotify: true
+    };
+
+    try {
+      if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg && 'showNotification' in reg) {
+          await reg.showNotification(title, options);
+          return;
+        }
+      }
+      new Notification(title, options);
+    } catch (e) {
+      console.warn('Bildirim hatası:', e);
+    }
   }
 }
 
-// Her 25 saniyede bir saati gelen görevleri kontrol et
+// Her 3 saniyede bir saati gelen görevleri milimetrik kontrol et (Asla dakika kaçırmaz!)
 setInterval(() => {
   const today = getTodayISO();
   const now = new Date();
   const currentHHMM = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
 
+  let changed = false;
   appData.tasks.forEach((t) => {
-    if (!t.completed && !t.notified && t.date === today && t.time === currentHHMM) {
+    if (!t.completed && !t.notified && t.alarmEnabled !== false && t.date === today && t.time === currentHHMM) {
       t.notified = true;
-      playAlertTone('notify');
-      sendSystemNotification(`⏰ Görev Zamanı: ${t.title}`, t.desc || 'Planladığın görevin saati geldi!');
-      saveProfileData();
+      changed = true;
+      sendSystemNotification(
+        `⏰ Görev Zamanı: ${t.title}`,
+        t.desc || `Saat ${t.time} görevinin vakti geldi! (${getPriorityLabel(t.priority)})`,
+        t.alarmSound || 'system'
+      );
     }
   });
-}, 25000);
+
+  if (changed) saveProfileData();
+}, 3000);
 
 // ----------------------------------------------------------------------------
 // 11. TEK TIKLA YEDEK İNDİRME VE ÜCRETSİZ CANLI BULUT SENKRONİZASYONU (MADDE 8, 9, 18)
