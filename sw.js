@@ -1,10 +1,10 @@
-const CACHE_NAME = 'taskflow-pro-live-v6';
+const CACHE_NAME = 'taskflow-pro-live-v7';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=6',
-  './app.js?v=6',
-  './manifest.json?v=6',
+  './styles.css?v=7',
+  './app.js?v=7',
+  './manifest.json?v=7',
   './icon-192.png',
   './icon-512.png'
 ];
@@ -25,7 +25,6 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Bildirime tıklandığında uygulamayı öne getir
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(

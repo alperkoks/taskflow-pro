@@ -7,52 +7,96 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>TaskFlow+ — Günlük Görev & Odak</title>
-  <link rel="manifest" href="manifest.json?v=6" />
-  <link rel="stylesheet" href="styles.css?v=6" />
+  <link rel="manifest" href="manifest.json?v=7" />
+  <link rel="stylesheet" href="styles.css?v=7" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body data-theme="dark">
 
-  <!-- 1. ŞİFRELİ VE ÇOKLU PROFİL GİRİŞ EKRANI (SEN & ARKADAŞIN İÇİN AYRI) -->
+  <!-- 1. PROFESYONEL KULLANICI GİRİŞ / KAYIT OL / ŞİFREMİ UNUTTUM EKRANI -->
   <div id="lockScreen" class="lock-screen">
-    <div class="lock-card">
-      <img src="icon-192.png" alt="TaskFlow+" style="width:68px;height:68px;border-radius:20px;margin:0 auto 12px;display:block;box-shadow:0 6px 20px rgba(0,0,0,0.4);" />
-      <h2 id="lockTitle" style="font-size:23px;font-weight:900;letter-spacing:-0.5px;">TaskFlow<span style="color:var(--pastel-purple);">+</span></h2>
-      <p id="lockSubtitle" style="font-size:13px;color:var(--text-muted);margin-top:4px;">
-        Profilini seç ve 4 haneli PIN şifreni gir
-      </p>
-
-      <!-- Kullanıcı / Arkadaş Profil Seçici -->
-      <div class="profile-switcher" style="margin-top:16px;">
-        <button class="profile-tab active" id="profTab1" onclick="switchProfile('user1')">👤 Benim Hesabım</button>
-        <button class="profile-tab" id="profTab2" onclick="switchProfile('user2')">🤝 Arkadaşım</button>
+    <div class="lock-card" style="max-width:390px;text-align:left;">
+      <div style="text-align:center;margin-bottom:16px;">
+        <img src="icon-192.png" alt="TaskFlow+" style="width:64px;height:64px;border-radius:18px;margin:0 auto 10px;display:block;box-shadow:0 6px 20px rgba(0,0,0,0.4);" />
+        <h2 style="font-size:23px;font-weight:900;letter-spacing:-0.5px;">TaskFlow<span style="color:var(--pastel-purple);">+</span></h2>
+        <p id="authSubtitle" style="font-size:12.5px;color:var(--text-muted);margin-top:3px;">
+          Kişisel Görev ve Planlama Alanına Giriş Yap
+        </p>
       </div>
 
-      <div class="pin-dots">
-        <div class="pin-dot" id="dot0"></div>
-        <div class="pin-dot" id="dot1"></div>
-        <div class="pin-dot" id="dot2"></div>
-        <div class="pin-dot" id="dot3"></div>
+      <!-- Giriş / Kayıt Sekmeleri -->
+      <div class="profile-switcher" id="authTabsBar">
+        <button type="button" class="profile-tab active" id="tabLoginBtn" onclick="switchAuthTab('login')">🔑 Giriş Yap</button>
+        <button type="button" class="profile-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">✨ Kayıt Ol</button>
       </div>
 
-      <p id="pinHint" style="font-size:12px;color:var(--accent-cream);min-height:18px;"></p>
+      <!-- GİRİŞ YAP FORMU -->
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Kullanıcı Adı veya E-Posta</label>
+          <input type="text" id="loginUsername" class="form-input" placeholder="kullaniciadi veya ornek@mail.com" required autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label>Şifre</label>
+          <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required autocomplete="current-password" />
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:12px;">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-muted);">
+            <input type="checkbox" id="rememberMeCheck" checked /> Oturumu açık tut
+          </label>
+          <a href="javascript:void(0)" onclick="switchAuthTab('forgot')" style="color:var(--accent-cream);text-decoration:none;font-weight:600;">Şifremi Unuttum?</a>
+        </div>
+        <p id="loginErrorMsg" style="font-size:12px;color:#ff4d4f;min-height:18px;margin-bottom:8px;text-align:center;"></p>
+        <button type="submit" class="btn-cream" style="width:100%;height:44px;font-size:14px;">Giriş Yap →</button>
+      </form>
 
-      <div class="pin-pad">
-        <button class="pin-btn" onclick="pressPin('1')">1</button>
-        <button class="pin-btn" onclick="pressPin('2')">2</button>
-        <button class="pin-btn" onclick="pressPin('3')">3</button>
-        <button class="pin-btn" onclick="pressPin('4')">4</button>
-        <button class="pin-btn" onclick="pressPin('5')">5</button>
-        <button class="pin-btn" onclick="pressPin('6')">6</button>
-        <button class="pin-btn" onclick="pressPin('7')">7</button>
-        <button class="pin-btn" onclick="pressPin('8')">8</button>
-        <button class="pin-btn" onclick="pressPin('9')">9</button>
-        <button class="pin-btn" onclick="clearPin()" style="font-size:14px;">Temizle</button>
-        <button class="pin-btn" onclick="pressPin('0')">0</button>
-        <button class="pin-btn" onclick="backspacePin()">⌫</button>
+      <!-- YENİ HESAP OLUŞTUR (KAYIT OL) FORMU -->
+      <form id="registerForm" style="display:none;" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label>Kullanıcı Adı Belirle</label>
+          <input type="text" id="regUsername" class="form-input" placeholder="Örn: alper" required autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label>E-Posta Adresin (Şifre Kurtarma İçin)</label>
+          <input type="email" id="regEmail" class="form-input" placeholder="ornek@gmail.com" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label>Şifre Belirle</label>
+          <input type="password" id="regPassword" class="form-input" placeholder="En az 4 karakter" required minlength="4" autocomplete="new-password" />
+        </div>
+        <p id="regErrorMsg" style="font-size:12px;color:#ff4d4f;min-height:18px;margin-bottom:8px;text-align:center;"></p>
+        <button type="submit" class="btn-cream" style="width:100%;height:44px;font-size:14px;">Hesabımı Oluştur ve Başla ✓</button>
+      </form>
+
+      <!-- ŞİFREMİ UNUTTUM (E-POSTA İLE KURTARMA) FORMU -->
+      <form id="forgotForm" style="display:none;" onsubmit="handleForgotPassword(event)">
+        <div class="form-group">
+          <label>Kayıtlı E-Posta Adresin veya Kullanıcı Adın</label>
+          <input type="text" id="forgotIdentifier" class="form-input" placeholder="ornek@gmail.com" required />
+        </div>
+        <p id="forgotStatusMsg" style="font-size:12px;color:var(--accent-cream);min-height:18px;margin-bottom:10px;text-align:center;"></p>
+        <button type="submit" id="forgotSubmitBtn" class="btn-cream" style="width:100%;height:44px;font-size:14px;">📧 Şifremi E-Postama Gönder</button>
+        <button type="button" class="pin-btn" style="width:100%;height:38px;font-size:12.5px;margin-top:8px;" onclick="switchAuthTab('login')">← Giriş Ekranına Dön</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- CANLI ÇALAN TAM EKRAN ALARM MODALI (SADECE MESAJ DEĞİL, GERÇEK ÇALAR SAAT UYARISI!) -->
+  <div id="liveAlarmModal" class="modal-backdrop hidden" style="z-index:25000;">
+    <div class="modal-sheet" style="max-width:380px;text-align:center;border:2px solid var(--prio-urgent);box-shadow:0 0 50px rgba(255,77,79,0.45);">
+      <div style="font-size:52px;animation:pulse 1s infinite;display:inline-block;border-radius:50%;">⏰</div>
+      <h2 style="font-size:21px;font-weight:900;margin-top:10px;color:#ff7875;">GÖREV ZAMANI GELDİ!</h2>
+      <h3 id="alarmModalTaskTitle" style="font-size:17px;font-weight:800;margin-top:8px;color:var(--text-main);"></h3>
+      <p id="alarmModalTaskDesc" style="font-size:13px;color:var(--text-muted);margin-top:4px;"></p>
+      <div id="alarmModalTaskTime" style="display:inline-block;margin-top:10px;padding:4px 12px;border-radius:99px;background:var(--bg-surface);color:var(--accent-cream);font-size:13px;font-weight:700;"></div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button type="button" class="pin-btn" style="flex:1;height:46px;font-size:13.5px;" onclick="snoozeLiveAlarm(5)">💤 5 Dk Ertele</button>
+        <button type="button" class="btn-cream" style="flex:1;height:46px;font-size:13.5px;background:#52c41a;color:#fff;" onclick="dismissLiveAlarm(true)">✓ Tamamla</button>
       </div>
+      <button type="button" class="btn-cream" style="width:100%;height:44px;font-size:14px;margin-top:10px;" onclick="dismissLiveAlarm(false)">🔕 Alarmı Kapat</button>
     </div>
   </div>
 
@@ -70,15 +114,15 @@
           <h1 class="greeting-title">Günlük Görevlerini<br>Yönet</h1>
         </div>
         <div class="header-actions">
-          <button class="icon-btn" onclick="requestNotificationPermission()" title="Bildirimler ve Sesli Uyarı">
+          <button class="icon-btn" onclick="requestNotificationPermission()" title="Bildirim İzni ve Test">
             🔔
             <span id="syncStatusDot" class="sync-dot" title="Çevrimdışı / Bulut Hazır"></span>
           </button>
           <button class="icon-btn" id="installAppBtn" style="display:none;" onclick="installPWA()" title="Uygulama Olarak Kur (PC / Mobil)">
             📲
           </button>
-          <button class="icon-btn" onclick="lockApp()" title="Uygulamayı Kilitle">
-            🔒
+          <button class="icon-btn" onclick="logoutUser()" title="Hesaptan Çıkış Yap / Kilitle">
+            🚪
           </button>
         </div>
       </header>
@@ -141,7 +185,7 @@
           <span>🔍</span>
           <input type="text" id="searchInput" placeholder="Görev, #etiket (#iş, #acil), yorum veya emoji ara..." oninput="renderAll()" />
         </div>
-        <select id="priorityFilterSelect" class="form-select" style="width:auto;min-width:140px;" onchange="renderAll()">
+        <select id="priorityFilterSelect" class="form-select" style="width:auto;min-width:130px;" onchange="renderAll()">
           <option value="all">Tüm Öncelikler</option>
           <option value="urgent">🚨 Acil</option>
           <option value="high">🔥 Yüksek</option>
@@ -155,15 +199,15 @@
         <div class="calendar-header">
           <div class="month-label" onclick="jumpToToday()">
             <span id="currentMonthLabel">Ekim 2026</span>
-            <span style="font-size:12px;background:var(--bg-surface);padding:4px 10px;border-radius:99px;color:var(--accent-cream);">Bugüne Dön</span>
+            <span style="font-size:11.5px;background:var(--bg-surface);padding:4px 9px;border-radius:99px;color:var(--accent-cream);">Bugüne Dön</span>
           </div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <input type="date" id="customDatePicker" class="form-input" style="padding:6px 10px;font-size:12px;width:auto;" onchange="selectDateFromPicker(this.value)" />
-            <button class="btn-cream" id="toggleAllDatesBtn" onclick="toggleShowAllDates()" style="padding:7px 12px;font-size:12px;">Tüm Günler</button>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input type="date" id="customDatePicker" class="form-input" style="padding:5px 8px;font-size:12px;width:auto;" onchange="selectDateFromPicker(this.value)" />
+            <button class="btn-cream" id="toggleAllDatesBtn" onclick="toggleShowAllDates()" style="padding:6px 10px;font-size:11.5px;">Tüm Günler</button>
           </div>
         </div>
 
-        <!-- YATAY GÜN ŞERİDİ (Görseldeki Sağ Telefon Tasarımı) -->
+        <!-- YATAY GÜN ŞERİDİ -->
         <div id="dateStrip" class="date-strip"></div>
 
         <div class="section-header">
@@ -174,7 +218,7 @@
         <div id="ongoingTaskList" class="task-list"></div>
       </section>
 
-      <!-- SEKME 2: ARŞİV & BİTEN GÖREVLER (TARİH VE ÖNCELİK SIRALI) -->
+      <!-- SEKME 2: ARŞİV & BİTEN GÖREVLER -->
       <section id="viewArchive" style="display:none;">
         <div class="section-header">
           <div>
@@ -192,8 +236,7 @@
 
       <!-- SEKME 3: HAFTALIK MOTİVASYON KARNESİ & POMODORO ODAK SAYACI -->
       <section id="viewStats" style="display:none;">
-        <!-- POMODORO ODAK SAYACI -->
-        <div class="task-card" style="text-align:center;margin-bottom:20px;">
+        <div class="task-card" style="text-align:center;margin-bottom:16px;">
           <h3 style="font-size:18px;font-weight:800;">⏱️ Odaklanma Modu (Pomodoro)</h3>
           <p style="font-size:12px;color:var(--text-muted);margin-top:4px;" id="pomoActiveTaskName">Acil bir göreve odaklanmak için 25 dakikalık sayaç</p>
           <div class="pomo-circle">
@@ -207,18 +250,17 @@
           </div>
         </div>
 
-        <!-- HAFTALIK MOTİVASYON VE RUH HALİ KARNESİ -->
         <div class="task-card">
           <h3 style="font-size:18px;font-weight:800;margin-bottom:8px;">🏆 Haftalık Motivasyon & Ruh Hali Karnesi</h3>
           <p id="weeklyMotivationSummary" style="font-size:14px;color:var(--accent-cream);font-weight:600;margin-bottom:16px;"></p>
-          <div id="emojiStatsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:10px;"></div>
+          <div id="emojiStatsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:10px;"></div>
         </div>
       </section>
 
-      <!-- SEKME 4: KİŞİSELLEŞTİRME, BULUT SENKRONİZASYONU VE YEDEKLEME AYARLARI -->
+      <!-- SEKME 4: KİŞİSELLEŞTİRME, HESAP AYARLARI, BULUT SENKRONİZASYONU VE YEDEKLEME -->
       <section id="viewSettings" style="display:none;">
-        <div class="task-card" style="margin-bottom:16px;">
-          <h3 style="font-size:17px;font-weight:800;margin-bottom:12px;">🎨 Arayüz Kişiselleştirme & Gece Işığı</h3>
+        <div class="task-card" style="margin-bottom:14px;">
+          <h3 style="font-size:16px;font-weight:800;margin-bottom:12px;">👤 Hesap Bilgilerim & Arayüz Kişiselleştirme</h3>
           <div class="form-row">
             <div class="form-group">
               <label>Renk Teması</label>
@@ -231,29 +273,37 @@
             </div>
             <div class="form-group">
               <label>Gece Işığı (Mavi Işık Filtresi)</label>
-              <button class="btn-cream" style="width:100%;height:43px;" onclick="toggleNightLight()">💡 Gece Işığını Aç / Kapat</button>
+              <button class="btn-cream" style="width:100%;height:40px;" onclick="toggleNightLight()">💡 Gece Işığını Aç / Kapat</button>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Adın / Hitap İsmi</label>
-              <input type="text" id="settingUserName" class="form-input" placeholder="Örn: Ahmet" onchange="saveUserSettings()" />
+              <label>Hitap İsmi / Kullanıcı Adı</label>
+              <input type="text" id="settingUserName" class="form-input" placeholder="Adın" />
             </div>
             <div class="form-group">
-              <label>4 Haneli PIN Şifreni Değiştir</label>
-              <input type="password" maxlength="4" id="settingUserPin" class="form-input" placeholder="Yeni 4 Haneli PIN" onchange="saveUserSettings()" />
+              <label>Kurtarma E-Posta Adresin</label>
+              <input type="email" id="settingUserEmail" class="form-input" placeholder="ornek@gmail.com" />
             </div>
+          </div>
+          <div class="form-group">
+            <label>Yeni Şifre Belirle (Değiştirmek İstersen Yaz)</label>
+            <input type="password" id="settingUserPassword" class="form-input" placeholder="Değiştirmek istemiyorsan boş bırak" />
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn-cream" onclick="saveUserSettings()">💾 Hesap Bilgilerimi Güncelle</button>
+            <button class="pin-btn" style="height:38px;padding:0 14px;font-size:12.5px;color:#ff7875;" onclick="logoutUser()">🚪 Hesaptan Çıkış Yap</button>
           </div>
         </div>
 
         <!-- TEK TIKLA TAM YEDEK İNDİRME / GERİ YÜKLEME -->
-        <div class="task-card" style="margin-bottom:16px;">
-          <h3 style="font-size:17px;font-weight:800;margin-bottom:6px;">💾 Tek Tıkla Güvenli Arşiv Yedeği (Fotoğraf + Ses + Görevler)</h3>
-          <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">
+        <div class="task-card" style="margin-bottom:14px;">
+          <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">💾 Tek Tıkla Güvenli Arşiv Yedeği (Fotoğraf + Ses + Görevler)</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
             Tüm görevlerini, sıkıştırılmış fotoğraflarını ve ses kayıtlarını tek dosyada bilgisayarına/telefonuna indirebilir veya başka cihaza aktarabilirsin.
           </p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn-cream" onclick="exportFullBackup()">📥 Tüm Verileri Yedek İndir (.JSON Arşivi)</button>
+            <button class="btn-cream" onclick="exportFullBackup()">📥 Tüm Verileri Yedek İndir (.JSON)</button>
             <label class="btn-cream" style="background:var(--bg-surface);color:var(--text-main);cursor:pointer;">
               📤 Yedek Dosyası Yükle
               <input type="file" accept=".json" style="display:none;" onchange="importFullBackup(event)" />
@@ -261,19 +311,19 @@
           </div>
         </div>
 
-        <!-- ÜCRETSİZ BULUT SENKRONİZASYONU (PC <-> TELEFON ANLIK EŞİTLEME) -->
+        <!-- ÜCRETSİZ BULUT SENKRONİZASYONU -->
         <div class="task-card">
-          <h3 style="font-size:17px;font-weight:800;margin-bottom:6px;">☁️ Ücretsiz Canlı Bulut Senkronizasyonu (PC & Telefon Eşitleme)</h3>
+          <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">☁️ Ücretsiz Canlı Bulut Senkronizasyonu (PC & Telefon Eşitleme)</h3>
           <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
-            İnternet yokken cihaz hafızasında çalışır. Ücretsiz Firebase Realtime Database URL ve Özel Oda Kodunu girdiğinde telefonun ve bilgisayarın otomatik eşitlenir.
+            İnternet yokken cihaz hafızasında çalışır. Ücretsiz Firebase Realtime Database URL girdiğinde kullanıcı adına özel olarak telefonun ve bilgisayarın otomatik eşitlenir.
           </p>
           <div class="form-group">
             <label>Ücretsiz Bulut Veritabanı Adresi (Firebase DB URL - İsteğe Bağlı)</label>
             <input type="text" id="cloudDbUrl" class="form-input" placeholder="https://projeniz-default-rtdb.firebaseio.com" />
           </div>
           <div class="form-group">
-            <label>Senkronizasyon Gizli Anahtarı (Senin için ayrı, arkadaşın için ayrı kod)</label>
-            <input type="text" id="cloudSyncKey" class="form-input" placeholder="Örn: benim-ozel-odam-2026" />
+            <label>Özel Senkronizasyon Anahtarı (Otomatik kullanıcı adına göre ayarlanır)</label>
+            <input type="text" id="cloudSyncKey" class="form-input" placeholder="Örn: alper-ozel-kasa" />
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn-cream" onclick="saveCloudConfigAndSync()">🔄 Kaydet ve Şimdi Eşitle</button>
@@ -285,7 +335,7 @@
     </main>
   </div>
 
-  <!-- ALT YÜZEN MENÜ VE ORTADAKİ + BUTONU (GÖRSELDEKİ İLE BİREBİR) -->
+  <!-- ALT YÜZEN MENÜ VE ORTADAKİ + BUTONU -->
   <div class="bottom-nav-wrap">
     <nav class="bottom-nav">
       <button class="nav-item active" id="navTasks" onclick="switchView('tasks')">
@@ -310,26 +360,26 @@
     </nav>
   </div>
 
-  <!-- GÖREV EKLEME / DÜZENLEME MODALI (SESLE YAZDIRMA, FOTOĞRAF, SES KAYDI, ALT GÖREVLER) -->
+  <!-- GÖREV EKLEME / DÜZENLEME MODALI -->
   <div id="taskModal" class="modal-backdrop hidden">
     <div class="modal-sheet">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h3 id="modalTitle" style="font-size:19px;font-weight:800;">Yeni Görev Planla</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3 id="modalTitle" style="font-size:18px;font-weight:800;">Yeni Görev Planla</h3>
         <button class="icon-btn" style="width:34px;height:34px;" onclick="closeTaskModal()">✕</button>
       </div>
 
       <input type="hidden" id="editTaskId" />
 
-      <!-- SESLE YAZDIRMA (TÜRKÇE AKILLI KONUŞARAK GÖREV EKLEME) -->
+      <!-- SESLE YAZDIRMA (TÜRKÇE AKILLI KONUŞARAK GÖREV EKLEME - HATASIZ MOTOR) -->
       <div class="form-group">
         <label>Görev Başlığı (Yaz veya Mikrofona Konuş)</label>
         <div style="display:flex;gap:8px;">
           <input type="text" id="taskTitleInput" class="form-input" placeholder="Örn: Yarın saat 14:00'te Ahmet Bey ile toplantı" />
-          <button type="button" id="voiceDictateBtn" class="btn-cream" onclick="startTurkishSpeechToText()" title="Konuşarak Türkçe Görev Yazdır">
+          <button type="button" id="voiceDictateBtn" class="btn-cream" onclick="toggleTurkishSpeechToText()" title="Konuşarak Türkçe Görev Yazdır">
             🎙️ Konuş
           </button>
         </div>
-        <small id="speechStatusHint" style="font-size:11px;color:var(--accent-cream);display:none;margin-top:4px;">Dinliyorum... Türkçe konuşabilirsin ("Yarın", "Acil" dediğinde otomatik algılar)</small>
+        <small id="speechStatusHint" style="font-size:11.5px;color:var(--accent-cream);display:none;margin-top:5px;"></small>
       </div>
 
       <div class="form-row">
@@ -348,7 +398,7 @@
         <div class="form-group">
           <label>⏰ Alarm & Bildirim</label>
           <select id="taskAlarmEnabled" class="form-select">
-            <option value="yes" selected>🔔 Alarm Açık (Bildirim Gönder)</option>
+            <option value="yes" selected>🔔 Alarm Açık (Canlı Uyarı + Bildirim)</option>
             <option value="no">🔕 Alarm Kapalı</option>
           </select>
         </div>
@@ -399,8 +449,11 @@
       </div>
 
       <div class="form-group">
-        <label>Detay / Açıklama</label>
-        <textarea id="taskDescInput" class="form-textarea" rows="2" placeholder="Görevle ilgili notlar..."></textarea>
+        <label>Detay / Açıklama (Sağdan Sesle de Yazdırabilirsin)</label>
+        <div style="display:flex;gap:8px;">
+          <textarea id="taskDescInput" class="form-textarea" rows="2" placeholder="Görevle ilgili notlar..."></textarea>
+          <button type="button" id="voiceDescBtn" class="pin-btn" style="width:46px;height:auto;font-size:16px;" onclick="toggleTurkishSpeechToText('desc')" title="Açıklamayı Sesle Yazdır">🎙️</button>
+        </div>
       </div>
 
       <!-- ALT GÖREVLER (CHECKLIST / ADIM ADIM İLERLEME) -->
@@ -434,14 +487,14 @@
         <div id="modalAttachmentsPreview" class="attachments-row"></div>
       </div>
 
-      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
-        <button type="button" class="pin-btn" style="height:44px;padding:0 18px;font-size:14px;" onclick="closeTaskModal()">İptal</button>
-        <button type="button" class="btn-cream" style="height:44px;padding:0 24px;font-size:14px;" onclick="saveTaskFromModal()">💾 Görevi Kaydet</button>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
+        <button type="button" class="pin-btn" style="height:42px;padding:0 18px;font-size:13.5px;" onclick="closeTaskModal()">İptal</button>
+        <button type="button" class="btn-cream" style="height:42px;padding:0 22px;font-size:13.5px;" onclick="saveTaskFromModal()">💾 Görevi Kaydet</button>
       </div>
     </div>
   </div>
 
-  <!-- GÖREV TAMAMLAMA: EMOJİ VE YORUM BIRAKMA MODALI (MADDE 4) -->
+  <!-- GÖREV TAMAMLAMA: EMOJİ VE YORUM BIRAKMA MODALI -->
   <div id="completeModal" class="modal-backdrop hidden">
     <div class="modal-sheet" style="max-width:430px;text-align:center;">
       <h3 style="font-size:20px;font-weight:800;">🎉 Görevi Tamamladın!</h3>
@@ -471,6 +524,6 @@
     <img id="photoViewerImg" src="" alt="Görev Fotoğrafı" style="max-width:92vw;max-height:88vh;border-radius:18px;box-shadow:var(--shadow);" />
   </div>
 
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

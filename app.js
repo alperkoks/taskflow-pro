@@ -1,19 +1,21 @@
 // ============================================================================
-// TASKFLOW PRO - TÜM 25 ÖZELLİK TEK MERKEZDE (OFFLINE + BULUT SENKRON + SIKIŞTIRMA)
+// TASKFLOW+ v7.0 - TAM KULLANICI GİRİŞ/KAYIT/ŞİFRE KURTARMA + CANLI ÇALAN ALARM
+// + KUSURSUZ TÜRKÇE SESLE YAZDIRMA + OFFLINE/BULUT SENKRONİZASYON
 // ============================================================================
 
 const DB_NAME = 'TaskFlowProDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 let dbInstance = null;
 
-// Aktif Profil ('user1' = Sen, 'user2' = Arkadaşın)
-let currentProfile = localStorage.getItem('tf_active_profile') || 'user1';
-let enteredPin = '';
+// Aktif Kullanıcı Kimliği (Örn: 'user_alper')
+let currentProfile = localStorage.getItem('tf_logged_in_user') || '';
 
 // Uygulama Durumu (State)
 let appData = {
-  profileName: currentProfile === 'user1' ? 'Benim Hesabım' : 'Arkadaşım',
-  pin: '', // İlk girişte kullanıcı belirler
+  username: '',
+  email: '',
+  password: '',
+  profileName: '',
   theme: 'dark',
   nightLight: false,
   scratchpad: '',
@@ -40,6 +42,15 @@ let mediaRecorder = null;
 let audioChunks = [];
 let isRecordingAudio = false;
 
+// Kusursuz Türkçe Sesle Yazdırma (SpeechRecognition) Durumu
+let activeSpeechRec = null;
+let isSpeechListening = false;
+let currentSpeechTarget = 'title';
+
+// Canlı Çalan Alarm Durumu
+let activeAlarmTaskId = null;
+let alarmLoopTimer = null;
+
 // Pomodoro Durumu
 let pomoSeconds = 25 * 60;
 let pomoInterval = null;
@@ -57,7 +68,6 @@ function getTodayISO() {
   return new Date(now - tzOffset).toISOString().split('T')[0];
 }
 
-// Web Audio API ile Harici Dosya Gerektirmeyen Şık Bildirim & Başarı Sesi
 function playAlertTone(type = 'notify') {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -68,29 +78,27 @@ function playAlertTone(type = 'notify') {
 
     if (type === 'success') {
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-      osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.12); // E5
-      osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.24); // G5
+      osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+      osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.12);
+      osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.24);
       gain.gain.setValueAtTime(0.18, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
       osc.start();
       osc.stop(ctx.currentTime + 0.55);
     } else {
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.18); // A5
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.18);
       gain.gain.setValueAtTime(0.25, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.65);
       osc.start();
       osc.stop(ctx.currentTime + 0.65);
     }
-  } catch (e) {
-    console.warn('Ses çalınamadı:', e);
-  }
+  } catch (e) {}
 }
 
 // ----------------------------------------------------------------------------
-// 2. INDEXEDDB ÇEVRİMDIŞI (OFFLINE) VERİTABANI MOTORU
+// 2. INDEXEDDB ÇEVRİMDIŞI VERİTABANI VE KULLANICI KAYIT DEPOSU
 // ----------------------------------------------------------------------------
 function initDB() {
   return new Promise((resolve, reject) => {
@@ -109,6 +117,17 @@ function initDB() {
   });
 }
 
+async function getAllUsersFromDB() {
+  if (!dbInstance) await initDB();
+  return new Promise((resolve) => {
+    const tx = dbInstance.transaction('profiles', 'readonly');
+    const store = tx.objectStore('profiles');
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => resolve([]);
+  });
+}
+
 async function loadProfileData(profileId) {
   if (!dbInstance) await initDB();
   return new Promise((resolve) => {
@@ -118,17 +137,17 @@ async function loadProfileData(profileId) {
     req.onsuccess = () => {
       if (req.result && req.result.data) {
         appData = req.result.data;
+        resolve(appData);
       } else {
-        // İlk kez açılıyorsa örnek başlangıç görevleri oluştur
-        appData = createDefaultProfileData(profileId);
-        saveProfileData();
+        resolve(null);
       }
-      resolve(appData);
     };
+    req.onerror = () => resolve(null);
   });
 }
 
 async function saveProfileData(skipCloud = false) {
+  if (!currentProfile) return;
   if (!dbInstance) await initDB();
   return new Promise((resolve) => {
     const tx = dbInstance.transaction('profiles', 'readwrite');
@@ -142,33 +161,37 @@ async function saveProfileData(skipCloud = false) {
   });
 }
 
-function createDefaultProfileData(profileId) {
+function createNewUserProfileData(username, email, password) {
   const today = getTodayISO();
   return {
-    profileName: profileId === 'user1' ? 'Benim Hesabım' : 'Arkadaşım',
-    pin: '',
+    username: username.toLowerCase(),
+    email: email.toLowerCase(),
+    password: password,
+    profileName: username,
     theme: 'dark',
     nightLight: false,
     scratchpad: '• Alışveriş listesi\n• Kitap önerileri\n• Hızlı notlarını buraya yazabilirsin...',
     streak: 1,
     lastCompletedDate: today,
     cloudDbUrl: '',
-    cloudSyncKey: '',
+    cloudSyncKey: 'taskflow_' + username.toLowerCase(),
     updatedAt: Date.now(),
     tasks: [
       {
         id: 't_' + Date.now() + '_1',
-        title: 'TaskFlow Pro Uygulamasını Keşfet 🚀',
-        desc: 'Sesle görev eklemeyi, fotoğraf sıkıştırmayı ve emojili arşivlemeyi dene.',
+        title: 'TaskFlow+ Uygulamasına Hoş Geldin 🚀',
+        desc: 'Sesle görev eklemeyi, kamerayla fotoğraf çekmeyi ve canlı alarmı dene.',
         date: today,
-        time: '14:00',
+        time: '',
+        alarmEnabled: true,
+        alarmSound: 'system',
         priority: 'high',
         category: 'İş & Proje',
         repeat: 'none',
         tags: ['#başlangıç', '#önemli'],
         subtasks: [
-          { text: 'Şifreni belirle ve giriş yap', done: true },
           { text: 'Mikrofon butonuna basıp konuşarak görev ekle', done: false },
+          { text: 'Bir göreve saat kurup canlı alarmı test et', done: false },
           { text: 'Görevi tamamlayıp 🔥 veya 💪 emojisi bırak', done: false }
         ],
         photos: [],
@@ -184,102 +207,241 @@ function createDefaultProfileData(profileId) {
 }
 
 // ----------------------------------------------------------------------------
-// 3. ŞİFRE (PIN) VE ÇOKLU KULLANICI GİRİŞ SİSTEMİ
+// 3. KULLANICI GİRİŞİ, KAYIT OLMA VE E-POSTA İLE ŞİFRE KURTARMA SİSTEMİ
 // ----------------------------------------------------------------------------
-async function switchProfile(profId) {
-  currentProfile = profId;
-  localStorage.setItem('tf_active_profile', profId);
-  document.getElementById('profTab1').classList.toggle('active', profId === 'user1');
-  document.getElementById('profTab2').classList.toggle('active', profId === 'user2');
-  enteredPin = '';
-  updatePinDots();
-  await loadProfileData(profId);
-  updateLockScreenLabels();
+function switchAuthTab(tab) {
+  const loginForm = document.getElementById('loginForm');
+  const regForm = document.getElementById('registerForm');
+  const forgotForm = document.getElementById('forgotForm');
+  const tabsBar = document.getElementById('authTabsBar');
+  const subtitle = document.getElementById('authSubtitle');
+
+  document.getElementById('loginErrorMsg').textContent = '';
+  document.getElementById('regErrorMsg').textContent = '';
+  document.getElementById('forgotStatusMsg').textContent = '';
+
+  if (tab === 'login') {
+    loginForm.style.display = 'block';
+    regForm.style.display = 'none';
+    forgotForm.style.display = 'none';
+    tabsBar.style.display = 'flex';
+    document.getElementById('tabLoginBtn').classList.add('active');
+    document.getElementById('tabRegisterBtn').classList.remove('active');
+    subtitle.textContent = 'Kullanıcı adın ve şifrenle hesabına giriş yap';
+  } else if (tab === 'register') {
+    loginForm.style.display = 'none';
+    regForm.style.display = 'block';
+    forgotForm.style.display = 'none';
+    tabsBar.style.display = 'flex';
+    document.getElementById('tabLoginBtn').classList.remove('active');
+    document.getElementById('tabRegisterBtn').classList.add('active');
+    subtitle.textContent = 'Yeni kişisel görev hesabını saniyeler içinde oluştur';
+  } else if (tab === 'forgot') {
+    loginForm.style.display = 'none';
+    regForm.style.display = 'none';
+    forgotForm.style.display = 'block';
+    tabsBar.style.display = 'none';
+    subtitle.textContent = 'Kayıtlı e-posta adresine şifreni gönderelim';
+  }
 }
 
-function updateLockScreenLabels() {
-  const hint = document.getElementById('pinHint');
-  const sub = document.getElementById('lockSubtitle');
-  if (!appData.pin) {
-    sub.textContent = `${appData.profileName} için yeni 4 haneli PIN şifreni belirle`;
-    hint.textContent = '✨ İlk kez giriş yapıyorsun: Belirleyeceğin 4 rakam şifren olacak.';
+async function handleRegister(e) {
+  e.preventDefault();
+  const rawUser = document.getElementById('regUsername').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const password = document.getElementById('regPassword').value;
+  const errEl = document.getElementById('regErrorMsg');
+
+  if (rawUser.length < 2) {
+    errEl.textContent = '❌ Kullanıcı adı en az 2 karakter olmalıdır.';
+    return;
+  }
+
+  const cleanUsername = rawUser.toLowerCase().replace(/\s+/g, '');
+  const profileId = 'user_' + cleanUsername;
+
+  const allRecords = await getAllUsersFromDB();
+  const exists = allRecords.find(
+    (r) =>
+      r.id === profileId ||
+      (r.data && r.data.username && r.data.username.toLowerCase() === cleanUsername) ||
+      (r.data && r.data.email && r.data.email.toLowerCase() === email)
+  );
+
+  if (exists) {
+    errEl.textContent = '❌ Bu kullanıcı adı veya e-posta zaten kayıtlı! Giriş yapabilirsin.';
+    return;
+  }
+
+  currentProfile = profileId;
+  appData = createNewUserProfileData(rawUser, email, password);
+  await saveProfileData();
+
+  localStorage.setItem('tf_logged_in_user', currentProfile);
+  unlockApp();
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const identifier = document.getElementById('loginUsername').value.trim().toLowerCase();
+  const password = document.getElementById('loginPassword').value;
+  const remember = document.getElementById('rememberMeCheck').checked;
+  const errEl = document.getElementById('loginErrorMsg');
+
+  const allRecords = await getAllUsersFromDB();
+
+  // Eğer cihazda hiç kullanıcı yoksa bilgilendir
+  if (allRecords.length === 0) {
+    errEl.textContent = 'ℹ️ Henüz kayıtlı hesap yok. Lütfen üstten "✨ Kayıt Ol" sekmesine geçerek ilk hesabını oluştur.';
+    return;
+  }
+
+  const matched = allRecords.find((r) => {
+    const d = r.data || {};
+    const uMatch = (d.username && d.username.toLowerCase() === identifier) ||
+                   (d.profileName && d.profileName.toLowerCase() === identifier) ||
+                   r.id === 'user_' + identifier;
+    const eMatch = d.email && d.email.toLowerCase() === identifier;
+    return uMatch || eMatch;
+  });
+
+  if (!matched) {
+    errEl.textContent = '❌ Bu kullanıcı adı veya e-posta bulunamadı! "Kayıt Ol" sekmesinden oluşturabilirsin.';
+    return;
+  }
+
+  const userPass = matched.data.password || matched.data.pin || '';
+  if (userPass !== password) {
+    errEl.textContent = '❌ Şifre hatalı! Unuttuysan "Şifremi Unuttum?" bağlantısına tıkla.';
+    return;
+  }
+
+  currentProfile = matched.id;
+  appData = matched.data;
+  if (remember) {
+    localStorage.setItem('tf_logged_in_user', currentProfile);
   } else {
-    sub.textContent = `${appData.profileName} hesabına girmek için PIN şifreni gir`;
-    hint.textContent = '';
+    localStorage.removeItem('tf_logged_in_user');
+  }
+
+  unlockApp();
+}
+
+async function handleForgotPassword(e) {
+  e.preventDefault();
+  const identifier = document.getElementById('forgotIdentifier').value.trim().toLowerCase();
+  const statusEl = document.getElementById('forgotStatusMsg');
+  const submitBtn = document.getElementById('forgotSubmitBtn');
+
+  const allRecords = await getAllUsersFromDB();
+  const matched = allRecords.find((r) => {
+    const d = r.data || {};
+    return (d.email && d.email.toLowerCase() === identifier) ||
+           (d.username && d.username.toLowerCase() === identifier) ||
+           (d.profileName && d.profileName.toLowerCase() === identifier);
+  });
+
+  if (!matched) {
+    statusEl.style.color = '#ff4d4f';
+    statusEl.textContent = '❌ Bu e-posta veya kullanıcı adına ait hesap bulunamadı.';
+    return;
+  }
+
+  const userEmail = matched.data.email;
+  const userName = matched.data.profileName || matched.data.username;
+  const userPass = matched.data.password || matched.data.pin;
+
+  if (!userEmail || !userEmail.includes('@')) {
+    statusEl.style.color = '#ff4d4f';
+    statusEl.textContent = '❌ Bu hesapta kayıtlı geçerli bir e-posta adresi yok.';
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = '⏳ E-Posta Gönderiliyor...';
+  statusEl.style.color = 'var(--accent-cream)';
+  statusEl.textContent = `📧 ${userEmail} adresine şifre hatırlatma e-postası gönderiliyor...`;
+
+  try {
+    // FormSubmit AJAX ile kullanıcının e-posta adresine şifre bilgisini ilet
+    const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(userEmail)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        _subject: 'TaskFlow+ Şifre Hatırlatma Talebiniz',
+        Kullanici_Adi: userName,
+        Kurtarilan_Sifreniz: userPass,
+        Mesaj: `Merhaba ${userName}, TaskFlow+ hesabınızın giriş şifresi: ${userPass}`,
+        _captcha: 'false'
+      })
+    });
+
+    if (res.ok) {
+      statusEl.style.color = '#52c41a';
+      statusEl.innerHTML = `✅ Şifreniz <b>${escapeHtml(userEmail)}</b> adresine başarıyla gönderildi! (Spam/Gereksiz kutusunu da kontrol edin. İlk kez kullanıyorsanız FormSubmit onay mailine tıklayın).<br><br><a href="javascript:void(0)" onclick="promptInstantPasswordReset('${matched.id}')" style="color:var(--accent-cream);text-decoration:underline;">E-posta gelmediyse buradan anında yeni şifre belirle</a>`;
+    } else {
+      throw new Error('Mail sunucusu yanıt vermedi');
+    }
+  } catch (err) {
+    statusEl.style.color = 'var(--accent-cream)';
+    statusEl.innerHTML = `⚠️ İnternet/Mail servisine ulaşılamadı. E-posta doğrulamasıyla buradan hemen yeni şifre belirleyebilirsin:<br><br><button type="button" class="btn-cream" onclick="promptInstantPasswordReset('${matched.id}')">🔑 Şimdi Yeni Şifre Belirle</button>`;
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = '📧 Şifremi E-Postama Gönder';
   }
 }
 
-function pressPin(digit) {
-  if (enteredPin.length >= 4) return;
-  enteredPin += digit;
-  updatePinDots();
-  if (enteredPin.length === 4) {
-    setTimeout(verifyOrSetPin, 140);
+async function promptInstantPasswordReset(profileId) {
+  const record = await loadProfileData(profileId);
+  if (!record) return;
+  const confirmMail = prompt(`Güvenlik doğrulaması için lütfen kayıtlı e-posta adresinizi (${record.email}) tam olarak yazın:`);
+  if (!confirmMail || confirmMail.trim().toLowerCase() !== (record.email || '').toLowerCase()) {
+    alert('❌ E-posta adresi eşleşmedi!');
+    return;
   }
-}
-
-function backspacePin() {
-  enteredPin = enteredPin.slice(0, -1);
-  updatePinDots();
-}
-
-function clearPin() {
-  enteredPin = '';
-  updatePinDots();
-}
-
-function updatePinDots() {
-  for (let i = 0; i < 4; i++) {
-    const dot = document.getElementById('dot' + i);
-    if (dot) dot.classList.toggle('filled', i < enteredPin.length);
-  }
-}
-
-async function verifyOrSetPin() {
-  const hint = document.getElementById('pinHint');
-  if (!appData.pin) {
-    appData.pin = enteredPin;
+  const newPass = prompt('Yeni şifrenizi girin (En az 4 karakter):');
+  if (newPass && newPass.length >= 4) {
+    currentProfile = profileId;
+    appData = record;
+    appData.password = newPass;
     await saveProfileData();
-    unlockApp();
-  } else if (enteredPin === appData.pin) {
-    unlockApp();
-  } else {
-    hint.style.color = '#ff4d4f';
-    hint.textContent = '❌ Hatalı PIN şifresi! Tekrar dene.';
-    enteredPin = '';
-    updatePinDots();
+    alert('✅ Şifreniz başarıyla güncellendi! Şimdi giriş yapabilirsiniz.');
+    switchAuthTab('login');
   }
 }
 
 function unlockApp() {
   document.getElementById('lockScreen').classList.add('hidden');
-  enteredPin = '';
-  updatePinDots();
   applyUserPreferences();
   renderAll();
   pullFromCloudIfConfigured();
 }
 
-function lockApp() {
-  enteredPin = '';
-  updatePinDots();
-  updateLockScreenLabels();
+function logoutUser() {
+  localStorage.removeItem('tf_logged_in_user');
+  currentProfile = '';
+  document.getElementById('loginPassword').value = '';
   document.getElementById('lockScreen').classList.remove('hidden');
+  switchAuthTab('login');
 }
 
 // ----------------------------------------------------------------------------
-// 4. TEMA, GECE IŞIĞI VE KİŞİSELLEŞTİRME (MADDE 11)
+// 4. TEMA, GECE IŞIĞI VE KULLANICI HESAP AYARLARI
 // ----------------------------------------------------------------------------
 function applyUserPreferences() {
   document.body.setAttribute('data-theme', appData.theme || 'dark');
   document.body.classList.toggle('night-light', !!appData.nightLight);
   document.getElementById('themeSelect').value = appData.theme || 'dark';
-  document.getElementById('settingUserName').value = appData.profileName || '';
-  document.getElementById('settingUserPin').value = appData.pin || '';
-  document.getElementById('welcomeUserText').textContent = `Merhaba, ${appData.profileName} 👋`;
+  document.getElementById('settingUserName').value = appData.profileName || appData.username || '';
+  document.getElementById('settingUserEmail').value = appData.email || '';
+  document.getElementById('settingUserPassword').value = '';
+  document.getElementById('welcomeUserText').textContent = `Merhaba, ${appData.profileName || appData.username || 'Kullanıcı'} 👋`;
   document.getElementById('scratchpadInput').value = appData.scratchpad || '';
   document.getElementById('cloudDbUrl').value = appData.cloudDbUrl || '';
-  document.getElementById('cloudSyncKey').value = appData.cloudSyncKey || '';
+  document.getElementById('cloudSyncKey').value = appData.cloudSyncKey || ('taskflow_' + (appData.username || 'user'));
   document.getElementById('streakBadge').textContent = `🔥 ${appData.streak || 1} Gün Seri`;
 }
 
@@ -295,18 +457,21 @@ function toggleNightLight() {
   saveProfileData();
 }
 
-function saveUserSettings() {
+async function saveUserSettings() {
   const nameVal = document.getElementById('settingUserName').value.trim();
-  const pinVal = document.getElementById('settingUserPin').value.trim();
+  const emailVal = document.getElementById('settingUserEmail').value.trim().toLowerCase();
+  const passVal = document.getElementById('settingUserPassword').value;
+
   if (nameVal) appData.profileName = nameVal;
-  if (pinVal && pinVal.length === 4 && /^\d+$/.test(pinVal)) {
-    appData.pin = pinVal;
+  if (emailVal) appData.email = emailVal;
+  if (passVal && passVal.length >= 4) {
+    appData.password = passVal;
   }
+  await saveProfileData();
   applyUserPreferences();
-  saveProfileData();
+  alert('✅ Hesap bilgileriniz güncellendi!');
 }
 
-// Scratchpad Otomatik Kayıt
 document.addEventListener('DOMContentLoaded', () => {
   const sp = document.getElementById('scratchpadInput');
   if (sp) {
@@ -319,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ----------------------------------------------------------------------------
-// 5. TAKVİM ŞERİDİ VE GÖREV LİSTELEME MOTORU (MADDE 1, 2, 3)
+// 5. TAKVİM ŞERİDİ VE GÖREV LİSTELEME MOTORU
 // ----------------------------------------------------------------------------
 function renderDateStrip() {
   const strip = document.getElementById('dateStrip');
@@ -332,7 +497,6 @@ function renderDateStrip() {
   document.getElementById('currentMonthLabel').textContent = `${monthNames[baseDate.getMonth()]} ${baseDate.getFullYear()}`;
   document.getElementById('customDatePicker').value = selectedDate;
 
-  // Seçili günün -5 gün öncesinden +9 gün sonrasına kadar 15 günlük kaydırılabilir şerit
   for (let i = -4; i <= 10; i++) {
     const d = new Date(baseDate);
     d.setDate(baseDate.getDate() + i);
@@ -382,7 +546,6 @@ function setCategoryFilter(cat) {
   renderAll();
 }
 
-// Dünden Kalan Görevleri Kontrol Et ve Tek Tıkla Bugüne Devret
 function checkOverdueTasks() {
   const today = getTodayISO();
   const overdue = appData.tasks.filter((t) => !t.completed && t.date < today);
@@ -400,6 +563,7 @@ function rolloverOverdueTasks() {
   appData.tasks.forEach((t) => {
     if (!t.completed && t.date < today) {
       t.date = today;
+      t.notified = false;
     }
   });
   saveProfileData();
@@ -408,6 +572,7 @@ function rolloverOverdueTasks() {
 }
 
 function renderAll() {
+  if (!appData || !Array.isArray(appData.tasks)) return;
   renderDateStrip();
   checkOverdueTasks();
   updateBentoCounts();
@@ -423,7 +588,7 @@ function updateBentoCounts() {
   const personalCount = active.filter((t) => t.category === 'Kişisel & Günlük').length;
 
   document.getElementById('countAllTasks').textContent = `${active.length} Aktif Görev`;
-  document.getElementById('countUrgentSub').textContent = `🚨 ${urgentCount} Acil • 📦 ${appData.tasks.filter(t => t.completed).length} Biten`;
+  document.getElementById('countUrgentSub').textContent = `🚨 ${urgentCount} Acil • 📦 ${appData.tasks.filter((t) => t.completed).length} Biten`;
   document.getElementById('countWorkTasks').textContent = `${workCount} Görev`;
   document.getElementById('countPersonalTasks').textContent = `${personalCount} Görev`;
 }
@@ -467,7 +632,6 @@ function renderOngoingTasks() {
     );
   }
 
-  // Aciliyet ve saate göre sırala
   list.sort((a, b) => {
     const pw = getPriorityWeight(b.priority) - getPriorityWeight(a.priority);
     if (pw !== 0) return pw;
@@ -476,8 +640,8 @@ function renderOngoingTasks() {
 
   if (list.length === 0) {
     container.innerHTML = `
-      <div class="task-card" style="text-align:center;padding:34px 20px;color:var(--text-muted);">
-        <div style="font-size:36px;margin-bottom:8px;">✨</div>
+      <div class="task-card" style="text-align:center;padding:30px 18px;color:var(--text-muted);">
+        <div style="font-size:32px;margin-bottom:6px;">✨</div>
         <div style="font-weight:700;color:var(--text-main);">Bu görünümde bekleyen görev yok!</div>
         <div style="font-size:12px;margin-top:4px;">Alt menüdeki <b>+</b> butonuna basarak yeni görev veya sesli plan ekleyebilirsin.</div>
       </div>
@@ -535,6 +699,8 @@ function buildTaskCardHTML(t, isArchive) {
     </div>
   ` : '';
 
+  const alarmIcon = t.time ? (t.alarmEnabled !== false ? '🔔' : '🔕') : '';
+
   return `
     <div class="task-card ${t.completed ? 'completed' : ''}">
       <div class="task-top">
@@ -551,7 +717,7 @@ function buildTaskCardHTML(t, isArchive) {
         <button class="check-circle" onclick="${t.completed ? `reopenTask('${t.id}')` : `openCompleteModal('${t.id}')`}" title="${t.completed ? 'Görevi Geri Aç' : 'Görevi Tamamla'}">
           ${t.completed ? '✓' : ''}
         </button>
-        <div style="flex:1;">
+        <div style="flex:1;min-width:0;">
           <div class="task-title">${escapeHtml(t.title)}</div>
           ${t.desc ? `<div class="task-desc">${escapeHtml(t.desc)}</div>` : ''}
         </div>
@@ -563,9 +729,9 @@ function buildTaskCardHTML(t, isArchive) {
 
       <div class="task-meta">
         <div>
-          📅 <b>${t.date}</b> ${t.time ? `• ⏰ <b>${t.time}</b>` : ''}
+          📅 <b>${t.date}</b> ${t.time ? `• ${alarmIcon} <b>${t.time}</b>` : ''}
         </div>
-        <div style="display:flex;gap:8px;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
           ${!isArchive ? `<button class="tag-badge" style="cursor:pointer;border:none;" onclick="focusTaskInPomodoro('${t.id}')">⏱️ Odaklan</button>` : ''}
           <button class="tag-badge" style="cursor:pointer;border:none;" onclick="openTaskModal('${t.id}')">✏️ Düzenle</button>
           <button class="tag-badge" style="cursor:pointer;border:none;color:#ff7875;" onclick="deleteTask('${t.id}')">🗑️ Sil</button>
@@ -585,7 +751,7 @@ function escapeHtml(str) {
 }
 
 // ----------------------------------------------------------------------------
-// 6. ALT GÖREV İLERLEMESİ, TAMAMLAMA, EMOJİ & ARŞİV SİSTEMİ (MADDE 3, 4, 15)
+// 6. ALT GÖREV İLERLEMESİ, TAMAMLAMA, EMOJİ & ARŞİV SİSTEMİ
 // ----------------------------------------------------------------------------
 function toggleSubtask(taskId, subIdx) {
   const t = appData.tasks.find((x) => x.id === taskId);
@@ -625,7 +791,6 @@ function confirmTaskCompletion() {
   t.completionEmoji = selectedCompletionEmoji;
   t.completionComment = document.getElementById('completionCommentInput').value.trim();
 
-  // Eğer tekrarlayan (rutin) bir görevse bir sonraki tarihi otomatik oluştur!
   if (t.repeat && t.repeat !== 'none') {
     const nextDate = new Date(t.date + 'T00:00:00');
     if (t.repeat === 'daily') nextDate.setDate(nextDate.getDate() + 1);
@@ -647,7 +812,6 @@ function confirmTaskCompletion() {
     });
   }
 
-  // Günlük Seri (Streak) Güncelle
   const today = getTodayISO();
   if (appData.lastCompletedDate !== today) {
     appData.streak = (appData.streak || 1) + 1;
@@ -665,6 +829,7 @@ function reopenTask(taskId) {
   const t = appData.tasks.find((x) => x.id === taskId);
   if (!t) return;
   t.completed = false;
+  t.notified = false;
   saveProfileData();
   renderAll();
 }
@@ -707,9 +872,10 @@ function renderArchive() {
 }
 
 // ----------------------------------------------------------------------------
-// 7. GÖREV EKLEME/DÜZENLEME, 10X FOTOĞRAF SIKIŞTIRMA VE SES KAYDI (MADDE 5, 6, 16)
+// 7. GÖREV EKLEME/DÜZENLEME, 10X FOTOĞRAF SIKIŞTIRMA VE SES KAYDI
 // ----------------------------------------------------------------------------
 function openTaskModal(taskId = null) {
+  stopActiveSpeechRecognition();
   const modal = document.getElementById('taskModal');
   document.getElementById('editTaskId').value = taskId || '';
   const statusEl = document.getElementById('photoUploadStatus');
@@ -755,6 +921,7 @@ function openTaskModal(taskId = null) {
 }
 
 function closeTaskModal() {
+  stopActiveSpeechRecognition();
   document.getElementById('taskModal').classList.add('hidden');
 }
 
@@ -777,7 +944,6 @@ function renderModalSubtasks() {
   `).join('');
 }
 
-// Otomatik 10 Kat Fotoğraf Küçültme Motoru (Hem Kamera Hem Galeri İçin %100 Garantili)
 function handlePhotoUpload(event) {
   const inputEl = event.target;
   const files = Array.from(inputEl.files || []);
@@ -830,11 +996,9 @@ function handlePhotoUpload(event) {
     reader.readAsDataURL(file);
   });
 
-  // Aynı fotoğrafı tekrar seçebilmek için input'u sıfırla
   inputEl.value = '';
 }
 
-// Sesli Mesaj Kaydı (Düşük Bitrate Sıkıştırmalı - Madde 6 & 16)
 async function toggleAudioRecording() {
   const btn = document.getElementById('recordAudioBtn');
   if (!isRecordingAudio) {
@@ -890,6 +1054,7 @@ function renderModalAttachments() {
 }
 
 function saveTaskFromModal() {
+  stopActiveSpeechRecognition();
   const title = document.getElementById('taskTitleInput').value.trim();
   if (!title) {
     alert('Lütfen bir görev başlığı girin!');
@@ -908,7 +1073,6 @@ function saveTaskFromModal() {
   const tagsArr = tagsRaw ? tagsRaw.split(/\s+/).map((t) => (t.startsWith('#') ? t : '#' + t)) : [];
   const descVal = document.getElementById('taskDescInput').value.trim();
 
-  // Eğer alarm açıksa ve saat girildiyse bildirim iznini hemen kontrol et
   if (alarmEnabled && timeVal && 'Notification' in window && Notification.permission !== 'granted') {
     Notification.requestPermission();
   }
@@ -967,65 +1131,129 @@ function openPhotoViewer(src) {
 }
 
 // ----------------------------------------------------------------------------
-// 8. TÜRKÇE SESLE KONUŞARAK GÖREV YAZDIRMA VE AKILLI TARİH/SAAT ÇÖZÜMLEME (MADDE 14)
+// 8. KUSURSUZ TÜRKÇE SESLE KONUŞARAK YAZDIRMA MOTORU (ÇÖKME/HATA KORUMALI)
 // ----------------------------------------------------------------------------
-function startTurkishSpeechToText() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    alert('Tarayıcınız sesle yazdırma özelliğini desteklemiyor (Chrome veya Edge önerilir).');
+function stopActiveSpeechRecognition() {
+  if (activeSpeechRec) {
+    try {
+      activeSpeechRec.onend = null;
+      activeSpeechRec.onerror = null;
+      activeSpeechRec.stop();
+    } catch (e) {}
+    activeSpeechRec = null;
+  }
+  isSpeechListening = false;
+  const titleBtn = document.getElementById('voiceDictateBtn');
+  const descBtn = document.getElementById('voiceDescBtn');
+  const hint = document.getElementById('speechStatusHint');
+  if (titleBtn) {
+    titleBtn.classList.remove('voice-btn-recording');
+    titleBtn.textContent = '🎙️ Konuş';
+  }
+  if (descBtn) {
+    descBtn.classList.remove('voice-btn-recording');
+  }
+  if (hint) hint.style.display = 'none';
+}
+
+function toggleTurkishSpeechToText(targetField = 'title') {
+  if (isSpeechListening) {
+    stopActiveSpeechRecognition();
     return;
   }
 
-  const rec = new SpeechRecognition();
-  rec.lang = 'tr-TR';
-  rec.interimResults = false;
-  rec.maxAlternatives = 1;
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert('Cihazınız doğrudan sesle yazdırmayı desteklemiyor. Klavyenizdeki mikrofon simgesini kullanabilirsiniz.');
+    return;
+  }
 
-  const btn = document.getElementById('voiceDictateBtn');
+  currentSpeechTarget = targetField;
+  const inputEl = targetField === 'desc'
+    ? document.getElementById('taskDescInput')
+    : document.getElementById('taskTitleInput');
+  const btn = targetField === 'desc'
+    ? document.getElementById('voiceDescBtn')
+    : document.getElementById('voiceDictateBtn');
   const hint = document.getElementById('speechStatusHint');
-  btn.classList.add('voice-btn-recording');
-  btn.textContent = '🛑 Dinleniyor...';
-  hint.style.display = 'block';
 
-  rec.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-    document.getElementById('taskTitleInput').value = transcript;
+  const initialText = inputEl.value ? inputEl.value.trim() + ' ' : '';
 
-    const lower = transcript.toLowerCase();
-    if (lower.includes('yarın')) {
-      const tmr = new Date();
-      tmr.setDate(tmr.getDate() + 1);
-      const tzOffset = tmr.getTimezoneOffset() * 60000;
-      document.getElementById('taskDateInput').value = new Date(tmr - tzOffset).toISOString().split('T')[0];
-    }
-    if (lower.includes('acil') || lower.includes('çok önemli')) {
-      document.getElementById('taskPriorityInput').value = 'urgent';
-    }
-    const timeMatch = lower.match(/(\d{1,2})[:.](\d{2})/);
-    if (timeMatch) {
-      const hh = timeMatch[1].padStart(2, '0');
-      const mm = timeMatch[2];
-      document.getElementById('taskTimeInput').value = `${hh}:${mm}`;
-    }
-  };
+  try {
+    const rec = new SpeechRecognition();
+    activeSpeechRec = rec;
+    rec.lang = 'tr-TR';
+    rec.continuous = false;
+    rec.interimResults = true; // Konuşurken kelimeleri canlı olarak anında ekranda gösterir!
+    rec.maxAlternatives = 1;
 
-  rec.onend = () => {
-    btn.classList.remove('voice-btn-recording');
-    btn.textContent = '🎙️ Konuş';
-    hint.style.display = 'none';
-  };
+    isSpeechListening = true;
+    btn.classList.add('voice-btn-recording');
+    if (targetField === 'title') btn.textContent = '⏹️ Durdur';
+    hint.style.display = 'block';
+    hint.style.color = 'var(--accent-cream)';
+    hint.textContent = '🎙️ Dinliyorum... Türkçe konuşabilirsin (Bitince otomatik yazılır)';
 
-  rec.onerror = () => {
-    btn.classList.remove('voice-btn-recording');
-    btn.textContent = '🎙️ Konuş';
-    hint.style.display = 'none';
-  };
+    rec.onresult = (event) => {
+      let interimTranscript = '';
+      let finalTranscript = '';
 
-  rec.start();
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const piece = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += piece;
+        } else {
+          interimTranscript += piece;
+        }
+      }
+
+      const combined = (initialText + finalTranscript + interimTranscript).trim();
+      inputEl.value = combined;
+
+      // Akıllı Türkçe Tarih, Saat ve Aciliyet Algılayıcı
+      const lower = combined.toLowerCase();
+      if (lower.includes('yarın')) {
+        const tmr = new Date();
+        tmr.setDate(tmr.getDate() + 1);
+        const tzOffset = tmr.getTimezoneOffset() * 60000;
+        document.getElementById('taskDateInput').value = new Date(tmr - tzOffset).toISOString().split('T')[0];
+      }
+      if (lower.includes('acil') || lower.includes('çok önemli')) {
+        document.getElementById('taskPriorityInput').value = 'urgent';
+      }
+      const timeMatch = lower.match(/(\d{1,2})[:.](\d{2})/);
+      if (timeMatch) {
+        const hh = timeMatch[1].padStart(2, '0');
+        const mm = timeMatch[2];
+        document.getElementById('taskTimeInput').value = `${hh}:${mm}`;
+      }
+    };
+
+    rec.onerror = (event) => {
+      const errCode = event.error;
+      if (errCode === 'no-speech') {
+        hint.textContent = 'ℹ️ Ses algılanmadı. Tekrar 🎙️ Konuş butonuna basıp konuşabilirsin.';
+      } else if (errCode === 'not-allowed' || errCode === 'service-not-allowed') {
+        hint.style.color = '#ff4d4f';
+        hint.textContent = '❌ Mikrofon izni kapalı! Lütfen uygulama izinlerinden mikrofonu açın.';
+      } else if (errCode !== 'aborted') {
+        hint.textContent = 'ℹ️ Ses tanıma tamamlandı.';
+      }
+      setTimeout(stopActiveSpeechRecognition, 1800);
+    };
+
+    rec.onend = () => {
+      stopActiveSpeechRecognition();
+    };
+
+    rec.start();
+  } catch (err) {
+    stopActiveSpeechRecognition();
+  }
 }
 
 // ----------------------------------------------------------------------------
-// 9. HAFTALIK MOTİVASYON KARNESİ & POMODORO SAYACI (MADDE 17, 19)
+// 9. HAFTALIK MOTİVASYON KARNESİ & POMODORO SAYACI
 // ----------------------------------------------------------------------------
 function renderWeeklyReport() {
   const doneTasks = appData.tasks.filter((t) => t.completed);
@@ -1107,11 +1335,10 @@ function updatePomoDisplay() {
 }
 
 // ----------------------------------------------------------------------------
-// 10. GERÇEK SİSTEM BİLDİRİMİ (TELEFON BİLDİRİM KANALI) VE ALARM MOTORU (MADDE 7)
+// 10. CANLI ÇALAN TAM EKRAN ALARM + SİSTEM BİLDİRİM KANALI MOTORU
 // ----------------------------------------------------------------------------
 function previewSelectedAlarm(soundType) {
   if (soundType === 'system') {
-    // Telefonun kendi bildirim kanalını test et
     sendSystemNotification('🔔 Bildirim Sesi Testi', 'Görev saati geldiğinde telefonunun kendi bildirim sesiyle böyle görünecek!', 'system');
   } else {
     playCustomTone(soundType);
@@ -1119,7 +1346,7 @@ function previewSelectedAlarm(soundType) {
 }
 
 function playCustomTone(soundType) {
-  if (soundType === 'system') return; // Sistem bildirim kanalını kullan, medya sesi çalma!
+  if (soundType === 'system') return;
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = ctx.createOscillator();
@@ -1165,16 +1392,19 @@ async function requestNotificationPermission() {
   }
   const perm = await Notification.requestPermission();
   if (perm === 'granted') {
-    await sendSystemNotification('🔔 TaskFlow+ Bildirimleri Aktif!', 'Artık görev saati geldiğinde telefonunun ve bilgisayarının kendi BİLDİRİM sesiyle uyarı alacaksın.', 'system');
+    await sendSystemNotification('🔔 TaskFlow+ Bildirimleri Aktif!', 'Artık görev saati geldiğinde hem tam ekran alarm hem de telefon bildirim sesiyle uyarı alacaksın.', 'system');
   } else {
     alert('Bildirim izni kapalı! Lütfen telefon Ayarlar -> Uygulamalar -> TaskFlow+ -> Bildirimler kısmından izni açın.');
   }
 }
 
-// Android APK ve Windows'ta Medya Sesi Yerine Doğrudan Sistem Bildirim Kanalını Tetikler!
 async function sendSystemNotification(title, body, soundType = 'system') {
   if (soundType && soundType !== 'system') {
     playCustomTone(soundType);
+  }
+
+  if (navigator.vibrate) {
+    try { navigator.vibrate([400, 200, 400, 200, 600]); } catch (e) {}
   }
 
   if (!('Notification' in window)) return;
@@ -1187,9 +1417,9 @@ async function sendSystemNotification(title, body, soundType = 'system') {
       body: body,
       icon: 'icon-192.png',
       badge: 'icon-192.png',
-      vibrate: [300, 150, 300, 150, 400],
+      vibrate: [400, 200, 400, 200, 600],
       requireInteraction: true,
-      silent: false, // false = Telefonun kendi BİLDİRİM SESİ kanalını (Notification Stream) çalar!
+      silent: false, // Telefonun kendi BİLDİRİM SESİ kanalını tetikler!
       tag: 'taskflow-alarm-' + Date.now(),
       renotify: true
     };
@@ -1209,8 +1439,79 @@ async function sendSystemNotification(title, body, soundType = 'system') {
   }
 }
 
-// Her 3 saniyede bir saati gelen görevleri milimetrik kontrol et (Asla dakika kaçırmaz!)
+// Sadece üstten mesaj düşmekle kalmaz, ekranda gerçek çalar saat penceresi açar ve Kapat/Ertele diyene kadar uyarır!
+function triggerLiveRingingAlarm(task) {
+  activeAlarmTaskId = task.id;
+  document.getElementById('alarmModalTaskTitle').textContent = task.title;
+  document.getElementById('alarmModalTaskDesc').textContent = task.desc || getPriorityLabel(task.priority);
+  document.getElementById('alarmModalTaskTime').textContent = `⏰ Saat: ${task.time}`;
+  document.getElementById('liveAlarmModal').classList.remove('hidden');
+
+  // İlk bildirimi hemen gönder
+  sendSystemNotification(
+    `⏰ Görev Zamanı: ${task.title}`,
+    task.desc || `Saat ${task.time} görevinin vakti geldi!`,
+    task.alarmSound || 'system'
+  );
+
+  // Kullanıcı kapatana kadar (en fazla 6 kez / 30 saniye boyunca) her 5 saniyede bir tekrarla
+  if (alarmLoopTimer) clearInterval(alarmLoopTimer);
+  let rings = 0;
+  alarmLoopTimer = setInterval(() => {
+    rings++;
+    if (rings >= 6) {
+      clearInterval(alarmLoopTimer);
+      alarmLoopTimer = null;
+      return;
+    }
+    if (task.alarmSound && task.alarmSound !== 'system') {
+      playCustomTone(task.alarmSound);
+    } else {
+      sendSystemNotification(
+        `⏰ Hatırlatma: ${task.title}`,
+        `Saat ${task.time} görevi onayınızı bekliyor!`,
+        'system'
+      );
+    }
+  }, 5000);
+}
+
+function dismissLiveAlarm(openComplete = false) {
+  if (alarmLoopTimer) {
+    clearInterval(alarmLoopTimer);
+    alarmLoopTimer = null;
+  }
+  document.getElementById('liveAlarmModal').classList.add('hidden');
+  const tId = activeAlarmTaskId;
+  activeAlarmTaskId = null;
+  if (openComplete && tId) {
+    openCompleteModal(tId);
+  }
+}
+
+function snoozeLiveAlarm(mins = 5) {
+  if (alarmLoopTimer) {
+    clearInterval(alarmLoopTimer);
+    alarmLoopTimer = null;
+  }
+  document.getElementById('liveAlarmModal').classList.add('hidden');
+  if (!activeAlarmTaskId) return;
+
+  const t = appData.tasks.find((x) => x.id === activeAlarmTaskId);
+  activeAlarmTaskId = null;
+  if (t) {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + mins);
+    t.time = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    t.notified = false;
+    saveProfileData();
+    renderAll();
+  }
+}
+
+// Her 3 saniyede bir saati gelen görevleri milimetrik kontrol et
 setInterval(() => {
+  if (!currentProfile || !appData || !Array.isArray(appData.tasks)) return;
   const today = getTodayISO();
   const now = new Date();
   const currentHHMM = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
@@ -1220,11 +1521,7 @@ setInterval(() => {
     if (!t.completed && !t.notified && t.alarmEnabled !== false && t.date === today && t.time === currentHHMM) {
       t.notified = true;
       changed = true;
-      sendSystemNotification(
-        `⏰ Görev Zamanı: ${t.title}`,
-        t.desc || `Saat ${t.time} görevinin vakti geldi! (${getPriorityLabel(t.priority)})`,
-        t.alarmSound || 'system'
-      );
+      triggerLiveRingingAlarm(t);
     }
   });
 
@@ -1232,7 +1529,7 @@ setInterval(() => {
 }, 3000);
 
 // ----------------------------------------------------------------------------
-// 11. TEK TIKLA YEDEK İNDİRME VE ÜCRETSİZ CANLI BULUT SENKRONİZASYONU (MADDE 8, 9, 18)
+// 11. TEK TIKLA YEDEK İNDİRME VE ÜCRETSİZ CANLI BULUT SENKRONİZASYONU
 // ----------------------------------------------------------------------------
 function exportFullBackup() {
   const dataStr = JSON.stringify(appData, null, 2);
@@ -1240,7 +1537,7 @@ function exportFullBackup() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `TaskFlow_Yedek_${currentProfile}_${getTodayISO()}.json`;
+  a.download = `TaskFlowPlus_Yedek_${appData.username || 'kullanici'}_${getTodayISO()}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -1284,9 +1581,7 @@ async function pushToCloudIfConfigured() {
       body: JSON.stringify(appData)
     });
     document.getElementById('cloudSyncStatusText').textContent = '☁️ Bulut ile eşitlendi (' + new Date().toLocaleTimeString() + ')';
-  } catch (e) {
-    console.warn('Bulut yazma hatası:', e);
-  }
+  } catch (e) {}
 }
 
 async function pullFromCloudIfConfigured() {
@@ -1304,9 +1599,7 @@ async function pullFromCloudIfConfigured() {
       }
       document.getElementById('cloudSyncStatusText').textContent = '☁️ Senkronize edildi ✓';
     }
-  } catch (e) {
-    console.warn('Bulut okuma hatası:', e);
-  }
+  } catch (e) {}
 }
 
 window.addEventListener('online', () => {
@@ -1320,7 +1613,7 @@ window.addEventListener('offline', () => {
 });
 
 // ----------------------------------------------------------------------------
-// 12. ALT MENÜ GEZİNTİSİ VE PWA KURULUMU
+// 12. ALT MENÜ GEZİNTİSİ VE BAŞLANGIÇ OTURUM KONTROLÜ
 // ----------------------------------------------------------------------------
 function switchView(viewName) {
   document.getElementById('viewTasks').style.display = viewName === 'tasks' ? 'block' : 'none';
@@ -1350,10 +1643,26 @@ async function installPWA() {
   document.getElementById('installAppBtn').style.display = 'none';
 }
 
-// Başlangıç Yüklemesi
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=7').catch(() => {});
   }
-  await switchProfile(currentProfile);
+  await initDB();
+
+  // Eğer "Oturumu açık tut" işaretliyse ve kullanıcı daha önce giriş yaptıysa direkt aç
+  if (currentProfile) {
+    const saved = await loadProfileData(currentProfile);
+    if (saved) {
+      unlockApp();
+      return;
+    }
+  }
+
+  // Cihazda hiç kayıtlı kullanıcı yoksa ilk açılışta doğrudan "Kayıt Ol" sekmesini göster!
+  const allUsers = await getAllUsersFromDB();
+  if (allUsers.length === 0) {
+    switchAuthTab('register');
+  } else {
+    switchAuthTab('login');
+  }
 });
