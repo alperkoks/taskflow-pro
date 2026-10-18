@@ -1056,6 +1056,12 @@ input, textarea {
   gap: 10px;
 }
 
+@media (max-width: 480px) {
+  .form-row.stack-mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
 .emoji-bar {
   display: flex;
   justify-content: space-between;

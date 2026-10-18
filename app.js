@@ -1079,7 +1079,8 @@ function renderGoals() {
   container.innerHTML = list.map((g) => {
     const totalSteps = (g.steps || []).length;
     const doneSteps = (g.steps || []).filter((s) => s.done).length;
-    const pct = totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : (g.progress || 0);
+    const stepPct = totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : 0;
+    const pct = typeof g.progress === 'number' ? g.progress : stepPct;
     const isAchieved = pct >= 100 || g.achieved;
 
     const stepsHTML = totalSteps > 0 ? `
@@ -1112,12 +1113,10 @@ function renderGoals() {
           <div class="progress-bar-track" style="height:8px;">
             <div class="progress-bar-fill" style="width:${pct}%;background:${isAchieved ? '#52c41a' : 'var(--pastel-purple)'};"></div>
           </div>
-          ${totalSteps === 0 ? `
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
-              <span style="font-size:11px;color:var(--text-muted);">İlerlemeyi Kaydırarak Güncelle:</span>
-              <input type="range" min="0" max="100" step="5" value="${pct}" style="width:140px;accent-color:var(--accent-cream);" onchange="updateGoalProgressSlider('${g.id}', this.value)" />
-            </div>
-          ` : ''}
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+            <span style="font-size:11px;color:var(--text-muted);">İlerlemeyi Kaydırarak Güncelle:</span>
+            <input type="range" min="0" max="100" step="5" value="${pct}" style="width:140px;accent-color:var(--accent-cream);" onchange="updateGoalProgressSlider('${g.id}', this.value)" />
+          </div>
         </div>
 
         ${stepsHTML}
@@ -1139,6 +1138,8 @@ function renderGoals() {
 function openGoalModal(goalId = null) {
   const modal = document.getElementById('goalModal');
   document.getElementById('editGoalId').value = goalId || '';
+  const pendingInp = document.getElementById('goalStepNewInput');
+  if (pendingInp) pendingInp.value = '';
 
   if (goalId) {
     const g = (appData.goals || []).find((x) => x.id === goalId);
@@ -1192,10 +1193,21 @@ function saveGoalFromModal() {
     alert('Lütfen bir hedef başlığı girin!');
     return;
   }
+  const pendingStep = document.getElementById('goalStepNewInput');
+  if (pendingStep && pendingStep.value.trim()) {
+    modalGoalSteps.push({ text: pendingStep.value.trim(), done: false });
+    pendingStep.value = '';
+  }
+
   const editId = document.getElementById('editGoalId').value;
   const category = document.getElementById('goalCategoryInput').value;
-  const progress = Math.min(100, Math.max(0, parseInt(document.getElementById('goalProgressInput').value || '0', 10)));
+  let progress = Math.min(100, Math.max(0, parseInt(document.getElementById('goalProgressInput').value || '0', 10)));
   const desc = document.getElementById('goalDescInput').value.trim();
+
+  if (modalGoalSteps.length > 0 && progress === 0) {
+    const doneCnt = modalGoalSteps.filter((s) => s.done).length;
+    progress = Math.round((doneCnt / modalGoalSteps.length) * 100);
+  }
 
   if (!Array.isArray(appData.goals)) appData.goals = [];
 
@@ -1421,6 +1433,8 @@ function openTaskModal(taskId = null) {
   document.getElementById('editTaskId').value = taskId || '';
   const statusEl = document.getElementById('photoUploadStatus');
   if (statusEl) statusEl.textContent = '';
+  const pendingSub = document.getElementById('subtaskNewInput');
+  if (pendingSub) pendingSub.value = '';
 
   if (taskId) {
     const t = appData.tasks.find((x) => x.id === taskId);
@@ -1605,6 +1619,12 @@ function saveTaskFromModal() {
   if (!title) {
     alert('Lütfen bir görev başlığı girin!');
     return;
+  }
+
+  const pendingSub = document.getElementById('subtaskNewInput');
+  if (pendingSub && pendingSub.value.trim()) {
+    modalSubtasks.push({ text: pendingSub.value.trim(), done: false });
+    pendingSub.value = '';
   }
 
   const editId = document.getElementById('editTaskId').value;
@@ -2196,7 +2216,7 @@ async function installPWA() {
 
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=9').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=10').catch(() => {});
   }
   await initDB();
 
