@@ -1,6 +1,6 @@
 {
-  "short_name": "TaskFlow",
-  "name": "TaskFlow Pro - Akıllı Görev Yöneticisi",
+  "short_name": "TaskFlow+",
+  "name": "TaskFlow+ Akıllı Görev Yöneticisi",
   "icons": [
     {
       "src": "icon-192.png",
@@ -16,9 +16,9 @@
     }
   ],
   "start_url": "./index.html",
-  "background_color": "#0f0f13",
-  "theme_color": "#0f0f13",
+  "background_color": "#0c0c0f",
+  "theme_color": "#0c0c0f",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "description": "Çevrimdışı ve Bulut Entegreli Kişisel Görev, Pomodoro ve Arşiv Uygulaması"
+  "description": "TaskFlow+ Kişisel Görev, Pomodoro ve Arşiv Uygulaması"
 }
