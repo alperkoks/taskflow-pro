@@ -7,8 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>TaskFlow+ — Günlük Görev, Hedefler & Odak</title>
-  <link rel="manifest" href="manifest.json?v=10" />
-  <link rel="stylesheet" href="styles.css?v=10" />
+  <link rel="manifest" href="manifest.json?v=11" />
+  <link rel="stylesheet" href="styles.css?v=11" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -138,19 +138,52 @@
         </div>
       </div>
 
-      <!-- 2. GÜNLÜK SU & ALIŞKANLIK TAKİPÇİSİ (MİNİ BAR) -->
-      <div class="water-bar-card">
-        <div>
-          <div style="font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:6px;">
-            <span>💧 Günlük Su Takibi:</span>
-            <span id="waterCountText" style="color:#93c5fd;">0 / 8 Bardak</span>
+      <!-- 2. ⚡ GÜNLÜK SU (LİTRE & BARDAK), KAFEİN, SPOR & ALIŞKANLIK ZİNCİRİ ÜSSÜ -->
+      <div class="vitality-hub-card">
+        <div class="vitality-top-row">
+          <div style="font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span>💧 Su:</span>
+            <span id="waterCountText" style="color:#93c5fd;">0.00 L / 3.0 L (0/12 Brd)</span>
           </div>
-          <div class="water-drops" id="waterDropsDisplay">⚪⚪⚪⚪⚪⚪⚪⚪</div>
+          <select id="waterTargetSelect" class="water-target-select" onchange="changeWaterTarget(this.value)" title="Günlük Su Hedefini Seç">
+            <option value="8">Hedef: 2.0 L (8 Brd)</option>
+            <option value="10">Hedef: 2.5 L (10 Brd)</option>
+            <option value="12" selected>Hedef: 3.0 L (12 Brd)</option>
+            <option value="14">Hedef: 3.5 L (14 Brd)</option>
+            <option value="16">Hedef: 4.0 L (16 Brd)</option>
+          </select>
         </div>
-        <div style="display:flex;gap:6px;">
-          <button type="button" class="icon-btn" style="width:32px;height:32px;font-weight:800;" onclick="changeWaterCount(-1)">-</button>
-          <button type="button" class="btn-cream" style="padding:6px 11px;font-size:12px;background:#93c5fd;color:#09090d;" onclick="changeWaterCount(1)">+1 💧</button>
+
+        <div class="progress-bar-track" style="height:6px;margin-top:6px;margin-bottom:4px;">
+          <div class="progress-bar-fill" id="waterProgressBarFill" style="width:0%;background:#60a5fa;"></div>
         </div>
+        <div class="water-drops" id="waterDropsDisplay" style="font-size:11px;line-height:1.35;"></div>
+
+        <div class="water-actions-row">
+          <button type="button" class="water-btn-chip" style="color:var(--text-muted);" onclick="changeWaterCount(-1)">-1 Brd</button>
+          <div style="display:flex;gap:6px;">
+            <button type="button" class="water-btn-chip" onclick="changeWaterCount(1)">+1 Bardak (250ml) 💧</button>
+            <button type="button" class="water-btn-chip" style="background:#60a5fa;color:#09090d;" onclick="changeWaterCount(2)">+1 Şişe (500ml) 🍼</button>
+          </div>
+        </div>
+
+        <!-- KAFEİN SAYACI & ADIM / UYKU MİNİ GÖSTERGELERİ -->
+        <div class="micro-vitals-grid">
+          <div class="vital-mini-box">
+            <span>☕ Kahve: <b id="coffeeCountText" style="color:var(--accent-cream);">0</b></span>
+            <div style="display:flex;gap:4px;">
+              <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 7px;" onclick="changeCoffeeCount(-1)">-</button>
+              <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 7px;background:rgba(245,216,181,0.2);color:var(--accent-cream);" onclick="changeCoffeeCount(1)">+1 ☕</button>
+            </div>
+          </div>
+          <div class="vital-mini-box">
+            <span>🔥 Seri: <b id="habitDoneSummaryText" style="color:#95de64;">0/5</b></span>
+            <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 7px;color:var(--pastel-purple);" onclick="promptAddCustomHabit()">+ Alışkanlık</button>
+          </div>
+        </div>
+
+        <!-- GÜNLÜK ZİNCİRİ KIRMA (TEK TIKLA SPOR / KİTAP / VİTAMİN / BESLENME ÇİPLERİ) -->
+        <div class="habit-chain-strip" id="dailyHabitsStrip"></div>
       </div>
 
       <!-- 3. TÜM GÖREVLER ŞERİDİ + 4 ANA KATEGORİ BENTO KARTLARI -->
@@ -206,6 +239,17 @@
           <textarea id="scratchpadInput" class="scratchpad-area" placeholder="Tarihi belli olmayan fikirler, antrenman notları veya market listesini buraya karala..."></textarea>
         </div>
       </div>
+
+      <!-- 🔐 GİZLİ KASA / ÖZEL NOT ALANI (BULANIKLAŞTIRILMIŞ GÜVENLİ KUTU) -->
+      <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(216,208,248,0.22);">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSecretVaultBox()">
+          <span style="font-weight:800;font-size:13px;">🔐 Gizli Kasa (Özel Notlar)</span>
+          <span style="font-size:11px;color:var(--pastel-purple);" id="vaultStatusBadge">🔒 Kilitli (Dokun)</span>
+        </div>
+        <div id="secretVaultBody" style="display:none;">
+          <textarea id="secretVaultInput" class="scratchpad-area" placeholder="Özel şifre ipuçları, IBAN, özel hedefler veya kimsenin görmesini istemediğin notlar... (Kapatınca otomatik kilitlenir)"></textarea>
+        </div>
+      </div>
     </aside>
 
     <!-- SAĞ SÜTUN: ANA GÖRÜNÜMLER (GÖREVLER, HEDEFLER, ARŞİV, KARNE, AYARLAR) -->
@@ -245,6 +289,7 @@
             <span style="font-size:11px;background:var(--bg-surface);padding:4px 9px;border-radius:99px;color:var(--accent-cream);">Bugün</span>
           </div>
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <button class="pin-btn" onclick="shareOrCopyDailyPlan()" style="height:32px;padding:0 10px;font-size:11.5px;" title="Günün Planını WhatsApp'ta Paylaş veya Kopyala">📤 Planı Paylaş</button>
             <button class="pin-btn" id="toggleMonthGridBtn" onclick="toggleMonthGridView()" style="height:32px;padding:0 10px;font-size:11.5px;">🗓️ Aylık Takvim</button>
             <button class="btn-cream" id="toggleAllDatesBtn" onclick="toggleShowAllDates()" style="padding:6px 10px;font-size:11.5px;">Tüm Günler</button>
           </div>
@@ -283,10 +328,13 @@
             <div>
               <h2 style="font-size:18px;font-weight:900;">🎯 Uzun Soluklu Hedeflerim</h2>
               <p style="font-size:12px;color:var(--text-muted);margin-top:3px;">
-                Son teslim tarihi (deadline) olmayan büyük hedeflerini, adım adım kilometre taşlarını ve ilerleme yüzdelerini burada yönet.
+                Son teslim tarihi (deadline) olmayan büyük hedeflerini yönet; istediğin adımı <b>📅 Bugüne Görev Çıkar</b> butonuyla günlük listene aktar!
               </p>
             </div>
-            <button class="btn-cream" onclick="openGoalModal()">+ Yeni Hedef Ekle</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="pin-btn" style="height:38px;padding:0 12px;font-size:12px;" onclick="shareOrCopyGoals()">📤 Hedefleri Paylaş</button>
+              <button class="btn-cream" onclick="openGoalModal()">+ Yeni Hedef Ekle</button>
+            </div>
           </div>
         </div>
 
@@ -312,7 +360,7 @@
       </section>
 
       <!-- ================================================================== -->
-      <!-- SEKME 4: 🔥 HAFTALIK MOTİVASYON KARNESİ & POMODORO ODAK SAYACI -->
+      <!-- SEKME 4: 🔥 HAFTALIK MOTİVASYON KARNESİ, KATEGORİ ANALİZİ & POMODORO -->
       <!-- ================================================================== -->
       <section id="viewStats" style="display:none;">
         <div class="task-card" style="text-align:center;margin-bottom:16px;">
@@ -327,6 +375,12 @@
             <button class="pin-btn" style="height:38px;padding:0 14px;font-size:13px;" onclick="resetPomodoro(25)">25 dk Odak</button>
             <button class="pin-btn" style="height:38px;padding:0 14px;font-size:13px;" onclick="resetPomodoro(5)">5 dk Mola</button>
           </div>
+        </div>
+
+        <!-- YENİ: 4 ANA KATEGORİYE GÖRE BAŞARI & DAĞILIM GRAFİĞİ -->
+        <div class="task-card" style="margin-bottom:16px;">
+          <h3 style="font-size:17px;font-weight:800;margin-bottom:10px;">📊 4 Ana Kategoriye Göre Başarı & Dağılım Analizi</h3>
+          <div id="categoryBreakdownContainer" style="display:flex;flex-direction:column;gap:10px;"></div>
         </div>
 
         <div class="task-card">
@@ -707,6 +761,6 @@
     <img id="photoViewerImg" src="" alt="Görev Fotoğrafı" style="max-width:92vw;max-height:88vh;border-radius:18px;box-shadow:var(--shadow);" />
   </div>
 
-  <script src="app.js?v=10"></script>
+  <script src="app.js?v=11"></script>
 </body>
 </html>

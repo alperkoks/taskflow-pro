@@ -182,20 +182,71 @@ function getTodayISO() {
   return new Date(now - tzOffset).toISOString().split('T')[0];
 }
 
+function createDefaultHabits() {
+  return [
+    { id: 'h_sport', title: '💪 Antrenman', done: false },
+    { id: 'h_vit', title: '💊 Vitamin / Kreatin', done: false },
+    { id: 'h_clean', title: '🥗 Temiz Beslenme', done: false },
+    { id: 'h_read', title: '📖 20 Syf Kitap', done: false },
+    { id: 'h_sleep', title: '💤 7+ Saat Uyku', done: false }
+  ];
+}
+
 function checkAndRenderWaterTracker() {
   const today = getTodayISO();
   if (appData.waterDate !== today) {
     appData.waterDate = today;
     appData.waterCount = 0;
+    appData.coffeeCount = 0;
+    if (Array.isArray(appData.habits)) {
+      appData.habits.forEach((h) => { h.done = false; });
+    }
   }
+  if (!appData.waterTarget || appData.waterTarget < 8) {
+    appData.waterTarget = 12; // Varsayılan: 12 Bardak (3.0 Litre)
+  }
+  if (!Array.isArray(appData.habits) || appData.habits.length === 0) {
+    appData.habits = createDefaultHabits();
+  }
+
+  const target = appData.waterTarget;
   const cnt = appData.waterCount || 0;
-  document.getElementById('waterCountText').textContent = `${cnt} / 8 Bardak`;
+  const currentLiters = ((cnt * 250) / 1000).toFixed(2);
+  const targetLiters = ((target * 250) / 1000).toFixed(1);
+  const pct = Math.min(100, Math.round((cnt / target) * 100));
+
+  const targetSelect = document.getElementById('waterTargetSelect');
+  if (targetSelect) targetSelect.value = String(target);
+
+  const countTextEl = document.getElementById('waterCountText');
+  if (countTextEl) {
+    countTextEl.textContent = `${currentLiters} L / ${targetLiters} L (${cnt}/${target} Brd)`;
+  }
+
+  const fillEl = document.getElementById('waterProgressBarFill');
+  if (fillEl) {
+    fillEl.style.width = `${pct}%`;
+    fillEl.style.background = pct >= 100 ? '#52c41a' : '#60a5fa';
+  }
+
   let drops = '';
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < target; i++) {
     drops += i < cnt ? '💧' : '⚪';
   }
-  if (cnt > 8) drops += ` +${cnt - 8}💧`;
-  document.getElementById('waterDropsDisplay').textContent = drops;
+  if (cnt > target) drops += ` +${cnt - target}💧`;
+  const dropsEl = document.getElementById('waterDropsDisplay');
+  if (dropsEl) dropsEl.textContent = drops;
+
+  const coffeeEl = document.getElementById('coffeeCountText');
+  if (coffeeEl) coffeeEl.textContent = `${appData.coffeeCount || 0} Fincan`;
+
+  renderDailyHabitsStrip();
+}
+
+function changeWaterTarget(newVal) {
+  appData.waterTarget = parseInt(newVal, 10) || 12;
+  checkAndRenderWaterTracker();
+  saveProfileData();
 }
 
 function changeWaterCount(delta) {
@@ -203,12 +254,77 @@ function changeWaterCount(delta) {
   if (appData.waterDate !== today) {
     appData.waterDate = today;
     appData.waterCount = 0;
+    appData.coffeeCount = 0;
   }
-  appData.waterCount = Math.max(0, (appData.waterCount || 0) + delta);
-  if (delta > 0 && appData.waterCount === 8) {
+  const target = appData.waterTarget || 12;
+  const prev = appData.waterCount || 0;
+  appData.waterCount = Math.max(0, prev + delta);
+  if (delta > 0 && prev < target && appData.waterCount >= target) {
     playAlertTone('success');
   }
   checkAndRenderWaterTracker();
+  saveProfileData();
+}
+
+function changeCoffeeCount(delta) {
+  const today = getTodayISO();
+  if (appData.waterDate !== today) {
+    appData.waterDate = today;
+    appData.waterCount = 0;
+    appData.coffeeCount = 0;
+  }
+  appData.coffeeCount = Math.max(0, (appData.coffeeCount || 0) + delta);
+  checkAndRenderWaterTracker();
+  saveProfileData();
+}
+
+function renderDailyHabitsStrip() {
+  const strip = document.getElementById('dailyHabitsStrip');
+  const summaryEl = document.getElementById('habitDoneSummaryText');
+  if (!strip) return;
+
+  const habits = appData.habits || [];
+  const doneCnt = habits.filter((h) => h.done).length;
+  if (summaryEl) summaryEl.textContent = `${doneCnt}/${habits.length} Tamam`;
+
+  strip.innerHTML = habits.map((h, idx) => `
+    <div class="habit-pill ${h.done ? 'done' : ''}" onclick="toggleDailyHabit(${idx})" title="Tamamlamak için dokun">
+      <span>${h.done ? '✅' : '⚪'}</span>
+      <span>${escapeHtml(h.title)}</span>
+      ${h.custom ? `<span onclick="event.stopPropagation();deleteCustomHabit(${idx});" style="margin-left:3px;color:#ff7875;font-weight:900;">×</span>` : ''}
+    </div>
+  `).join('');
+}
+
+function toggleDailyHabit(idx) {
+  if (!Array.isArray(appData.habits) || !appData.habits[idx]) return;
+  appData.habits[idx].done = !appData.habits[idx].done;
+  const allDone = appData.habits.every((h) => h.done);
+  if (appData.habits[idx].done && allDone) {
+    playAlertTone('success');
+  }
+  renderDailyHabitsStrip();
+  saveProfileData();
+}
+
+function promptAddCustomHabit() {
+  const name = prompt('Yeni günlük alışkanlık adı girin (Örn: 🧘 10 Dk Meditasyon / 🚫 Şekersiz Gün):');
+  if (!name || !name.trim()) return;
+  if (!Array.isArray(appData.habits)) appData.habits = createDefaultHabits();
+  appData.habits.push({
+    id: 'h_' + Date.now(),
+    title: name.trim(),
+    done: false,
+    custom: true
+  });
+  renderDailyHabitsStrip();
+  saveProfileData();
+}
+
+function deleteCustomHabit(idx) {
+  if (!Array.isArray(appData.habits)) return;
+  appData.habits.splice(idx, 1);
+  renderDailyHabitsStrip();
   saveProfileData();
 }
 
@@ -284,6 +400,12 @@ async function loadProfileData(profileId) {
         if (!Array.isArray(appData.goals)) {
           appData.goals = createDefaultGoals();
         }
+        if (!Array.isArray(appData.habits) || appData.habits.length === 0) {
+          appData.habits = createDefaultHabits();
+        }
+        if (!appData.waterTarget || appData.waterTarget < 8) {
+          appData.waterTarget = 12;
+        }
         // Eski kategori isimlerini yeni 4 başlığa uyarla
         (appData.tasks || []).forEach((t) => {
           if (t.category === 'Kişisel & Günlük') t.category = 'Rutin İşler';
@@ -332,7 +454,7 @@ function createDefaultGoals() {
       id: 'g_' + Date.now() + '_2',
       title: 'Fit ve Sağlıklı Vücut Formuna Ulaş 🏋️',
       category: 'Spor ve Sağlık',
-      desc: 'Düzenli antrenman, günlük 8 bardak su ve temiz beslenme ile formda kalmak.',
+      desc: 'Düzenli antrenman, günlük 3.0L su ve temiz beslenme ile formda kalmak.',
       progress: 50,
       achieved: false,
       steps: [
@@ -353,18 +475,22 @@ function createNewUserProfileData(username, email, password) {
     theme: 'dark',
     nightLight: false,
     scratchpad: '• Antrenman programı\n• Alışveriş listesi\n• Hızlı notlarını buraya yazabilirsin...',
+    secretVault: '',
     streak: 1,
     lastCompletedDate: today,
     waterDate: today,
+    waterTarget: 12,
     waterCount: 2,
+    coffeeCount: 1,
+    habits: createDefaultHabits(),
     cloudDbUrl: '',
     cloudSyncKey: 'taskflow_' + username.toLowerCase(),
     updatedAt: Date.now(),
     tasks: [
       {
         id: 't_' + Date.now() + '_1',
-        title: 'TaskFlow+ v9.0 Yaşam & Hedef Üssünü Keşfet 🚀',
-        desc: 'Yeni Hedefler sekmesini, Aylık Takvim görünümünü, Su takipçisini ve Harita/Link özelliğini dene.',
+        title: 'TaskFlow+ v11.0 Yaşam, Spor & Hedef Üssünü Keşfet 🚀',
+        desc: 'Yeni 3.0L Su & Kafein takipçisini, Alışkanlık Zincirini, Hedeflerden Göreve aktarımı ve Gizli Kasayı dene.',
         date: today,
         time: '',
         pinned: true,
@@ -377,8 +503,8 @@ function createNewUserProfileData(username, email, password) {
         link: '',
         tags: ['#başlangıç', '#hedefler'],
         subtasks: [
-          { text: 'Alttaki 🎯 Hedefler sekmesine tıklayıp uzun soluklu hedeflerine bak', done: false },
-          { text: '💧 Su takipçisinden +1 bardak su ekle', done: false },
+          { text: 'Alttaki 🎯 Hedefler sekmesine tıklayıp "📅 Bugüne Görev Çıkar" butonunu dene', done: false },
+          { text: '💧 Su takipçisinden +500ml Şişe ekle ve alışkanlık çiplerine dokun', done: false },
           { text: '🗓️ Aylık Takvim butonuna basıp 30 günlük görünümü aç', done: false }
         ],
         photos: [],
@@ -605,10 +731,27 @@ function applyUserPreferences() {
   document.getElementById('headerAvatarLetter').textContent = displayName.charAt(0).toUpperCase();
 
   document.getElementById('scratchpadInput').value = appData.scratchpad || '';
+  const vaultInp = document.getElementById('secretVaultInput');
+  if (vaultInp) vaultInp.value = appData.secretVault || '';
   document.getElementById('cloudDbUrl').value = appData.cloudDbUrl || '';
   document.getElementById('cloudSyncKey').value = appData.cloudSyncKey || ('taskflow_' + (appData.username || 'user'));
   document.getElementById('streakBadge').textContent = `🔥 ${appData.streak || 1} Gün Seri`;
   checkAndRenderWaterTracker();
+}
+
+function toggleSecretVaultBox() {
+  const bodyEl = document.getElementById('secretVaultBody');
+  const badgeEl = document.getElementById('vaultStatusBadge');
+  if (!bodyEl) return;
+  if (bodyEl.style.display === 'none') {
+    bodyEl.style.display = 'block';
+    badgeEl.textContent = '🔓 Açık (Gizlemek İçin Dokun)';
+    badgeEl.style.color = '#95de64';
+  } else {
+    bodyEl.style.display = 'none';
+    badgeEl.textContent = '🔒 Kilitli (Dokun)';
+    badgeEl.style.color = 'var(--pastel-purple)';
+  }
 }
 
 function changeTheme(newTheme) {
@@ -647,7 +790,84 @@ document.addEventListener('DOMContentLoaded', () => {
       saveProfileData();
     });
   }
+  const sv = document.getElementById('secretVaultInput');
+  if (sv) {
+    sv.addEventListener('input', () => {
+      appData.secretVault = sv.value;
+      saveProfileData();
+    });
+  }
 });
+
+// Günlük Planı veya Hedefleri WhatsApp / Sistem Paylaşımı ile Gönderme veya Panoya Kopyalama
+async function shareOrCopyDailyPlan() {
+  const dayTasks = appData.tasks.filter((t) => t.date === selectedDate);
+  const doneCnt = dayTasks.filter((t) => t.completed).length;
+  const pct = dayTasks.length > 0 ? Math.round((doneCnt / dayTasks.length) * 100) : 0;
+  const waterL = (((appData.waterCount || 0) * 250) / 1000).toFixed(2);
+
+  let lines = [
+    `📅 *TaskFlow+ Günlük Plan (${selectedDate})*`,
+    `📊 İlerleme: %${pct} (${doneCnt}/${dayTasks.length} Görev) | 💧 Su: ${waterL}L`,
+    `--------------------------------`
+  ];
+
+  if (dayTasks.length === 0) {
+    lines.push('✨ Bu tarih için kayıtlı görev yok.');
+  } else {
+    dayTasks.forEach((t) => {
+      const statusIcon = t.completed ? '✅' : '⬜';
+      const timeStr = t.time ? ` [${t.time}]` : '';
+      const locStr = t.location ? ` 📍(${t.location})` : '';
+      lines.push(`${statusIcon}${timeStr} ${t.title} — (${t.category})${locStr}`);
+    });
+  }
+
+  const text = lines.join('\n');
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: `TaskFlow+ Plan (${selectedDate})`, text });
+      return;
+    } catch (e) {}
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    alert('📋 Günlük planın panoya kopyalandı! İstediğin yere (WhatsApp, Notlar vb.) yapıştırabilirsin.');
+  } catch (e) {
+    prompt('Günlük planını kopyalayabilirsin:', text);
+  }
+}
+
+async function shareOrCopyGoals() {
+  const goals = appData.goals || [];
+  let lines = [
+    `🎯 *TaskFlow+ Uzun Soluklu Hedeflerim*`,
+    `--------------------------------`
+  ];
+  if (goals.length === 0) {
+    lines.push('Henüz hedef eklenmedi.');
+  } else {
+    goals.forEach((g) => {
+      lines.push(`🎯 *${g.title}* (${g.category}) — İlerleme: %${g.progress || 0}`);
+      (g.steps || []).forEach((s) => {
+        lines.push(`   ${s.done ? '✅' : '⬜'} ${s.text}`);
+      });
+    });
+  }
+  const text = lines.join('\n');
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'TaskFlow+ Hedeflerim', text });
+      return;
+    } catch (e) {}
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    alert('📋 Hedef listesi panoya kopyalandı! İstediğin yere yapıştırabilirsin.');
+  } catch (e) {
+    prompt('Hedeflerini kopyalayabilirsin:', text);
+  }
+}
 
 // ----------------------------------------------------------------------------
 // 6. YATAY GÜN ŞERİDİ & 30 GÜNLÜK TAM AYLIK TAKVİM (GRID) MOTORU
@@ -1039,7 +1259,7 @@ function escapeHtml(str) {
 }
 
 // ----------------------------------------------------------------------------
-// 7. 🎯 UZUN SOLUKLU HEDEFLER (GOALS) SİSTEMİ (DEADLINE OLMAYAN VİZYON SAYFASI)
+// 7. 🎯 UZUN SOLUKLU HEDEFLER (GOALS) SİSTEMİ + GÜNLÜK GÖREVE TEK TIKLA AKTARIM
 // ----------------------------------------------------------------------------
 function handleFabClick() {
   if (currentViewName === 'goals') {
@@ -1047,6 +1267,51 @@ function handleFabClick() {
   } else {
     openTaskModal();
   }
+}
+
+function createTaskFromGoal(goalId, stepIdx = null) {
+  const g = (appData.goals || []).find((x) => x.id === goalId);
+  if (!g) return;
+
+  const today = getTodayISO();
+  let taskTitle = g.title;
+  let taskDesc = `🎯 Bağlı Hedef: ${g.title}`;
+
+  if (stepIdx !== null && g.steps && g.steps[stepIdx]) {
+    taskTitle = `${g.steps[stepIdx].text}`;
+    taskDesc = `🎯 "${g.title}" hedefinin kilometre taşı adımı.`;
+  }
+
+  appData.tasks.unshift({
+    id: 't_' + Date.now(),
+    title: taskTitle,
+    pinned: true,
+    desc: taskDesc,
+    date: today,
+    time: '',
+    location: '',
+    link: '',
+    alarmEnabled: true,
+    alarmSound: 'system',
+    priority: 'high',
+    category: g.category || 'Kişisel Gelişim',
+    repeat: 'none',
+    tags: ['#hedef'],
+    subtasks: [],
+    photos: [],
+    audios: [],
+    completed: false,
+    completedAt: null,
+    completionEmoji: '',
+    completionComment: '',
+    notified: false
+  });
+
+  selectedDate = today;
+  playAlertTone('success');
+  saveProfileData();
+  renderAll();
+  alert(`✅ "${taskTitle}" bugünün (${today}) Günlük Görevler listesine eklendi!`);
 }
 
 function renderGoals() {
@@ -1087,9 +1352,12 @@ function renderGoals() {
       <div class="subtasks-box" style="margin-top:12px;">
         <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:6px;">🏁 KİLOMETRE TAŞLARI (${doneSteps}/${totalSteps})</div>
         ${g.steps.map((s, idx) => `
-          <div class="subtask-item ${s.done ? 'done' : ''}" onclick="toggleGoalStep('${g.id}', ${idx})">
-            <span>${s.done ? '✅' : '⬜'}</span>
-            <span>${escapeHtml(s.text)}</span>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:3px 0;">
+            <div class="subtask-item ${s.done ? 'done' : ''}" style="flex:1;" onclick="toggleGoalStep('${g.id}', ${idx})">
+              <span>${s.done ? '✅' : '⬜'}</span>
+              <span>${escapeHtml(s.text)}</span>
+            </div>
+            <button type="button" class="tag-badge" style="border:none;cursor:pointer;color:var(--accent-cream);font-size:10px;padding:3px 7px;flex-shrink:0;" onclick="createTaskFromGoal('${g.id}', ${idx})" title="Bu adımı bugünün görevlerine ekle">📅 Bugüne Ekle</button>
           </div>
         `).join('')}
       </div>
@@ -1122,8 +1390,9 @@ function renderGoals() {
         ${stepsHTML}
 
         <div class="task-meta">
-          <div style="display:flex;gap:6px;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
             <button class="tag-badge" style="cursor:pointer;border:none;color:#95de64;" onclick="adjustGoalProgress('${g.id}', 10)">+10% İlerle</button>
+            <button class="tag-badge" style="cursor:pointer;border:none;color:var(--accent-cream);" onclick="createTaskFromGoal('${g.id}')">📅 Bugüne Görev Çıkar</button>
           </div>
           <div style="display:flex;gap:6px;">
             <button class="tag-badge" style="cursor:pointer;border:none;" onclick="openGoalModal('${g.id}')">✏️ Düzenle</button>
@@ -1823,7 +2092,7 @@ function toggleTurkishSpeechToText(targetField = 'title') {
 }
 
 // ----------------------------------------------------------------------------
-// 11. HAFTALIK MOTİVASYON KARNESİ & POMODORO SAYACI
+// 11. HAFTALIK MOTİVASYON KARNESİ, KATEGORİ ANALİZİ & POMODORO SAYACI
 // ----------------------------------------------------------------------------
 function renderWeeklyReport() {
   const doneTasks = appData.tasks.filter((t) => t.completed);
@@ -1858,6 +2127,36 @@ function renderWeeklyReport() {
       <div style="font-size:11px;color:var(--text-muted);">Görev</div>
     </div>
   `).join('');
+
+  // 4 Ana Kategori Dağılım ve Başarı Grafiği
+  const catBox = document.getElementById('categoryBreakdownContainer');
+  if (catBox) {
+    const categories = [
+      { name: 'İş & Proje', icon: '💡', color: '#d8d0f8' },
+      { name: 'Rutin İşler', icon: '🔄', color: '#c8f4ec' },
+      { name: 'Spor ve Sağlık', icon: '🏋️', color: '#ffdecb' },
+      { name: 'Kişisel Gelişim', icon: '📚', color: '#e2f4cb' }
+    ];
+    catBox.innerHTML = categories.map((c) => {
+      const catTasks = appData.tasks.filter((t) => t.category === c.name);
+      const catDone = catTasks.filter((t) => t.completed).length;
+      const catTotal = catTasks.length;
+      const catPct = catTotal > 0 ? Math.round((catDone / catTotal) * 100) : 0;
+      const catGoals = (appData.goals || []).filter((g) => g.category === c.name).length;
+
+      return `
+        <div style="background:var(--bg-surface);padding:10px 12px;border-radius:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;font-weight:800;margin-bottom:5px;">
+            <span>${c.icon} ${c.name} <span style="font-weight:600;color:var(--text-muted);font-size:11px;">(${catGoals} Uzun Hedef)</span></span>
+            <span style="color:var(--accent-cream);">%${catPct} (${catDone}/${catTotal} Görev)</span>
+          </div>
+          <div class="progress-bar-track" style="height:7px;margin:0;">
+            <div class="progress-bar-fill" style="width:${catPct}%;background:${c.color};"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 }
 
 function focusTaskInPomodoro(taskId) {
@@ -2216,7 +2515,7 @@ async function installPWA() {
 
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=10').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=11').catch(() => {});
   }
   await initDB();
 
