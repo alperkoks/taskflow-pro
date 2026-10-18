@@ -3,6 +3,6 @@
       "target": {
         "namespace": "android_app",
         "package_name": "com.alperkoks.taskflowpro",
-        "sha256_cert_fingerprints": ["27:B4:D9:A3:6C:1E:B8:85:4C:0F:80:80:FA:56:CD:51:B0:77:9E:2B:25:3A:8F:0C:EA:F0:F7:D9:E3:6F:6A:E3"]
+        "sha256_cert_fingerprints": ["EE:A6:81:73:BA:CC:96:E1:CA:72:4F:97:FD:30:A5:48:42:2E:14:8A:0C:03:7C:AE:E9:E8:68:C6:31:1D:23:D2"]
       }
     }]
