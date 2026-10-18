@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0c0c0f" />
+  <meta name="theme-color" content="#09090d" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>TaskFlow+ — Günlük Görev & Odak</title>
-  <link rel="manifest" href="manifest.json?v=7" />
-  <link rel="stylesheet" href="styles.css?v=7" />
+  <link rel="manifest" href="manifest.json?v=8" />
+  <link rel="stylesheet" href="styles.css?v=8" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
 
   <!-- 1. PROFESYONEL KULLANICI GİRİŞ / KAYIT OL / ŞİFREMİ UNUTTUM EKRANI -->
   <div id="lockScreen" class="lock-screen">
-    <div class="lock-card" style="max-width:390px;text-align:left;">
+    <div class="lock-card" style="text-align:left;">
       <div style="text-align:center;margin-bottom:16px;">
         <img src="icon-192.png" alt="TaskFlow+" style="width:64px;height:64px;border-radius:18px;margin:0 auto 10px;display:block;box-shadow:0 6px 20px rgba(0,0,0,0.4);" />
         <h2 style="font-size:23px;font-weight:900;letter-spacing:-0.5px;">TaskFlow<span style="color:var(--pastel-purple);">+</span></h2>
@@ -46,10 +46,10 @@
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-muted);">
             <input type="checkbox" id="rememberMeCheck" checked /> Oturumu açık tut
           </label>
-          <a href="javascript:void(0)" onclick="switchAuthTab('forgot')" style="color:var(--accent-cream);text-decoration:none;font-weight:600;">Şifremi Unuttum?</a>
+          <a href="javascript:void(0)" onclick="switchAuthTab('forgot')" style="color:var(--accent-cream);text-decoration:none;font-weight:700;">Şifremi Unuttum?</a>
         </div>
         <p id="loginErrorMsg" style="font-size:12px;color:#ff4d4f;min-height:18px;margin-bottom:8px;text-align:center;"></p>
-        <button type="submit" class="btn-cream" style="width:100%;height:44px;font-size:14px;">Giriş Yap →</button>
+        <button type="submit" class="btn-cream" style="width:100%;height:45px;font-size:14px;">Giriş Yap →</button>
       </form>
 
       <!-- YENİ HESAP OLUŞTUR (KAYIT OL) FORMU -->
@@ -67,25 +67,29 @@
           <input type="password" id="regPassword" class="form-input" placeholder="En az 4 karakter" required minlength="4" autocomplete="new-password" />
         </div>
         <p id="regErrorMsg" style="font-size:12px;color:#ff4d4f;min-height:18px;margin-bottom:8px;text-align:center;"></p>
-        <button type="submit" class="btn-cream" style="width:100%;height:44px;font-size:14px;">Hesabımı Oluştur ve Başla ✓</button>
+        <button type="submit" class="btn-cream" style="width:100%;height:45px;font-size:14px;">Hesabımı Oluştur ve Başla ✓</button>
       </form>
 
-      <!-- ŞİFREMİ UNUTTUM (E-POSTA İLE KURTARMA) FORMU -->
+      <!-- ŞİFREMİ UNUTTUM (GARANTİLİ KURTARMA & E-POSTA SİSTEMİ) -->
       <form id="forgotForm" style="display:none;" onsubmit="handleForgotPassword(event)">
         <div class="form-group">
-          <label>Kayıtlı E-Posta Adresin veya Kullanıcı Adın</label>
-          <input type="text" id="forgotIdentifier" class="form-input" placeholder="ornek@gmail.com" required />
+          <label>Kayıtlı E-Posta Adresin</label>
+          <input type="email" id="forgotEmailInput" class="form-input" placeholder="Kayıt olurken girdiğin e-posta" required />
         </div>
-        <p id="forgotStatusMsg" style="font-size:12px;color:var(--accent-cream);min-height:18px;margin-bottom:10px;text-align:center;"></p>
-        <button type="submit" id="forgotSubmitBtn" class="btn-cream" style="width:100%;height:44px;font-size:14px;">📧 Şifremi E-Postama Gönder</button>
+        <div class="form-group" id="forgotNewPassGroup" style="display:none;">
+          <label>Yeni Şifreni Belirle</label>
+          <input type="password" id="forgotNewPassInput" class="form-input" placeholder="Yeni şifren (En az 4 karakter)" minlength="4" />
+        </div>
+        <div id="forgotStatusMsg" style="font-size:12px;color:var(--accent-cream);min-height:18px;margin-bottom:10px;text-align:center;line-height:1.45;"></div>
+        <button type="submit" id="forgotSubmitBtn" class="btn-cream" style="width:100%;height:45px;font-size:13.5px;">🔍 Hesabımı Doğrula & Şifreyi Kurtar</button>
         <button type="button" class="pin-btn" style="width:100%;height:38px;font-size:12.5px;margin-top:8px;" onclick="switchAuthTab('login')">← Giriş Ekranına Dön</button>
       </form>
     </div>
   </div>
 
-  <!-- CANLI ÇALAN TAM EKRAN ALARM MODALI (SADECE MESAJ DEĞİL, GERÇEK ÇALAR SAAT UYARISI!) -->
-  <div id="liveAlarmModal" class="modal-backdrop hidden" style="z-index:25000;">
-    <div class="modal-sheet" style="max-width:380px;text-align:center;border:2px solid var(--prio-urgent);box-shadow:0 0 50px rgba(255,77,79,0.45);">
+  <!-- CANLI ÇALAN TAM EKRAN ALARM MODALI -->
+  <div id="liveAlarmModal" class="modal-backdrop hidden" style="z-index:25000;align-items:center;padding:16px;">
+    <div class="modal-sheet" style="max-width:380px;text-align:center;border:2px solid var(--prio-urgent);border-radius:26px;box-shadow:0 0 50px rgba(255,77,79,0.45);">
       <div style="font-size:52px;animation:pulse 1s infinite;display:inline-block;border-radius:50%;">⏰</div>
       <h2 style="font-size:21px;font-weight:900;margin-top:10px;color:#ff7875;">GÖREV ZAMANI GELDİ!</h2>
       <h3 id="alarmModalTaskTitle" style="font-size:17px;font-weight:800;margin-top:8px;color:var(--text-main);"></h3>
@@ -103,54 +107,65 @@
   <!-- ANA UYGULAMA KABUĞU -->
   <div class="app-container">
 
-    <!-- SOL SÜTUN: KARŞILAMA, PASTEL BENTO KARTLAR, HIZLI NOT DEFTERİ -->
+    <!-- SOL SÜTUN: SADE ÜST BAR, GÜNLÜK İLERLEME, 4'LÜ PASTEL KATEGORİ (SPOR DAHİL), KARALAMA -->
     <aside class="left-panel">
       <header class="top-header">
         <div>
           <div class="greeting-sub">
             <span id="welcomeUserText">Merhaba 👋</span>
-            <span class="streak-badge" id="streakBadge" title="Üst üste görev tamamlama serisi">🔥 1 Gün</span>
+            <span class="streak-badge" id="streakBadge">🔥 1 Gün Seri</span>
           </div>
-          <h1 class="greeting-title">Günlük Görevlerini<br>Yönet</h1>
+          <h1 class="greeting-title">Günlük Planın</h1>
         </div>
-        <div class="header-actions">
-          <button class="icon-btn" onclick="requestNotificationPermission()" title="Bildirim İzni ve Test">
-            🔔
-            <span id="syncStatusDot" class="sync-dot" title="Çevrimdışı / Bulut Hazır"></span>
-          </button>
-          <button class="icon-btn" id="installAppBtn" style="display:none;" onclick="installPWA()" title="Uygulama Olarak Kur (PC / Mobil)">
-            📲
-          </button>
-          <button class="icon-btn" onclick="logoutUser()" title="Hesaptan Çıkış Yap / Kilitle">
-            🚪
-          </button>
+        <!-- Sağ Üstte Artık Sadece Şık Profil Rozeti Var (Tıklayınca Ayarlar'a Gider) -->
+        <div class="user-avatar-pill" onclick="switchView('settings')" title="Ayarlar ve Hesap">
+          <div class="user-avatar-circle" id="headerAvatarLetter">U</div>
+          <span id="syncStatusDot" class="sync-dot" title="Çevrimdışı / Bulut Hazır"></span>
         </div>
       </header>
 
-      <!-- GÖRSELDEKİ PASTEL KATEGORİ BENTO KARTLARI -->
+      <!-- GÜNLÜK İLERLEME DURUM ÇUBUĞU -->
+      <div class="daily-progress-card">
+        <div class="daily-progress-top">
+          <span id="dailyProgressLabel">🎯 Bugünün İlerlemesi</span>
+          <span id="dailyProgressPct" style="color:var(--accent-cream);">%0</span>
+        </div>
+        <div class="progress-bar-track" style="margin-bottom:0;height:6px;">
+          <div class="progress-bar-fill" id="dailyProgressFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- 4'LÜ PASTEL KATEGORİ BENTO KARTLARI (SPOR & SAĞLIK EKLENDİ!) -->
       <div class="bento-grid">
-        <div class="bento-card bento-tall" id="filterAllCard" onclick="setCategoryFilter('all')">
+        <div class="bento-card bento-all active-filter" id="filterAllCard" onclick="setCategoryFilter('all')">
           <div class="bento-icon">🗂️</div>
-          <div>
+          <div style="min-width:0;">
             <div class="bento-title">Tüm Görevler</div>
             <div class="bento-count" id="countAllTasks">0 Görev</div>
-            <div style="font-size:11px;margin-top:6px;opacity:0.75;" id="countUrgentSub">0 Acil</div>
           </div>
         </div>
 
-        <div class="bento-card bento-top-right" id="filterWorkCard" onclick="setCategoryFilter('İş & Proje')">
+        <div class="bento-card bento-work" id="filterWorkCard" onclick="setCategoryFilter('İş & Proje')">
           <div class="bento-icon">💡</div>
-          <div>
+          <div style="min-width:0;">
             <div class="bento-title">İş & Proje</div>
             <div class="bento-count" id="countWorkTasks">0 Görev</div>
           </div>
         </div>
 
-        <div class="bento-card bento-bottom-right" id="filterPersonalCard" onclick="setCategoryFilter('Kişisel & Günlük')">
+        <div class="bento-card bento-personal" id="filterPersonalCard" onclick="setCategoryFilter('Kişisel & Günlük')">
           <div class="bento-icon">🧩</div>
-          <div>
+          <div style="min-width:0;">
             <div class="bento-title">Kişisel & Rutin</div>
             <div class="bento-count" id="countPersonalTasks">0 Görev</div>
+          </div>
+        </div>
+
+        <div class="bento-card bento-sport" id="filterSportCard" onclick="setCategoryFilter('Spor & Sağlık')">
+          <div class="bento-icon">🏋️</div>
+          <div style="min-width:0;">
+            <div class="bento-title">Spor & Sağlık</div>
+            <div class="bento-count" id="countSportTasks">0 Görev</div>
           </div>
         </div>
       </div>
@@ -158,23 +173,23 @@
       <!-- HIZLI NOT / KARALAMA DEFTERİ (AÇILIR/KAPANIR KOMPAKT) -->
       <div class="scratchpad-card">
         <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="const sp=document.getElementById('scratchpadBody');sp.style.display=sp.style.display==='none'?'block':'none';">
-          <span style="font-weight:800;font-size:13px;">⚡ Hızlı Karalama Defteri (Aç/Kapat)</span>
-          <span style="font-size:11px;color:var(--accent-cream);" id="scratchSavedLabel">Göster ▾</span>
+          <span style="font-weight:800;font-size:13px;">⚡ Hızlı Karalama Defteri</span>
+          <span style="font-size:11px;color:var(--accent-cream);" id="scratchSavedLabel">Aç / Kapat ▾</span>
         </div>
         <div id="scratchpadBody" style="display:none;">
-          <textarea id="scratchpadInput" class="scratchpad-area" placeholder="Tarihi belli olmayan fikirler, market listesi veya anlık notlarını buraya karala..."></textarea>
+          <textarea id="scratchpadInput" class="scratchpad-area" placeholder="Tarihi belli olmayan fikirler, antrenman notları veya market listesini buraya karala..."></textarea>
         </div>
       </div>
     </aside>
 
-    <!-- SAĞ SÜTUN: TAKVİM ŞERİDİ, ARAMA, AKTİF GÖREVLER, ARŞİV, KARNE, ODAK -->
+    <!-- SAĞ SÜTUN: TAKVİM ŞERİDİ, ARAMA, AKTİF GÖREVLER, ARŞİV, KARNE, AYARLAR -->
     <main class="right-panel">
 
       <!-- DÜNDEN KALAN GÖREVLERİ BUGÜNE AKTAR BANNER'I -->
       <div id="rolloverBanner" class="rollover-banner hidden">
         <div>
-          <div style="font-weight:800;font-size:14px;color:#ff9c6e;">⏳ Geçmişten Kalan Görevler Var</div>
-          <div style="font-size:12px;color:var(--text-muted);" id="rolloverCountText">Tamamlanmamış görevleri tek tıkla bugüne taşıyabilirsin.</div>
+          <div style="font-weight:800;font-size:13.5px;color:#ff9c6e;">⏳ Geçmişten Kalan Görevler Var</div>
+          <div style="font-size:11.5px;color:var(--text-muted);" id="rolloverCountText">Tamamlanmamış görevleri tek tıkla bugüne taşıyabilirsin.</div>
         </div>
         <button class="btn-cream" onclick="rolloverOverdueTasks()">Bugüne Aktar</button>
       </div>
@@ -183,9 +198,9 @@
       <div class="search-bar-wrap">
         <div class="search-input-box">
           <span>🔍</span>
-          <input type="text" id="searchInput" placeholder="Görev, #etiket (#iş, #acil), yorum veya emoji ara..." oninput="renderAll()" />
+          <input type="text" id="searchInput" placeholder="Görev, #etiket (#spor, #acil), yorum veya emoji ara..." oninput="renderAll()" />
         </div>
-        <select id="priorityFilterSelect" class="form-select" style="width:auto;min-width:130px;" onchange="renderAll()">
+        <select id="priorityFilterSelect" class="form-select" style="width:auto;min-width:125px;padding:9px 10px;font-size:12.5px;" onchange="renderAll()">
           <option value="all">Tüm Öncelikler</option>
           <option value="urgent">🚨 Acil</option>
           <option value="high">🔥 Yüksek</option>
@@ -199,10 +214,14 @@
         <div class="calendar-header">
           <div class="month-label" onclick="jumpToToday()">
             <span id="currentMonthLabel">Ekim 2026</span>
-            <span style="font-size:11.5px;background:var(--bg-surface);padding:4px 9px;border-radius:99px;color:var(--accent-cream);">Bugüne Dön</span>
+            <span style="font-size:11px;background:var(--bg-surface);padding:4px 9px;border-radius:99px;color:var(--accent-cream);">Bugüne Dön</span>
           </div>
           <div style="display:flex;gap:6px;align-items:center;">
-            <input type="date" id="customDatePicker" class="form-input" style="padding:5px 8px;font-size:12px;width:auto;" onchange="selectDateFromPicker(this.value)" />
+            <!-- TAM KUTU TIKLANABİLİR TARİH SEÇİCİ -->
+            <div class="picker-box" style="padding:5px 10px;border-radius:10px;" onclick="openNativePicker('customDatePicker')">
+              <span style="font-size:12px;margin-right:4px;">📅</span>
+              <input type="date" id="customDatePicker" style="font-size:12px;width:98px;" onchange="selectDateFromPicker(this.value)" />
+            </div>
             <button class="btn-cream" id="toggleAllDatesBtn" onclick="toggleShowAllDates()" style="padding:6px 10px;font-size:11.5px;">Tüm Günler</button>
           </div>
         </div>
@@ -225,7 +244,7 @@
             <h2 class="section-title">📦 Tamamlanan Görevler Arşivi</h2>
             <p style="font-size:12px;color:var(--text-muted);">Biten görevlerin fotoğrafları, sesli notları, yorumları ve emojileri burada saklanır.</p>
           </div>
-          <select id="archiveSortSelect" class="form-select" style="width:auto;" onchange="renderArchive()">
+          <select id="archiveSortSelect" class="form-select" style="width:auto;font-size:12.5px;" onchange="renderArchive()">
             <option value="date">Tarihe Göre Sırala</option>
             <option value="priority">Önceliğe Göre Sırala</option>
             <option value="emoji">Emojiye Göre Sırala</option>
@@ -257,15 +276,29 @@
         </div>
       </section>
 
-      <!-- SEKME 4: KİŞİSELLEŞTİRME, HESAP AYARLARI, BULUT SENKRONİZASYONU VE YEDEKLEME -->
+      <!-- SEKME 4: AYARLAR (BİLDİRİM İZNİ, ÇIKIŞ YAPMA, TEMA, YEDEKLEME VE BULUT BURADA!) -->
       <section id="viewSettings" style="display:none;">
+
+        <!-- BİLDİRİM VE ALARM TEST MERKEZİ (SAĞ ÜSTTEN BURAYA TAŞINDI) -->
         <div class="task-card" style="margin-bottom:14px;">
-          <h3 style="font-size:16px;font-weight:800;margin-bottom:12px;">👤 Hesap Bilgilerim & Arayüz Kişiselleştirme</h3>
+          <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">🔔 Bildirimler & Alarm Ayarları</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
+            Görev saati geldiğinde telefonunun kendi bildirim sesiyle ve tam ekran alarmla uyarı almak için bildirim iznini buradan aktif edebilirsin.
+          </p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn-cream" onclick="requestNotificationPermission()">🔔 Bildirim İznini Aç & Test Gönder</button>
+            <button class="pin-btn" style="height:38px;padding:0 14px;font-size:12.5px;" id="installAppBtn" style="display:none;" onclick="installPWA()">📲 Ana Ekrana Kur</button>
+          </div>
+        </div>
+
+        <!-- HESAP BİLGİLERİ, KİŞİSELLEŞTİRME VE ÇIKIŞ YAPMA -->
+        <div class="task-card" style="margin-bottom:14px;">
+          <h3 style="font-size:16px;font-weight:800;margin-bottom:12px;">👤 Hesap Bilgilerim & Görünüm</h3>
           <div class="form-row">
             <div class="form-group">
               <label>Renk Teması</label>
               <select id="themeSelect" class="form-select" onchange="changeTheme(this.value)">
-                <option value="dark">🌙 Orijinal Koyu (Görseldeki Tasarım)</option>
+                <option value="dark">🌙 Orijinal Koyu (Lüks Siyah)</option>
                 <option value="midnight">🌌 Gece Mavisi (Midnight)</option>
                 <option value="emerald">🌲 Zümrüt Yeşili (Emerald)</option>
                 <option value="light">☀️ Açık & Ferah Mod</option>
@@ -273,7 +306,7 @@
             </div>
             <div class="form-group">
               <label>Gece Işığı (Mavi Işık Filtresi)</label>
-              <button class="btn-cream" style="width:100%;height:40px;" onclick="toggleNightLight()">💡 Gece Işığını Aç / Kapat</button>
+              <button class="btn-cream" style="width:100%;height:42px;" onclick="toggleNightLight()">💡 Gece Işığını Aç / Kapat</button>
             </div>
           </div>
           <div class="form-row">
@@ -290,20 +323,20 @@
             <label>Yeni Şifre Belirle (Değiştirmek İstersen Yaz)</label>
             <input type="password" id="settingUserPassword" class="form-input" placeholder="Değiştirmek istemiyorsan boş bırak" />
           </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn-cream" onclick="saveUserSettings()">💾 Hesap Bilgilerimi Güncelle</button>
-            <button class="pin-btn" style="height:38px;padding:0 14px;font-size:12.5px;color:#ff7875;" onclick="logoutUser()">🚪 Hesaptan Çıkış Yap</button>
+          <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:6px;">
+            <button class="btn-cream" onclick="saveUserSettings()">💾 Bilgilerimi Güncelle</button>
+            <button class="pin-btn" style="height:40px;padding:0 16px;font-size:13px;color:#ff7875;border-color:rgba(255,77,79,0.35);" onclick="logoutUser()">🚪 Hesaptan Çıkış Yap</button>
           </div>
         </div>
 
         <!-- TEK TIKLA TAM YEDEK İNDİRME / GERİ YÜKLEME -->
         <div class="task-card" style="margin-bottom:14px;">
-          <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">💾 Tek Tıkla Güvenli Arşiv Yedeği (Fotoğraf + Ses + Görevler)</h3>
+          <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">💾 Tek Tıkla Güvenli Arşiv Yedeği</h3>
           <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
-            Tüm görevlerini, sıkıştırılmış fotoğraflarını ve ses kayıtlarını tek dosyada bilgisayarına/telefonuna indirebilir veya başka cihaza aktarabilirsin.
+            Tüm görevlerini, sıkıştırılmış fotoğraflarını ve ses kayıtlarını tek dosyada indirebilir veya geri yükleyebilirsin.
           </p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn-cream" onclick="exportFullBackup()">📥 Tüm Verileri Yedek İndir (.JSON)</button>
+            <button class="btn-cream" onclick="exportFullBackup()">📥 Yedek İndir (.JSON)</button>
             <label class="btn-cream" style="background:var(--bg-surface);color:var(--text-main);cursor:pointer;">
               📤 Yedek Dosyası Yükle
               <input type="file" accept=".json" style="display:none;" onchange="importFullBackup(event)" />
@@ -313,16 +346,16 @@
 
         <!-- ÜCRETSİZ BULUT SENKRONİZASYONU -->
         <div class="task-card">
-          <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">☁️ Ücretsiz Canlı Bulut Senkronizasyonu (PC & Telefon Eşitleme)</h3>
+          <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">☁️ Ücretsiz Canlı Bulut Senkronizasyonu (PC & Mobil)</h3>
           <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
-            İnternet yokken cihaz hafızasında çalışır. Ücretsiz Firebase Realtime Database URL girdiğinde kullanıcı adına özel olarak telefonun ve bilgisayarın otomatik eşitlenir.
+            İnternet yokken cihaz hafızasında çalışır. Firebase Realtime Database URL girdiğinde telefonun ve bilgisayarın otomatik eşitlenir.
           </p>
           <div class="form-group">
-            <label>Ücretsiz Bulut Veritabanı Adresi (Firebase DB URL - İsteğe Bağlı)</label>
+            <label>Ücretsiz Bulut Veritabanı Adresi (Firebase DB URL)</label>
             <input type="text" id="cloudDbUrl" class="form-input" placeholder="https://projeniz-default-rtdb.firebaseio.com" />
           </div>
           <div class="form-group">
-            <label>Özel Senkronizasyon Anahtarı (Otomatik kullanıcı adına göre ayarlanır)</label>
+            <label>Özel Senkronizasyon Anahtarı</label>
             <input type="text" id="cloudSyncKey" class="form-input" placeholder="Örn: alper-ozel-kasa" />
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -360,145 +393,167 @@
     </nav>
   </div>
 
-  <!-- GÖREV EKLEME / DÜZENLEME MODALI -->
+  <!-- PROFESYONEL YENİ GÖREV PLANLAMA MODALI (TEK DOKUNUŞLU SEÇİCİLER & TAM TIKLANABİLİR TARİH/SAAT) -->
   <div id="taskModal" class="modal-backdrop hidden">
     <div class="modal-sheet">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <h3 id="modalTitle" style="font-size:18px;font-weight:800;">Yeni Görev Planla</h3>
-        <button class="icon-btn" style="width:34px;height:34px;" onclick="closeTaskModal()">✕</button>
+        <h3 id="modalTitle" style="font-size:18px;font-weight:900;">✨ Yeni Görev Planla</h3>
+        <button class="icon-btn" onclick="closeTaskModal()">✕</button>
       </div>
 
       <input type="hidden" id="editTaskId" />
+      <input type="hidden" id="taskPriorityInput" value="medium" />
+      <input type="hidden" id="taskCategoryInput" value="İş & Proje" />
 
-      <!-- SESLE YAZDIRMA (TÜRKÇE AKILLI KONUŞARAK GÖREV EKLEME - HATASIZ MOTOR) -->
+      <!-- 1. GÖREV BAŞLIĞI + KONUŞARAK YAZDIRMA + ÜSTE SABİTLEME -->
       <div class="form-group">
-        <label>Görev Başlığı (Yaz veya Mikrofona Konuş)</label>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <label style="margin:0;">Görev Başlığı</label>
+          <label style="margin:0;cursor:pointer;color:var(--accent-cream);display:flex;align-items:center;gap:4px;text-transform:none;">
+            <input type="checkbox" id="taskPinnedInput" /> ⭐ En Üste Sabitle
+          </label>
+        </div>
         <div style="display:flex;gap:8px;">
-          <input type="text" id="taskTitleInput" class="form-input" placeholder="Örn: Yarın saat 14:00'te Ahmet Bey ile toplantı" />
-          <button type="button" id="voiceDictateBtn" class="btn-cream" onclick="toggleTurkishSpeechToText()" title="Konuşarak Türkçe Görev Yazdır">
+          <input type="text" id="taskTitleInput" class="form-input" placeholder="Ne yapacaksın? (Yaz veya 🎙️ Konuş)" />
+          <button type="button" id="voiceDictateBtn" class="btn-cream" onclick="toggleTurkishSpeechToText('title')" title="Konuşarak Türkçe Görev Yazdır">
             🎙️ Konuş
           </button>
         </div>
         <small id="speechStatusHint" style="font-size:11.5px;color:var(--accent-cream);display:none;margin-top:5px;"></small>
       </div>
 
+      <!-- 2. TAM TIKLANABİLİR TARİH VE SAAT KUTULARI (18'E VEYA SAATE NEREDEN BASARSAN BAS DİREKT AÇILIR!) -->
       <div class="form-row">
         <div class="form-group">
-          <label>Tarih</label>
-          <input type="date" id="taskDateInput" class="form-input" />
+          <label>📅 Tarih Seç (Kutuya Dokun)</label>
+          <div class="picker-box" onclick="openNativePicker('taskDateInput')">
+            <input type="date" id="taskDateInput" />
+            <span style="font-size:16px;pointer-events:none;">📅</span>
+          </div>
+          <div class="quick-chips">
+            <span class="quick-chip" onclick="setQuickDate(0)">Bugün</span>
+            <span class="quick-chip" onclick="setQuickDate(1)">Yarın</span>
+            <span class="quick-chip" onclick="setQuickDate(7)">Haftaya</span>
+          </div>
         </div>
+
         <div class="form-group">
-          <label>Saat (Alarm & Bildirim Saati)</label>
-          <input type="time" id="taskTimeInput" class="form-input" />
+          <label>⏰ Saat & Alarm (Kutuya Dokun)</label>
+          <div class="picker-box" onclick="openNativePicker('taskTimeInput')">
+            <input type="time" id="taskTimeInput" />
+            <span style="font-size:16px;pointer-events:none;">⏰</span>
+          </div>
+          <div class="quick-chips">
+            <span class="quick-chip" onclick="setQuickTime('+1h')">+1 Saat</span>
+            <span class="quick-chip" onclick="setQuickTime('09:00')">09:00</span>
+            <span class="quick-chip" onclick="setQuickTime('14:00')">14:00</span>
+            <span class="quick-chip" onclick="setQuickTime('20:00')">20:00</span>
+          </div>
         </div>
       </div>
 
-      <!-- ALARM VE TELEFON BİLDİRİM SESİ SEÇİMİ -->
+      <!-- 3. TEK DOKUNUŞLU KATEGORİ SEÇİMİ (SPOR EKLENDİ!) -->
+      <div class="form-group">
+        <label>Kategori Seç</label>
+        <div class="pill-selector-grid cols-3" id="categoryPillsContainer">
+          <div class="choice-pill active" data-val="İş & Proje" onclick="selectCategoryPill('İş & Proje')">💡 İş & Proje</div>
+          <div class="choice-pill" data-val="Kişisel & Günlük" onclick="selectCategoryPill('Kişisel & Günlük')">🧩 Kişisel</div>
+          <div class="choice-pill" data-val="Spor & Sağlık" onclick="selectCategoryPill('Spor & Sağlık')">🏋️ Spor</div>
+        </div>
+      </div>
+
+      <!-- 4. TEK DOKUNUŞLU ACİLİYET & ÖNCELİK SEÇİMİ -->
+      <div class="form-group">
+        <label>Aciliyet & Öncelik</label>
+        <div class="pill-selector-grid cols-4" id="priorityPillsContainer">
+          <div class="choice-pill" data-val="urgent" onclick="selectPriorityPill('urgent')">🚨 Acil</div>
+          <div class="choice-pill" data-val="high" onclick="selectPriorityPill('high')">🔥 Yüksek</div>
+          <div class="choice-pill active" data-val="medium" onclick="selectPriorityPill('medium')">⚡ Orta</div>
+          <div class="choice-pill" data-val="low" onclick="selectPriorityPill('low')">🌱 Düşük</div>
+        </div>
+      </div>
+
+      <!-- 5. ALARM TONU VE TEKRARLAYAN RUTİN -->
       <div class="form-row">
         <div class="form-group">
-          <label>⏰ Alarm & Bildirim</label>
-          <select id="taskAlarmEnabled" class="form-select">
-            <option value="yes" selected>🔔 Alarm Açık (Canlı Uyarı + Bildirim)</option>
-            <option value="no">🔕 Alarm Kapalı</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>🎵 Bildirim / Alarm Sesi</label>
+          <label>🔔 Bildirim & Alarm Sesi</label>
           <select id="taskAlarmSound" class="form-select" onchange="previewSelectedAlarm(this.value)">
-            <option value="system" selected>📱 Telefonun Kendi Bildirim Sesi (Sistem Kanalı)</option>
-            <option value="classic">⏰ Klasik Dijital Alarm (+Bildirim)</option>
-            <option value="melody">🎶 Yumuşak Melodi (+Bildirim)</option>
-            <option value="urgent">🚨 Acil Uyarı Sesi (+Bildirim)</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Aciliyet & Öncelik</label>
-          <select id="taskPriorityInput" class="form-select">
-            <option value="urgent">🚨 Acil (Çok Önemli)</option>
-            <option value="high">🔥 Yüksek Öncelik</option>
-            <option value="medium" selected>⚡ Normal Öncelik</option>
-            <option value="low">🌱 Düşük Öncelik</option>
+            <option value="system" selected>📱 Telefon Bildirim Sesi</option>
+            <option value="classic">⏰ Klasik Dijital Alarm</option>
+            <option value="melody">🎶 Yumuşak Melodi</option>
+            <option value="urgent">🚨 Acil Siren</option>
+            <option value="off">🔕 Alarm Kapalı</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Kategori</label>
-          <select id="taskCategoryInput" class="form-select">
-            <option value="İş & Proje">💡 İş & Proje</option>
-            <option value="Kişisel & Günlük">🧩 Kişisel & Günlük</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Tekrarlayan Rutin Mi?</label>
+          <label>🔄 Tekrarlayan Rutin</label>
           <select id="taskRepeatInput" class="form-select">
             <option value="none">Tek Seferlik</option>
-            <option value="daily">🔄 Her Gün Tekrarla</option>
-            <option value="weekly">📅 Her Hafta Tekrarla</option>
-            <option value="monthly">🗓️ Her Ay Tekrarla</option>
+            <option value="daily">🔄 Her Gün</option>
+            <option value="weekly">📅 Her Hafta</option>
+            <option value="monthly">🗓️ Her Ay</option>
           </select>
         </div>
+      </div>
+
+      <!-- 6. AÇIKLAMA VE ETİKETLER -->
+      <div class="form-row">
         <div class="form-group">
-          <label>Etiketler (#iş #ev #acil)</label>
-          <input type="text" id="taskTagsInput" class="form-input" placeholder="#iş #rapor" />
+          <label>Detay / Not (Sesle Yazdır 🎙️)</label>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="taskDescInput" class="form-input" placeholder="Ek detay veya not..." />
+            <button type="button" id="voiceDescBtn" class="pin-btn" style="width:42px;height:42px;flex-shrink:0;" onclick="toggleTurkishSpeechToText('desc')">🎙️</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Etiketler</label>
+          <input type="text" id="taskTagsInput" class="form-input" placeholder="#spor #iş #acil" />
         </div>
       </div>
 
+      <!-- 7. ALT GÖREVLER (CHECKLIST) -->
       <div class="form-group">
-        <label>Detay / Açıklama (Sağdan Sesle de Yazdırabilirsin)</label>
-        <div style="display:flex;gap:8px;">
-          <textarea id="taskDescInput" class="form-textarea" rows="2" placeholder="Görevle ilgili notlar..."></textarea>
-          <button type="button" id="voiceDescBtn" class="pin-btn" style="width:46px;height:auto;font-size:16px;" onclick="toggleTurkishSpeechToText('desc')" title="Açıklamayı Sesle Yazdır">🎙️</button>
-        </div>
-      </div>
-
-      <!-- ALT GÖREVLER (CHECKLIST / ADIM ADIM İLERLEME) -->
-      <div class="form-group">
-        <label>Alt Görevler (Adım Adım Kontrol Listesi)</label>
+        <label>☑️ Alt Adımlar (Checklist)</label>
         <div style="display:flex;gap:8px;margin-bottom:8px;">
-          <input type="text" id="subtaskNewInput" class="form-input" placeholder="Alt adım ekle (Örn: Verileri topla)" onkeydown="if(event.key==='Enter'){event.preventDefault();addSubtaskInModal();}" />
+          <input type="text" id="subtaskNewInput" class="form-input" placeholder="Alt adım yazıp + Ekle'ye bas" onkeydown="if(event.key==='Enter'){event.preventDefault();addSubtaskInModal();}" />
           <button type="button" class="btn-cream" onclick="addSubtaskInModal()">+ Ekle</button>
         </div>
         <div id="modalSubtaskList" style="display:flex;flex-direction:column;gap:6px;"></div>
       </div>
 
-      <!-- FOTOĞRAF (KAMERA VEYA GALERİ - OTOMATİK 10X SIKIŞTIRMALI) VE SESLİ MESAJ EKLEME -->
+      <!-- 8. FOTOĞRAF (KAMERA / GALERİ) VE SESLİ MESAJ -->
       <div class="form-group">
-        <label>📷 Fotoğraf Çek / Seç & 🎤 Sesli Mesaj Ekle</label>
+        <label>📷 Fotoğraf & 🎤 Ses Kaydı Ekle</label>
         <input type="file" id="cameraFileInput" accept="image/*" capture="environment" style="position:fixed;top:-9999px;left:-9999px;opacity:0;" onchange="handlePhotoUpload(event)" />
         <input type="file" id="galleryFileInput" accept="image/*" multiple style="position:fixed;top:-9999px;left:-9999px;opacity:0;" onchange="handlePhotoUpload(event)" />
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button type="button" class="btn-cream" style="background:var(--bg-surface);color:var(--text-main);border:1px solid var(--border-color);" onclick="document.getElementById('cameraFileInput').click()">
-            📸 Kamerayla Çek
+          <button type="button" class="btn-cream" style="flex:1;background:var(--bg-surface);color:var(--text-main);border:1px solid var(--border-color);" onclick="document.getElementById('cameraFileInput').click()">
+            📸 Kamera
           </button>
-          <button type="button" class="btn-cream" style="background:var(--bg-surface);color:var(--text-main);border:1px solid var(--border-color);" onclick="document.getElementById('galleryFileInput').click()">
-            🖼️ Galeriden Seç
+          <button type="button" class="btn-cream" style="flex:1;background:var(--bg-surface);color:var(--text-main);border:1px solid var(--border-color);" onclick="document.getElementById('galleryFileInput').click()">
+            🖼️ Galeri
           </button>
-          <button type="button" id="recordAudioBtn" class="btn-cream" style="background:var(--bg-surface);color:var(--text-main);border:1px solid var(--border-color);" onclick="toggleAudioRecording()">
-            🎤 Sesli Mesaj Kaydet
+          <button type="button" id="recordAudioBtn" class="btn-cream" style="flex:1;background:var(--bg-surface);color:var(--text-main);border:1px solid var(--border-color);" onclick="toggleAudioRecording()">
+            🎤 Ses Kaydı
           </button>
         </div>
         <small id="photoUploadStatus" style="font-size:11px;color:var(--accent-cream);display:block;margin-top:5px;"></small>
         <div id="modalAttachmentsPreview" class="attachments-row"></div>
       </div>
 
-      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
-        <button type="button" class="pin-btn" style="height:42px;padding:0 18px;font-size:13.5px;" onclick="closeTaskModal()">İptal</button>
-        <button type="button" class="btn-cream" style="height:42px;padding:0 22px;font-size:13.5px;" onclick="saveTaskFromModal()">💾 Görevi Kaydet</button>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button type="button" class="pin-btn" style="flex:1;height:46px;" onclick="closeTaskModal()">Vazgeç</button>
+        <button type="button" class="btn-cream" style="flex:2;height:46px;font-size:14px;" onclick="saveTaskFromModal()">💾 Görevi Kaydet</button>
       </div>
     </div>
   </div>
 
   <!-- GÖREV TAMAMLAMA: EMOJİ VE YORUM BIRAKMA MODALI -->
-  <div id="completeModal" class="modal-backdrop hidden">
-    <div class="modal-sheet" style="max-width:430px;text-align:center;">
+  <div id="completeModal" class="modal-backdrop hidden" style="align-items:center;padding:16px;">
+    <div class="modal-sheet" style="max-width:420px;text-align:center;border-radius:26px;">
       <h3 style="font-size:20px;font-weight:800;">🎉 Görevi Tamamladın!</h3>
-      <p style="font-size:13px;color:var(--text-muted);margin-top:4px;">Bu görev nasıl geçti? Bir emoji ve hatıra yorumu bırak (Arşivde saklanır):</p>
+      <p style="font-size:13px;color:var(--text-muted);margin-top:4px;">Bu görev nasıl geçti? Bir emoji ve hatıra yorumu bırak:</p>
 
       <div class="emoji-bar" id="emojiPickerBar">
         <button class="emoji-choice selected" onclick="selectCompletionEmoji(this, '✅')">✅</button>
@@ -510,7 +565,7 @@
         <button class="emoji-choice" onclick="selectCompletionEmoji(this, '😢')">😢</button>
       </div>
 
-      <textarea id="completionCommentInput" class="form-textarea" rows="3" placeholder="Harika bitirdim! / Biraz yorucuydu ama değdi..."></textarea>
+      <textarea id="completionCommentInput" class="form-textarea" rows="3" placeholder="Harika bitirdim! / Antrenman süper geçti..."></textarea>
 
       <div style="display:flex;gap:10px;margin-top:16px;">
         <button class="pin-btn" style="flex:1;height:44px;font-size:14px;" onclick="closeCompleteModal()">Vazgeç</button>
@@ -520,10 +575,10 @@
   </div>
 
   <!-- BÜYÜK FOTOĞRAF GÖRÜNTÜLEYİCİ -->
-  <div id="photoViewerModal" class="modal-backdrop hidden" onclick="this.classList.add('hidden')">
+  <div id="photoViewerModal" class="modal-backdrop hidden" style="align-items:center;padding:16px;" onclick="closePhotoViewer()">
     <img id="photoViewerImg" src="" alt="Görev Fotoğrafı" style="max-width:92vw;max-height:88vh;border-radius:18px;box-shadow:var(--shadow);" />
   </div>
 
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

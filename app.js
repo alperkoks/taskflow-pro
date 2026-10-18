@@ -1,16 +1,19 @@
 // ============================================================================
-// TASKFLOW+ v7.0 - TAM KULLANICI GİRİŞ/KAYIT/ŞİFRE KURTARMA + CANLI ÇALAN ALARM
-// + KUSURSUZ TÜRKÇE SESLE YAZDIRMA + OFFLINE/BULUT SENKRONİZASYON
+// TASKFLOW+ v8.0 EXECUTIVE EDITION
+// - Spor & Sağlık Kategorisi (4'lü Bento + Tek Dokunuşlu Seçiciler)
+// - Android Geri Tuşu (Back Button) Akıllı Navigasyon Koruması (Uygulamadan Atmaz!)
+// - Tarih ve Saat Kutularının Tamamına Tıklayınca Anında Açılan Picker + Hızlı Çipler
+// - Garantili Şifremi Unuttum (Anında Sıfırlama + E-Posta Gönderimi)
+// - Sağ Üst İkon Kalabalığı Kaldırıldı -> Ayarlar'a Taşındı
 // ============================================================================
 
 const DB_NAME = 'TaskFlowProDB';
 const DB_VERSION = 2;
 let dbInstance = null;
 
-// Aktif Kullanıcı Kimliği (Örn: 'user_alper')
 let currentProfile = localStorage.getItem('tf_logged_in_user') || '';
+let currentViewName = 'tasks';
 
-// Uygulama Durumu (State)
 let appData = {
   username: '',
   email: '',
@@ -30,37 +33,137 @@ let selectedDate = getTodayISO();
 let showAllDates = false;
 let currentCategoryFilter = 'all';
 
-// Modal içi geçici durumlar
 let modalSubtasks = [];
 let modalPhotos = [];
 let modalAudios = [];
 let completingTaskId = null;
 let selectedCompletionEmoji = '✅';
 
-// Ses Kaydedici (MediaRecorder)
 let mediaRecorder = null;
 let audioChunks = [];
 let isRecordingAudio = false;
 
-// Kusursuz Türkçe Sesle Yazdırma (SpeechRecognition) Durumu
 let activeSpeechRec = null;
 let isSpeechListening = false;
-let currentSpeechTarget = 'title';
 
-// Canlı Çalan Alarm Durumu
 let activeAlarmTaskId = null;
 let alarmLoopTimer = null;
 
-// Pomodoro Durumu
 let pomoSeconds = 25 * 60;
 let pomoInterval = null;
 let pomoRunning = false;
 
-// PWA Kurulum İstemcisi
 let deferredInstallPrompt = null;
+let verifiedForgotProfileId = null;
 
 // ----------------------------------------------------------------------------
-// 1. YARDIMCI TARİH VE SES FONKSİYONLARI
+// 1. ANDROID GERİ TUŞU (BACK BUTTON) KORUMASI VE TAM KUTU TARİH/SAAT AÇICI
+// ----------------------------------------------------------------------------
+function pushAppHistoryState() {
+  try {
+    history.pushState({ taskflow: true, view: currentViewName }, '');
+  } catch (e) {}
+}
+
+window.addEventListener('popstate', (event) => {
+  // 1. Açık bir modal (Görev Ekle, Tamamla, Fotoğraf, Alarm) varsa önce onu kapat!
+  const taskModal = document.getElementById('taskModal');
+  const completeModal = document.getElementById('completeModal');
+  const photoModal = document.getElementById('photoViewerModal');
+  const alarmModal = document.getElementById('liveAlarmModal');
+
+  if (alarmModal && !alarmModal.classList.contains('hidden')) {
+    dismissLiveAlarm(false);
+    pushAppHistoryState();
+    return;
+  }
+  if (photoModal && !photoModal.classList.contains('hidden')) {
+    photoModal.classList.add('hidden');
+    pushAppHistoryState();
+    return;
+  }
+  if (completeModal && !completeModal.classList.contains('hidden')) {
+    closeCompleteModal();
+    pushAppHistoryState();
+    return;
+  }
+  if (taskModal && !taskModal.classList.contains('hidden')) {
+    closeTaskModal();
+    pushAppHistoryState();
+    return;
+  }
+
+  // 2. Eğer Arşiv, Odak veya Ayarlar sekmesindeyse, uygulamadan çıkmak yerine Ana Görevler ekranına dön!
+  if (currentViewName !== 'tasks') {
+    switchView('tasks', true);
+    pushAppHistoryState();
+    return;
+  }
+
+  // 3. Eğer kategori filtresi veya arama açıksa onu sıfırla ve ana ekranda kal!
+  if (currentCategoryFilter !== 'all' || showAllDates) {
+    showAllDates = false;
+    setCategoryFilter('all');
+    pushAppHistoryState();
+    return;
+  }
+
+  // Ana ekranda da yanlışlıkla tek basışta çıkmasın diye state'i koru
+  pushAppHistoryState();
+});
+
+// Tarih veya Saat kutusunun neresine (18'e, 10'a, boşluğa) dokunulursa dokunulsun direkt Takvim/Saat çarkını açar!
+function openNativePicker(inputId) {
+  const inp = document.getElementById(inputId);
+  if (!inp) return;
+  try {
+    if (typeof inp.showPicker === 'function') {
+      inp.showPicker();
+    } else {
+      inp.focus();
+      inp.click();
+    }
+  } catch (e) {
+    inp.focus();
+  }
+}
+
+function setQuickDate(offsetDays) {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  const tzOffset = d.getTimezoneOffset() * 60000;
+  const iso = new Date(d - tzOffset).toISOString().split('T')[0];
+  document.getElementById('taskDateInput').value = iso;
+}
+
+function setQuickTime(val) {
+  if (val === '+1h') {
+    const d = new Date();
+    d.setHours(d.getHours() + 1);
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    document.getElementById('taskTimeInput').value = `${hh}:${mm}`;
+  } else {
+    document.getElementById('taskTimeInput').value = val;
+  }
+}
+
+function selectCategoryPill(catVal) {
+  document.getElementById('taskCategoryInput').value = catVal;
+  document.querySelectorAll('#categoryPillsContainer .choice-pill').forEach((el) => {
+    el.classList.toggle('active', el.getAttribute('data-val') === catVal);
+  });
+}
+
+function selectPriorityPill(prioVal) {
+  document.getElementById('taskPriorityInput').value = prioVal;
+  document.querySelectorAll('#priorityPillsContainer .choice-pill').forEach((el) => {
+    el.classList.toggle('active', el.getAttribute('data-val') === prioVal);
+  });
+}
+
+// ----------------------------------------------------------------------------
+// 2. YARDIMCI TARİH VE SES FONKSİYONLARI
 // ----------------------------------------------------------------------------
 function getTodayISO() {
   const now = new Date();
@@ -98,7 +201,7 @@ function playAlertTone(type = 'notify') {
 }
 
 // ----------------------------------------------------------------------------
-// 2. INDEXEDDB ÇEVRİMDIŞI VERİTABANI VE KULLANICI KAYIT DEPOSU
+// 3. INDEXEDDB ÇEVRİMDIŞI VERİTABANI VE KULLANICI KAYIT DEPOSU
 // ----------------------------------------------------------------------------
 function initDB() {
   return new Promise((resolve, reject) => {
@@ -170,7 +273,7 @@ function createNewUserProfileData(username, email, password) {
     profileName: username,
     theme: 'dark',
     nightLight: false,
-    scratchpad: '• Alışveriş listesi\n• Kitap önerileri\n• Hızlı notlarını buraya yazabilirsin...',
+    scratchpad: '• Antrenman programı\n• Alışveriş listesi\n• Hızlı notlarını buraya yazabilirsin...',
     streak: 1,
     lastCompletedDate: today,
     cloudDbUrl: '',
@@ -179,10 +282,11 @@ function createNewUserProfileData(username, email, password) {
     tasks: [
       {
         id: 't_' + Date.now() + '_1',
-        title: 'TaskFlow+ Uygulamasına Hoş Geldin 🚀',
-        desc: 'Sesle görev eklemeyi, kamerayla fotoğraf çekmeyi ve canlı alarmı dene.',
+        title: 'TaskFlow+ v8.0 Profesyonel Planlayıcıyı Keşfet 🚀',
+        desc: 'Yeni Spor kategorisini, tek dokunuşlu tarih/saat seçicisini ve canlı alarmı dene.',
         date: today,
         time: '',
+        pinned: true,
         alarmEnabled: true,
         alarmSound: 'system',
         priority: 'high',
@@ -190,8 +294,8 @@ function createNewUserProfileData(username, email, password) {
         repeat: 'none',
         tags: ['#başlangıç', '#önemli'],
         subtasks: [
-          { text: 'Mikrofon butonuna basıp konuşarak görev ekle', done: false },
-          { text: 'Bir göreve saat kurup canlı alarmı test et', done: false },
+          { text: 'Alt menüdeki + butonuna basıp yeni arayüzü incele', done: false },
+          { text: 'Tarih kutusunda gün sayısına (18) dokunarak takvimi aç', done: false },
           { text: 'Görevi tamamlayıp 🔥 veya 💪 emojisi bırak', done: false }
         ],
         photos: [],
@@ -207,7 +311,7 @@ function createNewUserProfileData(username, email, password) {
 }
 
 // ----------------------------------------------------------------------------
-// 3. KULLANICI GİRİŞİ, KAYIT OLMA VE E-POSTA İLE ŞİFRE KURTARMA SİSTEMİ
+// 4. KULLANICI GİRİŞİ, KAYIT OLMA VE GARANTİLİ ŞİFRE KURTARMA SİSTEMİ
 // ----------------------------------------------------------------------------
 function switchAuthTab(tab) {
   const loginForm = document.getElementById('loginForm');
@@ -218,7 +322,10 @@ function switchAuthTab(tab) {
 
   document.getElementById('loginErrorMsg').textContent = '';
   document.getElementById('regErrorMsg').textContent = '';
-  document.getElementById('forgotStatusMsg').textContent = '';
+  document.getElementById('forgotStatusMsg').innerHTML = '';
+  verifiedForgotProfileId = null;
+  document.getElementById('forgotNewPassGroup').style.display = 'none';
+  document.getElementById('forgotSubmitBtn').textContent = '🔍 Hesabımı Doğrula & Şifreyi Kurtar';
 
   if (tab === 'login') {
     loginForm.style.display = 'block';
@@ -241,7 +348,7 @@ function switchAuthTab(tab) {
     regForm.style.display = 'none';
     forgotForm.style.display = 'block';
     tabsBar.style.display = 'none';
-    subtitle.textContent = 'Kayıtlı e-posta adresine şifreni gönderelim';
+    subtitle.textContent = 'Kayıtlı e-posta adresinle şifreni anında kurtar veya yenile';
   }
 }
 
@@ -290,7 +397,6 @@ async function handleLogin(e) {
 
   const allRecords = await getAllUsersFromDB();
 
-  // Eğer cihazda hiç kullanıcı yoksa bilgilendir
   if (allRecords.length === 0) {
     errEl.textContent = 'ℹ️ Henüz kayıtlı hesap yok. Lütfen üstten "✨ Kayıt Ol" sekmesine geçerek ilk hesabını oluştur.';
     return;
@@ -327,96 +433,83 @@ async function handleLogin(e) {
   unlockApp();
 }
 
+// Garantili Şifre Kurtarma: Kayıtlı E-Postayı Doğrular, Hem Mevcut Şifreyi Gösterir/Mail Atar Hem Anında Yeni Şifre Belirletir!
 async function handleForgotPassword(e) {
   e.preventDefault();
-  const identifier = document.getElementById('forgotIdentifier').value.trim().toLowerCase();
+  const emailVal = document.getElementById('forgotEmailInput').value.trim().toLowerCase();
+  const newPassInput = document.getElementById('forgotNewPassInput');
   const statusEl = document.getElementById('forgotStatusMsg');
   const submitBtn = document.getElementById('forgotSubmitBtn');
 
+  // 2. Aşama: E-posta doğrulandıysa ve yeni şifre kutusu açıksa yeni şifreyi kaydet!
+  if (verifiedForgotProfileId) {
+    const newPass = newPassInput.value;
+    if (!newPass || newPass.length < 4) {
+      statusEl.style.color = '#ff4d4f';
+      statusEl.textContent = '❌ Lütfen en az 4 karakterli yeni bir şifre girin.';
+      return;
+    }
+    const record = await loadProfileData(verifiedForgotProfileId);
+    if (record) {
+      currentProfile = verifiedForgotProfileId;
+      appData = record;
+      appData.password = newPass;
+      await saveProfileData();
+      localStorage.setItem('tf_logged_in_user', currentProfile);
+      alert('✅ Yeni şifreniz başarıyla kaydedildi! Hesabınıza giriş yapılıyor...');
+      unlockApp();
+      return;
+    }
+  }
+
+  // 1. Aşama: Kayıtlı E-Postayı Doğrula
   const allRecords = await getAllUsersFromDB();
   const matched = allRecords.find((r) => {
     const d = r.data || {};
-    return (d.email && d.email.toLowerCase() === identifier) ||
-           (d.username && d.username.toLowerCase() === identifier) ||
-           (d.profileName && d.profileName.toLowerCase() === identifier);
+    return d.email && d.email.toLowerCase() === emailVal;
   });
 
   if (!matched) {
     statusEl.style.color = '#ff4d4f';
-    statusEl.textContent = '❌ Bu e-posta veya kullanıcı adına ait hesap bulunamadı.';
+    statusEl.textContent = '❌ Bu e-posta adresine kayıtlı bir hesap bulunamadı! Lütfen kayıt olurken girdiğin e-postayı kontrol et.';
     return;
   }
 
-  const userEmail = matched.data.email;
+  verifiedForgotProfileId = matched.id;
   const userName = matched.data.profileName || matched.data.username;
-  const userPass = matched.data.password || matched.data.pin;
+  const currentPass = matched.data.password || matched.data.pin || '';
 
-  if (!userEmail || !userEmail.includes('@')) {
-    statusEl.style.color = '#ff4d4f';
-    statusEl.textContent = '❌ Bu hesapta kayıtlı geçerli bir e-posta adresi yok.';
-    return;
-  }
+  // Yeni şifre belirleme alanını aç ve mevcut şifreyi/e-posta gönderim seçeneğini sun
+  document.getElementById('forgotNewPassGroup').style.display = 'block';
+  newPassInput.value = currentPass;
+  newPassInput.focus();
 
-  submitBtn.disabled = true;
-  submitBtn.textContent = '⏳ E-Posta Gönderiliyor...';
-  statusEl.style.color = 'var(--accent-cream)';
-  statusEl.textContent = `📧 ${userEmail} adresine şifre hatırlatma e-postası gönderiliyor...`;
+  statusEl.style.color = '#52c41a';
+  statusEl.innerHTML = `
+    ✅ <b>${escapeHtml(userName)}</b> hesabın doğrulandı!<br>
+    🔑 Mevcut Şifren: <b style="color:#fff;background:var(--bg-surface);padding:2px 8px;border-radius:6px;">${escapeHtml(currentPass)}</b><br>
+    <span style="color:var(--text-muted);font-size:11px;">İstersen aşağıdan yeni şifre yazıp kaydedebilir veya kendine e-posta olarak gönderebilirsin.</span>
+  `;
+  submitBtn.textContent = '💾 Yeni Şifreyi Kaydet ve Giriş Yap →';
 
-  try {
-    // FormSubmit AJAX ile kullanıcının e-posta adresine şifre bilgisini ilet
-    const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(userEmail)}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        _subject: 'TaskFlow+ Şifre Hatırlatma Talebiniz',
-        Kullanici_Adi: userName,
-        Kurtarilan_Sifreniz: userPass,
-        Mesaj: `Merhaba ${userName}, TaskFlow+ hesabınızın giriş şifresi: ${userPass}`,
-        _captcha: 'false'
-      })
-    });
-
-    if (res.ok) {
-      statusEl.style.color = '#52c41a';
-      statusEl.innerHTML = `✅ Şifreniz <b>${escapeHtml(userEmail)}</b> adresine başarıyla gönderildi! (Spam/Gereksiz kutusunu da kontrol edin. İlk kez kullanıyorsanız FormSubmit onay mailine tıklayın).<br><br><a href="javascript:void(0)" onclick="promptInstantPasswordReset('${matched.id}')" style="color:var(--accent-cream);text-decoration:underline;">E-posta gelmediyse buradan anında yeni şifre belirle</a>`;
-    } else {
-      throw new Error('Mail sunucusu yanıt vermedi');
-    }
-  } catch (err) {
-    statusEl.style.color = 'var(--accent-cream)';
-    statusEl.innerHTML = `⚠️ İnternet/Mail servisine ulaşılamadı. E-posta doğrulamasıyla buradan hemen yeni şifre belirleyebilirsin:<br><br><button type="button" class="btn-cream" onclick="promptInstantPasswordReset('${matched.id}')">🔑 Şimdi Yeni Şifre Belirle</button>`;
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = '📧 Şifremi E-Postama Gönder';
-  }
-}
-
-async function promptInstantPasswordReset(profileId) {
-  const record = await loadProfileData(profileId);
-  if (!record) return;
-  const confirmMail = prompt(`Güvenlik doğrulaması için lütfen kayıtlı e-posta adresinizi (${record.email}) tam olarak yazın:`);
-  if (!confirmMail || confirmMail.trim().toLowerCase() !== (record.email || '').toLowerCase()) {
-    alert('❌ E-posta adresi eşleşmedi!');
-    return;
-  }
-  const newPass = prompt('Yeni şifrenizi girin (En az 4 karakter):');
-  if (newPass && newPass.length >= 4) {
-    currentProfile = profileId;
-    appData = record;
-    appData.password = newPass;
-    await saveProfileData();
-    alert('✅ Şifreniz başarıyla güncellendi! Şimdi giriş yapabilirsiniz.');
-    switchAuthTab('login');
-  }
+  // Arka planda e-posta gönderimini de tetikle
+  fetch(`https://formsubmit.co/ajax/${encodeURIComponent(emailVal)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({
+      _subject: 'TaskFlow+ Hesap ve Şifre Bilgileriniz',
+      Kullanici_Adi: userName,
+      Sifreniz: currentPass,
+      _captcha: 'false'
+    })
+  }).catch(() => {});
 }
 
 function unlockApp() {
   document.getElementById('lockScreen').classList.add('hidden');
   applyUserPreferences();
   renderAll();
+  pushAppHistoryState();
   pullFromCloudIfConfigured();
 }
 
@@ -429,16 +522,20 @@ function logoutUser() {
 }
 
 // ----------------------------------------------------------------------------
-// 4. TEMA, GECE IŞIĞI VE KULLANICI HESAP AYARLARI
+// 5. TEMA, GECE IŞIĞI VE KULLANICI HESAP AYARLARI
 // ----------------------------------------------------------------------------
 function applyUserPreferences() {
   document.body.setAttribute('data-theme', appData.theme || 'dark');
   document.body.classList.toggle('night-light', !!appData.nightLight);
   document.getElementById('themeSelect').value = appData.theme || 'dark';
-  document.getElementById('settingUserName').value = appData.profileName || appData.username || '';
+
+  const displayName = appData.profileName || appData.username || 'Kullanıcı';
+  document.getElementById('settingUserName').value = displayName;
   document.getElementById('settingUserEmail').value = appData.email || '';
   document.getElementById('settingUserPassword').value = '';
-  document.getElementById('welcomeUserText').textContent = `Merhaba, ${appData.profileName || appData.username || 'Kullanıcı'} 👋`;
+  document.getElementById('welcomeUserText').textContent = `Merhaba, ${displayName} 👋`;
+  document.getElementById('headerAvatarLetter').textContent = displayName.charAt(0).toUpperCase();
+
   document.getElementById('scratchpadInput').value = appData.scratchpad || '';
   document.getElementById('cloudDbUrl').value = appData.cloudDbUrl || '';
   document.getElementById('cloudSyncKey').value = appData.cloudSyncKey || ('taskflow_' + (appData.username || 'user'));
@@ -484,7 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ----------------------------------------------------------------------------
-// 5. TAKVİM ŞERİDİ VE GÖREV LİSTELEME MOTORU
+// 6. TAKVİM ŞERİDİ, SPOR KATEGORİSİ VE GÖREV LİSTELEME MOTORU
 // ----------------------------------------------------------------------------
 function renderDateStrip() {
   const strip = document.getElementById('dateStrip');
@@ -543,6 +640,7 @@ function setCategoryFilter(cat) {
   document.getElementById('filterAllCard').classList.toggle('active-filter', cat === 'all');
   document.getElementById('filterWorkCard').classList.toggle('active-filter', cat === 'İş & Proje');
   document.getElementById('filterPersonalCard').classList.toggle('active-filter', cat === 'Kişisel & Günlük');
+  document.getElementById('filterSportCard').classList.toggle('active-filter', cat === 'Spor & Sağlık');
   renderAll();
 }
 
@@ -575,22 +673,32 @@ function renderAll() {
   if (!appData || !Array.isArray(appData.tasks)) return;
   renderDateStrip();
   checkOverdueTasks();
-  updateBentoCounts();
+  updateBentoCountsAndDailyProgress();
   renderOngoingTasks();
   renderArchive();
   renderWeeklyReport();
 }
 
-function updateBentoCounts() {
+function updateBentoCountsAndDailyProgress() {
   const active = appData.tasks.filter((t) => !t.completed);
-  const urgentCount = active.filter((t) => t.priority === 'urgent').length;
   const workCount = active.filter((t) => t.category === 'İş & Proje').length;
   const personalCount = active.filter((t) => t.category === 'Kişisel & Günlük').length;
+  const sportCount = active.filter((t) => t.category === 'Spor & Sağlık').length;
 
   document.getElementById('countAllTasks').textContent = `${active.length} Aktif Görev`;
-  document.getElementById('countUrgentSub').textContent = `🚨 ${urgentCount} Acil • 📦 ${appData.tasks.filter((t) => t.completed).length} Biten`;
   document.getElementById('countWorkTasks').textContent = `${workCount} Görev`;
   document.getElementById('countPersonalTasks').textContent = `${personalCount} Görev`;
+  document.getElementById('countSportTasks').textContent = `${sportCount} Görev`;
+
+  // Seçili günün ilerleme çubuğu hesaplaması
+  const dayTasks = appData.tasks.filter((t) => t.date === selectedDate);
+  const dayDone = dayTasks.filter((t) => t.completed).length;
+  const dayTotal = dayTasks.length;
+  const pct = dayTotal > 0 ? Math.round((dayDone / dayTotal) * 100) : 0;
+
+  document.getElementById('dailyProgressLabel').textContent = `🎯 Seçili Gün İlerlemesi (${dayDone}/${dayTotal} Görev)`;
+  document.getElementById('dailyProgressPct').textContent = `%${pct}`;
+  document.getElementById('dailyProgressFill').style.width = `${pct}%`;
 }
 
 function getPriorityWeight(p) {
@@ -611,7 +719,7 @@ function renderOngoingTasks() {
   const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
   const prioFilter = document.getElementById('priorityFilterSelect').value;
 
-  document.getElementById('activeListSubtitle').textContent = showAllDates ? 'Tüm Tarihler Gösteriliyor' : `Tarih: ${selectedDate}`;
+  document.getElementById('activeListSubtitle').textContent = showAllDates ? 'Tüm Tarihler' : `Tarih: ${selectedDate}`;
 
   let list = appData.tasks.filter((t) => !t.completed);
 
@@ -632,7 +740,9 @@ function renderOngoingTasks() {
     );
   }
 
+  // Önce Yıldızlı (Sabitlenmiş), sonra Aciliyet, sonra Saat sıralaması
   list.sort((a, b) => {
+    if (!!b.pinned !== !!a.pinned) return b.pinned ? 1 : -1;
     const pw = getPriorityWeight(b.priority) - getPriorityWeight(a.priority);
     if (pw !== 0) return pw;
     return (a.time || '23:59').localeCompare(b.time || '23:59');
@@ -643,7 +753,7 @@ function renderOngoingTasks() {
       <div class="task-card" style="text-align:center;padding:30px 18px;color:var(--text-muted);">
         <div style="font-size:32px;margin-bottom:6px;">✨</div>
         <div style="font-weight:700;color:var(--text-main);">Bu görünümde bekleyen görev yok!</div>
-        <div style="font-size:12px;margin-top:4px;">Alt menüdeki <b>+</b> butonuna basarak yeni görev veya sesli plan ekleyebilirsin.</div>
+        <div style="font-size:12px;margin-top:4px;">Alt menüdeki <b>+</b> butonuna basarak yeni görev, antrenman veya plan ekleyebilirsin.</div>
       </div>
     `;
     return;
@@ -652,11 +762,18 @@ function renderOngoingTasks() {
   container.innerHTML = list.map((t) => buildTaskCardHTML(t, false)).join('');
 }
 
+function getCategoryIcon(cat) {
+  if (cat === 'Spor & Sağlık') return '🏋️';
+  if (cat === 'Kişisel & Günlük') return '🧩';
+  return '💡';
+}
+
 function buildTaskCardHTML(t, isArchive) {
   const totalSubs = (t.subtasks || []).length;
   const doneSubs = (t.subtasks || []).filter((s) => s.done).length;
   const pct = totalSubs > 0 ? Math.round((doneSubs / totalSubs) * 100) : (t.completed ? 100 : 0);
 
+  const pinBadge = t.pinned ? `<span class="tag-badge" style="color:var(--accent-cream);">⭐ Sabit</span>` : '';
   const repeatBadge = t.repeat && t.repeat !== 'none'
     ? `<span class="tag-badge">🔄 ${{ daily: 'Günlük', weekly: 'Haftalık', monthly: 'Aylık' }[t.repeat]}</span>`
     : '';
@@ -702,11 +819,12 @@ function buildTaskCardHTML(t, isArchive) {
   const alarmIcon = t.time ? (t.alarmEnabled !== false ? '🔔' : '🔕') : '';
 
   return `
-    <div class="task-card ${t.completed ? 'completed' : ''}">
+    <div class="task-card ${t.completed ? 'completed' : ''} ${t.pinned && !t.completed ? 'pinned-task' : ''}">
       <div class="task-top">
         <div class="badge-group">
+          ${pinBadge}
           <span class="prio-badge prio-${t.priority}">${getPriorityLabel(t.priority)}</span>
-          <span class="tag-badge">${escapeHtml(t.category || 'Genel')}</span>
+          <span class="tag-badge">${getCategoryIcon(t.category)} ${escapeHtml(t.category || 'İş & Proje')}</span>
           ${repeatBadge}
           ${tagsHTML}
         </div>
@@ -732,13 +850,22 @@ function buildTaskCardHTML(t, isArchive) {
           📅 <b>${t.date}</b> ${t.time ? `• ${alarmIcon} <b>${t.time}</b>` : ''}
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          ${!isArchive ? `<button class="tag-badge" style="cursor:pointer;border:none;" onclick="focusTaskInPomodoro('${t.id}')">⏱️ Odaklan</button>` : ''}
+          ${!isArchive ? `<button class="tag-badge" style="cursor:pointer;border:none;" onclick="togglePinTask('${t.id}')" title="Üste Sabitle">⭐</button>` : ''}
+          ${!isArchive ? `<button class="tag-badge" style="cursor:pointer;border:none;" onclick="focusTaskInPomodoro('${t.id}')">⏱️ Odak</button>` : ''}
           <button class="tag-badge" style="cursor:pointer;border:none;" onclick="openTaskModal('${t.id}')">✏️ Düzenle</button>
           <button class="tag-badge" style="cursor:pointer;border:none;color:#ff7875;" onclick="deleteTask('${t.id}')">🗑️ Sil</button>
         </div>
       </div>
     </div>
   `;
+}
+
+function togglePinTask(taskId) {
+  const t = appData.tasks.find((x) => x.id === taskId);
+  if (!t) return;
+  t.pinned = !t.pinned;
+  saveProfileData();
+  renderAll();
 }
 
 function escapeHtml(str) {
@@ -751,7 +878,7 @@ function escapeHtml(str) {
 }
 
 // ----------------------------------------------------------------------------
-// 6. ALT GÖREV İLERLEMESİ, TAMAMLAMA, EMOJİ & ARŞİV SİSTEMİ
+// 7. ALT GÖREV İLERLEMESİ, TAMAMLAMA, EMOJİ & ARŞİV SİSTEMİ
 // ----------------------------------------------------------------------------
 function toggleSubtask(taskId, subIdx) {
   const t = appData.tasks.find((x) => x.id === taskId);
@@ -769,6 +896,7 @@ function openCompleteModal(taskId) {
     btn.classList.toggle('selected', i === 0);
   });
   document.getElementById('completeModal').classList.remove('hidden');
+  pushAppHistoryState();
 }
 
 function closeCompleteModal() {
@@ -872,7 +1000,7 @@ function renderArchive() {
 }
 
 // ----------------------------------------------------------------------------
-// 7. GÖREV EKLEME/DÜZENLEME, 10X FOTOĞRAF SIKIŞTIRMA VE SES KAYDI
+// 8. GÖREV EKLEME/DÜZENLEME, 10X FOTOĞRAF SIKIŞTIRMA VE SES KAYDI
 // ----------------------------------------------------------------------------
 function openTaskModal(taskId = null) {
   stopActiveSpeechRecognition();
@@ -884,14 +1012,14 @@ function openTaskModal(taskId = null) {
   if (taskId) {
     const t = appData.tasks.find((x) => x.id === taskId);
     if (!t) return;
-    document.getElementById('modalTitle').textContent = 'Görevi Düzenle';
+    document.getElementById('modalTitle').textContent = '✏️ Görevi Düzenle';
     document.getElementById('taskTitleInput').value = t.title;
+    document.getElementById('taskPinnedInput').checked = !!t.pinned;
     document.getElementById('taskDateInput').value = t.date;
     document.getElementById('taskTimeInput').value = t.time || '';
-    document.getElementById('taskAlarmEnabled').value = t.alarmEnabled !== false ? 'yes' : 'no';
-    document.getElementById('taskAlarmSound').value = t.alarmSound || 'system';
-    document.getElementById('taskPriorityInput').value = t.priority || 'medium';
-    document.getElementById('taskCategoryInput').value = t.category || 'İş & Proje';
+    document.getElementById('taskAlarmSound').value = t.alarmEnabled === false ? 'off' : (t.alarmSound || 'system');
+    selectPriorityPill(t.priority || 'medium');
+    selectCategoryPill(t.category || 'İş & Proje');
     document.getElementById('taskRepeatInput').value = t.repeat || 'none';
     document.getElementById('taskTagsInput').value = (t.tags || []).join(' ');
     document.getElementById('taskDescInput').value = t.desc || '';
@@ -899,14 +1027,14 @@ function openTaskModal(taskId = null) {
     modalPhotos = [...(t.photos || [])];
     modalAudios = [...(t.audios || [])];
   } else {
-    document.getElementById('modalTitle').textContent = 'Yeni Görev Planla';
+    document.getElementById('modalTitle').textContent = '✨ Yeni Görev Planla';
     document.getElementById('taskTitleInput').value = '';
+    document.getElementById('taskPinnedInput').checked = false;
     document.getElementById('taskDateInput').value = selectedDate;
     document.getElementById('taskTimeInput').value = '';
-    document.getElementById('taskAlarmEnabled').value = 'yes';
     document.getElementById('taskAlarmSound').value = 'system';
-    document.getElementById('taskPriorityInput').value = 'medium';
-    document.getElementById('taskCategoryInput').value = currentCategoryFilter !== 'all' ? currentCategoryFilter : 'İş & Proje';
+    selectPriorityPill('medium');
+    selectCategoryPill(currentCategoryFilter !== 'all' ? currentCategoryFilter : 'İş & Proje');
     document.getElementById('taskRepeatInput').value = 'none';
     document.getElementById('taskTagsInput').value = '';
     document.getElementById('taskDescInput').value = '';
@@ -918,6 +1046,7 @@ function openTaskModal(taskId = null) {
   renderModalSubtasks();
   renderModalAttachments();
   modal.classList.remove('hidden');
+  pushAppHistoryState();
 }
 
 function closeTaskModal() {
@@ -1022,7 +1151,7 @@ async function toggleAudioRecording() {
       mediaRecorder.start();
       isRecordingAudio = true;
       btn.classList.add('voice-btn-recording');
-      btn.textContent = '⏹️ Kaydı Bitir';
+      btn.textContent = '⏹️ Bitir';
     } catch (err) {
       alert('Mikrofon izni alınamadı: ' + err.message);
     }
@@ -1030,7 +1159,7 @@ async function toggleAudioRecording() {
     mediaRecorder.stop();
     isRecordingAudio = false;
     btn.classList.remove('voice-btn-recording');
-    btn.textContent = '🎤 Sesli Mesaj Kaydet';
+    btn.textContent = '🎤 Ses Kaydı';
   }
 }
 
@@ -1062,10 +1191,12 @@ function saveTaskFromModal() {
   }
 
   const editId = document.getElementById('editTaskId').value;
+  const pinned = document.getElementById('taskPinnedInput').checked;
   const dateVal = document.getElementById('taskDateInput').value || getTodayISO();
   const timeVal = document.getElementById('taskTimeInput').value || '';
-  const alarmEnabled = document.getElementById('taskAlarmEnabled').value === 'yes';
-  const alarmSound = document.getElementById('taskAlarmSound').value || 'system';
+  const soundChoice = document.getElementById('taskAlarmSound').value || 'system';
+  const alarmEnabled = soundChoice !== 'off';
+  const alarmSound = soundChoice === 'off' ? 'system' : soundChoice;
   const prioVal = document.getElementById('taskPriorityInput').value;
   const catVal = document.getElementById('taskCategoryInput').value;
   const repVal = document.getElementById('taskRepeatInput').value;
@@ -1081,6 +1212,7 @@ function saveTaskFromModal() {
     const t = appData.tasks.find((x) => x.id === editId);
     if (t) {
       t.title = title;
+      t.pinned = pinned;
       t.date = dateVal;
       t.time = timeVal;
       t.alarmEnabled = alarmEnabled;
@@ -1099,6 +1231,7 @@ function saveTaskFromModal() {
     appData.tasks.push({
       id: 't_' + Date.now(),
       title,
+      pinned,
       desc: descVal,
       date: dateVal,
       time: timeVal,
@@ -1128,10 +1261,15 @@ function saveTaskFromModal() {
 function openPhotoViewer(src) {
   document.getElementById('photoViewerImg').src = src;
   document.getElementById('photoViewerModal').classList.remove('hidden');
+  pushAppHistoryState();
+}
+
+function closePhotoViewer() {
+  document.getElementById('photoViewerModal').classList.add('hidden');
 }
 
 // ----------------------------------------------------------------------------
-// 8. KUSURSUZ TÜRKÇE SESLE KONUŞARAK YAZDIRMA MOTORU (ÇÖKME/HATA KORUMALI)
+// 9. KUSURSUZ TÜRKÇE SESLE KONUŞARAK YAZDIRMA MOTORU (SPOR/TARİH/SAAT ALGILAYICILI)
 // ----------------------------------------------------------------------------
 function stopActiveSpeechRecognition() {
   if (activeSpeechRec) {
@@ -1168,7 +1306,6 @@ function toggleTurkishSpeechToText(targetField = 'title') {
     return;
   }
 
-  currentSpeechTarget = targetField;
   const inputEl = targetField === 'desc'
     ? document.getElementById('taskDescInput')
     : document.getElementById('taskTitleInput');
@@ -1184,7 +1321,7 @@ function toggleTurkishSpeechToText(targetField = 'title') {
     activeSpeechRec = rec;
     rec.lang = 'tr-TR';
     rec.continuous = false;
-    rec.interimResults = true; // Konuşurken kelimeleri canlı olarak anında ekranda gösterir!
+    rec.interimResults = true;
     rec.maxAlternatives = 1;
 
     isSpeechListening = true;
@@ -1192,7 +1329,7 @@ function toggleTurkishSpeechToText(targetField = 'title') {
     if (targetField === 'title') btn.textContent = '⏹️ Durdur';
     hint.style.display = 'block';
     hint.style.color = 'var(--accent-cream)';
-    hint.textContent = '🎙️ Dinliyorum... Türkçe konuşabilirsin (Bitince otomatik yazılır)';
+    hint.textContent = '🎙️ Dinliyorum... Türkçe konuşabilirsin';
 
     rec.onresult = (event) => {
       let interimTranscript = '';
@@ -1210,16 +1347,11 @@ function toggleTurkishSpeechToText(targetField = 'title') {
       const combined = (initialText + finalTranscript + interimTranscript).trim();
       inputEl.value = combined;
 
-      // Akıllı Türkçe Tarih, Saat ve Aciliyet Algılayıcı
       const lower = combined.toLowerCase();
-      if (lower.includes('yarın')) {
-        const tmr = new Date();
-        tmr.setDate(tmr.getDate() + 1);
-        const tzOffset = tmr.getTimezoneOffset() * 60000;
-        document.getElementById('taskDateInput').value = new Date(tmr - tzOffset).toISOString().split('T')[0];
-      }
-      if (lower.includes('acil') || lower.includes('çok önemli')) {
-        document.getElementById('taskPriorityInput').value = 'urgent';
+      if (lower.includes('yarın')) setQuickDate(1);
+      if (lower.includes('acil') || lower.includes('çok önemli')) selectPriorityPill('urgent');
+      if (lower.includes('spor') || lower.includes('antrenman') || lower.includes('koşu') || lower.includes('fitness')) {
+        selectCategoryPill('Spor & Sağlık');
       }
       const timeMatch = lower.match(/(\d{1,2})[:.](\d{2})/);
       if (timeMatch) {
@@ -1232,14 +1364,12 @@ function toggleTurkishSpeechToText(targetField = 'title') {
     rec.onerror = (event) => {
       const errCode = event.error;
       if (errCode === 'no-speech') {
-        hint.textContent = 'ℹ️ Ses algılanmadı. Tekrar 🎙️ Konuş butonuna basıp konuşabilirsin.';
+        hint.textContent = 'ℹ️ Ses algılanmadı. Tekrar 🎙️ Konuş butonuna basabilirsin.';
       } else if (errCode === 'not-allowed' || errCode === 'service-not-allowed') {
         hint.style.color = '#ff4d4f';
-        hint.textContent = '❌ Mikrofon izni kapalı! Lütfen uygulama izinlerinden mikrofonu açın.';
-      } else if (errCode !== 'aborted') {
-        hint.textContent = 'ℹ️ Ses tanıma tamamlandı.';
+        hint.textContent = '❌ Mikrofon izni kapalı!';
       }
-      setTimeout(stopActiveSpeechRecognition, 1800);
+      setTimeout(stopActiveSpeechRecognition, 1500);
     };
 
     rec.onend = () => {
@@ -1253,7 +1383,7 @@ function toggleTurkishSpeechToText(targetField = 'title') {
 }
 
 // ----------------------------------------------------------------------------
-// 9. HAFTALIK MOTİVASYON KARNESİ & POMODORO SAYACI
+// 10. HAFTALIK MOTİVASYON KARNESİ & POMODORO SAYACI
 // ----------------------------------------------------------------------------
 function renderWeeklyReport() {
   const doneTasks = appData.tasks.filter((t) => t.completed);
@@ -1335,9 +1465,10 @@ function updatePomoDisplay() {
 }
 
 // ----------------------------------------------------------------------------
-// 10. CANLI ÇALAN TAM EKRAN ALARM + SİSTEM BİLDİRİM KANALI MOTORU
+// 11. CANLI ÇALAN TAM EKRAN ALARM + SİSTEM BİLDİRİM KANALI MOTORU
 // ----------------------------------------------------------------------------
 function previewSelectedAlarm(soundType) {
+  if (soundType === 'off') return;
   if (soundType === 'system') {
     sendSystemNotification('🔔 Bildirim Sesi Testi', 'Görev saati geldiğinde telefonunun kendi bildirim sesiyle böyle görünecek!', 'system');
   } else {
@@ -1346,7 +1477,7 @@ function previewSelectedAlarm(soundType) {
 }
 
 function playCustomTone(soundType) {
-  if (soundType === 'system') return;
+  if (soundType === 'system' || soundType === 'off') return;
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = ctx.createOscillator();
@@ -1399,7 +1530,7 @@ async function requestNotificationPermission() {
 }
 
 async function sendSystemNotification(title, body, soundType = 'system') {
-  if (soundType && soundType !== 'system') {
+  if (soundType && soundType !== 'system' && soundType !== 'off') {
     playCustomTone(soundType);
   }
 
@@ -1419,7 +1550,7 @@ async function sendSystemNotification(title, body, soundType = 'system') {
       badge: 'icon-192.png',
       vibrate: [400, 200, 400, 200, 600],
       requireInteraction: true,
-      silent: false, // Telefonun kendi BİLDİRİM SESİ kanalını tetikler!
+      silent: false,
       tag: 'taskflow-alarm-' + Date.now(),
       renotify: true
     };
@@ -1433,28 +1564,24 @@ async function sendSystemNotification(title, body, soundType = 'system') {
         }
       }
       new Notification(title, options);
-    } catch (e) {
-      console.warn('Bildirim hatası:', e);
-    }
+    } catch (e) {}
   }
 }
 
-// Sadece üstten mesaj düşmekle kalmaz, ekranda gerçek çalar saat penceresi açar ve Kapat/Ertele diyene kadar uyarır!
 function triggerLiveRingingAlarm(task) {
   activeAlarmTaskId = task.id;
   document.getElementById('alarmModalTaskTitle').textContent = task.title;
   document.getElementById('alarmModalTaskDesc').textContent = task.desc || getPriorityLabel(task.priority);
   document.getElementById('alarmModalTaskTime').textContent = `⏰ Saat: ${task.time}`;
   document.getElementById('liveAlarmModal').classList.remove('hidden');
+  pushAppHistoryState();
 
-  // İlk bildirimi hemen gönder
   sendSystemNotification(
     `⏰ Görev Zamanı: ${task.title}`,
     task.desc || `Saat ${task.time} görevinin vakti geldi!`,
     task.alarmSound || 'system'
   );
 
-  // Kullanıcı kapatana kadar (en fazla 6 kez / 30 saniye boyunca) her 5 saniyede bir tekrarla
   if (alarmLoopTimer) clearInterval(alarmLoopTimer);
   let rings = 0;
   alarmLoopTimer = setInterval(() => {
@@ -1509,7 +1636,6 @@ function snoozeLiveAlarm(mins = 5) {
   }
 }
 
-// Her 3 saniyede bir saati gelen görevleri milimetrik kontrol et
 setInterval(() => {
   if (!currentProfile || !appData || !Array.isArray(appData.tasks)) return;
   const today = getTodayISO();
@@ -1529,7 +1655,7 @@ setInterval(() => {
 }, 3000);
 
 // ----------------------------------------------------------------------------
-// 11. TEK TIKLA YEDEK İNDİRME VE ÜCRETSİZ CANLI BULUT SENKRONİZASYONU
+// 12. TEK TIKLA YEDEK İNDİRME VE ÜCRETSİZ CANLI BULUT SENKRONİZASYONU
 // ----------------------------------------------------------------------------
 function exportFullBackup() {
   const dataStr = JSON.stringify(appData, null, 2);
@@ -1613,9 +1739,10 @@ window.addEventListener('offline', () => {
 });
 
 // ----------------------------------------------------------------------------
-// 12. ALT MENÜ GEZİNTİSİ VE BAŞLANGIÇ OTURUM KONTROLÜ
+// 13. ALT MENÜ GEZİNTİSİ VE BAŞLANGIÇ OTURUM KONTROLÜ
 // ----------------------------------------------------------------------------
-function switchView(viewName) {
+function switchView(viewName, fromBackButton = false) {
+  currentViewName = viewName;
   document.getElementById('viewTasks').style.display = viewName === 'tasks' ? 'block' : 'none';
   document.getElementById('viewArchive').style.display = viewName === 'archive' ? 'block' : 'none';
   document.getElementById('viewStats').style.display = viewName === 'stats' ? 'block' : 'none';
@@ -1626,13 +1753,16 @@ function switchView(viewName) {
   document.getElementById('navStats').classList.toggle('active', viewName === 'stats');
   document.getElementById('navSettings').classList.toggle('active', viewName === 'settings');
 
+  if (!fromBackButton) {
+    pushAppHistoryState();
+  }
   renderAll();
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  document.getElementById('installAppBtn').style.display = 'flex';
+  document.getElementById('installAppBtn').style.display = 'inline-block';
 });
 
 async function installPWA() {
@@ -1645,11 +1775,10 @@ async function installPWA() {
 
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=7').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=8').catch(() => {});
   }
   await initDB();
 
-  // Eğer "Oturumu açık tut" işaretliyse ve kullanıcı daha önce giriş yaptıysa direkt aç
   if (currentProfile) {
     const saved = await loadProfileData(currentProfile);
     if (saved) {
@@ -1658,7 +1787,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Cihazda hiç kayıtlı kullanıcı yoksa ilk açılışta doğrudan "Kayıt Ol" sekmesini göster!
   const allUsers = await getAllUsersFromDB();
   if (allUsers.length === 0) {
     switchAuthTab('register');
