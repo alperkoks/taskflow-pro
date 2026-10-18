@@ -2,7 +2,7 @@
       "relation": ["delegate_permission/common.handle_all_urls"],
       "target": {
         "namespace": "android_app",
-        "package_name": "com.alperkoks.taskflowpro",
-        "sha256_cert_fingerprints": ["EE:A6:81:73:BA:CC:96:E1:CA:72:4F:97:FD:30:A5:48:42:2E:14:8A:0C:03:7C:AE:E9:E8:68:C6:31:1D:23:D2"]
+        "package_name": "com.alperkoks.taskflowplus",
+        "sha256_cert_fingerprints": ["BA:E3:17:5D:96:5E:40:63:1E:19:E8:40:B2:C5:4A:FE:48:6D:1A:A8:E4:C9:0B:05:7B:FC:C1:8C:86:88:55:5B"]
       }
     }]
