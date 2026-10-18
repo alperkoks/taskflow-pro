@@ -111,13 +111,15 @@
         </div>
       </div>
 
-      <!-- HIZLI NOT / KARALAMA DEFTERİ (SCRATCHPAD) -->
+      <!-- HIZLI NOT / KARALAMA DEFTERİ (AÇILIR/KAPANIR KOMPAKT) -->
       <div class="scratchpad-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-weight:800;font-size:14px;">⚡ Hızlı Karalama Defteri</span>
-          <span style="font-size:11px;color:var(--text-muted);" id="scratchSavedLabel">Otomatik kaydedilir</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="const sp=document.getElementById('scratchpadBody');sp.style.display=sp.style.display==='none'?'block':'none';">
+          <span style="font-weight:800;font-size:13px;">⚡ Hızlı Karalama Defteri (Aç/Kapat)</span>
+          <span style="font-size:11px;color:var(--accent-cream);" id="scratchSavedLabel">Göster ▾</span>
         </div>
-        <textarea id="scratchpadInput" class="scratchpad-area" placeholder="Tarihi belli olmayan fikirler, market listesi veya anlık notlarını buraya karala..."></textarea>
+        <div id="scratchpadBody" style="display:none;">
+          <textarea id="scratchpadInput" class="scratchpad-area" placeholder="Tarihi belli olmayan fikirler, market listesi veya anlık notlarını buraya karala..."></textarea>
+        </div>
       </div>
     </aside>
 
