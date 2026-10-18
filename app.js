@@ -1,10 +1,12 @@
 // ============================================================================
-// TASKFLOW+ v8.0 EXECUTIVE EDITION
-// - Spor & Sağlık Kategorisi (4'lü Bento + Tek Dokunuşlu Seçiciler)
-// - Android Geri Tuşu (Back Button) Akıllı Navigasyon Koruması (Uygulamadan Atmaz!)
-// - Tarih ve Saat Kutularının Tamamına Tıklayınca Anında Açılan Picker + Hızlı Çipler
-// - Garantili Şifremi Unuttum (Anında Sıfırlama + E-Posta Gönderimi)
-// - Sağ Üst İkon Kalabalığı Kaldırıldı -> Ayarlar'a Taşındı
+// TASKFLOW+ v9.0 ULTIMATE EDITION
+// - 4 Ana Kategori: İş & Proje | Rutin İşler | Spor ve Sağlık | Kişisel Gelişim
+// - Apayrı 🎯 HEDEFLER Sayfası (Uzun Soluklu, Deadline Olmayan Vizyon & Kilometre Taşları)
+// - 📊 Günlük İlerleme Halkası (%75 Tamamlandı - 3/4 Görev)
+// - 💧 Günlük Su & Alışkanlık Takipçisi (0 / 8 Bardak)
+// - 🗓️ Aylık Tam Takvim (30 Günlük Grid) Görünümü + Yatay Gün Şeridi
+// - 📍 Görevlere Google Maps Konumu / GPS ve 🔗 Web Linki Ekleme
+// - 📱 Android Geri Tuşu Koruması + Tam Kutu Tıklanabilir Tarih/Saat + Canlı Alarm
 // ============================================================================
 
 const DB_NAME = 'TaskFlowProDB';
@@ -24,18 +26,24 @@ let appData = {
   scratchpad: '',
   streak: 1,
   lastCompletedDate: '',
+  waterDate: '',
+  waterCount: 0,
   cloudDbUrl: '',
   cloudSyncKey: '',
-  tasks: []
+  tasks: [],
+  goals: []
 };
 
 let selectedDate = getTodayISO();
 let showAllDates = false;
+let showMonthGrid = false;
+let currentCalendarMonth = new Date();
 let currentCategoryFilter = 'all';
 
 let modalSubtasks = [];
 let modalPhotos = [];
 let modalAudios = [];
+let modalGoalSteps = [];
 let completingTaskId = null;
 let selectedCompletionEmoji = '✅';
 
@@ -57,7 +65,7 @@ let deferredInstallPrompt = null;
 let verifiedForgotProfileId = null;
 
 // ----------------------------------------------------------------------------
-// 1. ANDROID GERİ TUŞU (BACK BUTTON) KORUMASI VE TAM KUTU TARİH/SAAT AÇICI
+// 1. ANDROID GERİ TUŞU KORUMASI VE TAM KUTU TARİH/SAAT SEÇİCİ
 // ----------------------------------------------------------------------------
 function pushAppHistoryState() {
   try {
@@ -65,9 +73,9 @@ function pushAppHistoryState() {
   } catch (e) {}
 }
 
-window.addEventListener('popstate', (event) => {
-  // 1. Açık bir modal (Görev Ekle, Tamamla, Fotoğraf, Alarm) varsa önce onu kapat!
+window.addEventListener('popstate', () => {
   const taskModal = document.getElementById('taskModal');
+  const goalModal = document.getElementById('goalModal');
   const completeModal = document.getElementById('completeModal');
   const photoModal = document.getElementById('photoViewerModal');
   const alarmModal = document.getElementById('liveAlarmModal');
@@ -87,32 +95,35 @@ window.addEventListener('popstate', (event) => {
     pushAppHistoryState();
     return;
   }
+  if (goalModal && !goalModal.classList.contains('hidden')) {
+    closeGoalModal();
+    pushAppHistoryState();
+    return;
+  }
   if (taskModal && !taskModal.classList.contains('hidden')) {
     closeTaskModal();
     pushAppHistoryState();
     return;
   }
 
-  // 2. Eğer Arşiv, Odak veya Ayarlar sekmesindeyse, uygulamadan çıkmak yerine Ana Görevler ekranına dön!
   if (currentViewName !== 'tasks') {
     switchView('tasks', true);
     pushAppHistoryState();
     return;
   }
 
-  // 3. Eğer kategori filtresi veya arama açıksa onu sıfırla ve ana ekranda kal!
-  if (currentCategoryFilter !== 'all' || showAllDates) {
+  if (currentCategoryFilter !== 'all' || showAllDates || showMonthGrid) {
     showAllDates = false;
+    showMonthGrid = false;
+    document.getElementById('monthGridContainer').style.display = 'none';
     setCategoryFilter('all');
     pushAppHistoryState();
     return;
   }
 
-  // Ana ekranda da yanlışlıkla tek basışta çıkmasın diye state'i koru
   pushAppHistoryState();
 });
 
-// Tarih veya Saat kutusunun neresine (18'e, 10'a, boşluğa) dokunulursa dokunulsun direkt Takvim/Saat çarkını açar!
 function openNativePicker(inputId) {
   const inp = document.getElementById(inputId);
   if (!inp) return;
@@ -163,12 +174,42 @@ function selectPriorityPill(prioVal) {
 }
 
 // ----------------------------------------------------------------------------
-// 2. YARDIMCI TARİH VE SES FONKSİYONLARI
+// 2. YARDIMCI TARİH, SU TAKİBİ VE SES FONKSİYONLARI
 // ----------------------------------------------------------------------------
 function getTodayISO() {
   const now = new Date();
   const tzOffset = now.getTimezoneOffset() * 60000;
   return new Date(now - tzOffset).toISOString().split('T')[0];
+}
+
+function checkAndRenderWaterTracker() {
+  const today = getTodayISO();
+  if (appData.waterDate !== today) {
+    appData.waterDate = today;
+    appData.waterCount = 0;
+  }
+  const cnt = appData.waterCount || 0;
+  document.getElementById('waterCountText').textContent = `${cnt} / 8 Bardak`;
+  let drops = '';
+  for (let i = 0; i < 8; i++) {
+    drops += i < cnt ? '💧' : '⚪';
+  }
+  if (cnt > 8) drops += ` +${cnt - 8}💧`;
+  document.getElementById('waterDropsDisplay').textContent = drops;
+}
+
+function changeWaterCount(delta) {
+  const today = getTodayISO();
+  if (appData.waterDate !== today) {
+    appData.waterDate = today;
+    appData.waterCount = 0;
+  }
+  appData.waterCount = Math.max(0, (appData.waterCount || 0) + delta);
+  if (delta > 0 && appData.waterCount === 8) {
+    playAlertTone('success');
+  }
+  checkAndRenderWaterTracker();
+  saveProfileData();
 }
 
 function playAlertTone(type = 'notify') {
@@ -240,6 +281,14 @@ async function loadProfileData(profileId) {
     req.onsuccess = () => {
       if (req.result && req.result.data) {
         appData = req.result.data;
+        if (!Array.isArray(appData.goals)) {
+          appData.goals = createDefaultGoals();
+        }
+        // Eski kategori isimlerini yeni 4 başlığa uyarla
+        (appData.tasks || []).forEach((t) => {
+          if (t.category === 'Kişisel & Günlük') t.category = 'Rutin İşler';
+          if (t.category === 'Spor & Sağlık') t.category = 'Spor ve Sağlık';
+        });
         resolve(appData);
       } else {
         resolve(null);
@@ -264,6 +313,36 @@ async function saveProfileData(skipCloud = false) {
   });
 }
 
+function createDefaultGoals() {
+  return [
+    {
+      id: 'g_' + Date.now() + '_1',
+      title: 'İngilizce Seviyesini İleri Düzeye (C1) Çıkar 🌍',
+      category: 'Kişisel Gelişim',
+      desc: 'Her gün düzenli kelime ve konuşma pratiği yaparak akıcı konuşma hedefine ulaşmak.',
+      progress: 35,
+      achieved: false,
+      steps: [
+        { text: 'B2 kelime listesini tamamla', done: true },
+        { text: 'Haftada 3 gün yabancı dizi/makale çalışması yap', done: false },
+        { text: '20 saat konuşma pratiği tamamla', done: false }
+      ]
+    },
+    {
+      id: 'g_' + Date.now() + '_2',
+      title: 'Fit ve Sağlıklı Vücut Formuna Ulaş 🏋️',
+      category: 'Spor ve Sağlık',
+      desc: 'Düzenli antrenman, günlük 8 bardak su ve temiz beslenme ile formda kalmak.',
+      progress: 50,
+      achieved: false,
+      steps: [
+        { text: 'İlk 1 aylık antrenman serisini aksatmadan bitir', done: true },
+        { text: 'Şeker ve paketli gıdaları minimuma indir', done: false }
+      ]
+    }
+  ];
+}
+
 function createNewUserProfileData(username, email, password) {
   const today = getTodayISO();
   return {
@@ -276,14 +355,16 @@ function createNewUserProfileData(username, email, password) {
     scratchpad: '• Antrenman programı\n• Alışveriş listesi\n• Hızlı notlarını buraya yazabilirsin...',
     streak: 1,
     lastCompletedDate: today,
+    waterDate: today,
+    waterCount: 2,
     cloudDbUrl: '',
     cloudSyncKey: 'taskflow_' + username.toLowerCase(),
     updatedAt: Date.now(),
     tasks: [
       {
         id: 't_' + Date.now() + '_1',
-        title: 'TaskFlow+ v8.0 Profesyonel Planlayıcıyı Keşfet 🚀',
-        desc: 'Yeni Spor kategorisini, tek dokunuşlu tarih/saat seçicisini ve canlı alarmı dene.',
+        title: 'TaskFlow+ v9.0 Yaşam & Hedef Üssünü Keşfet 🚀',
+        desc: 'Yeni Hedefler sekmesini, Aylık Takvim görünümünü, Su takipçisini ve Harita/Link özelliğini dene.',
         date: today,
         time: '',
         pinned: true,
@@ -292,11 +373,13 @@ function createNewUserProfileData(username, email, password) {
         priority: 'high',
         category: 'İş & Proje',
         repeat: 'none',
-        tags: ['#başlangıç', '#önemli'],
+        location: '',
+        link: '',
+        tags: ['#başlangıç', '#hedefler'],
         subtasks: [
-          { text: 'Alt menüdeki + butonuna basıp yeni arayüzü incele', done: false },
-          { text: 'Tarih kutusunda gün sayısına (18) dokunarak takvimi aç', done: false },
-          { text: 'Görevi tamamlayıp 🔥 veya 💪 emojisi bırak', done: false }
+          { text: 'Alttaki 🎯 Hedefler sekmesine tıklayıp uzun soluklu hedeflerine bak', done: false },
+          { text: '💧 Su takipçisinden +1 bardak su ekle', done: false },
+          { text: '🗓️ Aylık Takvim butonuna basıp 30 günlük görünümü aç', done: false }
         ],
         photos: [],
         audios: [],
@@ -306,12 +389,13 @@ function createNewUserProfileData(username, email, password) {
         completionComment: '',
         notified: false
       }
-    ]
+    ],
+    goals: createDefaultGoals()
   };
 }
 
 // ----------------------------------------------------------------------------
-// 4. KULLANICI GİRİŞİ, KAYIT OLMA VE GARANTİLİ ŞİFRE KURTARMA SİSTEMİ
+// 4. KULLANICI GİRİŞİ, KAYIT OLMA VE GARANTİLİ ŞİFRE KURTARMA
 // ----------------------------------------------------------------------------
 function switchAuthTab(tab) {
   const loginForm = document.getElementById('loginForm');
@@ -423,7 +507,7 @@ async function handleLogin(e) {
   }
 
   currentProfile = matched.id;
-  appData = matched.data;
+  await loadProfileData(currentProfile);
   if (remember) {
     localStorage.setItem('tf_logged_in_user', currentProfile);
   } else {
@@ -433,7 +517,6 @@ async function handleLogin(e) {
   unlockApp();
 }
 
-// Garantili Şifre Kurtarma: Kayıtlı E-Postayı Doğrular, Hem Mevcut Şifreyi Gösterir/Mail Atar Hem Anında Yeni Şifre Belirletir!
 async function handleForgotPassword(e) {
   e.preventDefault();
   const emailVal = document.getElementById('forgotEmailInput').value.trim().toLowerCase();
@@ -441,7 +524,6 @@ async function handleForgotPassword(e) {
   const statusEl = document.getElementById('forgotStatusMsg');
   const submitBtn = document.getElementById('forgotSubmitBtn');
 
-  // 2. Aşama: E-posta doğrulandıysa ve yeni şifre kutusu açıksa yeni şifreyi kaydet!
   if (verifiedForgotProfileId) {
     const newPass = newPassInput.value;
     if (!newPass || newPass.length < 4) {
@@ -462,7 +544,6 @@ async function handleForgotPassword(e) {
     }
   }
 
-  // 1. Aşama: Kayıtlı E-Postayı Doğrula
   const allRecords = await getAllUsersFromDB();
   const matched = allRecords.find((r) => {
     const d = r.data || {};
@@ -471,7 +552,7 @@ async function handleForgotPassword(e) {
 
   if (!matched) {
     statusEl.style.color = '#ff4d4f';
-    statusEl.textContent = '❌ Bu e-posta adresine kayıtlı bir hesap bulunamadı! Lütfen kayıt olurken girdiğin e-postayı kontrol et.';
+    statusEl.textContent = '❌ Bu e-posta adresine kayıtlı bir hesap bulunamadı!';
     return;
   }
 
@@ -479,7 +560,6 @@ async function handleForgotPassword(e) {
   const userName = matched.data.profileName || matched.data.username;
   const currentPass = matched.data.password || matched.data.pin || '';
 
-  // Yeni şifre belirleme alanını aç ve mevcut şifreyi/e-posta gönderim seçeneğini sun
   document.getElementById('forgotNewPassGroup').style.display = 'block';
   newPassInput.value = currentPass;
   newPassInput.focus();
@@ -488,21 +568,9 @@ async function handleForgotPassword(e) {
   statusEl.innerHTML = `
     ✅ <b>${escapeHtml(userName)}</b> hesabın doğrulandı!<br>
     🔑 Mevcut Şifren: <b style="color:#fff;background:var(--bg-surface);padding:2px 8px;border-radius:6px;">${escapeHtml(currentPass)}</b><br>
-    <span style="color:var(--text-muted);font-size:11px;">İstersen aşağıdan yeni şifre yazıp kaydedebilir veya kendine e-posta olarak gönderebilirsin.</span>
+    <span style="color:var(--text-muted);font-size:11px;">Aşağıdan yeni şifreni belirleyip hemen giriş yapabilirsin.</span>
   `;
   submitBtn.textContent = '💾 Yeni Şifreyi Kaydet ve Giriş Yap →';
-
-  // Arka planda e-posta gönderimini de tetikle
-  fetch(`https://formsubmit.co/ajax/${encodeURIComponent(emailVal)}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({
-      _subject: 'TaskFlow+ Hesap ve Şifre Bilgileriniz',
-      Kullanici_Adi: userName,
-      Sifreniz: currentPass,
-      _captcha: 'false'
-    })
-  }).catch(() => {});
 }
 
 function unlockApp() {
@@ -540,6 +608,7 @@ function applyUserPreferences() {
   document.getElementById('cloudDbUrl').value = appData.cloudDbUrl || '';
   document.getElementById('cloudSyncKey').value = appData.cloudSyncKey || ('taskflow_' + (appData.username || 'user'));
   document.getElementById('streakBadge').textContent = `🔥 ${appData.streak || 1} Gün Seri`;
+  checkAndRenderWaterTracker();
 }
 
 function changeTheme(newTheme) {
@@ -581,7 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ----------------------------------------------------------------------------
-// 6. TAKVİM ŞERİDİ, SPOR KATEGORİSİ VE GÖREV LİSTELEME MOTORU
+// 6. YATAY GÜN ŞERİDİ & 30 GÜNLÜK TAM AYLIK TAKVİM (GRID) MOTORU
 // ----------------------------------------------------------------------------
 function renderDateStrip() {
   const strip = document.getElementById('dateStrip');
@@ -592,7 +661,6 @@ function renderDateStrip() {
   const dayNames = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
 
   document.getElementById('currentMonthLabel').textContent = `${monthNames[baseDate.getMonth()]} ${baseDate.getFullYear()}`;
-  document.getElementById('customDatePicker').value = selectedDate;
 
   for (let i = -4; i <= 10; i++) {
     const d = new Date(baseDate);
@@ -616,16 +684,77 @@ function renderDateStrip() {
   }
 }
 
+function toggleMonthGridView() {
+  showMonthGrid = !showMonthGrid;
+  const gridBox = document.getElementById('monthGridContainer');
+  const stripBox = document.getElementById('dateStrip');
+  const btn = document.getElementById('toggleMonthGridBtn');
+
+  if (showMonthGrid) {
+    currentCalendarMonth = new Date(selectedDate + 'T00:00:00');
+    gridBox.style.display = 'block';
+    stripBox.style.display = 'none';
+    btn.style.background = 'var(--accent-cream)';
+    btn.style.color = '#14141b';
+    renderMonthGrid();
+  } else {
+    gridBox.style.display = 'none';
+    stripBox.style.display = 'flex';
+    btn.style.background = 'var(--bg-surface)';
+    btn.style.color = 'var(--text-main)';
+  }
+}
+
+function changeCalendarMonth(delta) {
+  currentCalendarMonth.setMonth(currentCalendarMonth.getMonth() + delta);
+  renderMonthGrid();
+}
+
+function renderMonthGrid() {
+  const container = document.getElementById('monthGridDays');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const year = currentCalendarMonth.getFullYear();
+  const month = currentCalendarMonth.getMonth();
+  const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  document.getElementById('gridMonthTitle').textContent = `${monthNames[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const totalDays = lastDay.getDate();
+
+  // Pazartesi = 0 ... Pazar = 6
+  let startOffset = (firstDay.getDay() + 6) % 7;
+
+  for (let i = 0; i < startOffset; i++) {
+    const emptyCell = document.createElement('div');
+    emptyCell.className = 'grid-day-cell empty';
+    container.appendChild(emptyCell);
+  }
+
+  for (let day = 1; day <= totalDays; day++) {
+    const d = new Date(year, month, day);
+    const tzOffset = d.getTimezoneOffset() * 60000;
+    const iso = new Date(d - tzOffset).toISOString().split('T')[0];
+
+    const hasTasks = appData.tasks.some((t) => !t.completed && t.date === iso);
+    const cell = document.createElement('div');
+    cell.className = `grid-day-cell ${!showAllDates && iso === selectedDate ? 'active' : ''} ${hasTasks ? 'has-tasks' : ''}`;
+    cell.textContent = day;
+    cell.onclick = () => {
+      showAllDates = false;
+      selectedDate = iso;
+      renderAll();
+    };
+    container.appendChild(cell);
+  }
+}
+
 function jumpToToday() {
   showAllDates = false;
   selectedDate = getTodayISO();
-  renderAll();
-}
-
-function selectDateFromPicker(val) {
-  if (!val) return;
-  showAllDates = false;
-  selectedDate = val;
+  currentCalendarMonth = new Date();
   renderAll();
 }
 
@@ -639,9 +768,14 @@ function setCategoryFilter(cat) {
   currentCategoryFilter = cat;
   document.getElementById('filterAllCard').classList.toggle('active-filter', cat === 'all');
   document.getElementById('filterWorkCard').classList.toggle('active-filter', cat === 'İş & Proje');
-  document.getElementById('filterPersonalCard').classList.toggle('active-filter', cat === 'Kişisel & Günlük');
-  document.getElementById('filterSportCard').classList.toggle('active-filter', cat === 'Spor & Sağlık');
-  renderAll();
+  document.getElementById('filterRoutineCard').classList.toggle('active-filter', cat === 'Rutin İşler');
+  document.getElementById('filterSportCard').classList.toggle('active-filter', cat === 'Spor ve Sağlık');
+  document.getElementById('filterGrowthCard').classList.toggle('active-filter', cat === 'Kişisel Gelişim');
+  if (currentViewName !== 'tasks' && currentViewName !== 'goals') {
+    switchView('tasks');
+  } else {
+    renderAll();
+  }
 }
 
 function checkOverdueTasks() {
@@ -672,33 +806,42 @@ function rolloverOverdueTasks() {
 function renderAll() {
   if (!appData || !Array.isArray(appData.tasks)) return;
   renderDateStrip();
+  if (showMonthGrid) renderMonthGrid();
   checkOverdueTasks();
+  checkAndRenderWaterTracker();
   updateBentoCountsAndDailyProgress();
   renderOngoingTasks();
+  renderGoals();
   renderArchive();
   renderWeeklyReport();
 }
 
+// Günlük İlerleme Halkası (%75 Tamamlandı - 3/4 Görev) ve 4 Kategori Sayacı
 function updateBentoCountsAndDailyProgress() {
   const active = appData.tasks.filter((t) => !t.completed);
   const workCount = active.filter((t) => t.category === 'İş & Proje').length;
-  const personalCount = active.filter((t) => t.category === 'Kişisel & Günlük').length;
-  const sportCount = active.filter((t) => t.category === 'Spor & Sağlık').length;
+  const routineCount = active.filter((t) => t.category === 'Rutin İşler').length;
+  const sportCount = active.filter((t) => t.category === 'Spor ve Sağlık').length;
+  const growthCount = active.filter((t) => t.category === 'Kişisel Gelişim').length;
 
   document.getElementById('countAllTasks').textContent = `${active.length} Aktif Görev`;
   document.getElementById('countWorkTasks').textContent = `${workCount} Görev`;
-  document.getElementById('countPersonalTasks').textContent = `${personalCount} Görev`;
+  document.getElementById('countRoutineTasks').textContent = `${routineCount} Görev`;
   document.getElementById('countSportTasks').textContent = `${sportCount} Görev`;
+  document.getElementById('countGrowthTasks').textContent = `${growthCount} Görev`;
 
-  // Seçili günün ilerleme çubuğu hesaplaması
   const dayTasks = appData.tasks.filter((t) => t.date === selectedDate);
   const dayDone = dayTasks.filter((t) => t.completed).length;
   const dayTotal = dayTasks.length;
   const pct = dayTotal > 0 ? Math.round((dayDone / dayTotal) * 100) : 0;
 
-  document.getElementById('dailyProgressLabel').textContent = `🎯 Seçili Gün İlerlemesi (${dayDone}/${dayTotal} Görev)`;
+  const isToday = selectedDate === getTodayISO();
+  const dayPrefix = isToday ? 'Bugün' : selectedDate;
+  document.getElementById('dailyProgressLabel').textContent = `${dayPrefix} %${pct} Tamamlandı`;
+  document.getElementById('dailyProgressSub').textContent = `${dayDone} / ${dayTotal} Görev Bitti`;
   document.getElementById('dailyProgressPct').textContent = `%${pct}`;
   document.getElementById('dailyProgressFill').style.width = `${pct}%`;
+  document.getElementById('dailyRingCircle').style.background = `conic-gradient(var(--accent-cream) ${pct}%, rgba(255,255,255,0.1) ${pct}%)`;
 }
 
 function getPriorityWeight(p) {
@@ -712,6 +855,13 @@ function getPriorityLabel(p) {
     medium: '⚡ Orta',
     low: '🌱 Düşük'
   }[p] || 'Normal';
+}
+
+function getCategoryIcon(cat) {
+  if (cat === 'Spor ve Sağlık') return '🏋️';
+  if (cat === 'Kişisel Gelişim') return '📚';
+  if (cat === 'Rutin İşler') return '🔄';
+  return '💡';
 }
 
 function renderOngoingTasks() {
@@ -736,11 +886,11 @@ function renderOngoingTasks() {
     list = list.filter((t) =>
       t.title.toLowerCase().includes(query) ||
       (t.desc && t.desc.toLowerCase().includes(query)) ||
+      (t.location && t.location.toLowerCase().includes(query)) ||
       (t.tags && t.tags.join(' ').toLowerCase().includes(query))
     );
   }
 
-  // Önce Yıldızlı (Sabitlenmiş), sonra Aciliyet, sonra Saat sıralaması
   list.sort((a, b) => {
     if (!!b.pinned !== !!a.pinned) return b.pinned ? 1 : -1;
     const pw = getPriorityWeight(b.priority) - getPriorityWeight(a.priority);
@@ -753,19 +903,13 @@ function renderOngoingTasks() {
       <div class="task-card" style="text-align:center;padding:30px 18px;color:var(--text-muted);">
         <div style="font-size:32px;margin-bottom:6px;">✨</div>
         <div style="font-weight:700;color:var(--text-main);">Bu görünümde bekleyen görev yok!</div>
-        <div style="font-size:12px;margin-top:4px;">Alt menüdeki <b>+</b> butonuna basarak yeni görev, antrenman veya plan ekleyebilirsin.</div>
+        <div style="font-size:12px;margin-top:4px;">Alt menüdeki <b>+</b> butonuna basarak yeni görev, konum veya plan ekleyebilirsin.</div>
       </div>
     `;
     return;
   }
 
   container.innerHTML = list.map((t) => buildTaskCardHTML(t, false)).join('');
-}
-
-function getCategoryIcon(cat) {
-  if (cat === 'Spor & Sağlık') return '🏋️';
-  if (cat === 'Kişisel & Günlük') return '🧩';
-  return '💡';
 }
 
 function buildTaskCardHTML(t, isArchive) {
@@ -779,6 +923,21 @@ function buildTaskCardHTML(t, isArchive) {
     : '';
 
   const tagsHTML = (t.tags || []).map((tg) => `<span class="tag-badge">${escapeHtml(tg)}</span>`).join('');
+
+  // Google Maps Konum ve Web Linki Rozetleri
+  let mapBadgeHTML = '';
+  if (t.location) {
+    const mapUrl = t.location.startsWith('http')
+      ? t.location
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(t.location)}`;
+    mapBadgeHTML = `<a href="${mapUrl}" target="_blank" rel="noopener" class="tag-badge map-link-badge">🗺️ Haritada Aç (${escapeHtml(t.location)})</a>`;
+  }
+
+  let webBadgeHTML = '';
+  if (t.link) {
+    const cleanUrl = t.link.startsWith('http') ? t.link : `https://${t.link}`;
+    webBadgeHTML = `<a href="${cleanUrl}" target="_blank" rel="noopener" class="tag-badge web-link-badge">🔗 Bağlantıyı Aç</a>`;
+  }
 
   const subtasksHTML = totalSubs > 0 ? `
     <div class="subtasks-box">
@@ -827,6 +986,8 @@ function buildTaskCardHTML(t, isArchive) {
           <span class="tag-badge">${getCategoryIcon(t.category)} ${escapeHtml(t.category || 'İş & Proje')}</span>
           ${repeatBadge}
           ${tagsHTML}
+          ${mapBadgeHTML}
+          ${webBadgeHTML}
         </div>
         <span class="task-progress-pct">${totalSubs > 0 ? `%${pct}` : ''}</span>
       </div>
@@ -878,7 +1039,239 @@ function escapeHtml(str) {
 }
 
 // ----------------------------------------------------------------------------
-// 7. ALT GÖREV İLERLEMESİ, TAMAMLAMA, EMOJİ & ARŞİV SİSTEMİ
+// 7. 🎯 UZUN SOLUKLU HEDEFLER (GOALS) SİSTEMİ (DEADLINE OLMAYAN VİZYON SAYFASI)
+// ----------------------------------------------------------------------------
+function handleFabClick() {
+  if (currentViewName === 'goals') {
+    openGoalModal();
+  } else {
+    openTaskModal();
+  }
+}
+
+function renderGoals() {
+  const container = document.getElementById('goalsListContainer');
+  if (!container) return;
+  const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+
+  let list = appData.goals || [];
+  if (currentCategoryFilter !== 'all') {
+    list = list.filter((g) => g.category === currentCategoryFilter);
+  }
+  if (query) {
+    list = list.filter((g) =>
+      g.title.toLowerCase().includes(query) ||
+      (g.desc && g.desc.toLowerCase().includes(query))
+    );
+  }
+
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="task-card" style="text-align:center;padding:32px 18px;color:var(--text-muted);">
+        <div style="font-size:36px;margin-bottom:8px;">🎯</div>
+        <div style="font-weight:800;color:var(--text-main);">Henüz uzun soluklu bir hedef eklemedin!</div>
+        <div style="font-size:12px;margin-top:4px;">Üstteki <b>+ Yeni Hedef Ekle</b> veya alttaki <b>+</b> butonuna basarak ilk büyük hedefini belirle.</div>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = list.map((g) => {
+    const totalSteps = (g.steps || []).length;
+    const doneSteps = (g.steps || []).filter((s) => s.done).length;
+    const pct = totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : (g.progress || 0);
+    const isAchieved = pct >= 100 || g.achieved;
+
+    const stepsHTML = totalSteps > 0 ? `
+      <div class="subtasks-box" style="margin-top:12px;">
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:6px;">🏁 KİLOMETRE TAŞLARI (${doneSteps}/${totalSteps})</div>
+        ${g.steps.map((s, idx) => `
+          <div class="subtask-item ${s.done ? 'done' : ''}" onclick="toggleGoalStep('${g.id}', ${idx})">
+            <span>${s.done ? '✅' : '⬜'}</span>
+            <span>${escapeHtml(s.text)}</span>
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
+
+    return `
+      <div class="goal-card ${isAchieved ? 'achieved' : ''}">
+        <div class="task-top">
+          <div class="badge-group">
+            <span class="tag-badge" style="background:rgba(216,208,248,0.2);color:var(--pastel-purple);">${getCategoryIcon(g.category)} ${escapeHtml(g.category)}</span>
+            <span class="tag-badge">♾️ Uzun Soluklu Hedef</span>
+            ${isAchieved ? `<span class="prio-badge prio-low">🏆 Hedefe Ulaşıldı!</span>` : ''}
+          </div>
+          <span style="font-size:15px;font-weight:900;color:var(--accent-cream);">%${pct}</span>
+        </div>
+
+        <div style="font-size:17px;font-weight:800;margin-top:4px;">${escapeHtml(g.title)}</div>
+        ${g.desc ? `<div style="font-size:12.5px;color:var(--text-muted);margin-top:4px;">${escapeHtml(g.desc)}</div>` : ''}
+
+        <div style="margin-top:12px;">
+          <div class="progress-bar-track" style="height:8px;">
+            <div class="progress-bar-fill" style="width:${pct}%;background:${isAchieved ? '#52c41a' : 'var(--pastel-purple)'};"></div>
+          </div>
+          ${totalSteps === 0 ? `
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+              <span style="font-size:11px;color:var(--text-muted);">İlerlemeyi Kaydırarak Güncelle:</span>
+              <input type="range" min="0" max="100" step="5" value="${pct}" style="width:140px;accent-color:var(--accent-cream);" onchange="updateGoalProgressSlider('${g.id}', this.value)" />
+            </div>
+          ` : ''}
+        </div>
+
+        ${stepsHTML}
+
+        <div class="task-meta">
+          <div style="display:flex;gap:6px;">
+            <button class="tag-badge" style="cursor:pointer;border:none;color:#95de64;" onclick="adjustGoalProgress('${g.id}', 10)">+10% İlerle</button>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="tag-badge" style="cursor:pointer;border:none;" onclick="openGoalModal('${g.id}')">✏️ Düzenle</button>
+            <button class="tag-badge" style="cursor:pointer;border:none;color:#ff7875;" onclick="deleteGoal('${g.id}')">🗑️ Sil</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openGoalModal(goalId = null) {
+  const modal = document.getElementById('goalModal');
+  document.getElementById('editGoalId').value = goalId || '';
+
+  if (goalId) {
+    const g = (appData.goals || []).find((x) => x.id === goalId);
+    if (!g) return;
+    document.getElementById('goalModalTitle').textContent = '✏️ Hedefi Düzenle';
+    document.getElementById('goalTitleInput').value = g.title;
+    document.getElementById('goalCategoryInput').value = g.category || 'Kişisel Gelişim';
+    document.getElementById('goalProgressInput').value = g.progress || 0;
+    document.getElementById('goalDescInput').value = g.desc || '';
+    modalGoalSteps = JSON.parse(JSON.stringify(g.steps || []));
+  } else {
+    document.getElementById('goalModalTitle').textContent = '🎯 Uzun Soluklu Hedef Belirle';
+    document.getElementById('goalTitleInput').value = '';
+    document.getElementById('goalCategoryInput').value = currentCategoryFilter !== 'all' ? currentCategoryFilter : 'Kişisel Gelişim';
+    document.getElementById('goalProgressInput').value = 0;
+    document.getElementById('goalDescInput').value = '';
+    modalGoalSteps = [];
+  }
+
+  renderModalGoalSteps();
+  modal.classList.remove('hidden');
+  pushAppHistoryState();
+}
+
+function closeGoalModal() {
+  document.getElementById('goalModal').classList.add('hidden');
+}
+
+function addGoalStepInModal() {
+  const inp = document.getElementById('goalStepNewInput');
+  const val = inp.value.trim();
+  if (!val) return;
+  modalGoalSteps.push({ text: val, done: false });
+  inp.value = '';
+  renderModalGoalSteps();
+}
+
+function renderModalGoalSteps() {
+  const box = document.getElementById('modalGoalStepList');
+  box.innerHTML = modalGoalSteps.map((s, idx) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg-main);padding:6px 10px;border-radius:10px;font-size:13px;">
+      <span>🏁 ${escapeHtml(s.text)}</span>
+      <button type="button" style="background:none;border:none;color:#ff7875;cursor:pointer;" onclick="modalGoalSteps.splice(${idx},1);renderModalGoalSteps();">Sil</button>
+    </div>
+  `).join('');
+}
+
+function saveGoalFromModal() {
+  const title = document.getElementById('goalTitleInput').value.trim();
+  if (!title) {
+    alert('Lütfen bir hedef başlığı girin!');
+    return;
+  }
+  const editId = document.getElementById('editGoalId').value;
+  const category = document.getElementById('goalCategoryInput').value;
+  const progress = Math.min(100, Math.max(0, parseInt(document.getElementById('goalProgressInput').value || '0', 10)));
+  const desc = document.getElementById('goalDescInput').value.trim();
+
+  if (!Array.isArray(appData.goals)) appData.goals = [];
+
+  if (editId) {
+    const g = appData.goals.find((x) => x.id === editId);
+    if (g) {
+      g.title = title;
+      g.category = category;
+      g.progress = progress;
+      g.desc = desc;
+      g.steps = modalGoalSteps;
+      g.achieved = progress >= 100;
+    }
+  } else {
+    appData.goals.unshift({
+      id: 'g_' + Date.now(),
+      title,
+      category,
+      progress,
+      desc,
+      steps: modalGoalSteps,
+      achieved: progress >= 100
+    });
+  }
+
+  closeGoalModal();
+  saveProfileData();
+  switchView('goals');
+}
+
+function toggleGoalStep(goalId, stepIdx) {
+  const g = (appData.goals || []).find((x) => x.id === goalId);
+  if (!g || !g.steps[stepIdx]) return;
+  g.steps[stepIdx].done = !g.steps[stepIdx].done;
+  const total = g.steps.length;
+  const done = g.steps.filter((s) => s.done).length;
+  g.progress = Math.round((done / total) * 100);
+  if (g.progress >= 100) {
+    g.achieved = true;
+    playAlertTone('success');
+  } else {
+    g.achieved = false;
+  }
+  saveProfileData();
+  renderGoals();
+}
+
+function updateGoalProgressSlider(goalId, val) {
+  const g = (appData.goals || []).find((x) => x.id === goalId);
+  if (!g) return;
+  g.progress = parseInt(val, 10);
+  g.achieved = g.progress >= 100;
+  if (g.achieved) playAlertTone('success');
+  saveProfileData();
+  renderGoals();
+}
+
+function adjustGoalProgress(goalId, delta) {
+  const g = (appData.goals || []).find((x) => x.id === goalId);
+  if (!g) return;
+  g.progress = Math.min(100, Math.max(0, (g.progress || 0) + delta));
+  g.achieved = g.progress >= 100;
+  if (g.achieved) playAlertTone('success');
+  saveProfileData();
+  renderGoals();
+}
+
+function deleteGoal(goalId) {
+  if (!confirm('Bu hedefi silmek istediğine emin misin?')) return;
+  appData.goals = (appData.goals || []).filter((x) => x.id !== goalId);
+  saveProfileData();
+  renderGoals();
+}
+
+// ----------------------------------------------------------------------------
+// 8. ALT GÖREV İLERLEMESİ, TAMAMLAMA, EMOJİ & ARŞİV SİSTEMİ
 // ----------------------------------------------------------------------------
 function toggleSubtask(taskId, subIdx) {
   const t = appData.tasks.find((x) => x.id === taskId);
@@ -1000,8 +1393,28 @@ function renderArchive() {
 }
 
 // ----------------------------------------------------------------------------
-// 8. GÖREV EKLEME/DÜZENLEME, 10X FOTOĞRAF SIKIŞTIRMA VE SES KAYDI
+// 9. GÖREV EKLEME/DÜZENLEME, GPS HARİTA KONUMU, FOTOĞRAF VE SES KAYDI
 // ----------------------------------------------------------------------------
+function detectCurrentGPSLocation() {
+  if (!navigator.geolocation) {
+    alert('Cihazınız konum özelliğini desteklemiyor.');
+    return;
+  }
+  const locInput = document.getElementById('taskLocationInput');
+  locInput.value = '⏳ Konum alınıyor...';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude.toFixed(5);
+      const lng = pos.coords.longitude.toFixed(5);
+      locInput.value = `https://www.google.com/maps?q=${lat},${lng}`;
+    },
+    () => {
+      locInput.value = '';
+      alert('GPS konum izni alınamadı. Mekan adını doğrudan yazabilirsiniz (Örn: Kadıköy).');
+    }
+  );
+}
+
 function openTaskModal(taskId = null) {
   stopActiveSpeechRecognition();
   const modal = document.getElementById('taskModal');
@@ -1017,6 +1430,8 @@ function openTaskModal(taskId = null) {
     document.getElementById('taskPinnedInput').checked = !!t.pinned;
     document.getElementById('taskDateInput').value = t.date;
     document.getElementById('taskTimeInput').value = t.time || '';
+    document.getElementById('taskLocationInput').value = t.location || '';
+    document.getElementById('taskLinkInput').value = t.link || '';
     document.getElementById('taskAlarmSound').value = t.alarmEnabled === false ? 'off' : (t.alarmSound || 'system');
     selectPriorityPill(t.priority || 'medium');
     selectCategoryPill(t.category || 'İş & Proje');
@@ -1032,6 +1447,8 @@ function openTaskModal(taskId = null) {
     document.getElementById('taskPinnedInput').checked = false;
     document.getElementById('taskDateInput').value = selectedDate;
     document.getElementById('taskTimeInput').value = '';
+    document.getElementById('taskLocationInput').value = '';
+    document.getElementById('taskLinkInput').value = '';
     document.getElementById('taskAlarmSound').value = 'system';
     selectPriorityPill('medium');
     selectCategoryPill(currentCategoryFilter !== 'all' ? currentCategoryFilter : 'İş & Proje');
@@ -1194,6 +1611,8 @@ function saveTaskFromModal() {
   const pinned = document.getElementById('taskPinnedInput').checked;
   const dateVal = document.getElementById('taskDateInput').value || getTodayISO();
   const timeVal = document.getElementById('taskTimeInput').value || '';
+  const locationVal = document.getElementById('taskLocationInput').value.trim();
+  const linkVal = document.getElementById('taskLinkInput').value.trim();
   const soundChoice = document.getElementById('taskAlarmSound').value || 'system';
   const alarmEnabled = soundChoice !== 'off';
   const alarmSound = soundChoice === 'off' ? 'system' : soundChoice;
@@ -1215,6 +1634,8 @@ function saveTaskFromModal() {
       t.pinned = pinned;
       t.date = dateVal;
       t.time = timeVal;
+      t.location = locationVal;
+      t.link = linkVal;
       t.alarmEnabled = alarmEnabled;
       t.alarmSound = alarmSound;
       t.priority = prioVal;
@@ -1235,6 +1656,8 @@ function saveTaskFromModal() {
       desc: descVal,
       date: dateVal,
       time: timeVal,
+      location: locationVal,
+      link: linkVal,
       alarmEnabled,
       alarmSound,
       priority: prioVal,
@@ -1269,7 +1692,7 @@ function closePhotoViewer() {
 }
 
 // ----------------------------------------------------------------------------
-// 9. KUSURSUZ TÜRKÇE SESLE KONUŞARAK YAZDIRMA MOTORU (SPOR/TARİH/SAAT ALGILAYICILI)
+// 10. KUSURSUZ TÜRKÇE SESLE KONUŞARAK YAZDIRMA MOTORU
 // ----------------------------------------------------------------------------
 function stopActiveSpeechRecognition() {
   if (activeSpeechRec) {
@@ -1351,7 +1774,11 @@ function toggleTurkishSpeechToText(targetField = 'title') {
       if (lower.includes('yarın')) setQuickDate(1);
       if (lower.includes('acil') || lower.includes('çok önemli')) selectPriorityPill('urgent');
       if (lower.includes('spor') || lower.includes('antrenman') || lower.includes('koşu') || lower.includes('fitness')) {
-        selectCategoryPill('Spor & Sağlık');
+        selectCategoryPill('Spor ve Sağlık');
+      } else if (lower.includes('kitap') || lower.includes('eğitim') || lower.includes('kurs') || lower.includes('ders')) {
+        selectCategoryPill('Kişisel Gelişim');
+      } else if (lower.includes('rutin') || lower.includes('market') || lower.includes('temizlik')) {
+        selectCategoryPill('Rutin İşler');
       }
       const timeMatch = lower.match(/(\d{1,2})[:.](\d{2})/);
       if (timeMatch) {
@@ -1361,15 +1788,8 @@ function toggleTurkishSpeechToText(targetField = 'title') {
       }
     };
 
-    rec.onerror = (event) => {
-      const errCode = event.error;
-      if (errCode === 'no-speech') {
-        hint.textContent = 'ℹ️ Ses algılanmadı. Tekrar 🎙️ Konuş butonuna basabilirsin.';
-      } else if (errCode === 'not-allowed' || errCode === 'service-not-allowed') {
-        hint.style.color = '#ff4d4f';
-        hint.textContent = '❌ Mikrofon izni kapalı!';
-      }
-      setTimeout(stopActiveSpeechRecognition, 1500);
+    rec.onerror = () => {
+      setTimeout(stopActiveSpeechRecognition, 1200);
     };
 
     rec.onend = () => {
@@ -1383,7 +1803,7 @@ function toggleTurkishSpeechToText(targetField = 'title') {
 }
 
 // ----------------------------------------------------------------------------
-// 10. HAFTALIK MOTİVASYON KARNESİ & POMODORO SAYACI
+// 11. HAFTALIK MOTİVASYON KARNESİ & POMODORO SAYACI
 // ----------------------------------------------------------------------------
 function renderWeeklyReport() {
   const doneTasks = appData.tasks.filter((t) => t.completed);
@@ -1465,7 +1885,7 @@ function updatePomoDisplay() {
 }
 
 // ----------------------------------------------------------------------------
-// 11. CANLI ÇALAN TAM EKRAN ALARM + SİSTEM BİLDİRİM KANALI MOTORU
+// 12. CANLI ÇALAN TAM EKRAN ALARM + SİSTEM BİLDİRİM KANALI MOTORU
 // ----------------------------------------------------------------------------
 function previewSelectedAlarm(soundType) {
   if (soundType === 'off') return;
@@ -1655,7 +2075,7 @@ setInterval(() => {
 }, 3000);
 
 // ----------------------------------------------------------------------------
-// 12. TEK TIKLA YEDEK İNDİRME VE ÜCRETSİZ CANLI BULUT SENKRONİZASYONU
+// 13. TEK TIKLA YEDEK İNDİRME VE ÜCRETSİZ CANLI BULUT SENKRONİZASYONU
 // ----------------------------------------------------------------------------
 function exportFullBackup() {
   const dataStr = JSON.stringify(appData, null, 2);
@@ -1739,19 +2159,20 @@ window.addEventListener('offline', () => {
 });
 
 // ----------------------------------------------------------------------------
-// 13. ALT MENÜ GEZİNTİSİ VE BAŞLANGIÇ OTURUM KONTROLÜ
+// 14. ALT MENÜ GEZİNTİSİ (GÖREVLER | HEDEFLER | ARŞİV | ODAK | AYARLAR)
 // ----------------------------------------------------------------------------
 function switchView(viewName, fromBackButton = false) {
   currentViewName = viewName;
   document.getElementById('viewTasks').style.display = viewName === 'tasks' ? 'block' : 'none';
+  document.getElementById('viewGoals').style.display = viewName === 'goals' ? 'block' : 'none';
   document.getElementById('viewArchive').style.display = viewName === 'archive' ? 'block' : 'none';
   document.getElementById('viewStats').style.display = viewName === 'stats' ? 'block' : 'none';
   document.getElementById('viewSettings').style.display = viewName === 'settings' ? 'block' : 'none';
 
   document.getElementById('navTasks').classList.toggle('active', viewName === 'tasks');
+  document.getElementById('navGoals').classList.toggle('active', viewName === 'goals');
   document.getElementById('navArchive').classList.toggle('active', viewName === 'archive');
   document.getElementById('navStats').classList.toggle('active', viewName === 'stats');
-  document.getElementById('navSettings').classList.toggle('active', viewName === 'settings');
 
   if (!fromBackButton) {
     pushAppHistoryState();
@@ -1775,7 +2196,7 @@ async function installPWA() {
 
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=8').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=9').catch(() => {});
   }
   await initDB();
 

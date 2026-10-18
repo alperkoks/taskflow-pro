@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#09090d" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>TaskFlow+ — Günlük Görev & Odak</title>
-  <link rel="manifest" href="manifest.json?v=8" />
-  <link rel="stylesheet" href="styles.css?v=8" />
+  <title>TaskFlow+ — Günlük Görev, Hedefler & Odak</title>
+  <link rel="manifest" href="manifest.json?v=9" />
+  <link rel="stylesheet" href="styles.css?v=9" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -22,11 +22,10 @@
         <img src="icon-192.png" alt="TaskFlow+" style="width:64px;height:64px;border-radius:18px;margin:0 auto 10px;display:block;box-shadow:0 6px 20px rgba(0,0,0,0.4);" />
         <h2 style="font-size:23px;font-weight:900;letter-spacing:-0.5px;">TaskFlow<span style="color:var(--pastel-purple);">+</span></h2>
         <p id="authSubtitle" style="font-size:12.5px;color:var(--text-muted);margin-top:3px;">
-          Kişisel Görev ve Planlama Alanına Giriş Yap
+          Kişisel Görev, Hedef ve Planlama Alanına Giriş Yap
         </p>
       </div>
 
-      <!-- Giriş / Kayıt Sekmeleri -->
       <div class="profile-switcher" id="authTabsBar">
         <button type="button" class="profile-tab active" id="tabLoginBtn" onclick="switchAuthTab('login')">🔑 Giriş Yap</button>
         <button type="button" class="profile-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">✨ Kayıt Ol</button>
@@ -52,7 +51,7 @@
         <button type="submit" class="btn-cream" style="width:100%;height:45px;font-size:14px;">Giriş Yap →</button>
       </form>
 
-      <!-- YENİ HESAP OLUŞTUR (KAYIT OL) FORMU -->
+      <!-- YENİ HESAP OLUŞTUR FORMU -->
       <form id="registerForm" style="display:none;" onsubmit="handleRegister(event)">
         <div class="form-group">
           <label>Kullanıcı Adı Belirle</label>
@@ -70,7 +69,7 @@
         <button type="submit" class="btn-cream" style="width:100%;height:45px;font-size:14px;">Hesabımı Oluştur ve Başla ✓</button>
       </form>
 
-      <!-- ŞİFREMİ UNUTTUM (GARANTİLİ KURTARMA & E-POSTA SİSTEMİ) -->
+      <!-- ŞİFREMİ UNUTTUM FORMU -->
       <form id="forgotForm" style="display:none;" onsubmit="handleForgotPassword(event)">
         <div class="form-group">
           <label>Kayıtlı E-Posta Adresin</label>
@@ -107,7 +106,7 @@
   <!-- ANA UYGULAMA KABUĞU -->
   <div class="app-container">
 
-    <!-- SOL SÜTUN: SADE ÜST BAR, GÜNLÜK İLERLEME, 4'LÜ PASTEL KATEGORİ (SPOR DAHİL), KARALAMA -->
+    <!-- SOL SÜTUN: ÜST BAR, GÜNLÜK İLERLEME HALKASI, SU TAKİPÇİSİ, 4 ANA KATEGORİ -->
     <aside class="left-panel">
       <header class="top-header">
         <div>
@@ -115,36 +114,55 @@
             <span id="welcomeUserText">Merhaba 👋</span>
             <span class="streak-badge" id="streakBadge">🔥 1 Gün Seri</span>
           </div>
-          <h1 class="greeting-title">Günlük Planın</h1>
+          <h1 class="greeting-title">Yaşam & Plan Üssü</h1>
         </div>
-        <!-- Sağ Üstte Artık Sadece Şık Profil Rozeti Var (Tıklayınca Ayarlar'a Gider) -->
+        <!-- Sağ Üstte Sadece Şık Profil & Ayarlar Rozeti -->
         <div class="user-avatar-pill" onclick="switchView('settings')" title="Ayarlar ve Hesap">
           <div class="user-avatar-circle" id="headerAvatarLetter">U</div>
+          <span style="font-size:11.5px;font-weight:700;color:var(--text-muted);">Ayarlar ⚙️</span>
           <span id="syncStatusDot" class="sync-dot" title="Çevrimdışı / Bulut Hazır"></span>
         </div>
       </header>
 
-      <!-- GÜNLÜK İLERLEME DURUM ÇUBUĞU -->
+      <!-- 1. GÜNLÜK İLERLEME HALKASI / YÜZDESİ -->
       <div class="daily-progress-card">
-        <div class="daily-progress-top">
-          <span id="dailyProgressLabel">🎯 Bugünün İlerlemesi</span>
-          <span id="dailyProgressPct" style="color:var(--accent-cream);">%0</span>
+        <div class="ring-circle" id="dailyRingCircle">
+          <div class="ring-inner" id="dailyProgressPct">%0</div>
         </div>
-        <div class="progress-bar-track" style="margin-bottom:0;height:6px;">
-          <div class="progress-bar-fill" id="dailyProgressFill" style="width:0%"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13.5px;font-weight:800;" id="dailyProgressLabel">Bugün %0 Tamamlandı</div>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;" id="dailyProgressSub">0/0 Görev Bitti</div>
+          <div class="progress-bar-track" style="margin-top:6px;margin-bottom:0;height:5px;">
+            <div class="progress-bar-fill" id="dailyProgressFill" style="width:0%"></div>
+          </div>
         </div>
       </div>
 
-      <!-- 4'LÜ PASTEL KATEGORİ BENTO KARTLARI (SPOR & SAĞLIK EKLENDİ!) -->
-      <div class="bento-grid">
-        <div class="bento-card bento-all active-filter" id="filterAllCard" onclick="setCategoryFilter('all')">
-          <div class="bento-icon">🗂️</div>
-          <div style="min-width:0;">
-            <div class="bento-title">Tüm Görevler</div>
-            <div class="bento-count" id="countAllTasks">0 Görev</div>
+      <!-- 2. GÜNLÜK SU & ALIŞKANLIK TAKİPÇİSİ (MİNİ BAR) -->
+      <div class="water-bar-card">
+        <div>
+          <div style="font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:6px;">
+            <span>💧 Günlük Su Takibi:</span>
+            <span id="waterCountText" style="color:#93c5fd;">0 / 8 Bardak</span>
           </div>
+          <div class="water-drops" id="waterDropsDisplay">⚪⚪⚪⚪⚪⚪⚪⚪</div>
         </div>
+        <div style="display:flex;gap:6px;">
+          <button type="button" class="icon-btn" style="width:32px;height:32px;font-weight:800;" onclick="changeWaterCount(-1)">-</button>
+          <button type="button" class="btn-cream" style="padding:6px 11px;font-size:12px;background:#93c5fd;color:#09090d;" onclick="changeWaterCount(1)">+1 💧</button>
+        </div>
+      </div>
 
+      <!-- 3. TÜM GÖREVLER ŞERİDİ + 4 ANA KATEGORİ BENTO KARTLARI -->
+      <div class="all-tasks-strip active-filter" id="filterAllCard" onclick="setCategoryFilter('all')">
+        <div style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:13.5px;">
+          <span>🗂️</span>
+          <span>Tüm Günlük Görevleri Göster</span>
+        </div>
+        <span style="font-size:12px;font-weight:700;color:var(--accent-cream);" id="countAllTasks">0 Aktif</span>
+      </div>
+
+      <div class="bento-grid">
         <div class="bento-card bento-work" id="filterWorkCard" onclick="setCategoryFilter('İş & Proje')">
           <div class="bento-icon">💡</div>
           <div style="min-width:0;">
@@ -153,24 +171,32 @@
           </div>
         </div>
 
-        <div class="bento-card bento-personal" id="filterPersonalCard" onclick="setCategoryFilter('Kişisel & Günlük')">
-          <div class="bento-icon">🧩</div>
+        <div class="bento-card bento-routine" id="filterRoutineCard" onclick="setCategoryFilter('Rutin İşler')">
+          <div class="bento-icon">🔄</div>
           <div style="min-width:0;">
-            <div class="bento-title">Kişisel & Rutin</div>
-            <div class="bento-count" id="countPersonalTasks">0 Görev</div>
+            <div class="bento-title">Rutin İşler</div>
+            <div class="bento-count" id="countRoutineTasks">0 Görev</div>
           </div>
         </div>
 
-        <div class="bento-card bento-sport" id="filterSportCard" onclick="setCategoryFilter('Spor & Sağlık')">
+        <div class="bento-card bento-sport" id="filterSportCard" onclick="setCategoryFilter('Spor ve Sağlık')">
           <div class="bento-icon">🏋️</div>
           <div style="min-width:0;">
-            <div class="bento-title">Spor & Sağlık</div>
+            <div class="bento-title">Spor ve Sağlık</div>
             <div class="bento-count" id="countSportTasks">0 Görev</div>
+          </div>
+        </div>
+
+        <div class="bento-card bento-growth" id="filterGrowthCard" onclick="setCategoryFilter('Kişisel Gelişim')">
+          <div class="bento-icon">📚</div>
+          <div style="min-width:0;">
+            <div class="bento-title">Kişisel Gelişim</div>
+            <div class="bento-count" id="countGrowthTasks">0 Görev</div>
           </div>
         </div>
       </div>
 
-      <!-- HIZLI NOT / KARALAMA DEFTERİ (AÇILIR/KAPANIR KOMPAKT) -->
+      <!-- HIZLI NOT / KARALAMA DEFTERİ -->
       <div class="scratchpad-card">
         <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="const sp=document.getElementById('scratchpadBody');sp.style.display=sp.style.display==='none'?'block':'none';">
           <span style="font-weight:800;font-size:13px;">⚡ Hızlı Karalama Defteri</span>
@@ -182,7 +208,7 @@
       </div>
     </aside>
 
-    <!-- SAĞ SÜTUN: TAKVİM ŞERİDİ, ARAMA, AKTİF GÖREVLER, ARŞİV, KARNE, AYARLAR -->
+    <!-- SAĞ SÜTUN: ANA GÖRÜNÜMLER (GÖREVLER, HEDEFLER, ARŞİV, KARNE, AYARLAR) -->
     <main class="right-panel">
 
       <!-- DÜNDEN KALAN GÖREVLERİ BUGÜNE AKTAR BANNER'I -->
@@ -194,13 +220,13 @@
         <button class="btn-cream" onclick="rolloverOverdueTasks()">Bugüne Aktar</button>
       </div>
 
-      <!-- SÜPER ARAMA VE ETİKET FİLTRESİ -->
+      <!-- SÜPER ARAMA VE ÖNCELİK FİLTRESİ -->
       <div class="search-bar-wrap">
         <div class="search-input-box">
           <span>🔍</span>
-          <input type="text" id="searchInput" placeholder="Görev, #etiket (#spor, #acil), yorum veya emoji ara..." oninput="renderAll()" />
+          <input type="text" id="searchInput" placeholder="Görev, hedef, #etiket, konum veya yorum ara..." oninput="renderAll()" />
         </div>
-        <select id="priorityFilterSelect" class="form-select" style="width:auto;min-width:125px;padding:9px 10px;font-size:12.5px;" onchange="renderAll()">
+        <select id="priorityFilterSelect" class="form-select" style="width:auto;min-width:120px;padding:9px 10px;font-size:12px;" onchange="renderAll()">
           <option value="all">Tüm Öncelikler</option>
           <option value="urgent">🚨 Acil</option>
           <option value="high">🔥 Yüksek</option>
@@ -209,25 +235,36 @@
         </select>
       </div>
 
-      <!-- SEKME 1: GÜNLÜK GÖREVLER & TAKVİM GÖRÜNÜMÜ -->
+      <!-- ================================================================== -->
+      <!-- SEKME 1: GÜNLÜK GÖREVLER + YATAY ŞERİT & 30 GÜNLÜK TAM TAKVİM GRİD -->
+      <!-- ================================================================== -->
       <section id="viewTasks">
         <div class="calendar-header">
           <div class="month-label" onclick="jumpToToday()">
             <span id="currentMonthLabel">Ekim 2026</span>
-            <span style="font-size:11px;background:var(--bg-surface);padding:4px 9px;border-radius:99px;color:var(--accent-cream);">Bugüne Dön</span>
+            <span style="font-size:11px;background:var(--bg-surface);padding:4px 9px;border-radius:99px;color:var(--accent-cream);">Bugün</span>
           </div>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <!-- TAM KUTU TIKLANABİLİR TARİH SEÇİCİ -->
-            <div class="picker-box" style="padding:5px 10px;border-radius:10px;" onclick="openNativePicker('customDatePicker')">
-              <span style="font-size:12px;margin-right:4px;">📅</span>
-              <input type="date" id="customDatePicker" style="font-size:12px;width:98px;" onchange="selectDateFromPicker(this.value)" />
-            </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <button class="pin-btn" id="toggleMonthGridBtn" onclick="toggleMonthGridView()" style="height:32px;padding:0 10px;font-size:11.5px;">🗓️ Aylık Takvim</button>
             <button class="btn-cream" id="toggleAllDatesBtn" onclick="toggleShowAllDates()" style="padding:6px 10px;font-size:11.5px;">Tüm Günler</button>
           </div>
         </div>
 
         <!-- YATAY GÜN ŞERİDİ -->
         <div id="dateStrip" class="date-strip"></div>
+
+        <!-- AYLIK 30 GÜNLÜK TAM TAKVİM (GRID) GÖRÜNÜMÜ -->
+        <div id="monthGridContainer" class="month-grid-box" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <button class="pin-btn" style="height:30px;padding:0 10px;font-size:12px;" onclick="changeCalendarMonth(-1)">◀ Önceki Ay</button>
+            <span id="gridMonthTitle" style="font-weight:800;font-size:14px;">Ekim 2026</span>
+            <button class="pin-btn" style="height:30px;padding:0 10px;font-size:12px;" onclick="changeCalendarMonth(1)">Sonraki Ay ▶</button>
+          </div>
+          <div class="month-grid-weekdays">
+            <span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span>
+          </div>
+          <div id="monthGridDays" class="month-grid-days"></div>
+        </div>
 
         <div class="section-header">
           <h2 class="section-title" id="activeListTitle">Devam Eden Görevler</h2>
@@ -237,7 +274,28 @@
         <div id="ongoingTaskList" class="task-list"></div>
       </section>
 
-      <!-- SEKME 2: ARŞİV & BİTEN GÖREVLER -->
+      <!-- ================================================================== -->
+      <!-- SEKME 2: 🎯 HEDEFLER (UZUN SOLUKLU, DEADLINE OLMAYAN VİZYON SAYFASI) -->
+      <!-- ================================================================== -->
+      <section id="viewGoals" style="display:none;">
+        <div class="task-card" style="background:linear-gradient(135deg, rgba(216,208,248,0.16), rgba(200,244,236,0.1));margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div>
+              <h2 style="font-size:18px;font-weight:900;">🎯 Uzun Soluklu Hedeflerim</h2>
+              <p style="font-size:12px;color:var(--text-muted);margin-top:3px;">
+                Son teslim tarihi (deadline) olmayan büyük hedeflerini, adım adım kilometre taşlarını ve ilerleme yüzdelerini burada yönet.
+              </p>
+            </div>
+            <button class="btn-cream" onclick="openGoalModal()">+ Yeni Hedef Ekle</button>
+          </div>
+        </div>
+
+        <div id="goalsListContainer" class="task-list"></div>
+      </section>
+
+      <!-- ================================================================== -->
+      <!-- SEKME 3: 📦 ARŞİV & BİTEN GÖREVLER -->
+      <!-- ================================================================== -->
       <section id="viewArchive" style="display:none;">
         <div class="section-header">
           <div>
@@ -253,7 +311,9 @@
         <div id="archiveTaskList" class="task-list"></div>
       </section>
 
-      <!-- SEKME 3: HAFTALIK MOTİVASYON KARNESİ & POMODORO ODAK SAYACI -->
+      <!-- ================================================================== -->
+      <!-- SEKME 4: 🔥 HAFTALIK MOTİVASYON KARNESİ & POMODORO ODAK SAYACI -->
+      <!-- ================================================================== -->
       <section id="viewStats" style="display:none;">
         <div class="task-card" style="text-align:center;margin-bottom:16px;">
           <h3 style="font-size:18px;font-weight:800;">⏱️ Odaklanma Modu (Pomodoro)</h3>
@@ -276,10 +336,10 @@
         </div>
       </section>
 
-      <!-- SEKME 4: AYARLAR (BİLDİRİM İZNİ, ÇIKIŞ YAPMA, TEMA, YEDEKLEME VE BULUT BURADA!) -->
+      <!-- ================================================================== -->
+      <!-- SEKME 5: ⚙️ AYARLAR (SAĞ ÜSTTEKİ PROFİL ROZETİNDEN AÇILIR) -->
+      <!-- ================================================================== -->
       <section id="viewSettings" style="display:none;">
-
-        <!-- BİLDİRİM VE ALARM TEST MERKEZİ (SAĞ ÜSTTEN BURAYA TAŞINDI) -->
         <div class="task-card" style="margin-bottom:14px;">
           <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">🔔 Bildirimler & Alarm Ayarları</h3>
           <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
@@ -287,11 +347,10 @@
           </p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn-cream" onclick="requestNotificationPermission()">🔔 Bildirim İznini Aç & Test Gönder</button>
-            <button class="pin-btn" style="height:38px;padding:0 14px;font-size:12.5px;" id="installAppBtn" style="display:none;" onclick="installPWA()">📲 Ana Ekrana Kur</button>
+            <button class="pin-btn" style="height:38px;padding:0 14px;font-size:12.5px;display:none;" id="installAppBtn" onclick="installPWA()">📲 Ana Ekrana Kur</button>
           </div>
         </div>
 
-        <!-- HESAP BİLGİLERİ, KİŞİSELLEŞTİRME VE ÇIKIŞ YAPMA -->
         <div class="task-card" style="margin-bottom:14px;">
           <h3 style="font-size:16px;font-weight:800;margin-bottom:12px;">👤 Hesap Bilgilerim & Görünüm</h3>
           <div class="form-row">
@@ -320,7 +379,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label>Yeni Şifre Belirle (Değiştirmek İstersen Yaz)</label>
+            <label>Yeni Şifre Belirle</label>
             <input type="password" id="settingUserPassword" class="form-input" placeholder="Değiştirmek istemiyorsan boş bırak" />
           </div>
           <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:6px;">
@@ -329,11 +388,10 @@
           </div>
         </div>
 
-        <!-- TEK TIKLA TAM YEDEK İNDİRME / GERİ YÜKLEME -->
         <div class="task-card" style="margin-bottom:14px;">
           <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">💾 Tek Tıkla Güvenli Arşiv Yedeği</h3>
           <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
-            Tüm görevlerini, sıkıştırılmış fotoğraflarını ve ses kayıtlarını tek dosyada indirebilir veya geri yükleyebilirsin.
+            Tüm görevlerini, hedeflerini, sıkıştırılmış fotoğraflarını ve ses kayıtlarını tek dosyada indirebilir veya geri yükleyebilirsin.
           </p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn-cream" onclick="exportFullBackup()">📥 Yedek İndir (.JSON)</button>
@@ -344,7 +402,6 @@
           </div>
         </div>
 
-        <!-- ÜCRETSİZ BULUT SENKRONİZASYONU -->
         <div class="task-card">
           <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">☁️ Ücretsiz Canlı Bulut Senkronizasyonu (PC & Mobil)</h3>
           <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
@@ -368,32 +425,34 @@
     </main>
   </div>
 
-  <!-- ALT YÜZEN MENÜ VE ORTADAKİ + BUTONU -->
+  <!-- ALT YÜZEN MENÜ: GÖREVLER | HEDEFLER | (+) | ARŞİV | ODAK & KARNE -->
   <div class="bottom-nav-wrap">
     <nav class="bottom-nav">
       <button class="nav-item active" id="navTasks" onclick="switchView('tasks')">
         <span class="nav-icon">🏠</span>
         <span>Görevler</span>
       </button>
-      <button class="nav-item" id="navArchive" onclick="switchView('archive')">
-        <span class="nav-icon">🗂️</span>
-        <span>Arşiv</span>
+      <button class="nav-item" id="navGoals" onclick="switchView('goals')">
+        <span class="nav-icon">🎯</span>
+        <span>Hedefler</span>
       </button>
 
-      <button class="fab-add" onclick="openTaskModal()" title="Yeni Görev Ekle">+</button>
+      <button class="fab-add" onclick="handleFabClick()" title="Yeni Görev veya Hedef Ekle">+</button>
 
+      <button class="nav-item" id="navArchive" onclick="switchView('archive')">
+        <span class="nav-icon">📦</span>
+        <span>Arşiv</span>
+      </button>
       <button class="nav-item" id="navStats" onclick="switchView('stats')">
         <span class="nav-icon">🔥</span>
         <span>Odak & Karne</span>
       </button>
-      <button class="nav-item" id="navSettings" onclick="switchView('settings')">
-        <span class="nav-icon">⚙️</span>
-        <span>Ayarlar</span>
-      </button>
     </nav>
   </div>
 
-  <!-- PROFESYONEL YENİ GÖREV PLANLAMA MODALI (TEK DOKUNUŞLU SEÇİCİLER & TAM TIKLANABİLİR TARİH/SAAT) -->
+  <!-- ==================================================================== -->
+  <!-- MODAL 1: PROFESYONEL GÜNLÜK GÖREV PLANLAMA MODALI (HARİTA & LİNK DAHİL) -->
+  <!-- ==================================================================== -->
   <div id="taskModal" class="modal-backdrop hidden">
     <div class="modal-sheet">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
@@ -405,7 +464,6 @@
       <input type="hidden" id="taskPriorityInput" value="medium" />
       <input type="hidden" id="taskCategoryInput" value="İş & Proje" />
 
-      <!-- 1. GÖREV BAŞLIĞI + KONUŞARAK YAZDIRMA + ÜSTE SABİTLEME -->
       <div class="form-group">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
           <label style="margin:0;">Görev Başlığı</label>
@@ -415,14 +473,14 @@
         </div>
         <div style="display:flex;gap:8px;">
           <input type="text" id="taskTitleInput" class="form-input" placeholder="Ne yapacaksın? (Yaz veya 🎙️ Konuş)" />
-          <button type="button" id="voiceDictateBtn" class="btn-cream" onclick="toggleTurkishSpeechToText('title')" title="Konuşarak Türkçe Görev Yazdır">
+          <button type="button" id="voiceDictateBtn" class="btn-cream" onclick="toggleTurkishSpeechToText('title')">
             🎙️ Konuş
           </button>
         </div>
         <small id="speechStatusHint" style="font-size:11.5px;color:var(--accent-cream);display:none;margin-top:5px;"></small>
       </div>
 
-      <!-- 2. TAM TIKLANABİLİR TARİH VE SAAT KUTULARI (18'E VEYA SAATE NEREDEN BASARSAN BAS DİREKT AÇILIR!) -->
+      <!-- TAM TIKLANABİLİR TARİH VE SAAT KUTULARI + HIZLI ÇİPLER -->
       <div class="form-row">
         <div class="form-group">
           <label>📅 Tarih Seç (Kutuya Dokun)</label>
@@ -444,25 +502,26 @@
             <span style="font-size:16px;pointer-events:none;">⏰</span>
           </div>
           <div class="quick-chips">
-            <span class="quick-chip" onclick="setQuickTime('+1h')">+1 Saat</span>
+            <span class="quick-chip" onclick="setQuickTime('+1h')">1 Saat Sonra</span>
             <span class="quick-chip" onclick="setQuickTime('09:00')">09:00</span>
             <span class="quick-chip" onclick="setQuickTime('14:00')">14:00</span>
-            <span class="quick-chip" onclick="setQuickTime('20:00')">20:00</span>
+            <span class="quick-chip" onclick="setQuickTime('20:00')">Akşam 20:00</span>
           </div>
         </div>
       </div>
 
-      <!-- 3. TEK DOKUNUŞLU KATEGORİ SEÇİMİ (SPOR EKLENDİ!) -->
+      <!-- 4 ANA KATEGORİ SEÇİMİ -->
       <div class="form-group">
-        <label>Kategori Seç</label>
-        <div class="pill-selector-grid cols-3" id="categoryPillsContainer">
+        <label>Kategori Başlığı Seç</label>
+        <div class="pill-selector-grid" id="categoryPillsContainer">
           <div class="choice-pill active" data-val="İş & Proje" onclick="selectCategoryPill('İş & Proje')">💡 İş & Proje</div>
-          <div class="choice-pill" data-val="Kişisel & Günlük" onclick="selectCategoryPill('Kişisel & Günlük')">🧩 Kişisel</div>
-          <div class="choice-pill" data-val="Spor & Sağlık" onclick="selectCategoryPill('Spor & Sağlık')">🏋️ Spor</div>
+          <div class="choice-pill" data-val="Rutin İşler" onclick="selectCategoryPill('Rutin İşler')">🔄 Rutin İşler</div>
+          <div class="choice-pill" data-val="Spor ve Sağlık" onclick="selectCategoryPill('Spor ve Sağlık')">🏋️ Spor ve Sağlık</div>
+          <div class="choice-pill" data-val="Kişisel Gelişim" onclick="selectCategoryPill('Kişisel Gelişim')">📚 Kişisel Gelişim</div>
         </div>
       </div>
 
-      <!-- 4. TEK DOKUNUŞLU ACİLİYET & ÖNCELİK SEÇİMİ -->
+      <!-- ACİLİYET & ÖNCELİK SEÇİMİ -->
       <div class="form-group">
         <label>Aciliyet & Öncelik</label>
         <div class="pill-selector-grid cols-4" id="priorityPillsContainer">
@@ -473,7 +532,22 @@
         </div>
       </div>
 
-      <!-- 5. ALARM TONU VE TEKRARLAYAN RUTİN -->
+      <!-- KONUM (GOOGLE MAPS) VE WEB LİNKİ EKLEME ALANI -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>📍 Konum / Mekan (Google Maps)</label>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="taskLocationInput" class="form-input" placeholder="Mekan adı veya adres..." />
+            <button type="button" class="pin-btn" style="width:40px;height:40px;flex-shrink:0;" onclick="detectCurrentGPSLocation()" title="Mevcut GPS Konumumu Ekle">📍</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>🔗 Web Linki / Bağlantı</label>
+          <input type="text" id="taskLinkInput" class="form-input" placeholder="https://..." />
+        </div>
+      </div>
+
+      <!-- ALARM TONU VE TEKRARLAYAN RUTİN -->
       <div class="form-row">
         <div class="form-group">
           <label>🔔 Bildirim & Alarm Sesi</label>
@@ -496,22 +570,22 @@
         </div>
       </div>
 
-      <!-- 6. AÇIKLAMA VE ETİKETLER -->
+      <!-- AÇIKLAMA VE ETİKETLER -->
       <div class="form-row">
         <div class="form-group">
           <label>Detay / Not (Sesle Yazdır 🎙️)</label>
           <div style="display:flex;gap:6px;">
             <input type="text" id="taskDescInput" class="form-input" placeholder="Ek detay veya not..." />
-            <button type="button" id="voiceDescBtn" class="pin-btn" style="width:42px;height:42px;flex-shrink:0;" onclick="toggleTurkishSpeechToText('desc')">🎙️</button>
+            <button type="button" id="voiceDescBtn" class="pin-btn" style="width:40px;height:40px;flex-shrink:0;" onclick="toggleTurkishSpeechToText('desc')">🎙️</button>
           </div>
         </div>
         <div class="form-group">
           <label>Etiketler</label>
-          <input type="text" id="taskTagsInput" class="form-input" placeholder="#spor #iş #acil" />
+          <input type="text" id="taskTagsInput" class="form-input" placeholder="#spor #iş #gelişim" />
         </div>
       </div>
 
-      <!-- 7. ALT GÖREVLER (CHECKLIST) -->
+      <!-- ALT GÖREVLER -->
       <div class="form-group">
         <label>☑️ Alt Adımlar (Checklist)</label>
         <div style="display:flex;gap:8px;margin-bottom:8px;">
@@ -521,7 +595,7 @@
         <div id="modalSubtaskList" style="display:flex;flex-direction:column;gap:6px;"></div>
       </div>
 
-      <!-- 8. FOTOĞRAF (KAMERA / GALERİ) VE SESLİ MESAJ -->
+      <!-- FOTOĞRAF VE SES KAYDI -->
       <div class="form-group">
         <label>📷 Fotoğraf & 🎤 Ses Kaydı Ekle</label>
         <input type="file" id="cameraFileInput" accept="image/*" capture="environment" style="position:fixed;top:-9999px;left:-9999px;opacity:0;" onchange="handlePhotoUpload(event)" />
@@ -545,6 +619,60 @@
       <div style="display:flex;gap:10px;margin-top:16px;">
         <button type="button" class="pin-btn" style="flex:1;height:46px;" onclick="closeTaskModal()">Vazgeç</button>
         <button type="button" class="btn-cream" style="flex:2;height:46px;font-size:14px;" onclick="saveTaskFromModal()">💾 Görevi Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL 2: 🎯 UZUN SOLUKLU HEDEF EKLEME / DÜZENLEME MODALI -->
+  <!-- ==================================================================== -->
+  <div id="goalModal" class="modal-backdrop hidden">
+    <div class="modal-sheet">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3 id="goalModalTitle" style="font-size:18px;font-weight:900;">🎯 Uzun Soluklu Hedef Belirle</h3>
+        <button class="icon-btn" onclick="closeGoalModal()">✕</button>
+      </div>
+
+      <input type="hidden" id="editGoalId" />
+
+      <div class="form-group">
+        <label>Hedef Başlığı (Son Tarihi Olmayan Büyük Hedefin)</label>
+        <input type="text" id="goalTitleInput" class="form-input" placeholder="Örn: İngilizceyi C1 Seviyesine Çıkar / 10 Kilo Ver / 25 Kitap Oku" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Hedef Kategorisi</label>
+          <select id="goalCategoryInput" class="form-select">
+            <option value="Kişisel Gelişim">📚 Kişisel Gelişim</option>
+            <option value="Spor ve Sağlık">🏋️ Spor ve Sağlık</option>
+            <option value="İş & Proje">💡 İş & Proje</option>
+            <option value="Rutin İşler">🔄 Rutin İşler</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Başlangıç İlerleme Yüzdesi (%)</label>
+          <input type="number" id="goalProgressInput" class="form-input" min="0" max="100" value="0" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Motivasyon / Vizyon Notu (Neden Bu Hedefe Ulaşmak İstiyorsun?)</label>
+        <textarea id="goalDescInput" class="form-textarea" rows="2" placeholder="Hedefinle ilgili motivasyon notun veya stratejin..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>🏁 Kilometre Taşları (Adım Adım Alt Hedefler)</label>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <input type="text" id="goalStepNewInput" class="form-input" placeholder="Kilometre taşı ekle (Örn: İlk 5 kitabı bitir)" onkeydown="if(event.key==='Enter'){event.preventDefault();addGoalStepInModal();}" />
+          <button type="button" class="btn-cream" onclick="addGoalStepInModal()">+ Ekle</button>
+        </div>
+        <div id="modalGoalStepList" style="display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button type="button" class="pin-btn" style="flex:1;height:46px;" onclick="closeGoalModal()">Vazgeç</button>
+        <button type="button" class="btn-cream" style="flex:2;height:46px;font-size:14px;" onclick="saveGoalFromModal()">🎯 Hedefi Kaydet</button>
       </div>
     </div>
   </div>
@@ -579,6 +707,6 @@
     <img id="photoViewerImg" src="" alt="Görev Fotoğrafı" style="max-width:92vw;max-height:88vh;border-radius:18px;box-shadow:var(--shadow);" />
   </div>
 
-  <script src="app.js?v=8"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>
