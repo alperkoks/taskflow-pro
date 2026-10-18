@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.alperkoks.taskflowpro",
+        "sha256_cert_fingerprints": ["27:B4:D9:A3:6C:1E:B8:85:4C:0F:80:80:FA:56:CD:51:B0:77:9E:2B:25:3A:8F:0C:EA:F0:F7:D9:E3:6F:6A:E3"]
+      }
+    }]
