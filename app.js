@@ -727,31 +727,338 @@ function applyUserPreferences() {
   document.getElementById('settingUserName').value = displayName;
   document.getElementById('settingUserEmail').value = appData.email || '';
   document.getElementById('settingUserPassword').value = '';
+  const vaultPassSetting = document.getElementById('settingVaultPassword');
+  if (vaultPassSetting) vaultPassSetting.value = appData.vaultPassword || '';
+
   document.getElementById('welcomeUserText').textContent = `Merhaba, ${displayName} 👋`;
   document.getElementById('headerAvatarLetter').textContent = displayName.charAt(0).toUpperCase();
 
   document.getElementById('scratchpadInput').value = appData.scratchpad || '';
   const vaultInp = document.getElementById('secretVaultInput');
   if (vaultInp) vaultInp.value = appData.secretVault || '';
+  lockSecretVault();
+
   document.getElementById('cloudDbUrl').value = appData.cloudDbUrl || '';
   document.getElementById('cloudSyncKey').value = appData.cloudSyncKey || ('taskflow_' + (appData.username || 'user'));
   document.getElementById('streakBadge').textContent = `🔥 ${appData.streak || 1} Gün Seri`;
   checkAndRenderWaterTracker();
+  renderBudgetTracker();
 }
 
+// ----------------------------------------------------------------------------
+// 🔐 ŞİFRE KORUMALI GİZLİ KASA (ÖZEL ŞİFRE VEYA HESAP ŞİFRESİ İLE AÇILIR)
+// ----------------------------------------------------------------------------
 function toggleSecretVaultBox() {
   const bodyEl = document.getElementById('secretVaultBody');
-  const badgeEl = document.getElementById('vaultStatusBadge');
-  if (!bodyEl) return;
-  if (bodyEl.style.display === 'none') {
-    bodyEl.style.display = 'block';
-    badgeEl.textContent = '🔓 Açık (Gizlemek İçin Dokun)';
-    badgeEl.style.color = '#95de64';
+  const authEl = document.getElementById('secretVaultAuthBox');
+  const passInp = document.getElementById('vaultPassCheckInput');
+  const errEl = document.getElementById('vaultAuthError');
+  if (!bodyEl || !authEl) return;
+
+  // Eğer kasa zaten açıksa kilitle
+  if (bodyEl.style.display === 'block') {
+    lockSecretVault();
+    return;
+  }
+
+  // Şifre kutusu açıksa kapat, kapalıysa aç
+  if (authEl.style.display === 'block') {
+    authEl.style.display = 'none';
   } else {
-    bodyEl.style.display = 'none';
-    badgeEl.textContent = '🔒 Kilitli (Dokun)';
+    authEl.style.display = 'block';
+    if (errEl) errEl.textContent = '';
+    if (passInp) {
+      passInp.value = '';
+      passInp.focus();
+    }
+  }
+}
+
+function verifyAndUnlockVault() {
+  const passInp = document.getElementById('vaultPassCheckInput');
+  const errEl = document.getElementById('vaultAuthError');
+  const authEl = document.getElementById('secretVaultAuthBox');
+  const bodyEl = document.getElementById('secretVaultBody');
+  const badgeEl = document.getElementById('vaultStatusBadge');
+
+  const entered = (passInp ? passInp.value : '').trim();
+  const expected = (appData.vaultPassword && appData.vaultPassword.trim())
+    ? appData.vaultPassword.trim()
+    : (appData.password || '');
+
+  if (expected && entered !== expected) {
+    if (errEl) errEl.textContent = '❌ Gizli Kasa şifresi hatalı!';
+    return;
+  }
+
+  if (authEl) authEl.style.display = 'none';
+  if (bodyEl) bodyEl.style.display = 'block';
+  if (badgeEl) {
+    badgeEl.textContent = '🔓 Açık (Kilitlemek İçin Dokun)';
+    badgeEl.style.color = '#95de64';
+  }
+}
+
+function lockSecretVault() {
+  const authEl = document.getElementById('secretVaultAuthBox');
+  const bodyEl = document.getElementById('secretVaultBody');
+  const badgeEl = document.getElementById('vaultStatusBadge');
+  const passInp = document.getElementById('vaultPassCheckInput');
+  const errEl = document.getElementById('vaultAuthError');
+
+  if (authEl) authEl.style.display = 'none';
+  if (bodyEl) bodyEl.style.display = 'none';
+  if (passInp) passInp.value = '';
+  if (errEl) errEl.textContent = '';
+  if (badgeEl) {
+    badgeEl.textContent = '🔒 Şifreli Kilit (Dokun)';
     badgeEl.style.color = 'var(--pastel-purple)';
   }
+}
+
+// ----------------------------------------------------------------------------
+// 💰 MİNİ BÜTÇE, HARCAMA & AYLIK ABONELİK TAKİPÇİSİ
+// ----------------------------------------------------------------------------
+function renderBudgetTracker() {
+  const listEl = document.getElementById('budgetListContainer');
+  const badgeEl = document.getElementById('budgetTotalBadge');
+  if (!listEl || !badgeEl) return;
+
+  if (!Array.isArray(appData.budgetItems)) {
+    appData.budgetItems = [
+      { id: 'b_1', title: '🏋️ Spor Salonu / Supplement', amount: 1200, type: 'sub', paid: false }
+    ];
+  }
+
+  const items = appData.budgetItems;
+  const total = items.reduce((acc, x) => acc + (Number(x.amount) || 0), 0);
+  badgeEl.textContent = `Toplam: ${total.toLocaleString('tr-TR')} ₺ ▾`;
+
+  if (items.length === 0) {
+    listEl.innerHTML = `<div style="font-size:11.5px;color:var(--text-muted);text-align:center;padding:8px;">Henüz harcama veya abonelik eklenmedi.</div>`;
+    return;
+  }
+
+  listEl.innerHTML = items.map((item, idx) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;background:var(--bg-surface);padding:7px 9px;border-radius:10px;font-size:12px;">
+      <div style="display:flex;align-items:center;gap:6px;min-width:0;flex:1;cursor:pointer;" onclick="toggleBudgetPaid(${idx})" title="Ödendi / Bekliyor Değiştir">
+        <span>${item.paid ? '✅' : '⏳'}</span>
+        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${item.paid ? 'text-decoration:line-through;color:var(--text-muted);' : 'font-weight:700;'}">${escapeHtml(item.title)}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
+        <b style="color:var(--accent-cream);">${Number(item.amount).toLocaleString('tr-TR')} ₺</b>
+        <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;font-size:10px;" onclick="createTaskFromBudgetItem(${idx})" title="Bugünün Görevlerine Hatırlatıcı Olarak Ekle">📅 Görev</button>
+        <button type="button" style="background:none;border:none;color:#ff7875;cursor:pointer;font-weight:800;" onclick="deleteBudgetItem(${idx})">×</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addBudgetItem() {
+  const titleInp = document.getElementById('budgetTitleInput');
+  const amountInp = document.getElementById('budgetAmountInput');
+  const typeInp = document.getElementById('budgetTypeInput');
+
+  const title = (titleInp.value || '').trim();
+  const amount = parseFloat(amountInp.value || '0');
+  const type = typeInp ? typeInp.value : 'sub';
+
+  if (!title || isNaN(amount) || amount <= 0) {
+    alert('Lütfen geçerli bir harcama/abonelik adı ve tutar (₺) girin!');
+    return;
+  }
+
+  if (!Array.isArray(appData.budgetItems)) appData.budgetItems = [];
+  appData.budgetItems.unshift({
+    id: 'b_' + Date.now(),
+    title: (type === 'sub' ? '🔄 ' : '🛒 ') + title,
+    amount,
+    type,
+    paid: false
+  });
+
+  titleInp.value = '';
+  amountInp.value = '';
+  renderBudgetTracker();
+  saveProfileData();
+}
+
+function toggleBudgetPaid(idx) {
+  if (!Array.isArray(appData.budgetItems) || !appData.budgetItems[idx]) return;
+  appData.budgetItems[idx].paid = !appData.budgetItems[idx].paid;
+  renderBudgetTracker();
+  saveProfileData();
+}
+
+function deleteBudgetItem(idx) {
+  if (!Array.isArray(appData.budgetItems)) return;
+  appData.budgetItems.splice(idx, 1);
+  renderBudgetTracker();
+  saveProfileData();
+}
+
+function createTaskFromBudgetItem(idx) {
+  if (!Array.isArray(appData.budgetItems) || !appData.budgetItems[idx]) return;
+  const item = appData.budgetItems[idx];
+  const today = getTodayISO();
+
+  appData.tasks.unshift({
+    id: 't_' + Date.now(),
+    title: `💰 Ödeme: ${item.title} (${Number(item.amount).toLocaleString('tr-TR')} ₺)`,
+    pinned: true,
+    desc: 'Bütçe & Abonelik takipçisinden aktarılan ödeme hatırlatıcısı.',
+    date: today,
+    time: '',
+    location: '',
+    link: '',
+    alarmEnabled: true,
+    alarmSound: 'system',
+    priority: 'high',
+    category: 'Rutin İşler',
+    repeat: item.type === 'sub' ? 'monthly' : 'none',
+    tags: ['#bütçe', '#ödeme'],
+    subtasks: [],
+    photos: [],
+    audios: [],
+    completed: false,
+    completedAt: null,
+    completionEmoji: '',
+    completionComment: '',
+    notified: false
+  });
+
+  selectedDate = today;
+  playAlertTone('success');
+  saveProfileData();
+  renderAll();
+  alert(`✅ "${item.title}" ödemesi bugünün (${today}) görevlerine eklendi!`);
+}
+
+// ----------------------------------------------------------------------------
+// 🏋️ HAZIR SPOR / ANTRENMAN VE RUTİN GÖREV ŞABLONLARI
+// ----------------------------------------------------------------------------
+const WORKOUT_TEMPLATES = {
+  push: {
+    title: '💪 İtiş Günü (Push Antrenmanı: Göğüs, Omuz, Arka Kol)',
+    category: 'Spor ve Sağlık',
+    priority: 'high',
+    desc: 'Göğüs, Ön/Yan Omuz ve Triceps odaklı hipertrofi antrenmanı.',
+    tags: '#spor #push #antrenman',
+    subtasks: [
+      '5 Dk Omuz & Rotator Cuff Isınma',
+      'Bench Press / Dumbbell Press (4 Set x 8-10 Tekrar)',
+      'Incline Dumbbell Press (4 Set x 10-12 Tekrar)',
+      'Overhead Shoulder Press (4 Set x 10-12 Tekrar)',
+      'Lateral Raise (4 Set x 15 Tekrar)',
+      'Triceps Rope Pushdown & Overhead Extension (4 Set x 12 Tekrar)'
+    ]
+  },
+  pull: {
+    title: '🏋️ Çekiş Günü (Pull Antrenmanı: Sırt, Arka Omuz, Ön Kol)',
+    category: 'Spor ve Sağlık',
+    priority: 'high',
+    desc: 'Sırt genişliği, kalınlığı ve Biceps odaklı çekiş antrenmanı.',
+    tags: '#spor #pull #sırt',
+    subtasks: [
+      '5 Dk Sırt & Eklem Mobilite Isınması',
+      'Lat Pulldown veya Barfiks (4 Set x 10-12 Tekrar)',
+      'Barbell Row / Seated Cable Row (4 Set x 10 Tekrar)',
+      'Single Arm Dumbbell Row (3 Set x 12 Tekrar)',
+      'Face Pull - Arka Omuz (4 Set x 15 Tekrar)',
+      'Barbell / EZ-Bar Biceps Curl & Hammer Curl (4 Set x 12 Tekrar)'
+    ]
+  },
+  legs: {
+    title: '🦵 Bacak & Kardiyo Antrenmanı (Leg Day & Core)',
+    category: 'Spor ve Sağlık',
+    priority: 'high',
+    desc: 'Alt vücut kuvvet, quadriceps/hamstring ve kardiyo seansı.',
+    tags: '#spor #bacak #kardiyo',
+    subtasks: [
+      '5-8 Dk Dinamik Kalça & Diz Isınması',
+      'Squat veya Leg Press (4 Set x 10 Tekrar)',
+      'Romanian Deadlift - Arka Bacak (4 Set x 10-12 Tekrar)',
+      'Leg Extension & Lying Leg Curl Süperset (4 Set x 12-15 Tekrar)',
+      'Standing Calf Raise (4 Set x 15-20 Tekrar)',
+      '20 Dk Eğimli Yürüyüş (Incline Walk) veya Kardiyo'
+    ]
+  },
+  fullbody: {
+    title: '🔥 Full Body & Karın (Core) Antrenmanı',
+    category: 'Spor ve Sağlık',
+    priority: 'high',
+    desc: 'Tüm vücut kas gruplarını çalıştıran yüksek tempolu antrenman.',
+    tags: '#spor #fullbody #kondisyon',
+    subtasks: [
+      '5 Dk Tüm Vücut Isınma',
+      'Göğüs Press & Sırt Çekiş (4 Set x 10-12 Tekrar)',
+      'Squat / Lunge Alt Vücut Serisi (4 Set x 12 Tekrar)',
+      'Omuz Press & Kol Süperset (3 Set x 12 Tekrar)',
+      'Plank & Karın (Core) Egzersizleri (4 Set)',
+      '15 Dk Tempolu Kardiyo'
+    ]
+  },
+  growth: {
+    title: '📚 Günlük Kişisel Gelişim & Derin Odak Seansı',
+    category: 'Kişisel Gelişim',
+    priority: 'medium',
+    desc: 'Zihinsel gelişim, okuma ve yabancı dil/beceri pratiği.',
+    tags: '#gelişim #okuma #odak',
+    subtasks: [
+      '25 sayfa kitap veya makale oku',
+      '20 dakika yabancı dil / kelime / kurs pratiği yap',
+      'Günün 3 önemli kazanımını not et'
+    ]
+  }
+};
+
+function applyWorkoutTemplateInModal(tplKey) {
+  const tpl = WORKOUT_TEMPLATES[tplKey];
+  if (!tpl) return;
+  document.getElementById('taskTitleInput').value = tpl.title;
+  document.getElementById('taskDescInput').value = tpl.desc;
+  document.getElementById('taskTagsInput').value = tpl.tags;
+  selectCategoryPill(tpl.category);
+  selectPriorityPill(tpl.priority);
+  modalSubtasks = tpl.subtasks.map((txt) => ({ text: txt, done: false }));
+  renderModalSubtasks();
+}
+
+function quickAddWorkoutTask(tplKey) {
+  const tpl = WORKOUT_TEMPLATES[tplKey];
+  if (!tpl) return;
+  const today = getTodayISO();
+
+  appData.tasks.unshift({
+    id: 't_' + Date.now(),
+    title: tpl.title,
+    pinned: true,
+    desc: tpl.desc,
+    date: today,
+    time: '',
+    location: '',
+    link: '',
+    alarmEnabled: true,
+    alarmSound: 'system',
+    priority: tpl.priority,
+    category: tpl.category,
+    repeat: 'none',
+    tags: tpl.tags.split(' '),
+    subtasks: tpl.subtasks.map((txt) => ({ text: txt, done: false })),
+    photos: [],
+    audios: [],
+    completed: false,
+    completedAt: null,
+    completionEmoji: '',
+    completionComment: '',
+    notified: false
+  });
+
+  selectedDate = today;
+  playAlertTone('success');
+  saveProfileData();
+  renderAll();
+  alert(`💪 "${tpl.title}" tüm hareket adımlarıyla birlikte bugünün görevlerine eklendi!`);
 }
 
 function changeTheme(newTheme) {
@@ -770,15 +1077,20 @@ async function saveUserSettings() {
   const nameVal = document.getElementById('settingUserName').value.trim();
   const emailVal = document.getElementById('settingUserEmail').value.trim().toLowerCase();
   const passVal = document.getElementById('settingUserPassword').value;
+  const vaultPassEl = document.getElementById('settingVaultPassword');
+  const vaultPassVal = vaultPassEl ? vaultPassEl.value.trim() : '';
 
   if (nameVal) appData.profileName = nameVal;
   if (emailVal) appData.email = emailVal;
   if (passVal && passVal.length >= 4) {
     appData.password = passVal;
   }
+  if (vaultPassVal) {
+    appData.vaultPassword = vaultPassVal;
+  }
   await saveProfileData();
   applyUserPreferences();
-  alert('✅ Hesap bilgileriniz güncellendi!');
+  alert('✅ Hesap bilgileriniz ve Gizli Kasa şifreniz başarıyla güncellendi!');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1029,6 +1341,7 @@ function renderAll() {
   if (showMonthGrid) renderMonthGrid();
   checkOverdueTasks();
   checkAndRenderWaterTracker();
+  renderBudgetTracker();
   updateBentoCountsAndDailyProgress();
   renderOngoingTasks();
   renderGoals();
@@ -2204,6 +2517,90 @@ function updatePomoDisplay() {
 }
 
 // ----------------------------------------------------------------------------
+// ⏱️ KRONOMETRE (STOPWATCH - İLERİ SAYIM & TUR/SET KAYDI) MOTORU
+// ----------------------------------------------------------------------------
+let stopwatchSeconds = 0;
+let stopwatchInterval = null;
+let stopwatchRunning = false;
+let stopwatchLaps = [];
+
+function switchTimerMode(mode) {
+  const pomoBox = document.getElementById('pomoModeBox');
+  const swBox = document.getElementById('stopwatchModeBox');
+  const tabPomo = document.getElementById('tabPomoModeBtn');
+  const tabSw = document.getElementById('tabStopwatchModeBtn');
+  if (!pomoBox || !swBox) return;
+
+  if (mode === 'stopwatch') {
+    pomoBox.style.display = 'none';
+    swBox.style.display = 'block';
+    tabPomo.classList.remove('active');
+    tabSw.classList.add('active');
+  } else {
+    pomoBox.style.display = 'block';
+    swBox.style.display = 'none';
+    tabPomo.classList.add('active');
+    tabSw.classList.remove('active');
+  }
+}
+
+function formatStopwatchTime(totalSec) {
+  const hrs = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+  const mins = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+  const secs = String(totalSec % 60).padStart(2, '0');
+  return `${hrs}:${mins}:${secs}`;
+}
+
+function toggleStopwatch() {
+  const stateEl = document.getElementById('stopwatchStateText');
+  if (stopwatchRunning) {
+    clearInterval(stopwatchInterval);
+    stopwatchRunning = false;
+    if (stateEl) stateEl.textContent = '⏸️ Duraklatıldı';
+    return;
+  }
+  stopwatchRunning = true;
+  if (stateEl) stateEl.textContent = '⏱️ Süre Ölçülüyor...';
+  stopwatchInterval = setInterval(() => {
+    stopwatchSeconds++;
+    const disp = document.getElementById('stopwatchDisplay');
+    if (disp) disp.textContent = formatStopwatchTime(stopwatchSeconds);
+  }, 1000);
+}
+
+function recordStopwatchLap() {
+  if (stopwatchSeconds === 0) return;
+  stopwatchLaps.unshift({
+    num: stopwatchLaps.length + 1,
+    time: formatStopwatchTime(stopwatchSeconds)
+  });
+  renderStopwatchLaps();
+}
+
+function resetStopwatch() {
+  clearInterval(stopwatchInterval);
+  stopwatchRunning = false;
+  stopwatchSeconds = 0;
+  stopwatchLaps = [];
+  const disp = document.getElementById('stopwatchDisplay');
+  const stateEl = document.getElementById('stopwatchStateText');
+  if (disp) disp.textContent = '00:00:00';
+  if (stateEl) stateEl.textContent = 'Hazır';
+  renderStopwatchLaps();
+}
+
+function renderStopwatchLaps() {
+  const box = document.getElementById('stopwatchLapsList');
+  if (!box) return;
+  box.innerHTML = stopwatchLaps.map((l) => `
+    <div style="display:flex;justify-content:space-between;background:var(--bg-surface);padding:7px 12px;border-radius:10px;font-size:12.5px;">
+      <span style="font-weight:700;color:var(--pastel-mint);">🏁 ${l.num}. Tur / Set</span>
+      <b style="color:var(--accent-cream);">${l.time}</b>
+    </div>
+  `).join('');
+}
+
+// ----------------------------------------------------------------------------
 // 12. CANLI ÇALAN TAM EKRAN ALARM + SİSTEM BİLDİRİM KANALI MOTORU
 // ----------------------------------------------------------------------------
 function previewSelectedAlarm(soundType) {
@@ -2515,7 +2912,7 @@ async function installPWA() {
 
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=11').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=12').catch(() => {});
   }
   await initDB();
 

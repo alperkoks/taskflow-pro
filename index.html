@@ -7,8 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>TaskFlow+ — Günlük Görev, Hedefler & Odak</title>
-  <link rel="manifest" href="manifest.json?v=11" />
-  <link rel="stylesheet" href="styles.css?v=11" />
+  <link rel="manifest" href="manifest.json?v=12" />
+  <link rel="stylesheet" href="styles.css?v=12" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -184,6 +184,17 @@
 
         <!-- GÜNLÜK ZİNCİRİ KIRMA (TEK TIKLA SPOR / KİTAP / VİTAMİN / BESLENME ÇİPLERİ) -->
         <div class="habit-chain-strip" id="dailyHabitsStrip"></div>
+
+        <!-- 🏋️ TEK TIKLA HAZIR ANTRENMAN ŞABLONU EKLEME -->
+        <div style="margin-top:9px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="font-size:10.5px;font-weight:800;color:var(--text-muted);margin-bottom:5px;">🏋️ TEK TIKLA BUGÜNE ANTRENMAN RUTİNİ EKLE:</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;">
+            <span class="quick-chip" onclick="quickAddWorkoutTask('push')">💪 İtiş (Push)</span>
+            <span class="quick-chip" onclick="quickAddWorkoutTask('pull')">🏋️ Çekiş (Pull)</span>
+            <span class="quick-chip" onclick="quickAddWorkoutTask('legs')">🦵 Bacak & Kardiyo</span>
+            <span class="quick-chip" onclick="quickAddWorkoutTask('fullbody')">🔥 Full Body</span>
+          </div>
+        </div>
       </div>
 
       <!-- 3. TÜM GÖREVLER ŞERİDİ + 4 ANA KATEGORİ BENTO KARTLARI -->
@@ -229,6 +240,28 @@
         </div>
       </div>
 
+      <!-- 💰 MİNİ BÜTÇE, HARCAMA & ABONELİK HATIRLATICI -->
+      <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(245,216,181,0.25);">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="const bd=document.getElementById('budgetTrackerBody');bd.style.display=bd.style.display==='none'?'block':'none';">
+          <span style="font-weight:800;font-size:13px;">💰 Bütçe & Abonelik Takibi</span>
+          <span style="font-size:11.5px;font-weight:800;color:#95de64;" id="budgetTotalBadge">0 ₺ ▾</span>
+        </div>
+        <div id="budgetTrackerBody" style="display:none;margin-top:10px;">
+          <div style="display:flex;gap:5px;margin-bottom:6px;flex-wrap:wrap;">
+            <input type="text" id="budgetTitleInput" class="form-input" style="flex:2;min-width:110px;padding:7px 9px;font-size:12px;" placeholder="Örn: Spor Salonu / Netflix / Kira" />
+            <input type="number" id="budgetAmountInput" class="form-input" style="flex:1;min-width:70px;padding:7px 9px;font-size:12px;" placeholder="Tutar (₺)" />
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:8px;">
+            <select id="budgetTypeInput" class="form-select" style="flex:1;padding:6px 8px;font-size:11.5px;">
+              <option value="sub">🔄 Aylık Sabit / Abonelik</option>
+              <option value="exp">🛒 Tek Seferlik Harcama</option>
+            </select>
+            <button type="button" class="btn-cream" style="padding:6px 12px;font-size:12px;" onclick="addBudgetItem()">+ Ekle</button>
+          </div>
+          <div id="budgetListContainer" style="display:flex;flex-direction:column;gap:5px;max-height:190px;overflow-y:auto;"></div>
+        </div>
+      </div>
+
       <!-- HIZLI NOT / KARALAMA DEFTERİ -->
       <div class="scratchpad-card">
         <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="const sp=document.getElementById('scratchpadBody');sp.style.display=sp.style.display==='none'?'block':'none';">
@@ -240,14 +273,25 @@
         </div>
       </div>
 
-      <!-- 🔐 GİZLİ KASA / ÖZEL NOT ALANI (BULANIKLAŞTIRILMIŞ GÜVENLİ KUTU) -->
-      <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(216,208,248,0.22);">
+      <!-- 🔐 ŞİFRE KORUMALI GİZLİ KASA / ÖZEL NOT ALANI -->
+      <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(216,208,248,0.28);">
         <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSecretVaultBox()">
-          <span style="font-weight:800;font-size:13px;">🔐 Gizli Kasa (Özel Notlar)</span>
-          <span style="font-size:11px;color:var(--pastel-purple);" id="vaultStatusBadge">🔒 Kilitli (Dokun)</span>
+          <span style="font-weight:800;font-size:13px;">🔐 Gizli Kasa (Şifreli Notlar)</span>
+          <span style="font-size:11px;color:var(--pastel-purple);" id="vaultStatusBadge">🔒 Şifreli Kilit (Dokun)</span>
         </div>
+        <!-- Şifre Soran Ara Ekran -->
+        <div id="secretVaultAuthBox" style="display:none;margin-top:9px;">
+          <div style="display:flex;gap:6px;">
+            <input type="password" id="vaultPassCheckInput" class="form-input" style="padding:7px 10px;font-size:12.5px;" placeholder="Gizli Kasa şifreni gir..." onkeydown="if(event.key==='Enter'){event.preventDefault();verifyAndUnlockVault();}" />
+            <button type="button" class="btn-cream" style="padding:7px 12px;font-size:12px;" onclick="verifyAndUnlockVault()">🔓 Aç</button>
+          </div>
+          <small id="vaultAuthError" style="color:#ff4d4f;font-size:11px;display:block;margin-top:4px;"></small>
+          <small style="color:var(--text-muted);font-size:10.5px;display:block;margin-top:2px;">(Ayarlardan özel kasa şifresi belirleyebilirsin; belirlemediysen hesap şifren geçerlidir.)</small>
+        </div>
+        <!-- Açılmış Kasa İçeriği -->
         <div id="secretVaultBody" style="display:none;">
-          <textarea id="secretVaultInput" class="scratchpad-area" placeholder="Özel şifre ipuçları, IBAN, özel hedefler veya kimsenin görmesini istemediğin notlar... (Kapatınca otomatik kilitlenir)"></textarea>
+          <textarea id="secretVaultInput" class="scratchpad-area" placeholder="Özel şifre ipuçları, IBAN, özel hedefler veya kimsenin görmesini istemediğin notlar..."></textarea>
+          <button type="button" class="pin-btn" style="width:100%;height:32px;font-size:11.5px;margin-top:6px;color:var(--pastel-purple);" onclick="lockSecretVault()">🔒 Kasayı Şimdi Kilitle</button>
         </div>
       </div>
     </aside>
@@ -360,20 +404,45 @@
       </section>
 
       <!-- ================================================================== -->
-      <!-- SEKME 4: 🔥 HAFTALIK MOTİVASYON KARNESİ, KATEGORİ ANALİZİ & POMODORO -->
+      <!-- SEKME 4: 🔥 HAFTALIK MOTİVASYON KARNESİ, KATEGORİ ANALİZİ, POMODORO & KRONOMETRE -->
       <!-- ================================================================== -->
       <section id="viewStats" style="display:none;">
         <div class="task-card" style="text-align:center;margin-bottom:16px;">
-          <h3 style="font-size:18px;font-weight:800;">⏱️ Odaklanma Modu (Pomodoro)</h3>
-          <p style="font-size:12px;color:var(--text-muted);margin-top:4px;" id="pomoActiveTaskName">Acil bir göreve odaklanmak için 25 dakikalık sayaç</p>
-          <div class="pomo-circle">
-            <div class="pomo-time" id="pomoTimerDisplay">25:00</div>
-            <div style="font-size:12px;color:var(--text-muted);margin-top:4px;" id="pomoStateText">Hazır</div>
+          <!-- Pomodoro / Kronometre Sekme Seçici -->
+          <div class="profile-switcher" style="max-width:340px;margin:0 auto 12px;">
+            <button type="button" class="profile-tab active" id="tabPomoModeBtn" onclick="switchTimerMode('pomo')">⏳ Pomodoro (25dk)</button>
+            <button type="button" class="profile-tab" id="tabStopwatchModeBtn" onclick="switchTimerMode('stopwatch')">⏱️ Kronometre</button>
           </div>
-          <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
-            <button class="btn-cream" onclick="startPomodoro()">▶ Başlat / Duraklat</button>
-            <button class="pin-btn" style="height:38px;padding:0 14px;font-size:13px;" onclick="resetPomodoro(25)">25 dk Odak</button>
-            <button class="pin-btn" style="height:38px;padding:0 14px;font-size:13px;" onclick="resetPomodoro(5)">5 dk Mola</button>
+
+          <!-- MOD 1: POMODORO (GERİ SAYIM) -->
+          <div id="pomoModeBox">
+            <h3 style="font-size:17px;font-weight:800;">⏳ Odaklanma Modu (Geri Sayım)</h3>
+            <p style="font-size:12px;color:var(--text-muted);margin-top:4px;" id="pomoActiveTaskName">Acil bir göreve odaklanmak için 25 dakikalık sayaç</p>
+            <div class="pomo-circle">
+              <div class="pomo-time" id="pomoTimerDisplay">25:00</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:4px;" id="pomoStateText">Hazır</div>
+            </div>
+            <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
+              <button class="btn-cream" onclick="startPomodoro()">▶ Başlat / Duraklat</button>
+              <button class="pin-btn" style="height:38px;padding:0 14px;font-size:13px;" onclick="resetPomodoro(25)">25 dk Odak</button>
+              <button class="pin-btn" style="height:38px;padding:0 14px;font-size:13px;" onclick="resetPomodoro(5)">5 dk Mola</button>
+            </div>
+          </div>
+
+          <!-- MOD 2: KRONOMETRE (İLERİ SAYIM + TUR/SET KAYDI) -->
+          <div id="stopwatchModeBox" style="display:none;">
+            <h3 style="font-size:17px;font-weight:800;">⏱️ Antrenman & Görev Kronometresi</h3>
+            <p style="font-size:12px;color:var(--text-muted);margin-top:4px;">Antrenman setlerini, koşu süreni veya bir işin ne kadar sürdüğünü ileri doğru ölç</p>
+            <div class="pomo-circle" style="border-color:var(--pastel-mint);">
+              <div class="pomo-time" id="stopwatchDisplay" style="font-size:36px;">00:00:00</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:4px;" id="stopwatchStateText">Hazır</div>
+            </div>
+            <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
+              <button class="btn-cream" id="stopwatchStartBtn" onclick="toggleStopwatch()">▶ Başlat / Duraklat</button>
+              <button class="pin-btn" style="height:38px;padding:0 14px;font-size:13px;" onclick="recordStopwatchLap()">🏁 Tur / Set Kaydet</button>
+              <button class="pin-btn" style="height:38px;padding:0 14px;font-size:13px;color:#ff7875;" onclick="resetStopwatch()">🔄 Sıfırla</button>
+            </div>
+            <div id="stopwatchLapsList" style="margin-top:12px;display:flex;flex-direction:column;gap:5px;max-height:150px;overflow-y:auto;text-align:left;"></div>
           </div>
         </div>
 
@@ -406,7 +475,7 @@
         </div>
 
         <div class="task-card" style="margin-bottom:14px;">
-          <h3 style="font-size:16px;font-weight:800;margin-bottom:12px;">👤 Hesap Bilgilerim & Görünüm</h3>
+          <h3 style="font-size:16px;font-weight:800;margin-bottom:12px;">👤 Hesap Bilgilerim, Şifre & Gizli Kasa</h3>
           <div class="form-row">
             <div class="form-group">
               <label>Renk Teması</label>
@@ -432,12 +501,18 @@
               <input type="email" id="settingUserEmail" class="form-input" placeholder="ornek@gmail.com" />
             </div>
           </div>
-          <div class="form-group">
-            <label>Yeni Şifre Belirle</label>
-            <input type="password" id="settingUserPassword" class="form-input" placeholder="Değiştirmek istemiyorsan boş bırak" />
+          <div class="form-row stack-mobile">
+            <div class="form-group">
+              <label>🔑 Hesap Giriş Şifresini Değiştir</label>
+              <input type="password" id="settingUserPassword" class="form-input" placeholder="Değiştirmek istemiyorsan boş bırak" />
+            </div>
+            <div class="form-group">
+              <label>🔐 Gizli Kasa Özel Şifresi Belirle</label>
+              <input type="password" id="settingVaultPassword" class="form-input" placeholder="Gizli Kasa için ayrı şifre / PIN belirle" />
+            </div>
           </div>
           <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:6px;">
-            <button class="btn-cream" onclick="saveUserSettings()">💾 Bilgilerimi Güncelle</button>
+            <button class="btn-cream" onclick="saveUserSettings()">💾 Bilgilerimi & Kasa Şifresini Kaydet</button>
             <button class="pin-btn" style="height:40px;padding:0 16px;font-size:13px;color:#ff7875;border-color:rgba(255,77,79,0.35);" onclick="logoutUser()">🚪 Hesaptan Çıkış Yap</button>
           </div>
         </div>
@@ -509,9 +584,21 @@
   <!-- ==================================================================== -->
   <div id="taskModal" class="modal-backdrop hidden">
     <div class="modal-sheet">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <h3 id="modalTitle" style="font-size:18px;font-weight:900;">✨ Yeni Görev Planla</h3>
         <button class="icon-btn" onclick="closeTaskModal()">✕</button>
+      </div>
+
+      <!-- 🏋️ HAZIR SPOR VE RUTİN GÖREV ŞABLONLARI -->
+      <div class="form-group" style="background:var(--bg-surface);padding:9px 11px;border-radius:14px;border:1px solid var(--border-color);">
+        <label style="margin-bottom:6px;color:var(--accent-cream);">⚡ Tek Tıkla Hazır Spor & Rutin Şablonu Doldur</label>
+        <div class="quick-chips" style="margin-top:0;">
+          <span class="quick-chip" onclick="applyWorkoutTemplateInModal('push')">💪 İtiş Günü (Push)</span>
+          <span class="quick-chip" onclick="applyWorkoutTemplateInModal('pull')">🏋️ Çekiş Günü (Pull)</span>
+          <span class="quick-chip" onclick="applyWorkoutTemplateInModal('legs')">🦵 Bacak & Kardiyo</span>
+          <span class="quick-chip" onclick="applyWorkoutTemplateInModal('fullbody')">🔥 Full Body & Core</span>
+          <span class="quick-chip" onclick="applyWorkoutTemplateInModal('growth')">📚 Gelişim & Okuma</span>
+        </div>
       </div>
 
       <input type="hidden" id="editTaskId" />
@@ -761,6 +848,6 @@
     <img id="photoViewerImg" src="" alt="Görev Fotoğrafı" style="max-width:92vw;max-height:88vh;border-radius:18px;box-shadow:var(--shadow);" />
   </div>
 
-  <script src="app.js?v=11"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>
