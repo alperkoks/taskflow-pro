@@ -1264,3 +1264,103 @@ input, textarea {
   opacity: 0.6;
 }
 
+/* ============================================================================
+   v13.0 GAMIFICATION, PANIC BLUR MODE, EISENHOWER MATRIX, COUNTDOWN & TOOLS
+   ============================================================================ */
+body.panic-blur-mode .task-title,
+body.panic-blur-mode .task-desc,
+body.panic-blur-mode .subtask-item,
+body.panic-blur-mode .goal-card,
+body.panic-blur-mode .scratchpad-area,
+body.panic-blur-mode #budgetListContainer,
+body.panic-blur-mode #budgetTotalBadge,
+body.panic-blur-mode #shoppingListContainer,
+body.panic-blur-mode #bodyPrListContainer,
+body.panic-blur-mode #booksListContainer,
+body.panic-blur-mode #journalListContainer,
+body.panic-blur-mode #countdownStripContainer {
+  filter: blur(8px);
+  user-select: none;
+}
+
+.xp-rank-bar {
+  background: linear-gradient(135deg, rgba(216, 208, 248, 0.14), rgba(245, 216, 181, 0.1));
+  border: 1px solid rgba(245, 216, 181, 0.25);
+  border-radius: 14px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
+
+.quote-banner-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--accent-cream);
+  font-style: italic;
+}
+
+.countdown-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+  scrollbar-width: none;
+  align-items: center;
+}
+
+.countdown-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.countdown-pill {
+  background: linear-gradient(135deg, rgba(255, 122, 69, 0.18), rgba(245, 216, 181, 0.12));
+  border: 1px solid rgba(255, 122, 69, 0.38);
+  border-radius: 12px;
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.eisenhower-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 600px) {
+  .eisenhower-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.matrix-quadrant {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.matrix-quadrant h4 {
+  font-size: 12.5px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+

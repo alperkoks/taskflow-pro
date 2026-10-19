@@ -1341,9 +1341,18 @@ function renderAll() {
   if (showMonthGrid) renderMonthGrid();
   checkOverdueTasks();
   checkAndRenderWaterTracker();
+  renderProteinTracker();
+  renderGamificationRank();
+  renderMotivationQuoteBar();
+  renderCountdownStrip();
+  renderShoppingTracker();
+  renderBodyPrTracker();
+  renderLibraryTracker();
+  renderMicroJournal();
   renderBudgetTracker();
   updateBentoCountsAndDailyProgress();
   renderOngoingTasks();
+  if (showEisenhowerMatrix) renderEisenhowerMatrix();
   renderGoals();
   renderArchive();
   renderWeeklyReport();
@@ -2910,9 +2919,565 @@ async function installPWA() {
   document.getElementById('installAppBtn').style.display = 'none';
 }
 
+// ----------------------------------------------------------------------------
+// 15. v13.0 MASTERPIECE ÖZELLİKLERİ (11 YENİ SÜPER GÜÇ)
+// ----------------------------------------------------------------------------
+let showEisenhowerMatrix = false;
+let quickRestInterval = null;
+let quickRestSeconds = 0;
+
+// 1) 🕵️ PANİK / GİZLİLİK MODU (TEK TUŞLA EKRANI BULANIKLAŞTIRMA)
+function togglePanicBlurMode() {
+  const isBlurred = document.body.classList.toggle('panic-blur-mode');
+  const btn = document.getElementById('panicBlurToggleBtn');
+  if (btn) {
+    btn.style.background = isBlurred ? '#ff4d4f' : 'var(--bg-surface)';
+    btn.style.color = isBlurred ? '#fff' : 'var(--text-main)';
+    btn.textContent = isBlurred ? '🙈 Gizli' : '🕵️';
+  }
+}
+
+// 2) 🏆 SEVİYE & RÜTBE SİSTEMİ (GAMIFICATION / XP HESAPLAMA)
+function renderGamificationRank() {
+  const badgeEl = document.getElementById('userRankBadgeText');
+  const xpEl = document.getElementById('userXpPointsText');
+  const fillEl = document.getElementById('userXpBarFill');
+  if (!badgeEl || !xpEl || !fillEl) return;
+
+  const doneTasksCount = (appData.tasks || []).filter((t) => t.completed).length;
+  const doneGoalSteps = (appData.goals || []).reduce((acc, g) => acc + (g.steps || []).filter((s) => s.done).length, 0);
+  const doneHabits = (appData.habits || []).filter((h) => h.done).length;
+  const waterPts = (appData.waterCount || 0) * 5;
+  const prPts = ((appData.bodyPrRecords || []).length) * 15;
+  const journalPts = ((appData.microJournal || []).length) * 20;
+  const bonusXp = appData.bonusXp || 0;
+
+  const totalXp = (doneTasksCount * 35) + (doneGoalSteps * 45) + (doneHabits * 15) + waterPts + prPts + journalPts + bonusXp;
+  const level = Math.floor(totalXp / 150) + 1;
+  const currentLevelXp = totalXp % 150;
+  const pct = Math.min(100, Math.round((currentLevelXp / 150) * 100));
+
+  let rankTitle = '🌱 Başlangıç';
+  if (level >= 25) rankTitle = '👑 Efsane Üstad';
+  else if (level >= 15) rankTitle = '🏋️ Demir İrade';
+  else if (level >= 8) rankTitle = '🔥 Disiplinli Savaşçı';
+  else if (level >= 4) rankTitle = '⚡ Odaklı Planlayıcı';
+
+  badgeEl.textContent = `${rankTitle} — Seviye ${level}`;
+  xpEl.textContent = `${totalXp} XP (%${pct})`;
+  fillEl.style.width = `${pct}%`;
+}
+
+// 3) 🧠 RASTGELE MOTİVASYON & DİSİPLİN SÖZÜ BARI
+const DEFAULT_MOTIVATION_QUOTES = [
+  'Disiplin, anlık hevesinle en büyük hedefin arasındaki köprüdür.',
+  'Bugün yapacağın küçük bir antrenman veya görev, yarınki özgüvenini inşa eder.',
+  'Mükemmel zamanı bekleme; başla ve zamanı mükemmel hale getir.',
+  'Yorgun olduğunda değil, işin ve antrenmanın bittiğinde dur!',
+  'Küçük günlük alışkanlıklar, uzun vadede devasa zaferler yaratır.',
+  'Zor olanı seçersen hayatın kolaylaşır; kolay olanı seçersen hayatın zorlaşır.',
+  'Bahane üretmek sıfır kalori yakar; harekete geç!'
+];
+let currentQuoteIdx = 0;
+
+function renderMotivationQuoteBar() {
+  const el = document.getElementById('dailyQuoteText');
+  if (!el) return;
+  const custom = Array.isArray(appData.customQuotes) ? appData.customQuotes : [];
+  const allQuotes = [...custom, ...DEFAULT_MOTIVATION_QUOTES];
+  if (currentQuoteIdx >= allQuotes.length) currentQuoteIdx = 0;
+  el.textContent = `"${allQuotes[currentQuoteIdx]}"`;
+}
+
+function nextMotivationQuote() {
+  const custom = Array.isArray(appData.customQuotes) ? appData.customQuotes : [];
+  const allQuotes = [...custom, ...DEFAULT_MOTIVATION_QUOTES];
+  currentQuoteIdx = (currentQuoteIdx + 1) % allQuotes.length;
+  renderMotivationQuoteBar();
+}
+
+function promptAddCustomQuote() {
+  const q = prompt('Kendi motivasyon sözünü veya mottomu yaz:');
+  if (!q || !q.trim()) return;
+  if (!Array.isArray(appData.customQuotes)) appData.customQuotes = [];
+  appData.customQuotes.unshift(q.trim());
+  currentQuoteIdx = 0;
+  renderMotivationQuoteBar();
+  saveProfileData();
+}
+
+// 4) 🥩 GÜNLÜK PROTEİN SAYACI & 5) ⏱️ SET ARASI DİNLENME SAYACI (60sn / 90sn BİP UYARICILI)
+function renderProteinTracker() {
+  const today = getTodayISO();
+  if (appData.proteinDate !== today) {
+    appData.proteinDate = today;
+    appData.proteinGrams = 0;
+  }
+  const target = appData.proteinTarget || 160;
+  const current = appData.proteinGrams || 0;
+  const el = document.getElementById('proteinCountText');
+  if (el) {
+    el.textContent = `${current} / ${target}g`;
+    el.style.color = current >= target ? '#52c41a' : '#ff9c6e';
+  }
+}
+
+function changeProteinCount(deltaGrams) {
+  const today = getTodayISO();
+  if (appData.proteinDate !== today) {
+    appData.proteinDate = today;
+    appData.proteinGrams = 0;
+  }
+  const prev = appData.proteinGrams || 0;
+  const target = appData.proteinTarget || 160;
+  appData.proteinGrams = Math.max(0, prev + deltaGrams);
+  if (deltaGrams > 0 && prev < target && appData.proteinGrams >= target) {
+    playAlertTone('success');
+  }
+  renderProteinTracker();
+  renderGamificationRank();
+  saveProfileData();
+}
+
+function startQuickRestTimer(seconds) {
+  const statusEl = document.getElementById('restTimerStatusText');
+  if (quickRestInterval) {
+    clearInterval(quickRestInterval);
+    quickRestInterval = null;
+  }
+  quickRestSeconds = seconds;
+  if (statusEl) {
+    statusEl.textContent = `⏱️ Dinlen: ${quickRestSeconds}sn`;
+    statusEl.style.color = '#ff9c6e';
+  }
+  quickRestInterval = setInterval(() => {
+    quickRestSeconds--;
+    if (quickRestSeconds <= 0) {
+      clearInterval(quickRestInterval);
+      quickRestInterval = null;
+      if (statusEl) {
+        statusEl.textContent = '💪 SETE GİR!';
+        statusEl.style.color = '#52c41a';
+      }
+      playAlertTone('success');
+      if (navigator.vibrate) navigator.vibrate([300, 120, 400]);
+      setTimeout(() => {
+        if (statusEl && !quickRestInterval) {
+          statusEl.textContent = '⏱️ Set Mola:';
+          statusEl.style.color = '#60a5fa';
+        }
+      }, 4500);
+    } else if (statusEl) {
+      statusEl.textContent = `⏱️ Dinlen: ${quickRestSeconds}sn`;
+    }
+  }, 1000);
+}
+
+// 6) ⏳ ÖNEMLİ GÜNLERE GERİ SAYIM (D-DAY / COUNTDOWN) KARTLARI
+function renderCountdownStrip() {
+  const container = document.getElementById('countdownStripContainer');
+  if (!container) return;
+
+  if (!Array.isArray(appData.countdowns)) {
+    const nextMonth = new Date();
+    nextMonth.setDate(nextMonth.getDate() + 30);
+    const iso = nextMonth.toISOString().split('T')[0];
+    appData.countdowns = [
+      { id: 'cd_1', title: '🏋️ Yaz & Plaj Formu Hedefi', date: iso }
+    ];
+  }
+
+  const todayMs = new Date(getTodayISO() + 'T00:00:00').getTime();
+
+  const pillsHTML = appData.countdowns.map((c, idx) => {
+    const targetMs = new Date(c.date + 'T00:00:00').getTime();
+    const diffDays = Math.ceil((targetMs - todayMs) / (1000 * 60 * 60 * 24));
+    const badgeStr = diffDays > 0 ? `${diffDays} Gün Kaldı` : (diffDays === 0 ? 'BUGÜN! 🎯' : `${Math.abs(diffDays)} Gün Geçti`);
+    return `
+      <div class="countdown-pill">
+        <span>⏳ ${escapeHtml(c.title)}:</span>
+        <span class="countdown-days-badge">${badgeStr}</span>
+        <span onclick="deleteCountdownItem(${idx})" style="cursor:pointer;color:#ff7875;font-weight:900;margin-left:3px;" title="Sil">×</span>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = `
+    ${pillsHTML}
+    <button type="button" class="pin-btn" style="height:30px;padding:0 10px;font-size:11.5px;flex-shrink:0;" onclick="promptAddCountdown()">+ ⏳ Geri Sayım Ekle</button>
+  `;
+}
+
+function promptAddCountdown() {
+  const title = prompt('Önemli gün veya hedef adı (Örn: Sınav, Tatil, Yarışma, Proje Teslimi):');
+  if (!title || !title.trim()) return;
+  const defaultDate = getTodayISO();
+  const dateStr = prompt('Hedef Tarihi girin (YYYY-AA-GG formatında):', defaultDate);
+  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr.trim())) {
+    alert('Lütfen tarihi YYYY-AA-GG (Örn: 2026-12-31) formatında girin.');
+    return;
+  }
+  if (!Array.isArray(appData.countdowns)) appData.countdowns = [];
+  appData.countdowns.push({
+    id: 'cd_' + Date.now(),
+    title: title.trim(),
+    date: dateStr.trim()
+  });
+  renderCountdownStrip();
+  saveProfileData();
+}
+
+function deleteCountdownItem(idx) {
+  if (!Array.isArray(appData.countdowns)) return;
+  appData.countdowns.splice(idx, 1);
+  renderCountdownStrip();
+  saveProfileData();
+}
+
+// 7) 🧊 EISENHOWER MATRİSİ (ACİL / ÖNEMLİ 4'LÜ KUTU GÖRÜNÜMÜ)
+function toggleEisenhowerMatrixView() {
+  showEisenhowerMatrix = !showEisenhowerMatrix;
+  const matrixBox = document.getElementById('eisenhowerContainer');
+  const btn = document.getElementById('toggleMatrixViewBtn');
+  if (!matrixBox) return;
+
+  if (showEisenhowerMatrix) {
+    matrixBox.style.display = 'grid';
+    if (btn) {
+      btn.style.background = 'var(--accent-cream)';
+      btn.style.color = '#14141b';
+    }
+    renderEisenhowerMatrix();
+  } else {
+    matrixBox.style.display = 'none';
+    if (btn) {
+      btn.style.background = 'var(--bg-surface)';
+      btn.style.color = 'var(--text-main)';
+    }
+  }
+}
+
+function renderEisenhowerMatrix() {
+  const box = document.getElementById('eisenhowerContainer');
+  if (!box) return;
+
+  const active = (appData.tasks || []).filter((t) => !t.completed);
+  const qUrgent = active.filter((t) => t.priority === 'urgent');
+  const qHigh = active.filter((t) => t.priority === 'high');
+  const qMedium = active.filter((t) => t.priority === 'medium');
+  const qLow = active.filter((t) => t.priority === 'low');
+
+  const renderMiniItems = (arr) => {
+    if (arr.length === 0) return `<div style="font-size:11px;color:var(--text-muted);">Görev yok ✨</div>`;
+    return arr.map((t) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;background:rgba(255,255,255,0.04);padding:6px 8px;border-radius:8px;font-size:11.5px;margin-bottom:4px;">
+        <span style="font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" onclick="openTaskModal('${t.id}')">${escapeHtml(t.title)}</span>
+        <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;" onclick="openCompleteModal('${t.id}')">✓</button>
+      </div>
+    `).join('');
+  };
+
+  box.innerHTML = `
+    <div class="matrix-quadrant q-urgent">
+      <div class="matrix-q-title" style="color:#ff7875;">🚨 1. HEMEN YAP (Acil & Önemli) <span>${qUrgent.length}</span></div>
+      ${renderMiniItems(qUrgent)}
+    </div>
+    <div class="matrix-quadrant q-high">
+      <div class="matrix-q-title" style="color:#ffc069;">🔥 2. PLANLA & ODAKLAN (Yüksek) <span>${qHigh.length}</span></div>
+      ${renderMiniItems(qHigh)}
+    </div>
+    <div class="matrix-quadrant q-medium">
+      <div class="matrix-q-title" style="color:#95de64;">⚡ 3. GÜNLÜK RUTİN (Orta) <span>${qMedium.length}</span></div>
+      ${renderMiniItems(qMedium)}
+    </div>
+    <div class="matrix-quadrant q-low">
+      <div class="matrix-q-title" style="color:#93c5fd;">🌱 4. ERTELE / RAHAT ZAMAN (Düşük) <span>${qLow.length}</span></div>
+      ${renderMiniItems(qLow)}
+    </div>
+  `;
+}
+
+// 8) 🛒 AKILLI ALIŞVERİŞ / MARKET & SPOR ÇANTASI HAZIRLAMA LİSTELERİ
+const SHOPPING_PRESETS = {
+  gymbag: [
+    '🎒 Antrenman Havlusu & Tişört',
+    '🍼 Su Matarası / Shaker',
+    '🎧 Kablosuz Kulaklık',
+    '👟 Spor Ayakkabısı & Çorap',
+    '💊 Kreatin / Whey Protein / Muz'
+  ],
+  market: [
+    '🥚 Yumurta (30\'lu Koli)',
+    '🍗 Tavuk Göğsü / Hindi / Kırmızı Et',
+    '🥣 Yulaf Ezmesi & Chia Tohumu',
+    '🥛 Süzme Yoğurt / Kefir / Lor Peyniri',
+    '🍌 Muz, Yeşil Elma & Avokado',
+    '🥜 Çiğ Badem / Fıstık Ezmesi'
+  ]
+};
+
+function renderShoppingTracker() {
+  const listEl = document.getElementById('shoppingListContainer');
+  const badgeEl = document.getElementById('shoppingCountBadge');
+  if (!listEl || !badgeEl) return;
+
+  if (!Array.isArray(appData.shoppingList)) {
+    appData.shoppingList = SHOPPING_PRESETS.gymbag.map((txt) => ({ text: txt, done: false }));
+  }
+
+  const items = appData.shoppingList;
+  const doneCnt = items.filter((x) => x.done).length;
+  badgeEl.textContent = `${doneCnt}/${items.length} Hazır ▾`;
+
+  if (items.length === 0) {
+    listEl.innerHTML = `<div style="font-size:11.5px;color:var(--text-muted);text-align:center;padding:6px;">Liste boş. Üstten hazır şablon seçebilirsin!</div>`;
+    return;
+  }
+
+  listEl.innerHTML = items.map((item, idx) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;background:var(--bg-surface);padding:6px 9px;border-radius:9px;font-size:12px;">
+      <div style="display:flex;align-items:center;gap:6px;flex:1;cursor:pointer;" onclick="toggleShoppingItem(${idx})">
+        <span>${item.done ? '☑️' : '⬜'}</span>
+        <span style="${item.done ? 'text-decoration:line-through;color:var(--text-muted);' : 'font-weight:600;'}">${escapeHtml(item.text)}</span>
+      </div>
+      <button type="button" style="background:none;border:none;color:#ff7875;cursor:pointer;font-weight:800;" onclick="deleteShoppingItem(${idx})">×</button>
+    </div>
+  `).join('');
+}
+
+function addShoppingItem() {
+  const inp = document.getElementById('shoppingItemInput');
+  const val = (inp ? inp.value : '').trim();
+  if (!val) return;
+  if (!Array.isArray(appData.shoppingList)) appData.shoppingList = [];
+  appData.shoppingList.unshift({ text: val, done: false });
+  inp.value = '';
+  renderShoppingTracker();
+  saveProfileData();
+}
+
+function toggleShoppingItem(idx) {
+  if (!Array.isArray(appData.shoppingList) || !appData.shoppingList[idx]) return;
+  appData.shoppingList[idx].done = !appData.shoppingList[idx].done;
+  renderShoppingTracker();
+  saveProfileData();
+}
+
+function deleteShoppingItem(idx) {
+  if (!Array.isArray(appData.shoppingList)) return;
+  appData.shoppingList.splice(idx, 1);
+  renderShoppingTracker();
+  saveProfileData();
+}
+
+function resetShoppingChecks() {
+  if (!Array.isArray(appData.shoppingList)) return;
+  appData.shoppingList.forEach((x) => { x.done = false; });
+  renderShoppingTracker();
+  saveProfileData();
+}
+
+function loadQuickChecklistPreset(presetKey) {
+  const list = SHOPPING_PRESETS[presetKey];
+  if (!list) return;
+  appData.shoppingList = list.map((txt) => ({ text: txt, done: false }));
+  renderShoppingTracker();
+  saveProfileData();
+}
+
+// 9) ⚖️ KİLO, YAĞ ORANI & ANTRENMAN REKORLARI (PR) TABLOSU
+function renderBodyPrTracker() {
+  const listEl = document.getElementById('bodyPrListContainer');
+  const badgeEl = document.getElementById('latestWeightBadge');
+  if (!listEl || !badgeEl) return;
+
+  if (!Array.isArray(appData.bodyPrRecords)) {
+    appData.bodyPrRecords = [];
+  }
+
+  const records = appData.bodyPrRecords;
+  badgeEl.textContent = records.length > 0 ? `${records[0].value} ▾` : `Kaydet ▾`;
+
+  if (records.length === 0) {
+    listEl.innerHTML = `<div style="font-size:11.5px;color:var(--text-muted);text-align:center;padding:6px;">Henüz kilo, yağ oranı veya Bench/Squat PR kaydı yok.</div>`;
+    return;
+  }
+
+  listEl.innerHTML = records.map((r, idx) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;background:var(--bg-surface);padding:6px 9px;border-radius:9px;font-size:12px;">
+      <div>
+        <div style="font-weight:700;">${escapeHtml(r.type)}: <span style="color:#93c5fd;">${escapeHtml(r.value)}</span></div>
+        <div style="font-size:10px;color:var(--text-muted);">📅 ${r.date}</div>
+      </div>
+      <button type="button" style="background:none;border:none;color:#ff7875;cursor:pointer;font-weight:800;" onclick="deleteBodyPrRecord(${idx})">×</button>
+    </div>
+  `).join('');
+}
+
+function addBodyPrRecord() {
+  const typeEl = document.getElementById('prMetricType');
+  const valEl = document.getElementById('prMetricValue');
+  const val = (valEl ? valEl.value : '').trim();
+  if (!val) return;
+
+  if (!Array.isArray(appData.bodyPrRecords)) appData.bodyPrRecords = [];
+  appData.bodyPrRecords.unshift({
+    id: 'pr_' + Date.now(),
+    type: typeEl ? typeEl.value : '⚖️ Güncel Kilo',
+    value: val,
+    date: getTodayISO()
+  });
+
+  valEl.value = '';
+  playAlertTone('success');
+  renderBodyPrTracker();
+  renderGamificationRank();
+  saveProfileData();
+}
+
+function deleteBodyPrRecord(idx) {
+  if (!Array.isArray(appData.bodyPrRecords)) return;
+  appData.bodyPrRecords.splice(idx, 1);
+  renderBodyPrTracker();
+  saveProfileData();
+}
+
+// 10) 📖 OKUNAN KİTAPLAR & İZLENEN EĞİTİMLER KÜTÜPHANESİ
+function renderLibraryTracker() {
+  const listEl = document.getElementById('libraryListContainer');
+  const badgeEl = document.getElementById('libraryCountBadge');
+  if (!listEl || !badgeEl) return;
+
+  if (!Array.isArray(appData.libraryItems)) {
+    appData.libraryItems = [
+      { id: 'lib_1', title: '📕 Atomik Alışkanlıklar', current: 80, total: 320 }
+    ];
+  }
+
+  const items = appData.libraryItems;
+  badgeEl.textContent = `${items.length} Eser ▾`;
+
+  if (items.length === 0) {
+    listEl.innerHTML = `<div style="font-size:11.5px;color:var(--text-muted);text-align:center;padding:6px;">Okuduğun kitabı veya izlediğin kursu ekle!</div>`;
+    return;
+  }
+
+  listEl.innerHTML = items.map((b, idx) => {
+    const pct = b.total > 0 ? Math.min(100, Math.round((b.current / b.total) * 100)) : 0;
+    return `
+      <div style="background:var(--bg-surface);padding:7px 9px;border-radius:10px;font-size:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+          <b style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(b.title)}</b>
+          <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+            <span style="font-size:11px;color:var(--accent-cream);">${b.current}/${b.total} (%${pct})</span>
+            <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;" onclick="advanceLibraryItem(${idx}, 10)">+10</button>
+            <button type="button" style="background:none;border:none;color:#ff7875;cursor:pointer;font-weight:800;" onclick="deleteLibraryItem(${idx})">×</button>
+          </div>
+        </div>
+        <div class="progress-bar-track" style="height:4px;margin-top:5px;margin-bottom:0;">
+          <div class="progress-bar-fill" style="width:${pct}%;background:var(--pastel-pink);"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function addLibraryItem() {
+  const tInp = document.getElementById('libTitleInput');
+  const totInp = document.getElementById('libTotalInput');
+  const title = (tInp ? tInp.value : '').trim();
+  const total = parseInt(totInp ? totInp.value : '100', 10) || 100;
+  if (!title) return;
+
+  if (!Array.isArray(appData.libraryItems)) appData.libraryItems = [];
+  appData.libraryItems.unshift({
+    id: 'lib_' + Date.now(),
+    title: '📖 ' + title,
+    current: 0,
+    total
+  });
+  tInp.value = '';
+  if (totInp) totInp.value = '';
+  renderLibraryTracker();
+  saveProfileData();
+}
+
+function advanceLibraryItem(idx, delta) {
+  if (!Array.isArray(appData.libraryItems) || !appData.libraryItems[idx]) return;
+  const item = appData.libraryItems[idx];
+  item.current = Math.min(item.total, (item.current || 0) + delta);
+  if (item.current >= item.total) playAlertTone('success');
+  renderLibraryTracker();
+  saveProfileData();
+}
+
+function deleteLibraryItem(idx) {
+  if (!Array.isArray(appData.libraryItems)) return;
+  appData.libraryItems.splice(idx, 1);
+  renderLibraryTracker();
+  saveProfileData();
+}
+
+// 11) 🌙 GÜNÜN 1 CÜMLELİK ÖZETİ (AKŞAM GÜNLÜĞÜ / MİKRO JOURNAL)
+function renderMicroJournal() {
+  const listEl = document.getElementById('microJournalList');
+  const badgeEl = document.getElementById('journalCountBadge');
+  if (!listEl || !badgeEl) return;
+
+  if (!Array.isArray(appData.microJournal)) {
+    appData.microJournal = [];
+  }
+
+  const entries = appData.microJournal;
+  badgeEl.textContent = `${entries.length} Kayıt ▾`;
+
+  if (entries.length === 0) {
+    listEl.innerHTML = `<div style="font-size:11.5px;color:var(--text-muted);text-align:center;padding:6px;">Günün nasıl geçtiğini 1 cümle ve puanla kaydet!</div>`;
+    return;
+  }
+
+  listEl.innerHTML = entries.map((e, idx) => `
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;background:var(--bg-surface);padding:7px 9px;border-radius:9px;font-size:12px;">
+      <div>
+        <div style="font-size:10.5px;color:var(--accent-cream);font-weight:700;">📅 ${e.date} — Puan: ${e.score}/10 ⭐</div>
+        <div style="margin-top:2px;">${escapeHtml(e.sentence)}</div>
+      </div>
+      <button type="button" style="background:none;border:none;color:#ff7875;cursor:pointer;font-weight:800;" onclick="deleteMicroJournalEntry(${idx})">×</button>
+    </div>
+  `).join('');
+}
+
+function addMicroJournalEntry() {
+  const sInp = document.getElementById('journalSentenceInput');
+  const scInp = document.getElementById('journalScoreInput');
+  const sentence = (sInp ? sInp.value : '').trim();
+  const score = scInp ? scInp.value : '8';
+  if (!sentence) return;
+
+  if (!Array.isArray(appData.microJournal)) appData.microJournal = [];
+  appData.microJournal.unshift({
+    id: 'mj_' + Date.now(),
+    date: getTodayISO(),
+    sentence,
+    score
+  });
+  sInp.value = '';
+  playAlertTone('success');
+  renderMicroJournal();
+  renderGamificationRank();
+  saveProfileData();
+}
+
+function deleteMicroJournalEntry(idx) {
+  if (!Array.isArray(appData.microJournal)) return;
+  appData.microJournal.splice(idx, 1);
+  renderMicroJournal();
+  saveProfileData();
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=12').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=13').catch(() => {});
   }
   await initDB();
 

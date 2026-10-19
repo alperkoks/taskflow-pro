@@ -7,8 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>TaskFlow+ — Günlük Görev, Hedefler & Odak</title>
-  <link rel="manifest" href="manifest.json?v=12" />
-  <link rel="stylesheet" href="styles.css?v=12" />
+  <link rel="manifest" href="manifest.json?v=13" />
+  <link rel="stylesheet" href="styles.css?v=13" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -116,13 +116,36 @@
           </div>
           <h1 class="greeting-title">Yaşam & Plan Üssü</h1>
         </div>
-        <!-- Sağ Üstte Sadece Şık Profil & Ayarlar Rozeti -->
-        <div class="user-avatar-pill" onclick="switchView('settings')" title="Ayarlar ve Hesap">
-          <div class="user-avatar-circle" id="headerAvatarLetter">U</div>
-          <span style="font-size:11.5px;font-weight:700;color:var(--text-muted);">Ayarlar ⚙️</span>
-          <span id="syncStatusDot" class="sync-dot" title="Çevrimdışı / Bulut Hazır"></span>
+        <!-- Sağ Üstte Panik Gizlilik Tuşu + Şık Profil & Ayarlar Rozeti -->
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button type="button" class="pin-btn" id="panicBlurToggleBtn" onclick="togglePanicBlurMode()" style="height:36px;padding:0 10px;font-size:12px;" title="Panik / Gizlilik Modu: Ekranı Tek Tuşla Bulanıklaştır">🕵️</button>
+          <div class="user-avatar-pill" onclick="switchView('settings')" title="Ayarlar ve Hesap">
+            <div class="user-avatar-circle" id="headerAvatarLetter">U</div>
+            <span style="font-size:11.5px;font-weight:700;color:var(--text-muted);">Ayarlar ⚙️</span>
+            <span id="syncStatusDot" class="sync-dot" title="Çevrimdışı / Bulut Hazır"></span>
+          </div>
         </div>
       </header>
+
+      <!-- 🏆 SEVİYE & RÜTBE SİSTEMİ (GAMIFICATION / OYUNLAŞTIRMA) -->
+      <div class="xp-rank-bar">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800;">
+          <span id="userRankBadgeText" style="color:var(--accent-cream);">🌱 Seviye 1 — Başlangıç</span>
+          <span id="userXpPointsText" style="color:var(--pastel-purple);font-size:11.5px;">0 XP (Sonraki: 100 XP)</span>
+        </div>
+        <div class="xp-progress-mini">
+          <div class="xp-progress-mini-fill" id="userXpBarFill" style="width:0%;"></div>
+        </div>
+      </div>
+
+      <!-- 🧠 RASTGELE MOTİVASYON & DİSİPLİN SÖZÜ BARI -->
+      <div class="quote-banner-bar">
+        <span id="dailyQuoteText" style="flex:1;">"Disiplin, anlık hevesinle en büyük hedefin arasındaki köprüdür."</span>
+        <div style="display:flex;gap:4px;flex-shrink:0;">
+          <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;" onclick="nextMotivationQuote()" title="Başka Söz Göster">🔄</button>
+          <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;color:var(--accent-cream);" onclick="promptAddCustomQuote()" title="Kendi Motivasyon Sözünü Ekle">+</button>
+        </div>
+      </div>
 
       <!-- 1. GÜNLÜK İLERLEME HALKASI / YÜZDESİ -->
       <div class="daily-progress-card">
@@ -138,7 +161,7 @@
         </div>
       </div>
 
-      <!-- 2. ⚡ GÜNLÜK SU (LİTRE & BARDAK), KAFEİN, SPOR & ALIŞKANLIK ZİNCİRİ ÜSSÜ -->
+      <!-- 2. ⚡ GÜNLÜK SU (LİTRE & BARDAK), KAFEİN, PROTEİN, SET DİNLENME & SPOR ÜSSÜ -->
       <div class="vitality-hub-card">
         <div class="vitality-top-row">
           <div style="font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -179,6 +202,24 @@
           <div class="vital-mini-box">
             <span>🔥 Seri: <b id="habitDoneSummaryText" style="color:#95de64;">0/5</b></span>
             <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 7px;color:var(--pastel-purple);" onclick="promptAddCustomHabit()">+ Alışkanlık</button>
+          </div>
+        </div>
+
+        <!-- 🥩 GÜNLÜK PROTEİN SAYACI & ⏱️ SET ARASI DİNLENME (60sn / 90sn BİP UYARICILI) -->
+        <div class="micro-vitals-grid" style="margin-top:6px;">
+          <div class="vital-mini-box">
+            <span>🥩 Protein: <b id="proteinCountText" style="color:#ff9c6e;">0 / 160g</b></span>
+            <div style="display:flex;gap:4px;">
+              <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;" onclick="changeProteinCount(-10)">-10g</button>
+              <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;background:rgba(255,156,110,0.2);color:#ff9c6e;" onclick="changeProteinCount(25)">+25g 🥩</button>
+            </div>
+          </div>
+          <div class="vital-mini-box">
+            <span id="restTimerStatusText" style="font-weight:800;color:#60a5fa;">⏱️ Set Mola:</span>
+            <div style="display:flex;gap:4px;">
+              <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;background:rgba(96,165,250,0.2);color:#93c5fd;" onclick="startQuickRestTimer(60)">60sn</button>
+              <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;background:rgba(96,165,250,0.2);color:#93c5fd;" onclick="startQuickRestTimer(90)">90sn</button>
+            </div>
           </div>
         </div>
 
@@ -237,6 +278,88 @@
             <div class="bento-title">Kişisel Gelişim</div>
             <div class="bento-count" id="countGrowthTasks">0 Görev</div>
           </div>
+        </div>
+      </div>
+
+      <!-- 🛒 AKILLI ALIŞVERİŞ / MARKET & SPOR ÇANTASI HAZIRLAMA LİSTELERİ -->
+      <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(200,244,236,0.28);">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="const sb=document.getElementById('shoppingBagBody');sb.style.display=sb.style.display==='none'?'block':'none';">
+          <span style="font-weight:800;font-size:13px;">🛒 Market & Spor Çantası Listesi</span>
+          <span style="font-size:11px;color:var(--pastel-mint);" id="shoppingCountBadge">0 Öğe ▾</span>
+        </div>
+        <div id="shoppingBagBody" style="display:none;margin-top:10px;">
+          <div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap;">
+            <span class="quick-chip" onclick="loadQuickChecklistPreset('gymbag')">🎒 Spor Çantası Doldur</span>
+            <span class="quick-chip" onclick="loadQuickChecklistPreset('market')">🛒 Sporcu Marketi</span>
+            <span class="quick-chip" onclick="resetShoppingChecks()">🔄 Tikleri Sıfırla</span>
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:8px;">
+            <input type="text" id="shoppingItemInput" class="form-input" style="padding:7px 9px;font-size:12px;" placeholder="Örn: Yulaf, Yumurta, Havlu..." onkeydown="if(event.key==='Enter'){event.preventDefault();addShoppingItem();}" />
+            <button type="button" class="btn-cream" style="padding:6px 12px;font-size:12px;" onclick="addShoppingItem()">+ Ekle</button>
+          </div>
+          <div id="shoppingListContainer" style="display:flex;flex-direction:column;gap:5px;max-height:190px;overflow-y:auto;"></div>
+        </div>
+      </div>
+
+      <!-- ⚖️ KİLO, YAĞ ORANI & ANTRENMAN REKORLARI (PR) TABLOSU -->
+      <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(96,165,250,0.3);">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="const prb=document.getElementById('bodyPrBody');prb.style.display=prb.style.display==='none'?'block':'none';">
+          <span style="font-weight:800;font-size:13px;">⚖️ Kilo, Yağ & PR Rekorları</span>
+          <span style="font-size:11px;color:#93c5fd;" id="latestWeightBadge">Kaydet ▾</span>
+        </div>
+        <div id="bodyPrBody" style="display:none;margin-top:10px;">
+          <div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap;">
+            <select id="prMetricType" class="form-select" style="flex:1.2;min-width:110px;padding:6px 8px;font-size:11.5px;">
+              <option value="⚖️ Güncel Kilo (kg)">⚖️ Güncel Kilo (kg)</option>
+              <option value="🔥 Yağ Oranı (%)">🔥 Yağ Oranı (%)</option>
+              <option value="🏋️ Bench Press PR (kg)">🏋️ Bench Press PR (kg)</option>
+              <option value="🦵 Squat PR (kg)">🦵 Squat PR (kg)</option>
+              <option value="💪 Deadlift PR (kg)">💪 Deadlift PR (kg)</option>
+              <option value="🏃 Koşu / Kardiyo (dk)">🏃 Koşu / Kardiyo (dk)</option>
+            </select>
+            <input type="text" id="prMetricValue" class="form-input" style="flex:1;min-width:75px;padding:6px 8px;font-size:12px;" placeholder="Örn: 78.5 kg" onkeydown="if(event.key==='Enter'){event.preventDefault();addBodyPrRecord();}" />
+            <button type="button" class="btn-cream" style="padding:6px 11px;font-size:12px;" onclick="addBodyPrRecord()">+ Kaydet</button>
+          </div>
+          <div id="bodyPrListContainer" style="display:flex;flex-direction:column;gap:5px;max-height:180px;overflow-y:auto;"></div>
+        </div>
+      </div>
+
+      <!-- 📖 OKUNAN KİTAPLAR & İZLENEN EĞİTİMLER KÜTÜPHANESİ -->
+      <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(252,216,229,0.3);">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="const lb=document.getElementById('libraryTrackerBody');lb.style.display=lb.style.display==='none'?'block':'none';">
+          <span style="font-weight:800;font-size:13px;">📖 Kitap & Eğitim Kütüphanem</span>
+          <span style="font-size:11px;color:var(--pastel-pink);" id="libraryCountBadge">0 Eser ▾</span>
+        </div>
+        <div id="libraryTrackerBody" style="display:none;margin-top:10px;">
+          <div style="display:flex;gap:5px;margin-bottom:6px;flex-wrap:wrap;">
+            <input type="text" id="libTitleInput" class="form-input" style="flex:2;min-width:110px;padding:6px 8px;font-size:12px;" placeholder="Kitap veya Kurs Adı..." />
+            <input type="number" id="libTotalInput" class="form-input" style="flex:1;min-width:75px;padding:6px 8px;font-size:12px;" placeholder="Top. Sayfa/Ders" />
+            <button type="button" class="btn-cream" style="padding:6px 11px;font-size:12px;" onclick="addLibraryItem()">+ Ekle</button>
+          </div>
+          <div id="libraryListContainer" style="display:flex;flex-direction:column;gap:6px;max-height:190px;overflow-y:auto;"></div>
+        </div>
+      </div>
+
+      <!-- 🌙 GÜNÜN 1 CÜMLELİK ÖZETİ (AKŞAM GÜNLÜĞÜ / MİKRO JOURNAL) -->
+      <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(216,208,248,0.3);">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="const jb=document.getElementById('microJournalBody');jb.style.display=jb.style.display==='none'?'block':'none';">
+          <span style="font-weight:800;font-size:13px;">🌙 Günün 1 Cümlelik Özeti & Puanı</span>
+          <span style="font-size:11px;color:var(--pastel-purple);" id="journalCountBadge">Günlük ▾</span>
+        </div>
+        <div id="microJournalBody" style="display:none;margin-top:10px;">
+          <div style="display:flex;gap:5px;margin-bottom:6px;">
+            <input type="text" id="journalSentenceInput" class="form-input" style="flex:1;padding:7px 9px;font-size:12px;" placeholder="Bugün nasıl geçti? 1 cümleyle hatıra bırak..." onkeydown="if(event.key==='Enter'){event.preventDefault();addMicroJournalEntry();}" />
+            <select id="journalScoreInput" class="form-select" style="width:74px;padding:6px;font-size:12px;">
+              <option value="10">10 ⭐</option>
+              <option value="9">9 ⭐</option>
+              <option value="8" selected>8 ⭐</option>
+              <option value="7">7 ⭐</option>
+              <option value="6">6 ⭐</option>
+              <option value="5">5 ⭐</option>
+            </select>
+            <button type="button" class="btn-cream" style="padding:6px 10px;font-size:12px;" onclick="addMicroJournalEntry()">Kaydet</button>
+          </div>
+          <div id="microJournalList" style="display:flex;flex-direction:column;gap:5px;max-height:180px;overflow-y:auto;"></div>
         </div>
       </div>
 
@@ -327,12 +450,16 @@
       <!-- SEKME 1: GÜNLÜK GÖREVLER + YATAY ŞERİT & 30 GÜNLÜK TAM TAKVİM GRİD -->
       <!-- ================================================================== -->
       <section id="viewTasks">
+        <!-- ⏳ ÖNEMLİ GÜNLERE GERİ SAYIM (D-DAY / COUNTDOWN) ŞERİDİ -->
+        <div class="countdown-strip" id="countdownStripContainer"></div>
+
         <div class="calendar-header">
           <div class="month-label" onclick="jumpToToday()">
             <span id="currentMonthLabel">Ekim 2026</span>
             <span style="font-size:11px;background:var(--bg-surface);padding:4px 9px;border-radius:99px;color:var(--accent-cream);">Bugün</span>
           </div>
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <button class="pin-btn" id="toggleMatrixViewBtn" onclick="toggleEisenhowerMatrixView()" style="height:32px;padding:0 10px;font-size:11.5px;" title="Eisenhower 4'lü Öncelik Matrisi">🧊 4'lü Matris</button>
             <button class="pin-btn" onclick="shareOrCopyDailyPlan()" style="height:32px;padding:0 10px;font-size:11.5px;" title="Günün Planını WhatsApp'ta Paylaş veya Kopyala">📤 Planı Paylaş</button>
             <button class="pin-btn" id="toggleMonthGridBtn" onclick="toggleMonthGridView()" style="height:32px;padding:0 10px;font-size:11.5px;">🗓️ Aylık Takvim</button>
             <button class="btn-cream" id="toggleAllDatesBtn" onclick="toggleShowAllDates()" style="padding:6px 10px;font-size:11.5px;">Tüm Günler</button>
@@ -359,6 +486,9 @@
           <h2 class="section-title" id="activeListTitle">Devam Eden Görevler</h2>
           <span style="font-size:12px;color:var(--text-muted);" id="activeListSubtitle">Seçili gün</span>
         </div>
+
+        <!-- 🧊 EISENHOWER 4'LÜ MATRİS GÖRÜNÜMÜ -->
+        <div id="eisenhowerContainer" class="eisenhower-grid" style="display:none;"></div>
 
         <div id="ongoingTaskList" class="task-list"></div>
       </section>
@@ -848,6 +978,6 @@
     <img id="photoViewerImg" src="" alt="Görev Fotoğrafı" style="max-width:92vw;max-height:88vh;border-radius:18px;box-shadow:var(--shadow);" />
   </div>
 
-  <script src="app.js?v=12"></script>
+  <script src="app.js?v=13"></script>
 </body>
 </html>
