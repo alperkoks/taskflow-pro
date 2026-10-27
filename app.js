@@ -1478,7 +1478,7 @@ function updateBentoCountsAndDailyProgress() {
   const sportCount = active.filter((t) => t.category === 'Spor ve Sağlık').length;
   const growthCount = active.filter((t) => t.category === 'Kişisel Gelişim').length;
 
-  document.getElementById('countAllTasks').textContent = `${active.length} Aktif Görev`;
+  document.getElementById('countAllTasks').textContent = `${active.length} Görev`;
   document.getElementById('countWorkTasks').textContent = `${workCount} Görev`;
   document.getElementById('countRoutineTasks').textContent = `${routineCount} Görev`;
   document.getElementById('countSportTasks').textContent = `${sportCount} Görev`;
@@ -3324,6 +3324,14 @@ window.addEventListener('offline', () => {
 // ----------------------------------------------------------------------------
 // 14. ALT MENÜ GEZİNTİSİ (GÖREVLER | HEDEFLER | ARŞİV | ODAK | AYARLAR)
 // ----------------------------------------------------------------------------
+let activeSocialSubTab = 'friends';
+
+function openSocialWithTab(tab) {
+  activeSocialSubTab = tab === 'missions' ? 'missions' : 'friends';
+  switchView('social');
+  switchSocialSubTab(activeSocialSubTab);
+}
+
 function switchView(viewName, fromBackButton = false) {
   currentViewName = viewName;
   document.body.setAttribute('data-active-view', viewName);
@@ -3341,10 +3349,16 @@ function switchView(viewName, fromBackButton = false) {
 
   document.getElementById('navTasks').classList.toggle('active', viewName === 'tasks');
   document.getElementById('navGoals').classList.toggle('active', viewName === 'goals');
+  const navFriendsEl = document.getElementById('navFriends');
   const navSocialEl = document.getElementById('navSocial');
-  if (navSocialEl) navSocialEl.classList.toggle('active', viewName === 'social');
+  if (navFriendsEl) navFriendsEl.classList.toggle('active', viewName === 'social' && activeSocialSubTab === 'friends');
+  if (navSocialEl) navSocialEl.classList.toggle('active', viewName === 'social' && activeSocialSubTab === 'missions');
   document.getElementById('navArchive').classList.toggle('active', viewName === 'archive');
   document.getElementById('navStats').classList.toggle('active', viewName === 'stats');
+
+  if (viewName === 'social') {
+    switchSocialSubTab(activeSocialSubTab);
+  }
 
   if (!fromBackButton) {
     pushAppHistoryState();
@@ -6270,17 +6284,26 @@ function setMissionCategoryFilter(cat, btnEl) {
 }
 
 function switchSocialSubTab(tab) {
+  activeSocialSubTab = tab === 'missions' ? 'missions' : 'friends';
   const mPane = document.getElementById('socialSubMissions') || document.getElementById('socialPaneMissions');
   const fPane = document.getElementById('socialSubFriends') || document.getElementById('socialPaneFriends');
-  if (mPane) mPane.style.display = tab === 'missions' ? 'block' : 'none';
-  if (fPane) fPane.style.display = tab === 'friends' ? 'block' : 'none';
+  if (mPane) mPane.style.display = activeSocialSubTab === 'missions' ? 'block' : 'none';
+  if (fPane) fPane.style.display = activeSocialSubTab === 'friends' ? 'block' : 'none';
 
   const bM = document.getElementById('socialSubBtnMissions');
   const bF = document.getElementById('socialSubBtnFriends');
-  if (bM) bM.classList.toggle('active', tab === 'missions');
-  if (bF) bF.classList.toggle('active', tab === 'friends');
+  if (bM) bM.classList.toggle('active', activeSocialSubTab === 'missions');
+  if (bF) bF.classList.toggle('active', activeSocialSubTab === 'friends');
 
-  if (tab === 'friends') {
+  if (currentViewName === 'social') {
+    const navFriendsEl = document.getElementById('navFriends');
+    const navSocialEl = document.getElementById('navSocial');
+    if (navFriendsEl) navFriendsEl.classList.toggle('active', activeSocialSubTab === 'friends');
+    if (navSocialEl) navSocialEl.classList.toggle('active', activeSocialSubTab === 'missions');
+  }
+
+  if (activeSocialSubTab === 'friends') {
+    ensureDefaultAiCoachFriend();
     discoverLocalDeviceUsersAsFriends();
   }
 }
@@ -6454,9 +6477,34 @@ function shareMyProfileAndShowcaseOnWP() {
   openWhatsAppOrShareText(text);
 }
 
-// ===== 33. 👥 ARKADAŞ EKLEME, PROFİL KODU & UYGULAMA İÇİ MESAJLAŞMA (HTML ID UYUMLU) =====
+// ===== 33. 👥 ARKADAŞ EKLEME, PROFİL KODU & UYGULAMA İÇİ MESAJLAŞMA (v21.0 ULTRA MODERN) =====
 
-let activeSelectedFriendIdx = -1;
+let activeSelectedFriendIdx = 0;
+
+function ensureDefaultAiCoachFriend() {
+  if (!appData) return;
+  if (!Array.isArray(appData.socialFriends)) appData.socialFriends = [];
+  if (appData.socialFriends.length === 0) {
+    appData.socialFriends.push({
+      username: 'ai_spor_kocu',
+      displayName: '🤖 Spor & Disiplin Koçu',
+      phone: '',
+      rank: '👑 7/24 Aktif Partner',
+      bio: 'Her mesajına anında yanıt veren kişisel antrenman & disiplin partnerin!',
+      waterCount: 10,
+      proteinGrams: 160,
+      badges: ['👑 Efsane Koç', '💧 Su Üstadı', '🏋️ PR Avcısı'],
+      isAiCoach: true,
+      messages: [
+        {
+          sender: 'ai_spor_kocu',
+          text: 'Selam Şampiyon! 👋 Ben senin 7/24 aktif Spor & Disiplin Koçunum. Yukarıdan yeni arkadaşlarını ismini ve WhatsApp numarasını yazarak ekleyebilir veya hemen aşağıdan bana mesaj yazıp günlük durumunu paylaşabilirsin! 💪',
+          time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+        }
+      ]
+    });
+  }
+}
 
 function generateMyShareableFriendCode() {
   const showcased = getShowcasedBadgeObjects().map((b) => `${b.icon} ${b.title}`);
@@ -6490,6 +6538,7 @@ function copyMyFriendInviteCode() {
 
 async function discoverLocalDeviceUsersAsFriends() {
   try {
+    ensureDefaultAiCoachFriend();
     const allUsers = await getAllUsersFromDB();
     if (!Array.isArray(appData.socialFriends)) appData.socialFriends = [];
     let changed = false;
@@ -6499,9 +6548,10 @@ async function discoverLocalDeviceUsersAsFriends() {
       const exists = appData.socialFriends.find((f) => f.username === u.username);
       const uShowcased = Array.isArray(u.showcasedBadges) ? u.showcasedBadges.length : 0;
       if (!exists) {
-        appData.socialFriends.push({
+        appData.socialFriends.unshift({
           username: u.username,
           displayName: u.profileName || u.username,
+          phone: '',
           rank: `🔥 ${u.streak || 1} Gün Seri`,
           bio: u.profileBio || 'Cihazdaki TaskFlow+ Kullanıcısı',
           waterCount: u.waterCount || 0,
@@ -6532,14 +6582,19 @@ async function discoverLocalDeviceUsersAsFriends() {
 
 function addFriendByCodeOrUsername() {
   const inp = document.getElementById('addFriendInput') || document.getElementById('friendAddInput');
+  const phoneInp = document.getElementById('addFriendPhoneInput');
   const raw = (inp ? inp.value : '').trim();
+  const rawPhone = (phoneInp ? phoneInp.value : '').trim();
+
   if (!raw) {
-    alert('Lütfen bir kullanıcı adı veya "TF-..." ile başlayan Arkadaşlık Kodu girin!');
+    alert('Lütfen eklemek istediğiniz arkadaşınızın adını (örn: Ahmet) veya TF-... kodunu yazın!');
+    if (inp) inp.focus();
     return;
   }
 
-  if (!Array.isArray(appData.socialFriends)) appData.socialFriends = [];
+  ensureDefaultAiCoachFriend();
 
+  const timeNow = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
   let newFriend = null;
   if (raw.startsWith('TF-')) {
     try {
@@ -6549,31 +6604,34 @@ function addFriendByCodeOrUsername() {
       newFriend = {
         username: parsed.u || ('arkadas_' + Date.now().toString().slice(-4)),
         displayName: parsed.n || parsed.u || 'Sporcu Arkadaş',
+        phone: rawPhone,
         rank: parsed.r || `🔥 ${parsed.s || 1} Gün Seri`,
         bio: parsed.b || 'TaskFlow+ Sporcusu 💪',
         waterCount: parsed.w || 0,
         proteinGrams: parsed.p || 0,
-        badges: Array.isArray(parsed.v) ? parsed.v : [],
+        badges: Array.isArray(parsed.v) && parsed.v.length > 0 ? parsed.v : ['🏅 Disiplin Savaşçısı'],
         messages: [
-          { sender: 'system', text: `🎉 ${parsed.n || parsed.u} profil koduyla arkadaş listene eklendi!`, time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) }
+          { sender: 'them', text: `Selam! 👑 Profil kodumla beni arkadaş ekledin. Hedeflerimizi ve antrenmanlarımızı buradan paylaşalım! 💪`, time: timeNow }
         ]
       };
     } catch (e) {
-      alert('Arkadaşlık kodu çözümlenemedi, lütfen kodun tam kopyalandığından emin olun.');
+      alert('Arkadaşlık kodu çözümlenemedi, lütfen kodun tam kopyalandığından emin olun veya doğrudan arkadaşınızın ismini yazın.');
       return;
     }
   } else {
-    const cleanUser = raw.replace(/^@/, '').toLowerCase();
+    const cleanName = raw.replace(/^@/, '').trim();
+    const cleanUser = cleanName.toLowerCase().replace(/\s+/g, '_');
     newFriend = {
       username: cleanUser,
-      displayName: raw.replace(/^@/, ''),
-      rank: '⚡ TaskFlow+ Sporcusu',
-      bio: 'Hedef ve antrenman arkadaşı 💪',
-      waterCount: 0,
-      proteinGrams: 0,
-      badges: ['🏅 Disiplin Savaşçısı'],
+      displayName: cleanName,
+      phone: rawPhone,
+      rank: '🔥 Aktif Spor Arkadaşı',
+      bio: rawPhone ? `📱 WhatsApp: ${rawPhone}` : 'Hedef & Antrenman Partneri 💪',
+      waterCount: 6,
+      proteinGrams: 95,
+      badges: ['🏅 Antrenman Partneri', '💧 Su Dostu'],
       messages: [
-        { sender: 'system', text: `🤝 @${cleanUser} arkadaş listene eklendi! Aşağıdan mesaj yazabilir veya WhatsApp köprüsüyle anında dürtebilirsin.`, time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) }
+        { sender: 'them', text: `Selam! 🤝 Beni (${cleanName}) arkadaş listene ekledin. Aşağıdan bana mesaj yazabilir, tek tıkla dürtebilir veya doğrudan WhatsApp'tan gönderebilirsin!`, time: timeNow }
       ]
     };
   }
@@ -6583,6 +6641,7 @@ function addFriendByCodeOrUsername() {
     appData.socialFriends[existingIdx] = {
       ...appData.socialFriends[existingIdx],
       ...newFriend,
+      phone: rawPhone || appData.socialFriends[existingIdx].phone || '',
       messages: appData.socialFriends[existingIdx].messages || newFriend.messages
     };
     activeSelectedFriendIdx = existingIdx;
@@ -6592,25 +6651,44 @@ function addFriendByCodeOrUsername() {
   }
 
   if (inp) inp.value = '';
+  if (phoneInp) phoneInp.value = '';
   renderSocialFriendsList();
   renderSelectedFriendChat();
   saveProfileData();
   syncSocialFriendsAndMessages(true);
+
+  if (typeof showSmartCoachPopup === 'function') {
+    showSmartCoachPopup('🤝', `${newFriend.displayName} Arkadaş Eklendi!`, 'Hemen aşağıdaki sohbet kutusundan mesaj gönderebilir veya tek tıkla dürtebilirsin!');
+  }
+
+  const chatBoxEl = document.getElementById('activeChatCardBox');
+  if (chatBoxEl) {
+    setTimeout(() => chatBoxEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 150);
+  }
+}
+
+function deleteSocialFriend(idx, event) {
+  if (event) event.stopPropagation();
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+  const target = friends[idx];
+  if (!target) return;
+  if (!confirm(`"${target.displayName || target.username}" adlı arkadaşı listeden silmek istediğinize emin misiniz?`)) return;
+  appData.socialFriends.splice(idx, 1);
+  ensureDefaultAiCoachFriend();
+  activeSelectedFriendIdx = 0;
+  renderSocialFriendsList();
+  saveProfileData();
 }
 
 function renderSocialFriendsList() {
+  ensureDefaultAiCoachFriend();
   const listEl = document.getElementById('friendsListContainer') || document.getElementById('socialFriendsList');
+  const countBadgeEl = document.getElementById('friendsCountBadge');
   if (!listEl) return;
   const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
 
-  if (friends.length === 0) {
-    listEl.innerHTML = `
-      <div style="font-size:12px;color:var(--text-muted);padding:12px;text-align:center;">
-        Henüz arkadaş eklenmedi.<br><br>
-        💡 <b>İpucu:</b> Yukarıdan <b>"🔗 Kendi Kodumu Kopyala"</b> butonuna basıp kodunu arkadaşına atabilir veya onun kullanıcı adını/kodunu yazıp ekleyebilirsin!
-      </div>
-    `;
-    return;
+  if (countBadgeEl) {
+    countBadgeEl.textContent = `${friends.length} Arkadaş`;
   }
 
   if (activeSelectedFriendIdx < 0 || activeSelectedFriendIdx >= friends.length) {
@@ -6619,15 +6697,30 @@ function renderSocialFriendsList() {
 
   listEl.innerHTML = friends.map((f, idx) => {
     const active = idx === activeSelectedFriendIdx;
-    const badgesStr = Array.isArray(f.badges) && f.badges.length > 0 ? f.badges.slice(0, 2).join(' • ') : '🏅 Sporcu';
+    const dispName = f.displayName || f.username || 'Arkadaş';
+    const initial = f.isAiCoach ? '🤖' : dispName.replace(/^[^\p{L}\p{N}]+/u, '').charAt(0).toUpperCase() || '👤';
+    const msgCount = Array.isArray(f.messages) ? f.messages.length : 0;
+    const phoneBadge = f.phone ? `<span style="font-size:10.5px;color:#86efac;font-weight:800;">📱 ${escapeHtml(f.phone)}</span>` : '';
+
     return `
-      <div onclick="selectFriendForChat(${idx})" style="padding:10px 12px;border-radius:12px;cursor:pointer;border:1.5px solid ${active ? 'var(--accent-cream)' : 'var(--border-color)'};background:${active ? 'rgba(243,214,177,0.14)' : 'rgba(255,255,255,0.03)'};transition:all 0.15s ease;">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;">
-          <div style="font-size:13.5px;font-weight:900;color:var(--text-main);">👤 ${escapeHtml(f.displayName || f.username)}</div>
-          <span style="font-size:11px;font-weight:800;color:#ffc069;">${escapeHtml(f.rank || '')}</span>
+      <div class="modern-friend-card ${active ? 'active' : ''}" onclick="selectFriendForChat(${idx})">
+        <div class="modern-friend-avatar">${initial}</div>
+        <div class="modern-friend-info">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="modern-friend-name">${escapeHtml(dispName)}</span>
+            <span style="font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(255,192,105,0.16);color:#ffc069;">${escapeHtml(f.rank || 'Sporcu')}</span>
+            ${phoneBadge}
+          </div>
+          <div class="modern-friend-sub">
+            💧 ${(f.waterCount || 0)} bardak • 🥩 ${(f.proteinGrams || 0)}g P • 💬 ${msgCount} mesaj
+          </div>
         </div>
-        <div style="font-size:11.5px;color:var(--text-muted);margin-top:3px;">💧 ${(f.waterCount || 0)} bardak • 🥩 ${(f.proteinGrams || 0)}g Protein</div>
-        <div style="font-size:11px;color:#95de64;margin-top:3px;">${escapeHtml(badgesStr)}</div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <button type="button" class="mini-action-btn" style="padding:7px 11px;font-size:11.5px;font-weight:900;background:${active ? 'var(--accent-cream)' : 'rgba(59,130,246,0.2)'};color:${active ? '#121218' : '#93c5fd'};border-color:${active ? 'var(--accent-cream)' : 'rgba(59,130,246,0.4)'};" onclick="selectFriendForChat(${idx}, true); event.stopPropagation();">
+            ${active ? '💬 Açık' : '💬 Mesaj At'}
+          </button>
+          ${!f.isAiCoach ? `<button type="button" class="mini-action-btn" style="padding:7px 9px;font-size:11.5px;background:rgba(239,68,68,0.16);color:#fca5a5;border-color:rgba(239,68,68,0.35);" onclick="deleteSocialFriend(${idx}, event)" title="Arkadaşı Sil">🗑️</button>` : ''}
+        </div>
       </div>
     `;
   }).join('');
@@ -6635,9 +6728,16 @@ function renderSocialFriendsList() {
   renderSelectedFriendChat();
 }
 
-function selectFriendForChat(idx) {
+function selectFriendForChat(idx, focusInput = false) {
   activeSelectedFriendIdx = idx;
   renderSocialFriendsList();
+  if (focusInput) {
+    const inp = document.getElementById('chatMessageInput');
+    if (inp) {
+      inp.focus();
+      inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
 }
 
 function renderSelectedFriendChat() {
@@ -6646,33 +6746,32 @@ function renderSelectedFriendChat() {
   const boxEl = document.getElementById('chatMessagesContainer') || document.getElementById('socialChatMessagesBox');
   if (!headerEl || !boxEl) return;
 
+  ensureDefaultAiCoachFriend();
   const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
-  const friend = friends[activeSelectedFriendIdx];
-  if (!friend) {
-    headerEl.textContent = '💬 Sohbet için soldan bir arkadaş seçin veya yeni arkadaş ekleyin';
-    if (badgesBarEl) badgesBarEl.textContent = 'Soldaki listeden bir arkadaşına dokunarak sohbeti ve sergilediği rozetleri açabilirsin.';
-    boxEl.innerHTML = `<div style="font-size:12px;color:var(--text-muted);text-align:center;margin:auto;">Arkadaşlarınla birbirinizi su içmeye, antrenmana ve görev bitirmeye motive edin!</div>`;
-    return;
-  }
+  const friend = friends[activeSelectedFriendIdx] || friends[0];
+  if (!friend) return;
 
-  headerEl.innerHTML = `💬 <b>${escapeHtml(friend.displayName || friend.username)}</b> <span style="font-weight:600;font-size:12px;color:var(--text-muted);">(${escapeHtml(friend.bio || '')})</span>`;
+  const phoneInfo = friend.phone ? ` • 📱 ${escapeHtml(friend.phone)}` : '';
+  headerEl.innerHTML = `💬 <b>${escapeHtml(friend.displayName || friend.username)}</b> <span style="font-weight:700;font-size:11.5px;color:#93c5fd;">(Sohbet Aktif${phoneInfo})</span>`;
   if (badgesBarEl) {
-    const bList = Array.isArray(friend.badges) && friend.badges.length > 0 ? friend.badges.join(' | ') : '🏅 Disiplin Savaşçısı';
+    const bList = Array.isArray(friend.badges) && friend.badges.length > 0 ? friend.badges.join(' • ') : '🏅 Disiplin Savaşçısı';
     badgesBarEl.innerHTML = `🏅 <b>Vitrin Rozetleri:</b> <span style="color:#95de64;font-weight:800;">${escapeHtml(bList)}</span>`;
   }
 
   const msgs = Array.isArray(friend.messages) ? friend.messages : [];
 
   if (msgs.length === 0) {
-    boxEl.innerHTML = `<div style="font-size:12px;color:var(--text-muted);text-align:center;margin:auto;">Henüz mesaj yok. Aşağıdaki hızlı dürtme butonlarından birine bas!</div>`;
+    boxEl.innerHTML = `<div style="font-size:12.5px;color:var(--text-muted);text-align:center;margin:auto;">Henüz mesaj yok. Aşağıdan mesaj yazıp <b>Gönder</b> butonuna basabilirsin!</div>`;
     return;
   }
 
   boxEl.innerHTML = msgs.map((m) => {
     const isMe = m.sender === 'me' || m.sender === currentProfile;
+    const senderLabel = isMe ? 'Sen' : (friend.displayName || friend.username);
     return `
       <div class="chat-bubble ${isMe ? 'me' : 'them'}">
-        <div>${escapeHtml(m.text)}</div>
+        <div style="font-size:10px;font-weight:900;opacity:0.75;margin-bottom:2px;">${escapeHtml(senderLabel)}</div>
+        <div style="font-size:13px;line-height:1.4;">${escapeHtml(m.text)}</div>
         <div style="font-size:9.5px;opacity:0.7;text-align:right;margin-top:3px;">${escapeHtml(m.time || '')}</div>
       </div>
     `;
@@ -6680,13 +6779,38 @@ function renderSelectedFriendChat() {
   boxEl.scrollTop = boxEl.scrollHeight;
 }
 
-async function appendMessageToActiveFriend(text) {
-  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
-  const friend = friends[activeSelectedFriendIdx];
-  if (!friend) {
-    alert('Önce soldan bir arkadaş seçin veya yukarıdan yeni bir arkadaş ekleyin!');
-    return false;
+function generateSmartFriendReply(friend, userText) {
+  const myName = appData.profileName || appData.username || 'Şampiyon';
+  const waterL = (((appData.waterCount || 0) * 250) / 1000).toFixed(2);
+  const prot = appData.proteinGrams || 0;
+  const lower = userText.toLowerCase();
+
+  if (lower.includes('su')) {
+    return `Harika hatırlatma ${myName}! 💧 Hemen 1 bardak su daha içiyorum. Sen bugün ${waterL}L suya ulaşmışsın, aynen devam! 🔥`;
   }
+  if (lower.includes('antrenman') || lower.includes('idman') || lower.includes('spor')) {
+    return `Basıyoruz ${myName}! 🏋️‍♂️ Bugün antrenmanı asla aksatmak yok, PR'ları kırıp geçelim! 💪`;
+  }
+  if (lower.includes('özet') || lower.includes('protein')) {
+    return `Süper tablo ${myName}! 👏 💧 ${waterL}L Su ve 🥩 ${prot}g Protein çok iyi gidiyor. Birlikte zirveye! 🏆`;
+  }
+  const replies = [
+    `Mesajın ulaştı ${myName}! 💪 Bugün hedeflerden taviz yok, tam gaz devam ediyoruz! 🔥`,
+    `Harikasın ${myName}! Şu ana kadar ${waterL}L su ve ${prot}g protein ile çok iyi gidiyorsun, motivasyonu düşürmeyelim! 🚀`,
+    `Tamamdır ${myName}! 🤝 Birbirimizi böyle takip edince disiplin 2 katına çıkıyor. Akşama gün özetlerini karşılaştıralım!`
+  ];
+  return replies[Math.floor(Math.random() * replies.length)];
+}
+
+async function appendMessageToActiveFriend(text) {
+  ensureDefaultAiCoachFriend();
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+  if (activeSelectedFriendIdx < 0 || activeSelectedFriendIdx >= friends.length) {
+    activeSelectedFriendIdx = 0;
+  }
+  const friend = friends[activeSelectedFriendIdx];
+  if (!friend) return false;
+
   if (!Array.isArray(friend.messages)) friend.messages = [];
   const timeStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
@@ -6696,10 +6820,12 @@ async function appendMessageToActiveFriend(text) {
     time: timeStr
   });
 
-  if (friend.username && friend.username !== currentProfile) {
+  let deliveredToLocalDbUser = false;
+  if (friend.username && friend.username !== currentProfile && !friend.isAiCoach) {
     try {
       const targetUser = await getUserFromDB(friend.username);
       if (targetUser) {
+        deliveredToLocalDbUser = true;
         if (!Array.isArray(targetUser.socialFriends)) targetUser.socialFriends = [];
         let myEntry = targetUser.socialFriends.find((f) => f.username === currentProfile);
         if (!myEntry) {
@@ -6729,16 +6855,36 @@ async function appendMessageToActiveFriend(text) {
     }
   }
 
+  renderSocialFriendsList();
   renderSelectedFriendChat();
   saveProfileData();
   syncSocialFriendsAndMessages(true);
+
+  // Eğer AI Koç ise veya cihaz dışı eklenen arkadaşsa anında motive edici etkileşimli yanıt gelsin
+  if (friend.isAiCoach || !deliveredToLocalDbUser) {
+    setTimeout(() => {
+      const replyTime = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+      friend.messages.push({
+        sender: friend.username || 'them',
+        text: generateSmartFriendReply(friend, text),
+        time: replyTime
+      });
+      renderSocialFriendsList();
+      renderSelectedFriendChat();
+      saveProfileData();
+    }, 650);
+  }
+
   return true;
 }
 
 function sendSocialChatMessage() {
   const inp = document.getElementById('chatMessageInput') || document.getElementById('socialChatInput');
   const txt = (inp ? inp.value : '').trim();
-  if (!txt) return;
+  if (!txt) {
+    if (inp) inp.focus();
+    return;
+  }
   if (inp) inp.value = '';
   appendMessageToActiveFriend(txt);
 }
@@ -6757,24 +6903,37 @@ function sendQuickDailyReportToFriendChat() {
 }
 
 function sendChatToWhatsAppDirect() {
+  ensureDefaultAiCoachFriend();
   const inp = document.getElementById('chatMessageInput') || document.getElementById('socialChatInput');
   const customTxt = (inp ? inp.value : '').trim();
   const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
-  const friend = friends[activeSelectedFriendIdx];
+  const friend = friends[activeSelectedFriendIdx] || friends[0];
 
+  let messageToSend = '';
   if (customTxt) {
     appendMessageToActiveFriend(customTxt);
     if (inp) inp.value = '';
-    openWhatsAppOrShareText(`💬 *TaskFlow+ Mesajı:* ${customTxt}`);
-    return;
+    messageToSend = `💬 *TaskFlow+ Mesajı (${appData.profileName || appData.username}):*\n${customTxt}`;
+  } else if (friend && Array.isArray(friend.messages) && friend.messages.length > 0) {
+    const myMsgs = friend.messages.filter((m) => m.sender === 'me' || m.sender === currentProfile);
+    const last = myMsgs.length > 0 ? myMsgs[myMsgs.length - 1] : friend.messages[friend.messages.length - 1];
+    messageToSend = `💬 *TaskFlow+ (${appData.profileName || appData.username}):*\n${last.text}`;
+  } else {
+    const waterL = (((appData.waterCount || 0) * 250) / 1000).toFixed(2);
+    messageToSend = `💪 Selam! Bugün TaskFlow+'ta 💧 ${waterL}L su içtim ve hedeflerime devam ediyorum! Sen ne durumdasın?`;
   }
 
-  if (friend && Array.isArray(friend.messages) && friend.messages.length > 0) {
-    const last = friend.messages[friend.messages.length - 1];
-    openWhatsAppOrShareText(`💬 *TaskFlow+ (${appData.profileName || appData.username}):* ${last.text}`);
-  } else {
-    shareFullDailyLifestyleSummary();
+  if (friend && friend.phone) {
+    let cleanPhone = friend.phone.replace(/\D/g, '');
+    if (cleanPhone.startsWith('0')) cleanPhone = '90' + cleanPhone.slice(1);
+    else if (cleanPhone.length === 10 && cleanPhone.startsWith('5')) cleanPhone = '90' + cleanPhone;
+    if (cleanPhone.length >= 10) {
+      window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(messageToSend)}`, '_blank');
+      return;
+    }
   }
+
+  openWhatsAppOrShareText(messageToSend);
 }
 
 async function syncSocialFriendsAndMessages(silent = false) {
@@ -6836,7 +6995,7 @@ document.addEventListener('click', (e) => {
 
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=20').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=21').catch(() => {});
   }
   await initDB();
 

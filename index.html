@@ -7,8 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>TaskFlow+ — Günlük Görev, Hedefler & Odak</title>
-  <link rel="manifest" href="manifest.json?v=20" />
-  <link rel="stylesheet" href="styles.css?v=20" />
+  <link rel="manifest" href="manifest.json?v=21" />
+  <link rel="stylesheet" href="styles.css?v=21" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -178,83 +178,70 @@
         <!-- ANA EKRAN: 4 BÜYÜK FERAH KUTU (TIKLAYINCA TAM EKRAN AÇILIR, GERİ TUŞUYLA DÖNÜLÜR) -->
         <!-- ============================================================== -->
         <div id="hubTabCategories">
-          <div style="font-size:12px;font-weight:800;color:var(--text-muted);margin-bottom:6px;">👇 İşlem yapmak istediğin kutuya dokun (İçinden ⬅️ Geri dönebilirsin):</div>
-
+          <!-- 4 BİREBİR EŞİT BOYUTLU MODERN ANA KUTU (2x2 SİMETRİK GRİD) -->
           <div class="simple-main-hub-grid">
-            <button type="button" class="simple-hub-card" style="border-color:rgba(96,165,250,0.4);background:linear-gradient(135deg,rgba(96,165,250,0.14),rgba(15,16,24,0.6));" onclick="openSimpleDrilldown('water')">
-              <div style="font-size:22px;">💧</div>
-              <div class="simple-hub-card-title">Su, Uyku & Rutin</div>
-              <div class="simple-hub-card-sub" style="color:#93c5fd;">Su: <span id="miniWaterQuickText">0.00L</span> • Dokun Aç ➡️</div>
+            <button type="button" class="simple-hub-card" style="border-color:rgba(96,165,250,0.4);background:linear-gradient(135deg,rgba(96,165,250,0.15),rgba(15,16,24,0.75));" onclick="openSimpleDrilldown('water')">
+              <div style="font-size:22px;line-height:1;">💧</div>
+              <div class="simple-hub-card-title">Su & Rutin</div>
+              <div class="simple-hub-card-sub" style="color:#93c5fd;">Su: <span id="miniWaterQuickText">0.00L</span> ➡️</div>
             </button>
 
-            <button type="button" class="simple-hub-card" style="border-color:rgba(82,196,26,0.45);background:linear-gradient(135deg,rgba(82,196,26,0.14),rgba(15,16,24,0.6));" onclick="openSimpleDrilldown('food')">
-              <div style="font-size:22px;">🍽️</div>
-              <div class="simple-hub-card-title">Yemek & Tarif Ekle</div>
-              <div class="simple-hub-card-sub" style="color:#95de64;" id="miniFoodQuickSubText">188+ Besin & Tarifim ➡️</div>
+            <button type="button" class="simple-hub-card" style="border-color:rgba(82,196,26,0.45);background:linear-gradient(135deg,rgba(82,196,26,0.15),rgba(15,16,24,0.75));" onclick="openSimpleDrilldown('food')">
+              <div style="font-size:22px;line-height:1;">🍽️</div>
+              <div class="simple-hub-card-title">Yemek & Tarifim</div>
+              <div class="simple-hub-card-sub" style="color:#95de64;" id="miniFoodQuickSubText">Besin & Tarif Ekle ➡️</div>
             </button>
 
-            <button type="button" class="simple-hub-card" style="border-color:rgba(255,156,110,0.4);background:linear-gradient(135deg,rgba(255,156,110,0.14),rgba(15,16,24,0.6));" onclick="openSimpleDrilldown('workout')">
-              <div style="font-size:22px;">🏋️</div>
+            <button type="button" class="simple-hub-card" style="border-color:rgba(255,156,110,0.4);background:linear-gradient(135deg,rgba(255,156,110,0.15),rgba(15,16,24,0.75));" onclick="openSimpleDrilldown('workout')">
+              <div style="font-size:22px;line-height:1;">🏋️</div>
               <div class="simple-hub-card-title">Antrenman & PR</div>
-              <div class="simple-hub-card-sub" style="color:#ffc069;">Spor, Kilo & 1RM ➡️</div>
+              <div class="simple-hub-card-sub" style="color:#ffc069;">Spor & Rekorlar ➡️</div>
             </button>
 
-            <button type="button" class="simple-hub-card" style="border-color:rgba(216,208,248,0.4);background:linear-gradient(135deg,rgba(216,208,248,0.14),rgba(15,16,24,0.6));" onclick="openSimpleDrilldown('tools')">
-              <div style="font-size:22px;">🧰</div>
-              <div class="simple-hub-card-title">Market, Bütçe & Kasa</div>
-              <div class="simple-hub-card-sub" style="color:var(--pastel-purple);">6 Pratik Araç ➡️</div>
+            <button type="button" class="simple-hub-card" style="border-color:rgba(216,208,248,0.4);background:linear-gradient(135deg,rgba(216,208,248,0.15),rgba(15,16,24,0.75));" onclick="openSimpleDrilldown('tools')">
+              <div style="font-size:22px;line-height:1;">🧰</div>
+              <div class="simple-hub-card-title">Araçlar & Kasa</div>
+              <div class="simple-hub-card-sub" style="color:var(--pastel-purple);">Market, Bütçe, Not ➡️</div>
             </button>
           </div>
 
-          <!-- Hızlı Su +1 Bardak & Rozetler Tek Satır Rahat Bar -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-            <button type="button" class="btn-cream" style="height:44px;font-size:13px;background:#60a5fa;color:#09090d;font-weight:900;" onclick="changeWaterCount(1)">💧 Hızlı +1 Bardak Su İç</button>
-            <button type="button" class="btn-cream" style="height:44px;font-size:13px;background:rgba(245,216,181,0.18);color:var(--accent-cream);border:1px solid rgba(245,216,181,0.4);" onclick="switchView('social')">🏆 Rozetler & 120 Görev</button>
+          <!-- 2 EŞİT BÜYÜK HIZLI AKSİYON BUTONU (+ YENİ GÖREV EKLE & +1 BARDAK SU) -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <button type="button" class="btn-cream" style="height:46px;font-size:13.5px;font-weight:900;" onclick="openTaskModal()">➕ Yeni Görev Ekle</button>
+            <button type="button" class="btn-cream" style="height:46px;font-size:13.5px;background:#60a5fa;color:#09090d;font-weight:900;" onclick="changeWaterCount(1)">💧 +1 Bardak Su İç</button>
           </div>
+
           <!-- Hidden legacy IDs so JS never errors -->
           <span id="miniEnergyQuickBtn" style="display:none;"></span>
           <span id="miniSleepQuickBtn" style="display:none;"></span>
 
-          <div class="all-tasks-strip active-filter" id="filterAllCard" onclick="setCategoryFilter('all')">
-            <div style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:13.5px;">
-              <span>🗂️</span>
-              <span>Tüm Günlük Görevleri Göster</span>
-            </div>
-            <span style="font-size:12px;font-weight:700;color:var(--accent-cream);" id="countAllTasks">0 Aktif</span>
-          </div>
-
-          <div class="bento-grid" style="margin-bottom:4px;">
-            <div class="bento-card bento-work" id="filterWorkCard" onclick="setCategoryFilter('İş & Proje')">
-              <div class="bento-icon">💡</div>
-              <div style="min-width:0;">
-                <div class="bento-title">İş & Proje</div>
-                <div class="bento-count" id="countWorkTasks">0 Görev</div>
-              </div>
-            </div>
-
-            <div class="bento-card bento-routine" id="filterRoutineCard" onclick="setCategoryFilter('Rutin İşler')">
-              <div class="bento-icon">🔄</div>
-              <div style="min-width:0;">
-                <div class="bento-title">Rutin İşler</div>
-                <div class="bento-count" id="countRoutineTasks">0 Görev</div>
-              </div>
-            </div>
-
-            <div class="bento-card bento-sport" id="filterSportCard" onclick="setCategoryFilter('Spor ve Sağlık')">
-              <div class="bento-icon">🏋️</div>
-              <div style="min-width:0;">
-                <div class="bento-title">Spor ve Sağlık</div>
-                <div class="bento-count" id="countSportTasks">0 Görev</div>
-              </div>
-            </div>
-
-            <div class="bento-card bento-growth" id="filterGrowthCard" onclick="setCategoryFilter('Kişisel Gelişim')">
-              <div class="bento-icon">📚</div>
-              <div style="min-width:0;">
-                <div class="bento-title">Kişisel Gelişim</div>
-                <div class="bento-count" id="countGrowthTasks">0 Görev</div>
-              </div>
-            </div>
+          <!-- 5 BİREBİR EŞİT BOYUTLU KATEGORİ SEÇENEĞİ (TÜMÜ | İŞ | RUTİN | SPOR | GELİŞİM) -->
+          <div class="equal-category-bar">
+            <button type="button" class="equal-cat-btn active-filter" id="filterAllCard" onclick="setCategoryFilter('all')">
+              <span class="cat-icon">🗂️</span>
+              <span class="cat-name">Tümü</span>
+              <span class="cat-cnt" id="countAllTasks">0</span>
+            </button>
+            <button type="button" class="equal-cat-btn" id="filterWorkCard" onclick="setCategoryFilter('İş & Proje')">
+              <span class="cat-icon">💡</span>
+              <span class="cat-name">İş</span>
+              <span class="cat-cnt" id="countWorkTasks">0</span>
+            </button>
+            <button type="button" class="equal-cat-btn" id="filterRoutineCard" onclick="setCategoryFilter('Rutin İşler')">
+              <span class="cat-icon">🔄</span>
+              <span class="cat-name">Rutin</span>
+              <span class="cat-cnt" id="countRoutineTasks">0</span>
+            </button>
+            <button type="button" class="equal-cat-btn" id="filterSportCard" onclick="setCategoryFilter('Spor ve Sağlık')">
+              <span class="cat-icon">🏋️</span>
+              <span class="cat-name">Spor</span>
+              <span class="cat-cnt" id="countSportTasks">0</span>
+            </button>
+            <button type="button" class="equal-cat-btn" id="filterGrowthCard" onclick="setCategoryFilter('Kişisel Gelişim')">
+              <span class="cat-icon">📚</span>
+              <span class="cat-name">Gelişim</span>
+              <span class="cat-cnt" id="countGrowthTasks">0</span>
+            </button>
           </div>
         </div>
 
@@ -1115,91 +1102,95 @@
           </div>
         </div>
 
-        <!-- 2'Lİ SOSYAL ALT SEKME SEÇİCİ: 🏆 120 MİSYON & CHALLENGE | 👥 ARKADAŞLAR & SOHBET -->
-        <div class="sub-tab-switcher" style="grid-template-columns:repeat(2,1fr);margin-bottom:12px;">
-          <button type="button" class="sub-tab-btn active" id="socialSubBtnMissions" onclick="switchSocialSubTab('missions')">🏆 120 Misyon & Challenge (% İlerleme)</button>
-          <button type="button" class="sub-tab-btn" id="socialSubBtnFriends" onclick="switchSocialSubTab('friends')">👥 Arkadaşlarım, Profiller & Mesajlaşma</button>
+        <!-- 2'Lİ EŞİT BÜYÜK SEKME SEÇİCİ: 💬 ARKADAŞLAR & SOHBET | 🏆 120 ROZET & MİSYON -->
+        <div class="sub-tab-switcher" style="grid-template-columns:repeat(2,1fr);margin-bottom:14px;">
+          <button type="button" class="sub-tab-btn active" id="socialSubBtnFriends" onclick="switchSocialSubTab('friends')">💬 Arkadaşlarım & Mesajlaşma</button>
+          <button type="button" class="sub-tab-btn" id="socialSubBtnMissions" onclick="switchSocialSubTab('missions')">🏆 120 Rozet & Görevler</button>
         </div>
 
-        <!-- ALT BÖLÜM 1: 🏆 120 MİSYON & CHALLENGE MERKEZİ -->
-        <div id="socialSubMissions">
+        <!-- ALT BÖLÜM 1: 💬 MODERN ARKADAŞ EKLEME & CANLI MESAJLAŞMA (VARSAYILAN AÇIK!) -->
+        <div id="socialSubFriends">
+          <!-- KART 1: ➕ HIZLI VE BASİT ARKADAŞ EKLEME -->
+          <div class="task-card" style="margin-bottom:14px;border-color:rgba(82,196,26,0.4);">
+            <div style="font-size:16px;font-weight:900;color:#95de64;margin-bottom:4px;">➕ Yeni Arkadaş Ekle</div>
+            <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:10px;">
+              Arkadaşının adını yazıp hemen listene ekle ve mesajlaşmaya başla! (İstersen WhatsApp numarasını da yazabilirsin):
+            </p>
+            <div class="form-row stack-mobile" style="margin-bottom:8px;">
+              <input type="text" id="addFriendInput" class="form-input" style="height:46px;font-size:13.5px;" placeholder="👤 Arkadaşının Adı (Örn: Ahmet, Berk, Ayşe)..." onkeydown="if(event.key==='Enter'){event.preventDefault();addFriendByCodeOrUsername();}" />
+              <input type="tel" id="addFriendPhoneInput" class="form-input" style="height:46px;font-size:13.5px;" placeholder="📱 WhatsApp No (Opsiyonel: 05...)" onkeydown="if(event.key==='Enter'){event.preventDefault();addFriendByCodeOrUsername();}" />
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;">
+              <button type="button" class="btn-cream" style="height:46px;font-size:14px;font-weight:900;background:#95de64;color:#09090d;" onclick="addFriendByCodeOrUsername()">➕ Arkadaş Olarak Ekle</button>
+              <button type="button" class="pin-btn" style="height:46px;font-size:12.5px;font-weight:800;" onclick="copyMyFriendInviteCode()">🔗 Davet Kodum</button>
+            </div>
+          </div>
+
+          <!-- KART 2: 👥 ARKADAŞ LİSTEM (DOKUN VE SOHBET ET) -->
+          <div class="task-card" style="margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <h4 style="font-size:15px;font-weight:900;">👥 Arkadaşlarım (Mesaj Atmak İçin Kişiye Dokun)</h4>
+              <button type="button" class="pin-btn" style="height:36px;padding:0 12px;font-size:12px;" onclick="syncSocialFriendsAndMessages()">🔄 Yenile</button>
+            </div>
+            <div id="friendsListContainer" style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;"></div>
+          </div>
+
+          <!-- KART 3: 💬 SEÇİLİ ARKADAŞLA MESAJLAŞMA & WHATSAPP GÖNDERİMİ -->
+          <div class="task-card" style="border-color:rgba(245,216,181,0.4);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap;">
+              <h4 id="activeChatFriendTitle" style="font-size:15.5px;font-weight:900;color:var(--accent-cream);">💬 Sohbet & Motivasyon</h4>
+              <button type="button" class="btn-cream" style="height:38px;padding:0 14px;font-size:12.5px;background:#25D366;color:#fff;font-weight:900;" onclick="sendChatToWhatsAppDirect()">📲 WhatsApp'tan Gönder</button>
+            </div>
+
+            <div id="activeChatFriendBadgesBar" style="font-size:12px;color:var(--text-muted);margin-bottom:10px;padding:8px 11px;background:var(--bg-surface);border-radius:11px;">
+              Yukarıdan bir arkadaşına dokun ve hemen aşağıdan mesaj yaz!
+            </div>
+
+            <!-- Sohbet Baloncukları -->
+            <div id="chatMessagesContainer" class="chat-messages-box" style="height:240px;"></div>
+
+            <!-- 4 Eşit Boyutlu Tek Tıkla Hazır Mesaj Butonu -->
+            <div style="font-size:11.5px;font-weight:800;color:var(--text-muted);margin-bottom:6px;">⚡ Tek Dokunuşla Hızlı Mesaj Gönder:</div>
+            <div class="quick-chat-grid">
+              <button type="button" class="quick-chat-btn" onclick="sendQuickSocialMessage('💪 Bugün antrenmanımı tamamladım, sıra sende şampiyon!')">💪 Antrenman Bitti!</button>
+              <button type="button" class="quick-chat-btn" onclick="sendQuickSocialMessage('💧 Su hedefimi devirdim, bugün kaç bardak su içtin?')">💧 Su İçtin mi?</button>
+              <button type="button" class="quick-chat-btn" onclick="sendQuickSocialMessage('🥩 Protein ve beslenme tam gaz! Pes etmek yok 🔥')">🥩 Beslenme Tam Gaz!</button>
+              <button type="button" class="quick-chat-btn" onclick="sendQuickDailyReportToFriendChat()">📊 Günlük Özetimi At</button>
+            </div>
+
+            <!-- Büyük Mesaj Yazma ve Gönderme Alanı -->
+            <div style="display:flex;gap:8px;margin-top:6px;">
+              <input type="text" id="chatMessageInput" class="form-input" style="flex:1;height:48px;font-size:14px;" placeholder="💬 Mesajını buraya yaz..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendSocialChatMessage();}" />
+              <button type="button" class="btn-cream" style="height:48px;padding:0 20px;font-size:14px;font-weight:900;" onclick="sendSocialChatMessage()">Gönder ➤</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ALT BÖLÜM 2: 🏆 120 MİSYON & CHALLENGE MERKEZİ -->
+        <div id="socialSubMissions" style="display:none;">
           <div class="task-card" style="margin-bottom:12px;">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
               <div>
                 <h3 style="font-size:16px;font-weight:900;">🏆 120 Kademeli Misyon & Challenge Merkezi</h3>
-                <p style="font-size:11.5px;color:var(--text-muted);">Görev yaptıkça, su içtikçe, protein aldıkça ve antrenman tamamladıkça yüzdelik ilerlemen artar, rozet açılır ve ekstra XP kazanıp seviye atlarsın!</p>
+                <p style="font-size:12px;color:var(--text-muted);">Hangi görevi tamamlarsan hangi rozeti ve kaç XP kazanacağın aşağıda tek tek yazar!</p>
               </div>
-              <span id="missionsTotalUnlockedText" style="font-size:12px;font-weight:900;padding:5px 11px;border-radius:99px;background:rgba(82,196,26,0.18);color:#95de64;">0 / 120 Tamamlandı</span>
+              <span id="missionsTotalUnlockedText" style="font-size:12.5px;font-weight:900;padding:6px 12px;border-radius:99px;background:rgba(82,196,26,0.18);color:#95de64;">0 / 120 Tamamlandı</span>
             </div>
 
             <!-- Challenge Kategori Filtresi -->
-            <div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;scrollbar-width:none;">
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="all" style="border:none;cursor:pointer;padding:5px 10px;background:var(--accent-cream);color:#121218;font-weight:800;flex-shrink:0;" onclick="setMissionCategoryFilter('all', this)">🌟 Tümü (120)</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="closest" style="border:none;cursor:pointer;padding:5px 10px;color:#ffc069;font-weight:800;flex-shrink:0;" onclick="setMissionCategoryFilter('closest', this)">🎯 Kazanmaya En Yakınlar</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="unlocked" style="border:none;cursor:pointer;padding:5px 10px;color:#95de64;font-weight:800;flex-shrink:0;" onclick="setMissionCategoryFilter('unlocked', this)">✅ Kazanılan Rozetlerim</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="water" style="border:none;cursor:pointer;padding:5px 10px;flex-shrink:0;" onclick="setMissionCategoryFilter('water', this)">💧 Su Misyonları (20)</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="sport" style="border:none;cursor:pointer;padding:5px 10px;flex-shrink:0;" onclick="setMissionCategoryFilter('sport', this)">🏋️ Antrenman & PR (20)</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="nutrition" style="border:none;cursor:pointer;padding:5px 10px;flex-shrink:0;" onclick="setMissionCategoryFilter('nutrition', this)">🍽️ Beslenme & Protein (20)</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="tasks" style="border:none;cursor:pointer;padding:5px 10px;flex-shrink:0;" onclick="setMissionCategoryFilter('tasks', this)">📋 Görev Avcısı (20)</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="streak" style="border:none;cursor:pointer;padding:5px 10px;flex-shrink:0;" onclick="setMissionCategoryFilter('streak', this)">🔥 Seri & Rutin (20)</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="growth" style="border:none;cursor:pointer;padding:5px 10px;flex-shrink:0;" onclick="setMissionCategoryFilter('growth', this)">🧠 Gelişim & Sosyal (20)</button>
+            <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;scrollbar-width:none;">
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="all" style="border:none;cursor:pointer;background:var(--accent-cream);color:#121218;font-weight:800;flex-shrink:0;" onclick="setMissionCategoryFilter('all', this)">🌟 Tümü (120)</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="closest" style="border:none;cursor:pointer;color:#ffc069;font-weight:800;flex-shrink:0;" onclick="setMissionCategoryFilter('closest', this)">🎯 Kazanmaya En Yakınlar</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="unlocked" style="border:none;cursor:pointer;color:#95de64;font-weight:800;flex-shrink:0;" onclick="setMissionCategoryFilter('unlocked', this)">✅ Kazanılan Rozetlerim</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="water" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('water', this)">💧 Su (20)</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="sport" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('sport', this)">🏋️ Spor & PR (20)</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="nutrition" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('nutrition', this)">🍽️ Beslenme (20)</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="tasks" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('tasks', this)">📋 Görevler (20)</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="streak" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('streak', this)">🔥 Seri (20)</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="growth" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('growth', this)">🧠 Gelişim (20)</button>
             </div>
 
             <div id="missionsCardsContainer" class="challenge-card-grid"></div>
-          </div>
-        </div>
-
-        <!-- ALT BÖLÜM 2: 👥 ARKADAŞ EKLEME, PROFİL İNCELEME & MESAJLAŞMA -->
-        <div id="socialSubFriends" style="display:none;">
-          <div class="task-card" style="margin-bottom:12px;">
-            <h3 style="font-size:16px;font-weight:900;margin-bottom:4px;">➕ Arkadaş Ekle & Profil / Rozet Vitrini Gör</h3>
-            <p style="font-size:11.5px;color:var(--text-muted);margin-bottom:10px;">
-              Arkadaşının kullanıcı adını veya WhatsApp'tan gönderdiği <b>Profil Davet Kodunu (`TF-...`)</b> aşağıya yapıştırarak arkadaş ekle, sergilediği rozetleri gör ve mesajlaş!
-            </p>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <input type="text" id="addFriendInput" class="form-input" style="flex:1;min-width:190px;padding:8px 10px;font-size:12.5px;" placeholder="Kullanıcı adı (Örn: ahmet) veya Profil Kodu (TF-...) yapıştır..." onkeydown="if(event.key==='Enter'){event.preventDefault();addFriendByCodeOrUsername();}" />
-              <button type="button" class="btn-cream" onclick="addFriendByCodeOrUsername()">+ Arkadaş Ekle</button>
-              <button type="button" class="pin-btn" style="height:38px;padding:0 11px;font-size:11.5px;" onclick="copyMyFriendInviteCode()">🔗 Kendi Kodumu Kopyala</button>
-            </div>
-          </div>
-
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px;">
-            <!-- Sol: Arkadaş Listesi ve Profilleri -->
-            <div class="task-card">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                <h4 style="font-size:14px;font-weight:800;">👥 Arkadaş Listem & Profilleri</h4>
-                <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:3px 8px;" onclick="syncSocialFriendsAndMessages()">🔄 Yenile</button>
-              </div>
-              <div id="friendsListContainer" style="display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;"></div>
-            </div>
-
-            <!-- Sağ: Seçili Arkadaşla Uygulama İçi Mesajlaşma & Motivasyon Gönderme -->
-            <div class="task-card">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;flex-wrap:wrap;">
-                <h4 id="activeChatFriendTitle" style="font-size:14px;font-weight:800;color:var(--accent-cream);">💬 Mesajlaşma & Motivasyon</h4>
-                <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:3px 8px;background:rgba(37,211,102,0.18);color:#95de64;" onclick="sendChatToWhatsAppDirect()">📲 WP'den Gönder</button>
-              </div>
-
-              <!-- Seçili Arkadaşın Rozet Vitrini Özeti -->
-              <div id="activeChatFriendBadgesBar" style="font-size:11px;color:var(--text-muted);margin-bottom:8px;padding:6px 9px;background:var(--bg-surface);border-radius:10px;">
-                Soldaki listeden bir arkadaşına dokunarak sohbeti ve sergilediği rozetleri açabilirsin.
-              </div>
-
-              <div id="chatMessagesContainer" class="chat-messages-box"></div>
-
-              <!-- Hızlı Motivasyon Dürtmeleri -->
-              <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;">
-                <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="sendQuickSocialMessage('💪 Bugün antrenmanımı tamamladım, sıra sende şampiyon!')">💪 Antrenman Bitti!</span>
-                <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="sendQuickSocialMessage('💧 Su hedefimi devirdim, bugün kaç bardak su içtin?')">💧 Su İçtin mi?</span>
-                <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="sendQuickSocialMessage('🥩 Protein ve beslenme tam gaz! Pes etmek yok 🔥')">🥩 Beslenme Tam Gaz!</span>
-                <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="sendQuickDailyReportToFriendChat()">📊 Günlük Özetimi At</span>
-              </div>
-
-              <div style="display:flex;gap:6px;">
-                <input type="text" id="chatMessageInput" class="form-input" style="flex:1;padding:8px 10px;font-size:12.5px;" placeholder="Arkadaşına mesaj veya motivasyon yaz..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendSocialChatMessage();}" />
-                <button type="button" class="btn-cream" style="padding:8px 14px;font-size:12.5px;" onclick="sendSocialChatMessage()">Gönder ➤</button>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -1207,23 +1198,24 @@
     </main>
   </div>
 
-  <!-- ALT YÜZEN MENÜ: GÖREVLER | HEDEFLER | (+) | SOSYAL & MİSYON | ARŞİV | ODAK -->
+  <!-- ALT YÜZEN MENÜ: 6 BİREBİR EŞİT BOYUTLU SEÇENEK (GÖREVLER | ARKADAŞLAR | ROZETLER | HEDEFLER | ARŞİV | ODAK) -->
   <div class="bottom-nav-wrap">
     <nav class="bottom-nav">
       <button class="nav-item active" id="navTasks" onclick="switchView('tasks')">
         <span class="nav-icon">🏠</span>
         <span>Görevler</span>
       </button>
+      <button class="nav-item" id="navFriends" onclick="openSocialWithTab('friends')">
+        <span class="nav-icon">💬</span>
+        <span>Arkadaşlar</span>
+      </button>
+      <button class="nav-item" id="navSocial" onclick="openSocialWithTab('missions')">
+        <span class="nav-icon">🏆</span>
+        <span>Rozetler</span>
+      </button>
       <button class="nav-item" id="navGoals" onclick="switchView('goals')">
         <span class="nav-icon">🎯</span>
         <span>Hedefler</span>
-      </button>
-
-      <button class="fab-add" onclick="handleFabClick()" title="Yeni Görev veya Hedef Ekle">+</button>
-
-      <button class="nav-item" id="navSocial" onclick="switchView('social')">
-        <span class="nav-icon">🏆</span>
-        <span>Misyon & Sosyal</span>
       </button>
       <button class="nav-item" id="navArchive" onclick="switchView('archive')">
         <span class="nav-icon">📦</span>
@@ -1626,6 +1618,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=20"></script>
+  <script src="app.js?v=21"></script>
 </body>
 </html>

@@ -2054,6 +2054,222 @@ body[data-drilldown-open="true"] .right-panel {
   text-align: center;
 }
 
+/* ============================================================================
+   v21.0 ULTRA-MODERN, TEK SÜTUN FERAH YAPI & %100 EŞİT BOYUTLU SİMGELER / KARTLAR
+   ============================================================================ */
+
+/* Hem Bilgisayarda hem Telefonda tek sütunlu, ortalanmış, ferah modern uygulama düzeni */
+@media (min-width: 960px) {
+  .app-container {
+    display: flex !important;
+    flex-direction: column !important;
+    max-width: 740px !important;
+    padding: 22px 20px 115px !important;
+    gap: 16px !important;
+  }
+}
+
+/* Görevler dışındaki bir sekmeye (Arkadaşlar, Rozetler, Hedefler, Arşiv, Odak, Ayarlar)
+   geçildiğinde üstteki ana ekran kutularını ve arama çubuğunu TAMAMEN GİZLE! */
+body:not([data-active-view="tasks"]) #leftPanelMainBody,
+body:not([data-active-view="tasks"]) .search-bar-wrap,
+body:not([data-active-view="tasks"]) #rolloverBanner {
+  display: none !important;
+}
+
+/* 4 Ana Kutu Birebir Eşit Boyutta (94px Yükseklik, Simetrik İçerik) */
+.simple-main-hub-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+  margin-bottom: 12px !important;
+}
+
+.simple-hub-card {
+  height: 94px !important;
+  min-height: 94px !important;
+  max-height: 94px !important;
+  padding: 12px 14px !important;
+  border-radius: 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  overflow: hidden !important;
+}
+
+/* 5 Eşit Boyutlu Kategori Seçici Bar (Tümü | İş | Rutin | Spor | Gelişim) */
+.equal-category-bar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.equal-cat-btn {
+  height: 60px;
+  border-radius: 14px;
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-main);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  padding: 4px 2px;
+}
+
+.equal-cat-btn .cat-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.equal-cat-btn .cat-name {
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.equal-cat-btn .cat-cnt {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.equal-cat-btn.active-filter {
+  border-color: var(--accent-cream);
+  background: rgba(245, 216, 181, 0.18);
+  color: var(--accent-cream);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+}
+
+/* ALT MENÜ: 6 BİREBİR EŞİT BOYUTLU MODERN BUTON (SİMGELER VE SEÇENEKLER %100 AYNI BOYUTTA!) */
+.bottom-nav-wrap {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 16px);
+  max-width: 720px;
+  z-index: 900;
+}
+
+.bottom-nav {
+  display: grid !important;
+  grid-template-columns: repeat(6, 1fr) !important;
+  gap: 4px !important;
+  height: 64px !important;
+  padding: 5px !important;
+  border-radius: 20px !important;
+  background: rgba(15, 16, 24, 0.97) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7) !important;
+  align-items: center !important;
+}
+
+.nav-item {
+  width: 100% !important;
+  height: 52px !important;
+  padding: 4px 2px !important;
+  margin: 0 !important;
+  border-radius: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: var(--text-muted) !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  transition: all 0.15s ease !important;
+}
+
+.nav-item .nav-icon {
+  font-size: 19px !important;
+  line-height: 1 !important;
+}
+
+.nav-item.active {
+  background: rgba(245, 216, 181, 0.16) !important;
+  color: var(--accent-cream) !important;
+  border-color: rgba(245, 216, 181, 0.4) !important;
+}
+
+/* Modern Arkadaş Kartı ve Sohbet Kişi Seçici */
+.modern-friend-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.16s ease;
+  min-height: 72px;
+}
+
+.modern-friend-card.active {
+  border-color: #95de64;
+  background: linear-gradient(135deg, rgba(82, 196, 26, 0.14), rgba(96, 165, 250, 0.08));
+  box-shadow: 0 4px 16px rgba(82, 196, 26, 0.15);
+}
+
+.modern-friend-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent-cream), var(--pastel-purple));
+  color: #121218;
+  font-size: 18px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.quick-chat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.quick-chat-btn {
+  min-height: 40px;
+  padding: 8px 10px;
+  border-radius: 11px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.14s ease;
+}
+
+.quick-chat-btn:hover,
+.quick-chat-btn:active {
+  border-color: var(--accent-cream);
+  background: rgba(245, 216, 181, 0.14);
+}
+
+
 
 
 
