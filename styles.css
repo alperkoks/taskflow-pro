@@ -1747,6 +1747,149 @@ body.panic-blur-mode #countdownStripContainer {
   font-size: 10.5px;
 }
 
+/* ============================================================================
+   v19.0 ULTRA-SADE ALT SEKMELER, FAVORİ ÖĞÜNLER, 120 MİSYON & SOSYAL PROFİL/SOHBET
+   ============================================================================ */
+.sub-tab-switcher {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.sub-tab-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 7px 4px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.sub-tab-btn.active {
+  background: rgba(245, 216, 181, 0.22);
+  color: var(--accent-cream);
+  border: 1px solid rgba(245, 216, 181, 0.45);
+}
+
+.fav-meal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.fav-meal-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 11px;
+  padding: 7px 9px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.fav-meal-card:hover {
+  border-color: #95de64;
+  background: rgba(82, 196, 26, 0.08);
+}
+
+.challenge-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.challenge-item-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 7px;
+  transition: all 0.15s ease;
+}
+
+.challenge-item-card.unlocked {
+  border-color: rgba(82, 196, 26, 0.55);
+  background: linear-gradient(135deg, rgba(82, 196, 26, 0.12), rgba(245, 216, 181, 0.06));
+}
+
+.challenge-item-card.showcased {
+  border: 1.5px solid var(--accent-cream);
+  box-shadow: 0 0 14px rgba(245, 216, 181, 0.2);
+}
+
+.social-profile-banner {
+  background: linear-gradient(135deg, rgba(216, 208, 248, 0.16), rgba(96, 165, 250, 0.12), rgba(82, 196, 26, 0.1));
+  border: 1px solid rgba(245, 216, 181, 0.35);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.showcase-badges-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.showcase-badge-box {
+  background: rgba(15, 16, 24, 0.65);
+  border: 1px solid rgba(245, 216, 181, 0.35);
+  border-radius: 13px;
+  padding: 8px 6px;
+  text-align: center;
+}
+
+.chat-messages-box {
+  height: 230px;
+  overflow-y: auto;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 8px;
+}
+
+.chat-bubble {
+  max-width: 82%;
+  padding: 8px 11px;
+  border-radius: 13px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.chat-bubble.me {
+  align-self: flex-end;
+  background: rgba(82, 196, 26, 0.2);
+  border: 1px solid rgba(82, 196, 26, 0.4);
+  color: #e6f7ff;
+}
+
+.chat-bubble.them {
+  align-self: flex-start;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+
 
 
 

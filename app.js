@@ -1445,8 +1445,10 @@ function renderAll() {
   checkAndRenderWaterTracker();
   renderProteinTracker();
   if (typeof renderFoodMacroTracker === 'function') renderFoodMacroTracker();
+  if (typeof renderFavoriteMealCombos === 'function') renderFavoriteMealCombos();
   renderEnergyAndSleepUI();
   renderSelectedDayDailyValuesBar();
+  if (typeof renderSocialAndMissionsHub === 'function') renderSocialAndMissionsHub();
   renderGamificationRank();
   renderMotivationQuoteBar();
   renderCountdownStrip();
@@ -3328,12 +3330,16 @@ function switchView(viewName, fromBackButton = false) {
 
   document.getElementById('viewTasks').style.display = viewName === 'tasks' ? 'block' : 'none';
   document.getElementById('viewGoals').style.display = viewName === 'goals' ? 'block' : 'none';
+  const viewSocialEl = document.getElementById('viewSocial');
+  if (viewSocialEl) viewSocialEl.style.display = viewName === 'social' ? 'block' : 'none';
   document.getElementById('viewArchive').style.display = viewName === 'archive' ? 'block' : 'none';
   document.getElementById('viewStats').style.display = viewName === 'stats' ? 'block' : 'none';
   document.getElementById('viewSettings').style.display = viewName === 'settings' ? 'block' : 'none';
 
   document.getElementById('navTasks').classList.toggle('active', viewName === 'tasks');
   document.getElementById('navGoals').classList.toggle('active', viewName === 'goals');
+  const navSocialEl = document.getElementById('navSocial');
+  if (navSocialEl) navSocialEl.classList.toggle('active', viewName === 'social');
   document.getElementById('navArchive').classList.toggle('active', viewName === 'archive');
   document.getElementById('navStats').classList.toggle('active', viewName === 'stats');
 
@@ -3391,8 +3397,9 @@ function renderGamificationRank() {
   const prPts = ((appData.bodyPrRecords || []).length) * 15;
   const journalPts = ((appData.microJournal || []).length) * 20;
   const bonusXp = appData.bonusXp || 0;
+  const challengeXp = appData.challengeBonusXp || 0;
 
-  const totalXp = (doneTasksCount * 35) + (doneGoalSteps * 45) + (doneHabits * 15) + waterPts + prPts + journalPts + bonusXp;
+  const totalXp = (doneTasksCount * 35) + (doneGoalSteps * 45) + (doneHabits * 15) + waterPts + prPts + journalPts + bonusXp + challengeXp;
   const level = Math.floor(totalXp / 150) + 1;
   const currentLevelXp = totalXp % 150;
   const pct = Math.min(100, Math.round((currentLevelXp / 150) * 100));
@@ -4927,6 +4934,7 @@ function getCombinedFoodDatabase() {
 
 function openFoodTrackerQuick() {
   switchLeftHubMode('sport');
+  if (typeof switchSportSubTab === 'function') switchSportSubTab('food');
   setTimeout(() => {
     const card = document.getElementById('foodMacroTrackerCard');
     const inp = document.getElementById('foodSearchInput');
@@ -5186,11 +5194,33 @@ function showSmartCoachPopup(icon, title, message, durationMs = 9500) {
   const iconEl = document.getElementById('smartCoachIcon');
   const titleEl = document.getElementById('smartCoachTitle');
   const bodyEl = document.getElementById('smartCoachBody');
+  const badgeBoxEl = document.getElementById('smartCoachNextBadgeBox');
   if (!popup || !bodyEl) return;
 
   if (iconEl) iconEl.textContent = icon || '🤖';
   if (titleEl) titleEl.textContent = title || 'Kişisel Koç & Başarı Analizi';
   bodyEl.innerHTML = message;
+
+  // En yakın kazanılabilir rozet ve % ilerleme ipucunu otomatik göster
+  if (badgeBoxEl && typeof get120ChallengesWithLiveProgress === 'function') {
+    const allCh = get120ChallengesWithLiveProgress();
+    const lockedSorted = allCh.filter((c) => !c.unlocked).sort((a, b) => b.pct - a.pct);
+    const closest = lockedSorted[0];
+    if (closest) {
+      badgeBoxEl.style.display = 'block';
+      badgeBoxEl.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+          <span>🎯 <b>Sıradaki Rozet İpucu:</b> ${closest.icon} <b>${escapeHtml(closest.title)}</b></span>
+          <span style="color:#95de64;font-weight:900;">%${closest.pct} (+${closest.xp} XP)</span>
+        </div>
+        <div style="margin-top:3px;color:var(--text-muted);font-size:10px;">
+          Şunu yaparsan bu rozeti kazanabilirsin: <b>${escapeHtml(closest.desc)}</b> — Şu an <b>${closest.currentVal}/${closest.targetVal} (%${closest.pct})</b> yaptın!
+        </div>
+      `;
+    } else {
+      badgeBoxEl.style.display = 'none';
+    }
+  }
 
   popup.classList.add('show');
   if (smartCoachTimer) clearTimeout(smartCoachTimer);
@@ -5357,6 +5387,1173 @@ function triggerRandomPersonalInsightPopup() {
   showSmartCoachPopup(pick.icon, pick.title, pick.msg, 11000);
 }
 
+// ===== 30. 🎨 ULTRA-SADE ALT SEKME SİSTEMİ & 🍱 FAVORİ ÖĞÜN KOMBİNASYONLARI & 👨‍🍳 ÖZEL TARİF (v19.0) =====
+
+function switchSportSubTab(tab) {
+  const wPane = document.getElementById('sportSubWater');
+  const fPane = document.getElementById('sportSubFood');
+  const kPane = document.getElementById('sportSubWorkout');
+  if (wPane) wPane.style.display = tab === 'water' ? 'block' : 'none';
+  if (fPane) fPane.style.display = tab === 'food' ? 'block' : 'none';
+  if (kPane) kPane.style.display = tab === 'workout' ? 'block' : 'none';
+
+  const bW = document.getElementById('sportSubBtnWater');
+  const bF = document.getElementById('sportSubBtnFood');
+  const bK = document.getElementById('sportSubBtnWorkout');
+  if (bW) bW.classList.toggle('active', tab === 'water');
+  if (bF) bF.classList.toggle('active', tab === 'food');
+  if (bK) bK.classList.toggle('active', tab === 'workout');
+}
+
+const DEFAULT_FAVORITE_MEALS = [
+  {
+    id: 'fav_1',
+    title: '⚡ Sporcu Kahvaltısı',
+    items: [
+      { name: 'Haşlanmış Yumurta (Tam)', grams: 150, kcal: 233, protein: 19.5, carbs: 1.7, fat: 16.5 },
+      { name: 'Yulaf Ezmesi (Sade / Çiğ)', grams: 60, kcal: 233, protein: 10.1, carbs: 39.8, fat: 4.1 },
+      { name: 'Lor Peyniri (Kahvaltılık/Börek)', grams: 100, kcal: 98, protein: 14.0, carbs: 3.6, fat: 3.0 }
+    ]
+  },
+  {
+    id: 'fav_2',
+    title: '🍗 Antrenman Sonrası Öğün',
+    items: [
+      { name: 'Tavuk Sote (Biberli, Domatesli, Soğanlı)', grams: 250, kcal: 338, protein: 45.0, carbs: 8.8, fat: 12.5 },
+      { name: 'Pirinç Pilavı (Pişmiş)', grams: 200, kcal: 290, protein: 5.2, carbs: 56.0, fat: 4.4 }
+    ]
+  },
+  {
+    id: 'fav_3',
+    title: '🥩 Yüksek Protein Akşam',
+    items: [
+      { name: 'Dana Kıyma (Yağsız Pişmiş / Kavurma)', grams: 200, kcal: 430, protein: 52.0, carbs: 0.0, fat: 24.0 },
+      { name: 'Bulgur Pilavı (Pişmiş)', grams: 180, kcal: 207, protein: 6.3, carbs: 39.6, fat: 2.7 },
+      { name: 'Ayran', grams: 250, kcal: 93, protein: 5.0, carbs: 7.0, fat: 5.0 }
+    ]
+  },
+  {
+    id: 'fav_4',
+    title: '🥤 Hızlı Shake & Ara Öğün',
+    items: [
+      { name: 'Whey Protein Tozu (1 Ölçek ≈ 30g)', grams: 30, kcal: 117, protein: 23.4, carbs: 2.1, fat: 1.7 },
+      { name: 'Muz (Soyulmuş)', grams: 120, kcal: 107, protein: 1.3, carbs: 27.4, fat: 0.4 },
+      { name: 'Fıstık Ezmesi (Şekersiz %100)', grams: 20, kcal: 118, protein: 5.2, carbs: 3.2, fat: 10.0 }
+    ]
+  }
+];
+
+function getFavoriteMealCombosList() {
+  if (!Array.isArray(appData.favoriteMeals) || appData.favoriteMeals.length === 0) {
+    appData.favoriteMeals = JSON.parse(JSON.stringify(DEFAULT_FAVORITE_MEALS));
+  }
+  return appData.favoriteMeals;
+}
+
+function renderFavoriteMealCombos() {
+  const container = document.getElementById('favoriteMealsContainer');
+  if (!container) return;
+  const list = getFavoriteMealCombosList();
+
+  container.innerHTML = list.map((combo, idx) => {
+    const tot = (combo.items || []).reduce((acc, it) => {
+      acc.kcal += Number(it.kcal) || 0;
+      acc.prot += Number(it.protein) || 0;
+      acc.carb += Number(it.carbs) || 0;
+      acc.fat += Number(it.fat) || 0;
+      return acc;
+    }, { kcal: 0, prot: 0, carb: 0, fat: 0 });
+    const summaryNames = (combo.items || []).map((i) => `${i.grams}g ${i.name.split('(')[0].trim()}`).join(' + ');
+
+    return `
+      <div class="fav-meal-card" onclick="applyFavoriteMealCombo(${idx})" title="Tek tıkla bu öğündeki tüm besinleri ve makroları bugüne ekle">
+        <button type="button" class="fav-meal-del" onclick="deleteFavoriteMealCombo(${idx}, event)" title="Kombinasyonu Sil">×</button>
+        <div class="fav-meal-title">${escapeHtml(combo.title)}</div>
+        <div class="fav-meal-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(summaryNames)}</div>
+        <div style="font-size:10px;font-weight:800;color:#95de64;margin-top:3px;">🔥 ${Math.round(tot.kcal)} kcal • 🥩 ${tot.prot.toFixed(0)}g P • 🍞 ${tot.carb.toFixed(0)}g K</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function applyFavoriteMealCombo(idx) {
+  const list = getFavoriteMealCombosList();
+  const combo = list[idx];
+  if (!combo || !Array.isArray(combo.items)) return;
+
+  const targetDate = selectedDate || getTodayISO();
+  if (!appData.dailyFoods || typeof appData.dailyFoods !== 'object') {
+    appData.dailyFoods = {};
+  }
+  if (!Array.isArray(appData.dailyFoods[targetDate])) {
+    appData.dailyFoods[targetDate] = [];
+  }
+
+  const prevProt = appData.proteinGrams || 0;
+  let addedProt = 0;
+  let addedKcal = 0;
+
+  combo.items.forEach((it, i) => {
+    const p = Number(it.protein) || 0;
+    const k = Number(it.kcal) || 0;
+    addedProt += p;
+    addedKcal += k;
+    appData.dailyFoods[targetDate].unshift({
+      id: 'fd_' + Date.now() + '_' + i,
+      name: it.name,
+      grams: Number(it.grams) || 100,
+      kcal: k,
+      protein: p,
+      carbs: Number(it.carbs) || 0,
+      fat: Number(it.fat) || 0
+    });
+  });
+
+  if (targetDate === getTodayISO()) {
+    appData.proteinDate = targetDate;
+    appData.proteinGrams = Math.round((appData.proteinGrams || 0) + addedProt);
+  }
+
+  playAlertTone('success');
+  syncTodayDailyLog(targetDate);
+  renderProteinTracker();
+  renderFoodMacroTracker();
+  renderSelectedDayDailyValuesBar();
+  renderSocialAndMissionsHub();
+  if (currentViewName === 'archive') renderArchive();
+  saveProfileData();
+
+  checkFoodCoachMilestone(combo.title, combo.items.reduce((a, b) => a + (Number(b.grams) || 0), 0), Math.round(addedKcal), Number(addedProt.toFixed(1)), prevProt, appData.proteinGrams || 0);
+}
+
+function saveCurrentTodayFoodsAsFavoriteMeal() {
+  const targetDate = selectedDate || getTodayISO();
+  const foods = (appData.dailyFoods && Array.isArray(appData.dailyFoods[targetDate])) ? appData.dailyFoods[targetDate] : [];
+  if (foods.length === 0) {
+    alert('Önce aşağıdan bugüne en az 1-2 yemek/besin ekleyin, ardından "⭐ Bugün Yediklerimi Kombinasyon Kaydet" butonuna basın!');
+    return;
+  }
+  const title = prompt('Bu favori öğün kombinasyonuna bir isim verin (Örn: 🌟 Benim Sabah Kahvaltım / 💪 Akşam Menüm):', '🌟 Özel Öğün Kombinasyonum');
+  if (!title || !title.trim()) return;
+
+  const list = getFavoriteMealCombosList();
+  list.unshift({
+    id: 'fav_' + Date.now(),
+    title: title.trim(),
+    items: foods.slice(0, 8).map((f) => ({
+      name: f.name,
+      grams: f.grams,
+      kcal: f.kcal,
+      protein: f.protein,
+      carbs: f.carbs,
+      fat: f.fat
+    }))
+  });
+  renderFavoriteMealCombos();
+  saveProfileData();
+  alert(`✅ "${title.trim()}" favori öğün kombinasyonlarına eklendi! Artık tek tıkla her gün ekleyebilirsin.`);
+}
+
+function deleteFavoriteMealCombo(idx, event) {
+  if (event) event.stopPropagation();
+  const list = getFavoriteMealCombosList();
+  if (!list[idx]) return;
+  if (!confirm(`"${list[idx].title}" kombinasyonunu silmek istiyor musunuz?`)) return;
+  list.splice(idx, 1);
+  renderFavoriteMealCombos();
+  saveProfileData();
+}
+
+// 👨‍🍳 KENDİ TARİFLERİMİZİ EKLEME (MAKRO + MİKRO + GRAMAJ MODALI)
+function openCustomRecipeModal() {
+  const modal = document.getElementById('customRecipeModal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeCustomRecipeModal() {
+  const modal = document.getElementById('customRecipeModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function saveCustomRecipeToDB() {
+  const nameEl = document.getElementById('recipeNameInput');
+  const gramsEl = document.getElementById('recipeRefGramsInput');
+  const catEl = document.getElementById('recipeCatInput');
+  const kcalEl = document.getElementById('recipeKcalInput');
+  const protEl = document.getElementById('recipeProtInput');
+  const carbEl = document.getElementById('recipeCarbInput');
+  const fatEl = document.getElementById('recipeFatInput');
+  const fiberEl = document.getElementById('recipeFiberInput');
+  const microEl = document.getElementById('recipeMicroInput');
+  const notesEl = document.getElementById('recipeNotesInput');
+
+  const rawName = (nameEl ? nameEl.value : '').trim();
+  if (!rawName) {
+    alert('Lütfen tarif veya yemek adını yazın!');
+    return;
+  }
+
+  const refGrams = Math.max(1, parseFloat(gramsEl ? gramsEl.value : '100') || 100);
+  const ratioTo100 = 100 / refGrams;
+
+  const rawKcal = parseFloat(kcalEl ? kcalEl.value : '180') || 0;
+  const rawProt = parseFloat(protEl ? protEl.value : '15') || 0;
+  const rawCarb = parseFloat(carbEl ? carbEl.value : '20') || 0;
+  const rawFat = parseFloat(fatEl ? fatEl.value : '6') || 0;
+  const rawFiber = parseFloat(fiberEl ? fiberEl.value : '0') || 0;
+  const microNote = (microEl ? microEl.value : '').trim();
+  const prepNote = (notesEl ? notesEl.value : '').trim();
+
+  // Besin veritabanı 100g bazlı çalıştığı için kullanıcının girdiği referans gramajı otomatik 100g'a oranlar, varsayılan porsiyonu refGrams yapar!
+  const newRecipe = {
+    name: `👨‍🍳 ${rawName}`,
+    cat: catEl ? catEl.value : 'yemek',
+    kcal: Math.round(rawKcal * ratioTo100),
+    protein: Number((rawProt * ratioTo100).toFixed(1)),
+    carbs: Number((rawCarb * ratioTo100).toFixed(1)),
+    fat: Number((rawFat * ratioTo100).toFixed(1)),
+    fiber: Number((rawFiber * ratioTo100).toFixed(1)),
+    micros: microNote,
+    notes: prepNote,
+    defGrams: refGrams,
+    hint: `Özel Tarif (${refGrams}g Porsiyon${rawFiber ? `, 🌾${rawFiber}g Lif` : ''}${microNote ? `, 💊${microNote}` : ''})`
+  };
+
+  if (!Array.isArray(appData.customFoodDB)) appData.customFoodDB = [];
+  appData.customFoodDB.unshift(newRecipe);
+  selectedFoodObj = newRecipe;
+
+  const searchInp = document.getElementById('foodSearchInput');
+  const fgInp = document.getElementById('foodGramsInput');
+  if (searchInp) searchInp.value = newRecipe.name;
+  if (fgInp) fgInp.value = refGrams;
+
+  closeCustomRecipeModal();
+  if (nameEl) nameEl.value = '';
+  if (notesEl) notesEl.value = '';
+
+  updateFoodLiveMacroPreview();
+  renderSocialAndMissionsHub();
+  saveProfileData();
+  showSmartCoachPopup('👨‍🍳', 'Kendi Tarifin Veritabanına Eklendi!', `Harika! <b>${escapeHtml(newRecipe.name)}</b> (${refGrams}g porsiyon: 🔥${rawKcal} kcal, 🥩${rawProt}g P, 🍞${rawCarb}g K, 🥑${rawFat}g Y) kaydedildi. Şimdi "+ Ekle"ye basarak bugüne işleyebilirsin!`);
+}
+
+// ===== 31. 📲 GÜNLÜK SU, YEMEK, ANTRENMAN VE ROZETLERİ WHATSAPP'TAN PAYLAŞMA (v19.0) =====
+
+function openWhatsAppOrShareText(text) {
+  const encoded = encodeURIComponent(text);
+  const wpUrl = `https://wa.me/?text=${encoded}`;
+  window.open(wpUrl, '_blank');
+}
+
+function buildDailyLifestyleSummaryText() {
+  const targetDate = selectedDate || getTodayISO();
+  const name = appData.profileName || appData.username || 'Şampiyon';
+  const log = getDailyLogForArchiveDate(targetDate);
+  const waterCnt = log.waterCount || 0;
+  const waterL = ((waterCnt * 250) / 1000).toFixed(2);
+  const prot = log.proteinGrams || 0;
+  const sleep = log.sleepHours !== undefined ? log.sleepHours : 8;
+  const energy = log.energyLevel || 'Yüksek';
+
+  const dayTasks = (appData.tasks || []).filter((t) => t.date === targetDate);
+  const doneTasks = dayTasks.filter((t) => t.completed);
+  const pct = dayTasks.length > 0 ? Math.round((doneTasks.length / dayTasks.length) * 100) : 0;
+
+  const foods = Array.isArray(log.foods) ? log.foods : [];
+  const totalKcal = foods.reduce((acc, f) => acc + (Number(f.kcal) || 0), 0);
+
+  const lines = [
+    `🔥 *TASKFLOW+ GÜNLÜK GELİŞİM & ANTRENMAN RAPORU* 🔥`,
+    `👤 *Sporcu / Kullanıcı:* ${name} (🔥 ${appData.streak || 1} Gün Seri)`,
+    `📅 *Tarih:* ${targetDate}`,
+    ``,
+    `💧 *İçilen Su:* ${waterL} Litre (${waterCnt} Bardak)`,
+    `🥩 *Alınan Protein & Kalori:* ${prot}g Protein | 🔥 ${Math.round(totalKcal)} kcal`,
+    `⚡ *Enerji & Uyku:* ${energy} Enerji | 😴 ${sleep} Saat Uyku`,
+    `✅ *Tamamlanan Görev & Antrenman (%${pct}):* ${doneTasks.length}/${dayTasks.length}`
+  ];
+
+  if (doneTasks.length > 0) {
+    lines.push(``);
+    lines.push(`🏋️ *Bugün Tamamladıklarım:*`);
+    doneTasks.slice(0, 6).forEach((t) => {
+      lines.push(`  • ✔️ ${t.title}`);
+    });
+  }
+
+  if (foods.length > 0) {
+    lines.push(``);
+    lines.push(`🍽️ *Bugün Yediklerim:*`);
+    foods.slice(0, 6).forEach((f) => {
+      lines.push(`  • ${f.name} (${f.grams}g -> 🥩${f.protein}g P, 🔥${Math.round(f.kcal)} kcal)`);
+    });
+  }
+
+  const showcased = getShowcasedBadgeObjects();
+  if (showcased.length > 0) {
+    lines.push(``);
+    lines.push(`🏅 *Vitrin Rozetlerim:* ${showcased.map((b) => `${b.icon} ${b.title}`).join(' | ')}`);
+  }
+
+  lines.push(``);
+  lines.push(`🚀 _Sen de bugün hedeflerini tamamla, zinciri kırma!_`);
+  return lines.join('\n');
+}
+
+function shareFullDailyLifestyleSummary() {
+  const text = buildDailyLifestyleSummaryText();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(() => {});
+  }
+  openWhatsAppOrShareText(text);
+}
+
+// ===== 32. 🏆 120 KADEMELİ MİSYON, CHALLENGE & ROZET SİSTEMİ (% İLERLEMELİ & XP ÖDÜLLÜ) =====
+
+let currentMissionCatFilter = 'all';
+
+function computeUserChallengeStats() {
+  const allTasks = appData.tasks || [];
+  const doneTasks = allTasks.filter((t) => t.completed);
+  const sportTasksDone = doneTasks.filter((t) =>
+    t.category === 'Spor ve Sağlık' ||
+    /antrenman|spor|push|pull|bacak|leg|full body|kardiyo|koşu|idman|şınav|barfiks/i.test(t.title)
+  ).length;
+
+  const dailyLogs = appData.dailyLogs || {};
+  const logDates = Object.keys(dailyLogs);
+
+  let totalWaterGlasses = appData.waterCount || 0;
+  let daysWith3LWater = 0; // >= 12 bardak (3 Litre)
+  let daysWith2LWater = 0; // >= 8 bardak (2 Litre)
+  let daysWith150gProt = 0;
+  let totalLoggedMeals = 0;
+
+  logDates.forEach((d) => {
+    const l = dailyLogs[d] || {};
+    const wc = l.waterCount || 0;
+    if (d !== getTodayISO()) totalWaterGlasses += wc;
+    if (wc >= 12) daysWith3LWater++;
+    if (wc >= 8) daysWith2LWater++;
+    if ((l.proteinGrams || 0) >= 150) daysWith150gProt++;
+    if (Array.isArray(l.foods)) totalLoggedMeals += l.foods.length;
+  });
+
+  // Bugünün değerlerini de kontrol et
+  if ((appData.waterCount || 0) >= 12 && !dailyLogs[getTodayISO()]) daysWith3LWater++;
+  if ((appData.waterCount || 0) >= 8 && !dailyLogs[getTodayISO()]) daysWith2LWater++;
+  if ((appData.proteinGrams || 0) >= 150 && !dailyLogs[getTodayISO()]) daysWith150gProt++;
+
+  const todayFoodsCount = (appData.dailyFoods && Array.isArray(appData.dailyFoods[getTodayISO()]))
+    ? appData.dailyFoods[getTodayISO()].length
+    : 0;
+  totalLoggedMeals = Math.max(totalLoggedMeals, todayFoodsCount);
+
+  const doneGoalSteps = (appData.goals || []).reduce((acc, g) => acc + (g.steps || []).filter((s) => s.done).length, 0);
+  const prCount = (appData.bodyPrRecords || []).length;
+  const booksJournals = ((appData.libraryItems || []).length) + ((appData.microJournal || []).length);
+  const customRecipesCount = (appData.customFoodDB || []).length;
+  const friendsCount = (appData.socialFriends || []).length;
+  const streak = appData.streak || 1;
+
+  return {
+    doneTasksCount: doneTasks.length,
+    sportTasksDone,
+    totalWaterGlasses,
+    daysWith3LWater,
+    daysWith2LWater,
+    daysWith150gProt,
+    todayProtein: appData.proteinGrams || 0,
+    totalLoggedMeals,
+    doneGoalSteps,
+    prCount,
+    booksJournals,
+    customRecipesCount,
+    friendsCount,
+    streak
+  };
+}
+
+function generate120ChallengesCatalog() {
+  const catalog = [];
+
+  // 1) 💧 SU & HİDRASYON MİSYONLARI (20 Görev)
+  const water3LDaysTargets = [1, 3, 5, 7, 10, 14, 21, 30, 45, 60];
+  water3LDaysTargets.forEach((days, i) => {
+    catalog.push({
+      id: `ch_water3l_${days}`,
+      cat: 'water',
+      icon: i >= 5 ? '🌊' : '💧',
+      title: `${days} Gün Günde 3 Litre Su İç`,
+      desc: `En az ${days} farklı günde günlük 3 Litre (12 bardak) su hedefini tamamla.`,
+      metric: 'daysWith3LWater',
+      targetVal: days,
+      xp: days * 35
+    });
+  });
+
+  const totalWaterTargets = [10, 25, 50, 100, 200, 350, 500, 750, 1000, 1500];
+  totalWaterTargets.forEach((glasses, i) => {
+    catalog.push({
+      id: `ch_watertot_${glasses}`,
+      cat: 'water',
+      icon: i >= 6 ? '🐳' : '🥤',
+      title: `Toplam ${glasses} Bardak (${(glasses * 0.25).toFixed(0)}L) Su Tüket`,
+      desc: `Uygulamada toplam ${glasses} bardak su içerek hidrasyon rekoru kır.`,
+      metric: 'totalWaterGlasses',
+      targetVal: glasses,
+      xp: 40 + (i * 45)
+    });
+  });
+
+  // 2) 🏋️ ANTRENMAN & PR MİSYONLARI (20 Görev)
+  const sportTargets = [1, 3, 5, 7, 10, 15, 20, 30, 40, 50, 75, 100, 150];
+  sportTargets.forEach((cnt, i) => {
+    catalog.push({
+      id: `ch_sport_${cnt}`,
+      cat: 'sport',
+      icon: i >= 7 ? '🦾' : '🏋️',
+      title: `${cnt} Antrenman / Spor Görevi Tamamla`,
+      desc: `Spor ve Sağlık kategorisinde toplam ${cnt} antrenmanı tamamlayıp tikle.`,
+      metric: 'sportTasksDone',
+      targetVal: cnt,
+      xp: 50 + (i * 50)
+    });
+  });
+
+  const prTargets = [1, 3, 5, 10, 15, 25, 40];
+  prTargets.forEach((cnt, i) => {
+    catalog.push({
+      id: `ch_pr_${cnt}`,
+      cat: 'sport',
+      icon: '⚖️',
+      title: `${cnt} Kez Kilo / PR Rekoru Kaydet`,
+      desc: `Vücut ölçümü veya Bench/Squat/Deadlift PR tablosuna ${cnt} kayıt ekle.`,
+      metric: 'prCount',
+      targetVal: cnt,
+      xp: 45 + (i * 40)
+    });
+  });
+
+  // 3) 🍽️ BESLENME, MAKRO & PROTEİN MİSYONLARI (20 Görev)
+  const protDaysTargets = [1, 3, 5, 7, 10, 14, 21, 30, 45, 60];
+  protDaysTargets.forEach((days, i) => {
+    catalog.push({
+      id: `ch_prot150_${days}`,
+      cat: 'nutrition',
+      icon: i >= 5 ? '🥩' : '🍗',
+      title: `${days} Gün 150g+ Protein Barajını Aş`,
+      desc: `${days} farklı günde günlük en az 150 gram protein hedefine ulaş.`,
+      metric: 'daysWith150gProt',
+      targetVal: days,
+      xp: 45 + (i * 45)
+    });
+  });
+
+  const mealLogTargets = [1, 5, 10, 25, 50, 75, 100, 150, 250, 400];
+  mealLogTargets.forEach((cnt, i) => {
+    catalog.push({
+      id: `ch_meals_${cnt}`,
+      cat: 'nutrition',
+      icon: '🍽️',
+      title: `Besin Sayacına ${cnt} Öğün/Yemek Kaydet`,
+      desc: `Gramajlı besin & makro hesaplayıcıya toplam ${cnt} yemek ekle.`,
+      metric: 'totalLoggedMeals',
+      targetVal: cnt,
+      xp: 35 + (i * 40)
+    });
+  });
+
+  // 4) 📋 GÖREV AVCISI MİSYONLARI (20 Görev)
+  const taskTargets = [1, 5, 10, 20, 35, 50, 75, 100, 150, 200, 250, 300, 400, 500, 600, 750, 900, 1000, 1250, 1500];
+  taskTargets.forEach((cnt, i) => {
+    catalog.push({
+      id: `ch_tasks_${cnt}`,
+      cat: 'tasks',
+      icon: i >= 12 ? '👑' : (i >= 6 ? '⚔️' : '✅'),
+      title: `Toplam ${cnt} Görevi Başarıyla Bitir`,
+      desc: `Planladığın günlük iş ve görevlerden toplam ${cnt} tanesini tamamla.`,
+      metric: 'doneTasksCount',
+      targetVal: cnt,
+      xp: 30 + (i * 45)
+    });
+  });
+
+  // 5) 🔥 SERİ (STREAK) & ZİNCİRİ KIRMA MİSYONLARI (20 Görev)
+  const streakTargets = [2, 3, 5, 7, 10, 14, 21, 30, 40, 50, 60, 75, 90, 100, 120, 150, 180, 240, 300, 365];
+  streakTargets.forEach((days, i) => {
+    catalog.push({
+      id: `ch_streak_${days}`,
+      cat: 'streak',
+      icon: i >= 10 ? '💎' : '🔥',
+      title: `Üst Üste ${days} Gün Disiplin Serisi`,
+      desc: `Zinciri hiç kırmadan üst üste ${days} gün boyunca uygulamada aktif kal.`,
+      metric: 'streak',
+      targetVal: days,
+      xp: 50 + (i * 55)
+    });
+  });
+
+  // 6) 🧠 GELİŞİM, HEDEF & SOSYAL MİSYONLAR (20 Görev)
+  const goalStepTargets = [1, 3, 5, 10, 20, 35, 50, 75, 100];
+  goalStepTargets.forEach((cnt, i) => {
+    catalog.push({
+      id: `ch_goals_${cnt}`,
+      cat: 'mind',
+      icon: '🎯',
+      title: `${cnt} Uzun Vadeli Hedef Adımı Tamamla`,
+      desc: `Büyük hedeflerinin alt adımlarından ${cnt} tanesini bitir.`,
+      metric: 'doneGoalSteps',
+      targetVal: cnt,
+      xp: 45 + (i * 40)
+    });
+  });
+
+  const bookJournalTargets = [1, 3, 5, 10, 20, 35, 50];
+  bookJournalTargets.forEach((cnt, i) => {
+    catalog.push({
+      id: `ch_mind_${cnt}`,
+      cat: 'mind',
+      icon: '📖',
+      title: `${cnt} Kitap / Eğitim veya Akşam Günlüğü Yaz`,
+      desc: `Kütüphanene veya akşam mikro günlüğüne toplam ${cnt} kayıt ekle.`,
+      metric: 'booksJournals',
+      targetVal: cnt,
+      xp: 40 + (i * 35)
+    });
+  });
+
+  const socialAndRecipeTargets = [
+    { id: 'ch_rec_1', title: 'İlk Özel Tarifini Tanımla', desc: 'Kendi makro/mikro yemek tarifini oluştur.', metric: 'customRecipesCount', targetVal: 1, icon: '👨‍🍳', xp: 75 },
+    { id: 'ch_rec_5', title: '5 Özel Sporcu Tarifi Oluştur', desc: 'Veritabanına 5 kendi tarifini ekle.', metric: 'customRecipesCount', targetVal: 5, icon: '🍲', xp: 150 },
+    { id: 'ch_fr_1', title: 'İlk Arkadaşını Ekle & Motive Et', desc: 'Sosyal sekmesinden ilk arkadaşını ekle.', metric: 'friendsCount', targetVal: 1, icon: '🤝', xp: 100 },
+    { id: 'ch_fr_3', title: '3 Arkadaşlık Ağı Kur', desc: 'Sosyal listene en az 3 arkadaş ekle.', metric: 'friendsCount', targetVal: 3, icon: '🌟', xp: 200 }
+  ];
+  socialAndRecipeTargets.forEach((item) => {
+    catalog.push({ ...item, cat: 'mind' });
+  });
+
+  return catalog;
+}
+
+function get120ChallengesWithLiveProgress() {
+  const stats = computeUserChallengeStats();
+  const catalog = generate120ChallengesCatalog();
+  if (!Array.isArray(appData.unlockedBadges)) appData.unlockedBadges = [];
+
+  let totalEarnedChallengeXp = 0;
+  let newlyUnlocked = null;
+
+  const enriched = catalog.map((ch) => {
+    const currentVal = Math.max(0, Number(stats[ch.metric]) || 0);
+    const pct = Math.min(100, Math.round((currentVal / ch.targetVal) * 100));
+    const unlocked = currentVal >= ch.targetVal || appData.unlockedBadges.includes(ch.id);
+
+    if (unlocked) {
+      totalEarnedChallengeXp += ch.xp;
+      if (!appData.unlockedBadges.includes(ch.id)) {
+        appData.unlockedBadges.push(ch.id);
+        newlyUnlocked = ch;
+      }
+    }
+
+    return {
+      ...ch,
+      currentVal,
+      pct: unlocked ? 100 : pct,
+      unlocked
+    };
+  });
+
+  if (appData.challengeBonusXp !== totalEarnedChallengeXp) {
+    appData.challengeBonusXp = totalEarnedChallengeXp;
+    renderGamificationRank();
+  }
+
+  // Eğer yeni bir rozet kazanıldıysa otomatik vitrine ekle (vitrin 6'dan azsa)
+  if (newlyUnlocked) {
+    if (!Array.isArray(appData.showcasedBadges)) appData.showcasedBadges = [];
+    if (appData.showcasedBadges.length < 6 && !appData.showcasedBadges.includes(newlyUnlocked.id)) {
+      appData.showcasedBadges.push(newlyUnlocked.id);
+    }
+  }
+
+  return enriched;
+}
+
+function getShowcasedBadgeObjects() {
+  const all = get120ChallengesWithLiveProgress();
+  const unlocked = all.filter((c) => c.unlocked);
+  if (!Array.isArray(appData.showcasedBadges) || appData.showcasedBadges.length === 0) {
+    appData.showcasedBadges = unlocked.slice(0, 6).map((c) => c.id);
+  }
+  const map = {};
+  all.forEach((c) => { map[c.id] = c; });
+  return appData.showcasedBadges.map((id) => map[id]).filter(Boolean).slice(0, 6);
+}
+
+function toggleShowcaseBadge(challengeId) {
+  if (!Array.isArray(appData.showcasedBadges)) appData.showcasedBadges = [];
+  const idx = appData.showcasedBadges.indexOf(challengeId);
+  if (idx >= 0) {
+    appData.showcasedBadges.splice(idx, 1);
+  } else {
+    if (appData.showcasedBadges.length >= 6) {
+      appData.showcasedBadges.shift();
+    }
+    appData.showcasedBadges.push(challengeId);
+  }
+  renderSocialAndMissionsHub();
+  saveProfileData();
+}
+
+function shareSingleBadgeOnWP(challengeId) {
+  const all = get120ChallengesWithLiveProgress();
+  const ch = all.find((c) => c.id === challengeId);
+  if (!ch) return;
+  const name = appData.profileName || appData.username || 'Şampiyon';
+  const text = [
+    `🏅 *TASKFLOW+ YENİ BAŞARIM & ROZET KAZANDIM!* 🏅`,
+    `👤 *Sporcu:* ${name}`,
+    `${ch.icon} *Rozet:* ${ch.title}`,
+    `📝 *Görev:* ${ch.desc} (%${ch.pct} Tamamlandı - ${ch.currentVal}/${ch.targetVal})`,
+    `⚡ *Ödül:* +${ch.xp} XP`,
+    `🚀 _Hedeflerime adım adım ilerliyorum!_`
+  ].join('\n');
+  openWhatsAppOrShareText(text);
+}
+
+function setMissionCategoryFilter(cat, btnEl) {
+  currentMissionCatFilter = cat;
+  document.querySelectorAll('.mission-cat-chip').forEach((b) => {
+    const active = b.getAttribute('data-mcat') === cat;
+    b.style.background = active ? 'var(--accent-cream)' : 'var(--bg-surface)';
+    b.style.color = active ? '#121218' : 'var(--text-main)';
+  });
+  renderSocialAndMissionsHub();
+}
+
+function switchSocialSubTab(tab) {
+  const mPane = document.getElementById('socialPaneMissions');
+  const fPane = document.getElementById('socialPaneFriends');
+  if (mPane) mPane.style.display = tab === 'missions' ? 'block' : 'none';
+  if (fPane) fPane.style.display = tab === 'friends' ? 'block' : 'none';
+
+  const bM = document.getElementById('socialSubBtnMissions');
+  const bF = document.getElementById('socialSubBtnFriends');
+  if (bM) bM.classList.toggle('active', tab === 'missions');
+  if (bF) bF.classList.toggle('active', tab === 'friends');
+
+  if (tab === 'friends') {
+    discoverLocalDeviceUsersAsFriends();
+  }
+}
+
+function renderSocialAndMissionsHub() {
+  const all = get120ChallengesWithLiveProgress();
+  const unlockedList = all.filter((c) => c.unlocked);
+
+  // Üst Profil Kartı
+  const avEl = document.getElementById('socialProfileAvatar');
+  const nameEl = document.getElementById('socialProfileNameText');
+  const rankEl = document.getElementById('socialProfileRankBadge');
+  const bioEl = document.getElementById('socialProfileBioText');
+  const stripEl = document.getElementById('profileShowcaseBadgesStrip');
+  const sumBadgeEl = document.getElementById('missionsUnlockedSummaryBadge');
+  const gridEl = document.getElementById('missionsCatalogGrid');
+
+  const dispName = appData.profileName || appData.username || 'Şampiyon';
+  if (avEl) avEl.textContent = dispName.charAt(0).toUpperCase();
+  if (nameEl) nameEl.textContent = dispName;
+
+  const badgeTextEl = document.getElementById('userRankBadgeText');
+  const xpTextEl = document.getElementById('userXpPointsText');
+  if (rankEl && badgeTextEl) {
+    rankEl.textContent = `${badgeTextEl.textContent} (${xpTextEl ? xpTextEl.textContent : ''})`;
+  }
+  if (bioEl) {
+    bioEl.textContent = appData.profileBio || 'Disiplin, hedefler ve sağlıklı yaşam yolculuğum! 💪';
+  }
+  if (sumBadgeEl) {
+    sumBadgeEl.textContent = `${unlockedList.length} / ${all.length} Rozet Kazanıldı`;
+  }
+
+  // Vitrin Rozetleri
+  if (stripEl) {
+    const showcased = getShowcasedBadgeObjects();
+    if (showcased.length === 0) {
+      stripEl.innerHTML = `<div style="font-size:11px;color:var(--text-muted);">Henüz vitrine rozet eklenmedi. Aşağıdaki kazanılan rozetlerden "📌 Vitrine Koy"a tıkla!</div>`;
+    } else {
+      stripEl.innerHTML = showcased.map((b) => `
+        <div class="showcase-badge-box" onclick="shareSingleBadgeOnWP('${b.id}')" style="cursor:pointer;" title="${escapeHtml(b.desc)} (Paylaşmak için tıkla)">
+          <span style="font-size:15px;">${b.icon}</span>
+          <div>
+            <div style="font-size:10.5px;font-weight:900;color:var(--text-main);">${escapeHtml(b.title)}</div>
+            <div style="font-size:9px;color:#95de64;font-weight:800;">+${b.xp} XP • 📲 Paylaş</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // 120 Misyon Grid
+  if (gridEl) {
+    const filtered = all.filter((c) => {
+      if (currentMissionCatFilter === 'all') return true;
+      if (currentMissionCatFilter === 'unlocked') return c.unlocked;
+      return c.cat === currentMissionCatFilter;
+    });
+
+    // Önce kazanılmaya en yakın olanları veya kazanılanları düzenli göster
+    const sorted = filtered.slice().sort((a, b) => {
+      if (a.unlocked !== b.unlocked) return a.unlocked ? -1 : 1;
+      return b.pct - a.pct;
+    });
+
+    const showcasedIds = Array.isArray(appData.showcasedBadges) ? appData.showcasedBadges : [];
+
+    gridEl.innerHTML = sorted.map((c) => {
+      const isShowcased = showcasedIds.includes(c.id);
+      return `
+        <div class="challenge-item-card ${c.unlocked ? 'unlocked' : ''}">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;">
+            <div style="display:flex;align-items:center;gap:7px;">
+              <span style="font-size:20px;">${c.icon}</span>
+              <div>
+                <div style="font-size:11.5px;font-weight:900;color:var(--text-main);">${escapeHtml(c.title)}</div>
+                <div style="font-size:9.5px;color:var(--text-muted);">${escapeHtml(c.desc)}</div>
+              </div>
+            </div>
+            <span style="font-size:9.5px;font-weight:900;padding:2px 7px;border-radius:999px;background:${c.unlocked ? 'rgba(149,222,100,0.2)' : 'rgba(255,192,105,0.14)'};color:${c.unlocked ? '#95de64' : '#ffc069'};flex-shrink:0;">
+              +${c.xp} XP
+            </span>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:9.5px;font-weight:800;margin-bottom:2px;">
+              <span style="color:${c.unlocked ? '#95de64' : 'var(--text-muted)'};">${c.unlocked ? '✅ TAMAMLANDI!' : `İlerleme: ${c.currentVal} / ${c.targetVal}`}</span>
+              <span style="color:var(--accent-cream);">%${c.pct}</span>
+            </div>
+            <div class="challenge-prog-track">
+              <div class="challenge-prog-fill" style="width:${c.pct}%;"></div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:2px;">
+            <button type="button" class="mini-action-btn" style="font-size:9.5px;padding:3px 8px;" onclick="toggleShowcaseBadge('${c.id}')">
+              ${isShowcased ? '⭐ Vitrinde (Çıkar)' : '📌 Vitrine Koy'}
+            </button>
+            <button type="button" class="mini-action-btn" style="font-size:9.5px;padding:3px 8px;background:rgba(37,211,102,0.16);color:#95de64;border-color:rgba(37,211,102,0.35);" onclick="shareSingleBadgeOnWP('${c.id}')">
+              📲 WP Paylaş
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  renderSocialFriendsList();
+}
+
+function promptEditProfileBio() {
+  const current = appData.profileBio || 'Disiplin, hedefler ve sağlıklı yaşam yolculuğum! 💪';
+  const next = prompt('Profil durum / biyografi yazınızı güncelleyin:', current);
+  if (next === null) return;
+  appData.profileBio = next.trim() || current;
+  renderSocialAndMissionsHub();
+  saveProfileData();
+}
+
+function shareMyProfileAndShowcaseOnWP() {
+  const dispName = appData.profileName || appData.username || 'Şampiyon';
+  const badgeTextEl = document.getElementById('userRankBadgeText');
+  const xpTextEl = document.getElementById('userXpPointsText');
+  const showcased = getShowcasedBadgeObjects();
+  const code = generateMyShareableFriendCode();
+
+  const text = [
+    `👑 *TASKFLOW+ OYUNCU & SPORCU PROFİLİM* 👑`,
+    `👤 *İsim:* ${dispName} (@${appData.username || 'sporcu'})`,
+    `🏆 *Seviye & Rütbe:* ${badgeTextEl ? badgeTextEl.textContent : 'Seviye 1'} (${xpTextEl ? xpTextEl.textContent : '0 XP'})`,
+    `🔥 *Disiplin Serisi:* ${appData.streak || 1} Gün`,
+    `💬 *Durum:* "${appData.profileBio || 'Hedeflere tam gaz devam!'}"`,
+    ``,
+    `🏅 *Vitrin Rozetlerim (${showcased.length}):*`,
+    ...(showcased.length > 0 ? showcased.map((b) => `  • ${b.icon} ${b.title} (+${b.xp} XP)`) : ['  • Henüz vitrin rozeti seçilmedi']),
+    ``,
+    `🤝 *Beni TaskFlow+'ta Arkadaş Ekle (Davet Kodum):*`,
+    `${code}`
+  ].join('\n');
+
+  openWhatsAppOrShareText(text);
+}
+
+// ===== 33. 👥 ARKADAŞ EKLEME, PROFİL KODU & UYGULAMA İÇİ MESAJLAŞMA (3 KATMANLI HİBRİT MİMARİ) =====
+
+let activeSelectedFriendIdx = -1;
+
+function generateMyShareableFriendCode() {
+  const showcased = getShowcasedBadgeObjects().map((b) => `${b.icon} ${b.title}`);
+  const badgeTextEl = document.getElementById('userRankBadgeText');
+  const payload = {
+    u: appData.username || 'kullanici',
+    n: appData.profileName || appData.username || 'Şampiyon',
+    r: badgeTextEl ? badgeTextEl.textContent : 'Seviye 1',
+    s: appData.streak || 1,
+    b: (appData.profileBio || 'Hedeflere devam! 💪').slice(0, 60),
+    w: appData.waterCount || 0,
+    p: appData.proteinGrams || 0,
+    v: showcased.slice(0, 4)
+  };
+  try {
+    const json = JSON.stringify(payload);
+    const b64 = btoa(unescape(encodeURIComponent(json)));
+    return `TF-${b64}`;
+  } catch (e) {
+    return `TF-${appData.username || 'user'}`;
+  }
+}
+
+function copyMyFriendInviteCode() {
+  const code = generateMyShareableFriendCode();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).catch(() => {});
+  }
+  prompt('🔑 Arkadaşlık & Profil Kodunuz kopyalandı! Bu kodu arkadaşınıza WhatsApp\'tan gönderin, o da "Arkadaş Ekle" kutusuna yapıştırsın:', code);
+}
+
+async function discoverLocalDeviceUsersAsFriends() {
+  try {
+    const allUsers = await getAllUsersFromDB();
+    if (!Array.isArray(appData.socialFriends)) appData.socialFriends = [];
+    let changed = false;
+
+    allUsers.forEach((u) => {
+      if (!u || !u.username || u.username === currentProfile) return;
+      const exists = appData.socialFriends.find((f) => f.username === u.username);
+      const uShowcased = Array.isArray(u.showcasedBadges) ? u.showcasedBadges.length : 0;
+      if (!exists) {
+        appData.socialFriends.push({
+          username: u.username,
+          displayName: u.profileName || u.username,
+          rank: `🔥 ${u.streak || 1} Gün Seri`,
+          bio: u.profileBio || 'Cihazdaki TaskFlow+ Kullanıcısı',
+          waterCount: u.waterCount || 0,
+          proteinGrams: u.proteinGrams || 0,
+          badges: [`🏅 ${uShowcased} Rozet`],
+          isLocalUser: true,
+          messages: [
+            { sender: u.username, text: 'Selam! Aynı cihaz üzerinden TaskFlow+ arkadaş listene otomatik eklendim. Birbirimizi motive edelim! 💪', time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) }
+          ]
+        });
+        changed = true;
+      } else if (exists.isLocalUser) {
+        exists.displayName = u.profileName || u.username;
+        exists.waterCount = u.waterCount || 0;
+        exists.proteinGrams = u.proteinGrams || 0;
+        exists.rank = `🔥 ${u.streak || 1} Gün Seri`;
+      }
+    });
+
+    if (changed) {
+      saveProfileData();
+    }
+    renderSocialFriendsList();
+  } catch (e) {
+    console.warn('Local friend discovery warning:', e);
+  }
+}
+
+function addFriendByCodeOrUsername() {
+  const inp = document.getElementById('friendAddInput');
+  const raw = (inp ? inp.value : '').trim();
+  if (!raw) {
+    alert('Lütfen bir kullanıcı adı veya "TF-..." ile başlayan Arkadaşlık Kodu girin!');
+    return;
+  }
+
+  if (!Array.isArray(appData.socialFriends)) appData.socialFriends = [];
+
+  let newFriend = null;
+  if (raw.startsWith('TF-')) {
+    try {
+      const b64 = raw.slice(3).trim();
+      const json = decodeURIComponent(escape(atob(b64)));
+      const parsed = JSON.parse(json);
+      newFriend = {
+        username: parsed.u || ('arkadas_' + Date.now().toString().slice(-4)),
+        displayName: parsed.n || parsed.u || 'Sporcu Arkadaş',
+        rank: parsed.r || `🔥 ${parsed.s || 1} Gün Seri`,
+        bio: parsed.b || 'TaskFlow+ Sporcusu 💪',
+        waterCount: parsed.w || 0,
+        proteinGrams: parsed.p || 0,
+        badges: Array.isArray(parsed.v) ? parsed.v : [],
+        messages: [
+          { sender: 'system', text: `🎉 ${parsed.n || parsed.u} profil koduyla arkadaş listene eklendi!`, time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) }
+        ]
+      };
+    } catch (e) {
+      alert('Arkadaşlık kodu çözümlenemedi, lütfen kodun tam kopyalandığından emin olun.');
+      return;
+    }
+  } else {
+    const cleanUser = raw.replace(/^@/, '').toLowerCase();
+    newFriend = {
+      username: cleanUser,
+      displayName: raw.replace(/^@/, ''),
+      rank: '⚡ TaskFlow+ Sporcusu',
+      bio: 'Hedef ve antrenman arkadaşı 💪',
+      waterCount: 0,
+      proteinGrams: 0,
+      badges: ['🏅 Disiplin Savaşçısı'],
+      messages: [
+        { sender: 'system', text: `🤝 @${cleanUser} arkadaş listene eklendi! Aşağıdan mesaj yazabilir veya WhatsApp köprüsüyle anında dürtebilirsin.`, time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) }
+      ]
+    };
+  }
+
+  const existingIdx = appData.socialFriends.findIndex((f) => f.username === newFriend.username);
+  if (existingIdx >= 0) {
+    appData.socialFriends[existingIdx] = {
+      ...appData.socialFriends[existingIdx],
+      ...newFriend,
+      messages: appData.socialFriends[existingIdx].messages || newFriend.messages
+    };
+    activeSelectedFriendIdx = existingIdx;
+  } else {
+    appData.socialFriends.unshift(newFriend);
+    activeSelectedFriendIdx = 0;
+  }
+
+  if (inp) inp.value = '';
+  renderSocialFriendsList();
+  renderSelectedFriendChat();
+  saveProfileData();
+  syncSocialFriendsAndMessages(true);
+}
+
+function renderSocialFriendsList() {
+  const listEl = document.getElementById('socialFriendsList');
+  if (!listEl) return;
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+
+  if (friends.length === 0) {
+    listEl.innerHTML = `
+      <div style="font-size:11px;color:var(--text-muted);padding:10px;text-align:center;">
+        Henüz arkadaş eklenmedi.<br><br>
+        💡 <b>İpucu:</b> Yukarıdan <b>"🔑 Davet Kodumu Kopyala"</b> butonuna basıp kodunu arkadaşına atabilir veya onun kullanıcı adını/kodunu yazıp ekleyebilirsin!
+      </div>
+    `;
+    return;
+  }
+
+  if (activeSelectedFriendIdx < 0 || activeSelectedFriendIdx >= friends.length) {
+    activeSelectedFriendIdx = 0;
+  }
+
+  listEl.innerHTML = friends.map((f, idx) => {
+    const active = idx === activeSelectedFriendIdx;
+    const badgesStr = Array.isArray(f.badges) && f.badges.length > 0 ? f.badges.slice(0, 2).join(' • ') : '🏅 Sporcu';
+    return `
+      <div onclick="selectFriendForChat(${idx})" style="padding:8px 10px;border-radius:10px;cursor:pointer;border:1px solid ${active ? 'var(--accent-cream)' : 'var(--border-subtle)'};background:${active ? 'rgba(243,214,177,0.12)' : 'rgba(255,255,255,0.03)'};transition:all 0.15s ease;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:4px;">
+          <div style="font-size:12px;font-weight:900;color:var(--text-main);">👤 ${escapeHtml(f.displayName || f.username)}</div>
+          <span style="font-size:9.5px;font-weight:800;color:#ffc069;">${escapeHtml(f.rank || '')}</span>
+        </div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">💧 ${(f.waterCount || 0)} bardak • 🥩 ${(f.proteinGrams || 0)}g P</div>
+        <div style="font-size:9.5px;color:#95de64;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(badgesStr)}</div>
+      </div>
+    `;
+  }).join('');
+
+  renderSelectedFriendChat();
+}
+
+function selectFriendForChat(idx) {
+  activeSelectedFriendIdx = idx;
+  renderSocialFriendsList();
+}
+
+function renderSelectedFriendChat() {
+  const headerEl = document.getElementById('activeChatFriendHeader');
+  const boxEl = document.getElementById('socialChatMessagesBox');
+  if (!headerEl || !boxEl) return;
+
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+  const friend = friends[activeSelectedFriendIdx];
+  if (!friend) {
+    headerEl.textContent = '💬 Sohbet için soldan bir arkadaş seçin veya yeni arkadaş ekleyin';
+    boxEl.innerHTML = `<div style="font-size:11px;color:var(--text-muted);text-align:center;margin:auto;">Arkadaşlarınla birbirinizi su içmeye, antrenmana ve görev bitirmeye motive edin!</div>`;
+    return;
+  }
+
+  headerEl.innerHTML = `💬 <b>${escapeHtml(friend.displayName || friend.username)}</b> <span style="font-weight:600;color:var(--text-muted);">(${escapeHtml(friend.bio || '')})</span>`;
+  const msgs = Array.isArray(friend.messages) ? friend.messages : [];
+
+  if (msgs.length === 0) {
+    boxEl.innerHTML = `<div style="font-size:11px;color:var(--text-muted);text-align:center;margin:auto;">Henüz mesaj yok. Aşağıdaki hızlı dürtme butonlarından birine bas!</div>`;
+    return;
+  }
+
+  boxEl.innerHTML = msgs.map((m) => {
+    const isMe = m.sender === 'me' || m.sender === currentProfile;
+    return `
+      <div class="chat-bubble ${isMe ? 'me' : 'them'}">
+        <div>${escapeHtml(m.text)}</div>
+        <div style="font-size:8.5px;opacity:0.7;text-align:right;margin-top:2px;">${escapeHtml(m.time || '')}</div>
+      </div>
+    `;
+  }).join('');
+  boxEl.scrollTop = boxEl.scrollHeight;
+}
+
+async function appendMessageToActiveFriend(text) {
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+  const friend = friends[activeSelectedFriendIdx];
+  if (!friend) {
+    alert('Önce soldan bir arkadaş seçin veya yeni bir arkadaş ekleyin!');
+    return false;
+  }
+  if (!Array.isArray(friend.messages)) friend.messages = [];
+  const timeStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+
+  friend.messages.push({
+    sender: 'me',
+    text,
+    time: timeStr
+  });
+
+  // Eğer aynı cihazdaki yerel bir kullanıcıysa, onun profiline de mesajı otomatik ilet!
+  if (friend.username && friend.username !== currentProfile) {
+    try {
+      const targetUser = await getUserFromDB(friend.username);
+      if (targetUser) {
+        if (!Array.isArray(targetUser.socialFriends)) targetUser.socialFriends = [];
+        let myEntry = targetUser.socialFriends.find((f) => f.username === currentProfile);
+        if (!myEntry) {
+          myEntry = {
+            username: currentProfile,
+            displayName: appData.profileName || currentProfile,
+            rank: `🔥 ${appData.streak || 1} Gün Seri`,
+            bio: appData.profileBio || 'TaskFlow+ Arkadaşın',
+            waterCount: appData.waterCount || 0,
+            proteinGrams: appData.proteinGrams || 0,
+            badges: [],
+            isLocalUser: true,
+            messages: []
+          };
+          targetUser.socialFriends.unshift(myEntry);
+        }
+        if (!Array.isArray(myEntry.messages)) myEntry.messages = [];
+        myEntry.messages.push({
+          sender: currentProfile,
+          text,
+          time: timeStr
+        });
+        await saveUserToDB(targetUser);
+      }
+    } catch (err) {
+      console.warn('Local message delivery warning:', err);
+    }
+  }
+
+  renderSelectedFriendChat();
+  saveProfileData();
+  syncSocialFriendsAndMessages(true);
+  return true;
+}
+
+function sendSocialChatMessage() {
+  const inp = document.getElementById('socialChatInput');
+  const txt = (inp ? inp.value : '').trim();
+  if (!txt) return;
+  if (inp) inp.value = '';
+  appendMessageToActiveFriend(txt);
+}
+
+function sendQuickSocialMessage(msg) {
+  appendMessageToActiveFriend(msg);
+}
+
+function sendQuickDailyReportToFriendChat() {
+  const waterL = (((appData.waterCount || 0) * 250) / 1000).toFixed(2);
+  const prot = appData.proteinGrams || 0;
+  const today = getTodayISO();
+  const doneToday = (appData.tasks || []).filter((t) => t.date === today && t.completed).length;
+  const msg = `📊 Bugünkü Özeti Paylaşıyorum: 💧 ${waterL}L Su içtim, 🥩 ${prot}g Protein aldım ve ✅ ${doneToday} görev/antrenman tamamladım! Sen ne durumdasın? 💪`;
+  appendMessageToActiveFriend(msg);
+}
+
+function sendChatToWhatsAppDirect() {
+  const inp = document.getElementById('socialChatInput');
+  const customTxt = (inp ? inp.value : '').trim();
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+  const friend = friends[activeSelectedFriendIdx];
+
+  if (customTxt) {
+    appendMessageToActiveFriend(customTxt);
+    if (inp) inp.value = '';
+    openWhatsAppOrShareText(`💬 *TaskFlow+ Mesajı:* ${customTxt}`);
+    return;
+  }
+
+  if (friend && Array.isArray(friend.messages) && friend.messages.length > 0) {
+    const last = friend.messages[friend.messages.length - 1];
+    openWhatsAppOrShareText(`💬 *TaskFlow+ (${appData.profileName || appData.username}):* ${last.text}`);
+  } else {
+    shareFullDailyLifestyleSummary();
+  }
+}
+
+async function syncSocialFriendsAndMessages(silent = false) {
+  await discoverLocalDeviceUsersAsFriends();
+
+  // Eğer Firebase Cloud URL tanımlıysa ortak sosyal havuzdan profilleri ve mesajları senkronize et
+  const baseUrl = normalizeCloudUrl(appData.cloudDbUrl);
+  if (baseUrl && currentProfile) {
+    try {
+      const myCode = generateMyShareableFriendCode();
+      const myPublicProfile = {
+        username: currentProfile,
+        displayName: appData.profileName || currentProfile,
+        rank: document.getElementById('userRankBadgeText') ? document.getElementById('userRankBadgeText').textContent : 'Seviye 1',
+        bio: appData.profileBio || 'Hedeflere devam! 💪',
+        waterCount: appData.waterCount || 0,
+        proteinGrams: appData.proteinGrams || 0,
+        inviteCode: myCode,
+        updatedAt: Date.now()
+      };
+      await fetch(`${baseUrl}/taskflow_social_profiles/${encodeURIComponent(currentProfile)}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(myPublicProfile)
+      });
+
+      // Arkadaş listemdeki kişilerin güncel su/protein/rozet durumunu buluttan çek
+      for (const fr of (appData.socialFriends || [])) {
+        if (!fr.username) continue;
+        const res = await fetch(`${baseUrl}/taskflow_social_profiles/${encodeURIComponent(fr.username)}.json`);
+        if (res.ok) {
+          const remoteProf = await res.json();
+          if (remoteProf && remoteProf.username) {
+            fr.displayName = remoteProf.displayName || fr.displayName;
+            fr.rank = remoteProf.rank || fr.rank;
+            fr.bio = remoteProf.bio || fr.bio;
+            fr.waterCount = remoteProf.waterCount ?? fr.waterCount;
+            fr.proteinGrams = remoteProf.proteinGrams ?? fr.proteinGrams;
+          }
+        }
+      }
+      renderSocialFriendsList();
+    } catch (e) {
+      console.warn('Cloud social sync info:', e);
+    }
+  }
+
+  if (!silent) {
+    showSmartCoachPopup('🔄', 'Sosyal Ağ & Arkadaş Durumları Güncellendi!', 'Cihazdaki profiller ve bulut arkadaş verileri başarıyla senkronize edildi!');
+  }
+}
+
 // Dışarı tıklanınca besin arama listesini kapat
 document.addEventListener('click', (e) => {
   const card = document.getElementById('foodMacroTrackerCard');
@@ -5368,7 +6565,7 @@ document.addEventListener('click', (e) => {
 
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=18').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=19').catch(() => {});
   }
   await initDB();
 

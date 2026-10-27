@@ -7,8 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>TaskFlow+ — Günlük Görev, Hedefler & Odak</title>
-  <link rel="manifest" href="manifest.json?v=18" />
-  <link rel="stylesheet" href="styles.css?v=18" />
+  <link rel="manifest" href="manifest.json?v=19" />
+  <link rel="stylesheet" href="styles.css?v=19" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -225,252 +225,279 @@
         </div>
 
         <!-- ============================================================== -->
-        <!-- ÜS MODU 2: 💪 SPOR, SU, SABAH/AKŞAM RUTİNİ, HAFTALIK PROGRAM & PR -->
+        <!-- ÜS MODU 2: 💪 SPOR, SU & BESİN (3 ALT SEKMELİ ULTRA-SADE GÖRÜNÜM) -->
         <!-- ============================================================== -->
         <div id="hubTabSport" style="display:none;">
-          <div class="vitality-hub-card">
-            <div class="vitality-top-row">
-              <div style="font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                <span>💧 Su:</span>
-                <span id="waterCountText" style="color:#93c5fd;">0.00 L / 3.0 L (0/12 Brd)</span>
+          <!-- 3'LÜ ALT SEKME SEÇİCİ: KARMAŞAYA VE UZUN KAYDIRMAYA SON! -->
+          <div class="sub-tab-switcher">
+            <button type="button" class="sub-tab-btn active" id="sportSubBtnWater" onclick="switchSportSubTab('water')">💧 Su & Rutin</button>
+            <button type="button" class="sub-tab-btn" id="sportSubBtnFood" onclick="switchSportSubTab('food')">🍽️ Besin & Tarif</button>
+            <button type="button" class="sub-tab-btn" id="sportSubBtnWorkout" onclick="switchSportSubTab('workout')">🏋️ Antrenman & PR</button>
+          </div>
+
+          <!-- 📲 TEK TIKLA GÜNLÜK SU, YEMEK & ANTRENMAN ÖZETİNİ WHATSAPP'TA PAYLAŞ BARI -->
+          <button type="button" class="btn-cream" style="width:100%;height:36px;font-size:12px;margin-bottom:8px;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="shareFullDailyLifestyleSummary()">
+            <span>📲 Günlük Su, Yemek & Antrenman Özetimi Arkadaşımla Paylaş (WP)</span>
+          </button>
+
+          <!-- ALT SEKME 2.1: 💧 SU, ENERJİ, UYKU & SABAH/AKŞAM RUTİNİ -->
+          <div id="sportSubWater">
+            <div class="vitality-hub-card">
+              <div class="vitality-top-row">
+                <div style="font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <span>💧 Su:</span>
+                  <span id="waterCountText" style="color:#93c5fd;">0.00 L / 3.0 L (0/12 Brd)</span>
+                </div>
+                <select id="waterTargetSelect" class="water-target-select" onchange="changeWaterTarget(this.value)" title="Günlük Su Hedefini Seç">
+                  <option value="8">Hedef: 2.0 L (8 Brd)</option>
+                  <option value="10">Hedef: 2.5 L (10 Brd)</option>
+                  <option value="12" selected>Hedef: 3.0 L (12 Brd)</option>
+                  <option value="14">Hedef: 3.5 L (14 Brd)</option>
+                  <option value="16">Hedef: 4.0 L (16 Brd)</option>
+                </select>
               </div>
-              <select id="waterTargetSelect" class="water-target-select" onchange="changeWaterTarget(this.value)" title="Günlük Su Hedefini Seç">
-                <option value="8">Hedef: 2.0 L (8 Brd)</option>
-                <option value="10">Hedef: 2.5 L (10 Brd)</option>
-                <option value="12" selected>Hedef: 3.0 L (12 Brd)</option>
-                <option value="14">Hedef: 3.5 L (14 Brd)</option>
-                <option value="16">Hedef: 4.0 L (16 Brd)</option>
-              </select>
-            </div>
 
-            <div class="progress-bar-track" style="height:6px;margin-top:6px;margin-bottom:4px;">
-              <div class="progress-bar-fill" id="waterProgressBarFill" style="width:0%;background:#60a5fa;"></div>
-            </div>
-            <div class="water-drops" id="waterDropsDisplay" style="font-size:11px;line-height:1.35;"></div>
-
-            <div class="water-actions-row">
-              <button type="button" class="water-btn-chip" style="color:var(--text-muted);" onclick="changeWaterCount(-1)">-1 Brd</button>
-              <div style="display:flex;gap:6px;">
-                <button type="button" class="water-btn-chip" onclick="changeWaterCount(1)">+1 Bardak (250ml) 💧</button>
-                <button type="button" class="water-btn-chip" style="background:#60a5fa;color:#09090d;" onclick="changeWaterCount(2)">+1 Şişe (500ml) 🍼</button>
+              <div class="progress-bar-track" style="height:6px;margin-top:6px;margin-bottom:4px;">
+                <div class="progress-bar-fill" id="waterProgressBarFill" style="width:0%;background:#60a5fa;"></div>
               </div>
+              <div class="water-drops" id="waterDropsDisplay" style="font-size:11px;line-height:1.35;"></div>
+
+              <div class="water-actions-row">
+                <button type="button" class="water-btn-chip" style="color:var(--text-muted);" onclick="changeWaterCount(-1)">-1 Brd</button>
+                <div style="display:flex;gap:6px;">
+                  <button type="button" class="water-btn-chip" onclick="changeWaterCount(1)">+1 Bardak (250ml) 💧</button>
+                  <button type="button" class="water-btn-chip" style="background:#60a5fa;color:#09090d;" onclick="changeWaterCount(2)">+1 Şişe (500ml) 🍼</button>
+                </div>
+              </div>
+
+              <!-- KAFEİN SAYACI & ADIM / UYKU MİNİ GÖSTERGELERİ -->
+              <div class="micro-vitals-grid">
+                <div class="vital-mini-box">
+                  <span>☕ Kahve: <b id="coffeeCountText" style="color:var(--accent-cream);">0</b></span>
+                  <div style="display:flex;gap:4px;">
+                    <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 7px;" onclick="changeCoffeeCount(-1)">-</button>
+                    <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 7px;background:rgba(245,216,181,0.2);color:var(--accent-cream);" onclick="changeCoffeeCount(1)">+1 ☕</button>
+                  </div>
+                </div>
+                <div class="vital-mini-box">
+                  <span>🔥 Seri: <b id="habitDoneSummaryText" style="color:#95de64;">0/5</b></span>
+                  <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 7px;color:var(--pastel-purple);" onclick="promptAddCustomHabit()">+ Alışkanlık</button>
+                </div>
+              </div>
+
+              <!-- 🥩 GÜNLÜK PROTEİN SAYACI & ⏱️ SET ARASI DİNLENME (60sn / 90sn BİP UYARICILI) -->
+              <div class="micro-vitals-grid" style="margin-top:6px;">
+                <div class="vital-mini-box">
+                  <span>🥩 Protein: <b id="proteinCountText" style="color:#ff9c6e;">0 / 160g</b></span>
+                  <div style="display:flex;gap:4px;">
+                    <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;" onclick="changeProteinCount(-10)">-10g</button>
+                    <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;background:rgba(255,156,110,0.2);color:#ff9c6e;" onclick="changeProteinCount(25)">+25g 🥩</button>
+                  </div>
+                </div>
+                <div class="vital-mini-box">
+                  <span id="restTimerStatusText" style="font-weight:800;color:#60a5fa;">⏱️ Set Mola:</span>
+                  <div style="display:flex;gap:4px;">
+                    <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;background:rgba(96,165,250,0.2);color:#93c5fd;" onclick="startQuickRestTimer(60)">60sn</button>
+                    <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;background:rgba(96,165,250,0.2);color:#93c5fd;" onclick="startQuickRestTimer(90)">90sn</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 🔋 GÜNLÜK ENERJİ SEVİYESİ & 💤 UYKU KALİTESİ SEÇİCİ -->
+              <div class="micro-vitals-grid" style="margin-top:6px;">
+                <div class="vital-mini-box">
+                  <span>🔋 Enerji:</span>
+                  <div style="display:flex;gap:3px;">
+                    <button type="button" class="tag-badge" id="energyBtnHigh" style="border:none;cursor:pointer;padding:2px 6px;" onclick="setDailyEnergyLevel('Yüksek')">🔥 Yüksek</button>
+                    <button type="button" class="tag-badge" id="energyBtnMed" style="border:none;cursor:pointer;padding:2px 6px;" onclick="setDailyEnergyLevel('Orta')">⚡ Orta</button>
+                    <button type="button" class="tag-badge" id="energyBtnLow" style="border:none;cursor:pointer;padding:2px 6px;" onclick="setDailyEnergyLevel('Düşük')">🪫 Düşük</button>
+                  </div>
+                </div>
+                <div class="vital-mini-box">
+                  <span>💤 Uyku: <b id="sleepHoursText" style="color:var(--pastel-purple);">8 Saat</b></span>
+                  <div style="display:flex;gap:4px;">
+                    <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;" onclick="changeDailySleepHours(-0.5)">-</button>
+                    <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;background:rgba(216,208,248,0.2);color:var(--pastel-purple);" onclick="changeDailySleepHours(0.5)">+0.5s</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- GÜNLÜK ZİNCİRİ KIRMA (TEK TIKLA SPOR / KİTAP / VİTAMİN / BESLENME ÇİPLERİ) -->
+              <div class="habit-chain-strip" id="dailyHabitsStrip"></div>
             </div>
 
-            <!-- KAFEİN SAYACI & ADIM / UYKU MİNİ GÖSTERGELERİ -->
-            <div class="micro-vitals-grid">
-              <div class="vital-mini-box">
-                <span>☕ Kahve: <b id="coffeeCountText" style="color:var(--accent-cream);">0</b></span>
+            <!-- ☀️ SABAH & 🌙 AKŞAM RUTİNİ TEK TIKLA KONTROL LİSTESİ -->
+            <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(245,216,181,0.3);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="font-weight:800;font-size:13px;">☀️ Sabah & 🌙 Akşam Rutini</span>
                 <div style="display:flex;gap:4px;">
-                  <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 7px;" onclick="changeCoffeeCount(-1)">-</button>
-                  <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 7px;background:rgba(245,216,181,0.2);color:var(--accent-cream);" onclick="changeCoffeeCount(1)">+1 ☕</button>
+                  <button type="button" class="tag-badge" id="btnMorningRoutine" style="border:none;cursor:pointer;padding:3px 8px;background:var(--accent-cream);color:#14141c;" onclick="switchDayNightRoutine('morning')">☀️ Sabah</button>
+                  <button type="button" class="tag-badge" id="btnEveningRoutine" style="border:none;cursor:pointer;padding:3px 8px;" onclick="switchDayNightRoutine('evening')">🌙 Akşam</button>
                 </div>
               </div>
-              <div class="vital-mini-box">
-                <span>🔥 Seri: <b id="habitDoneSummaryText" style="color:#95de64;">0/5</b></span>
-                <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 7px;color:var(--pastel-purple);" onclick="promptAddCustomHabit()">+ Alışkanlık</button>
-              </div>
+              <div id="dayNightRoutineList" style="display:flex;flex-direction:column;gap:5px;"></div>
             </div>
+          </div>
 
-            <!-- 🥩 GÜNLÜK PROTEİN SAYACI & ⏱️ SET ARASI DİNLENME (60sn / 90sn BİP UYARICILI) -->
-            <div class="micro-vitals-grid" style="margin-top:6px;">
-              <div class="vital-mini-box">
-                <span>🥩 Protein: <b id="proteinCountText" style="color:#ff9c6e;">0 / 160g</b></span>
-                <div style="display:flex;gap:4px;">
-                  <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;" onclick="changeProteinCount(-10)">-10g</button>
-                  <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;background:rgba(255,156,110,0.2);color:#ff9c6e;" onclick="changeProteinCount(25)">+25g 🥩</button>
+          <!-- ALT SEKME 2.2: 🍽️ BESİN SAYACI (188+ BESİN), 🍱 FAVORİ ÖĞÜN KOMBİNASYONLARI & 👨‍🍳 ÖZEL TARİFLER -->
+          <div id="sportSubFood" style="display:none;">
+            <div class="scratchpad-card" id="foodMacroTrackerCard" style="border-color:rgba(82,196,26,0.38);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;flex-wrap:wrap;">
+                <span style="font-weight:900;font-size:13px;color:#95de64;">🍽️ Yediklerim & Besin Sayacı (188+ Besin)</span>
+                <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:4px 9px;background:rgba(245,216,181,0.2);color:var(--accent-cream);font-weight:800;" onclick="openCustomRecipeModal()">👨‍🍳 + Kendi Tarifimi Ekle (Makro/Mikro)</button>
+              </div>
+
+              <!-- Bugünün Toplam Kalori, Protein, Karbonhidrat ve Yağ Özeti -->
+              <div class="macro-badge-row">
+                <div class="macro-mini-pill">
+                  <div style="color:var(--text-muted);font-size:9.5px;font-weight:700;">🔥 KALORİ</div>
+                  <div style="font-weight:900;font-size:12px;color:#ffc069;" id="dailyTotalKcalText">0 kcal</div>
+                </div>
+                <div class="macro-mini-pill">
+                  <div style="color:var(--text-muted);font-size:9.5px;font-weight:700;">🥩 PROTEİN</div>
+                  <div style="font-weight:900;font-size:12px;color:#ff9c6e;" id="dailyTotalProtText">0g</div>
+                </div>
+                <div class="macro-mini-pill">
+                  <div style="color:var(--text-muted);font-size:9.5px;font-weight:700;">🍞 KARB</div>
+                  <div style="font-weight:900;font-size:12px;color:#93c5fd;" id="dailyTotalCarbText">0g</div>
+                </div>
+                <div class="macro-mini-pill">
+                  <div style="color:var(--text-muted);font-size:9.5px;font-weight:700;">🥑 YAĞ</div>
+                  <div style="font-weight:900;font-size:12px;color:#95de64;" id="dailyTotalFatText">0g</div>
                 </div>
               </div>
-              <div class="vital-mini-box">
-                <span id="restTimerStatusText" style="font-weight:800;color:#60a5fa;">⏱️ Set Mola:</span>
-                <div style="display:flex;gap:4px;">
-                  <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;background:rgba(96,165,250,0.2);color:#93c5fd;" onclick="startQuickRestTimer(60)">60sn</button>
-                  <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;background:rgba(96,165,250,0.2);color:#93c5fd;" onclick="startQuickRestTimer(90)">90sn</button>
+
+              <!-- 🍱 TEK TIKLA FAVORİ ÖĞÜN KOMBİNASYONLARI -->
+              <div style="background:rgba(255,255,255,0.025);border:1px solid var(--border-color);border-radius:12px;padding:8px 9px;margin-bottom:8px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:4px;flex-wrap:wrap;">
+                  <span style="font-size:11px;font-weight:800;color:var(--accent-cream);">🍱 Favori Öğün Kombinasyonlarım (Tek Tıkla Ekle)</span>
+                  <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 7px;background:rgba(82,196,26,0.2);color:#95de64;font-size:10px;" onclick="saveCurrentTodayFoodsAsFavoriteMeal()">⭐ Bugün Yediklerimi Kombinasyon Kaydet</button>
                 </div>
+                <div id="favoriteMealsContainer" class="fav-meal-grid"></div>
               </div>
+
+              <!-- Hızlı Kategori Filtresi -->
+              <div style="display:flex;gap:4px;overflow-x:auto;padding-bottom:5px;margin-bottom:6px;scrollbar-width:none;">
+                <button type="button" class="tag-badge food-cat-chip" data-cat="all" style="border:none;cursor:pointer;padding:3px 7px;background:var(--accent-cream);color:#121218;flex-shrink:0;" onclick="setFoodCategoryFilter('all', this)">Tümü (188+)</button>
+                <button type="button" class="tag-badge food-cat-chip" data-cat="tarif" style="border:none;cursor:pointer;padding:3px 7px;flex-shrink:0;color:#ffc069;" onclick="setFoodCategoryFilter('tarif', this)">👨‍🍳 Özel Tariflerim</button>
+                <button type="button" class="tag-badge food-cat-chip" data-cat="kahvalti" style="border:none;cursor:pointer;padding:3px 7px;flex-shrink:0;" onclick="setFoodCategoryFilter('kahvalti', this)">🥚 Yumurta/Kahvaltı</button>
+                <button type="button" class="tag-badge food-cat-chip" data-cat="et" style="border:none;cursor:pointer;padding:3px 7px;flex-shrink:0;" onclick="setFoodCategoryFilter('et', this)">🍗 Et/Tavuk/Balık</button>
+                <button type="button" class="tag-badge food-cat-chip" data-cat="yemek" style="border:none;cursor:pointer;padding:3px 7px;flex-shrink:0;" onclick="setFoodCategoryFilter('yemek', this)">🍲 Ev Yemeği/Çorba</button>
+                <button type="button" class="tag-badge food-cat-chip" data-cat="tahil" style="border:none;cursor:pointer;padding:3px 7px;flex-shrink:0;" onclick="setFoodCategoryFilter('tahil', this)">🍚 Pilav/Yulaf/Ekmek</button>
+                <button type="button" class="tag-badge food-cat-chip" data-cat="sebze" style="border:none;cursor:pointer;padding:3px 7px;flex-shrink:0;" onclick="setFoodCategoryFilter('sebze', this)">🥦 Sebze/Biber/Soğan</button>
+                <button type="button" class="tag-badge food-cat-chip" data-cat="meyve" style="border:none;cursor:pointer;padding:3px 7px;flex-shrink:0;" onclick="setFoodCategoryFilter('meyve', this)">🍎 Meyve/Kuruyemiş</button>
+                <button type="button" class="tag-badge food-cat-chip" data-cat="sut" style="border:none;cursor:pointer;padding:3px 7px;flex-shrink:0;" onclick="setFoodCategoryFilter('sut', this)">🥛 Süt/Supplement</button>
+              </div>
+
+              <!-- Besin Arama Kutusu ve Gramaj Girişi -->
+              <div style="display:flex;gap:5px;align-items:center;">
+                <input type="text" id="foodSearchInput" class="form-input" style="flex:1.8;padding:7px 9px;font-size:12px;" placeholder="🔍 Yemek/Tarif ara (Örn: Haşlanmış yumurta, tavuk sote, biber, soğan...)" oninput="onFoodSearchInput()" onfocus="onFoodSearchInput()" autocomplete="off" />
+                <div style="display:flex;align-items:center;gap:3px;flex:0.9;min-width:85px;">
+                  <input type="number" id="foodGramsInput" class="form-input" style="padding:7px 7px;font-size:12px;text-align:center;" value="100" min="1" max="3000" oninput="updateFoodLiveMacroPreview()" placeholder="Gram" />
+                  <span style="font-size:11px;font-weight:800;color:var(--text-muted);">gr</span>
+                </div>
+                <button type="button" class="btn-cream" style="padding:7px 11px;font-size:12px;flex-shrink:0;" onclick="addSelectedFoodToDailyLog()">+ Ekle</button>
+              </div>
+
+              <!-- Arama Sonucu Açılır Liste -->
+              <div id="foodSearchDropdown" class="food-search-dropdown"></div>
+
+              <!-- Hızlı Gramaj Çipleri -->
+              <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;">
+                <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="setQuickFoodGrams(50)">50g (1 Yumurta/Dilim)</span>
+                <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="setQuickFoodGrams(100)">100g</span>
+                <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="setQuickFoodGrams(150)">150g</span>
+                <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="setQuickFoodGrams(200)">200g (1 Porsiyon)</span>
+                <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="setQuickFoodGrams(250)">250g</span>
+                <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="setQuickFoodGrams(300)">300g</span>
+              </div>
+
+              <!-- Canlı Gramaj Hesaplama Önizlemesi -->
+              <div id="foodLiveMacroPreview" style="margin-top:6px;padding:6px 9px;border-radius:9px;background:rgba(255,255,255,0.03);border:1px dashed var(--border-color);font-size:11px;color:var(--accent-cream);">
+                👆 Yukarıdan bir yemek/besin seç ve gramajını gir; protein, karbonhidrat, yağ ve kalorisi anında hesaplansın!
+              </div>
+
+              <!-- Bugün Yenilen Besinler Listesi -->
+              <div id="dailyEatenFoodsList" style="display:flex;flex-direction:column;gap:4px;margin-top:8px;max-height:210px;overflow-y:auto;"></div>
             </div>
+          </div>
 
-            <!-- 🔋 GÜNLÜK ENERJİ SEVİYESİ & 💤 UYKU KALİTESİ SEÇİCİ -->
-            <div class="micro-vitals-grid" style="margin-top:6px;">
-              <div class="vital-mini-box">
-                <span>🔋 Enerji:</span>
-                <div style="display:flex;gap:3px;">
-                  <button type="button" class="tag-badge" id="energyBtnHigh" style="border:none;cursor:pointer;padding:2px 6px;" onclick="setDailyEnergyLevel('Yüksek')">🔥 Yüksek</button>
-                  <button type="button" class="tag-badge" id="energyBtnMed" style="border:none;cursor:pointer;padding:2px 6px;" onclick="setDailyEnergyLevel('Orta')">⚡ Orta</button>
-                  <button type="button" class="tag-badge" id="energyBtnLow" style="border:none;cursor:pointer;padding:2px 6px;" onclick="setDailyEnergyLevel('Düşük')">🪫 Düşük</button>
-                </div>
-              </div>
-              <div class="vital-mini-box">
-                <span>💤 Uyku: <b id="sleepHoursText" style="color:var(--pastel-purple);">8 Saat</b></span>
-                <div style="display:flex;gap:4px;">
-                  <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;" onclick="changeDailySleepHours(-0.5)">-</button>
-                  <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;background:rgba(216,208,248,0.2);color:var(--pastel-purple);" onclick="changeDailySleepHours(0.5)">+0.5s</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- GÜNLÜK ZİNCİRİ KIRMA (TEK TIKLA SPOR / KİTAP / VİTAMİN / BESLENME ÇİPLERİ) -->
-            <div class="habit-chain-strip" id="dailyHabitsStrip"></div>
-
-            <!-- 🏋️ TEK TIKLA HAZIR ANTRENMAN ŞABLONU EKLEME -->
-            <div style="margin-top:9px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);">
-              <div style="font-size:10.5px;font-weight:800;color:var(--text-muted);margin-bottom:5px;">🏋️ TEK TIKLA BUGÜNE ANTRENMAN RUTİNİ EKLE:</div>
-              <div style="display:flex;gap:5px;flex-wrap:wrap;">
+          <!-- ALT SEKME 2.3: 🏋️ ANTRENMAN ŞABLONLARI, HAFTALIK PROGRAM, 1RM & PR REKORLARI -->
+          <div id="sportSubWorkout" style="display:none;">
+            <div class="scratchpad-card" style="border-color:rgba(255,156,110,0.35);">
+              <div style="font-size:11.5px;font-weight:800;color:var(--accent-cream);margin-bottom:6px;">🏋️ Tek Tıkla Bugüne Hazır Antrenman Görevi Ekle:</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
                 <span class="quick-chip" onclick="quickAddWorkoutTask('push')">💪 İtiş (Push)</span>
                 <span class="quick-chip" onclick="quickAddWorkoutTask('pull')">🏋️ Çekiş (Pull)</span>
                 <span class="quick-chip" onclick="quickAddWorkoutTask('legs')">🦵 Bacak & Kardiyo</span>
                 <span class="quick-chip" onclick="quickAddWorkoutTask('fullbody')">🔥 Full Body</span>
               </div>
             </div>
-          </div>
 
-          <!-- 🍽️ GÜNLÜK YEMEK & BESİN MAKRO SAYACI (185+ BESİN VERİTABANI — GRAMAJLA OTOMATİK PROTEİN / KARB / YAĞ / KALORİ) -->
-          <div class="scratchpad-card" id="foodMacroTrackerCard" style="margin-top:6px;border-color:rgba(82,196,26,0.38);">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;flex-wrap:wrap;">
-              <span style="font-weight:900;font-size:13px;color:#95de64;">🍽️ Yediklerim & Gramajlı Besin Sayacı (185+ Besin)</span>
-              <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:3px 8px;color:var(--accent-cream);" onclick="promptAddCustomFoodToDB()" title="Listede olmayan kendi özel yemek veya besinini tanımla">+ Özel Besin Tanımla</button>
-            </div>
-
-            <!-- Bugünün Toplam Kalori, Protein, Karbonhidrat ve Yağ Özeti -->
-            <div class="macro-badge-row">
-              <div class="macro-mini-pill">
-                <div style="color:var(--text-muted);font-size:9.5px;font-weight:700;">🔥 KALORİ</div>
-                <div style="font-weight:900;font-size:12px;color:#ffc069;" id="dailyTotalKcalText">0 kcal</div>
+            <!-- 📅 HAFTALIK RUTİN & ANTRENMAN PROGRAMI TABLOSU (PZT - PAZ) -->
+            <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(200,244,236,0.3);">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-weight:800;font-size:13px;">📅 Haftalık Antrenman & Rutin Programım</span>
+                <span style="font-size:10.5px;color:var(--text-muted);">Güne dokunup düzenle ✎</span>
               </div>
-              <div class="macro-mini-pill">
-                <div style="color:var(--text-muted);font-size:9.5px;font-weight:700;">🥩 PROTEİN</div>
-                <div style="font-weight:900;font-size:12px;color:#ff9c6e;" id="dailyTotalProtText">0g</div>
+              <div id="weeklyScheduleGrid" class="weekly-schedule-grid"></div>
+            </div>
+
+            <!-- ⚖️ KİLO, YAĞ ORANI & ANTRENMAN REKORLARI (PR) TABLOSU -->
+            <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(96,165,250,0.3);">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <span style="font-weight:800;font-size:13px;">⚖️ Kilo, Yağ & PR Rekorları</span>
+                <span style="font-size:11px;color:#93c5fd;" id="latestWeightBadge">Kaydet</span>
               </div>
-              <div class="macro-mini-pill">
-                <div style="color:var(--text-muted);font-size:9.5px;font-weight:700;">🍞 KARB</div>
-                <div style="font-weight:900;font-size:12px;color:#93c5fd;" id="dailyTotalCarbText">0g</div>
-              </div>
-              <div class="macro-mini-pill">
-                <div style="color:var(--text-muted);font-size:9.5px;font-weight:700;">🥑 YAĞ</div>
-                <div style="font-weight:900;font-size:12px;color:#95de64;" id="dailyTotalFatText">0g</div>
-              </div>
-            </div>
-
-            <!-- Hızlı Kategori Filtresi -->
-            <div style="display:flex;gap:4px;overflow-x:auto;padding-bottom:5px;margin-bottom:6px;scrollbar-width:none;">
-              <button type="button" class="tag-badge food-cat-chip" data-cat="all" style="border:none;cursor:pointer;padding:3px 7px;background:var(--accent-cream);color:#121218;flex-shrink:0;" onclick="setFoodCategoryFilter('all', this)">Tümü (185+)</button>
-              <button type="button" class="tag-badge food-cat-chip" data-cat="kahvalti" style="border:none;cursor:pointer;padding:3px 7px;flex-shrink:0;" onclick="setFoodCategoryFilter('kahvalti', this)">🥚 Yumurta/Kahvaltı</button>
-              <button type="button" class="tag-badge food-cat-chip" data-cat="et" style="border:none;cursor:pointer;padding:3px 7px;flex-shrink:0;" onclick="setFoodCategoryFilter('et', this)">🍗 Et/Tavuk/Balık</button>
-              <button type="button" class="tag-badge food-cat-chip" data-cat="yemek" style="border:none;cursor:pointer;padding:3px 7px;flex-shrink:0;" onclick="setFoodCategoryFilter('yemek', this)">🍲 Ev Yemeği/Çorba</button>
-              <button type="button" class="tag-badge food-cat-chip" data-cat="tahil" style="border:none;cursor:pointer;padding:3px 7px;flex-shrink:0;" onclick="setFoodCategoryFilter('tahil', this)">🍚 Pilav/Yulaf/Ekmek</button>
-              <button type="button" class="tag-badge food-cat-chip" data-cat="sebze" style="border:none;cursor:pointer;padding:3px 7px;flex-shrink:0;" onclick="setFoodCategoryFilter('sebze', this)">🥦 Sebze/Biber/Soğan</button>
-              <button type="button" class="tag-badge food-cat-chip" data-cat="meyve" style="border:none;cursor:pointer;padding:3px 7px;flex-shrink:0;" onclick="setFoodCategoryFilter('meyve', this)">🍎 Meyve/Kuruyemiş</button>
-              <button type="button" class="tag-badge food-cat-chip" data-cat="sut" style="border:none;cursor:pointer;padding:3px 7px;flex-shrink:0;" onclick="setFoodCategoryFilter('sut', this)">🥛 Süt/Supplement</button>
-            </div>
-
-            <!-- Besin Arama Kutusu ve Gramaj Girişi -->
-            <div style="display:flex;gap:5px;align-items:center;">
-              <input type="text" id="foodSearchInput" class="form-input" style="flex:1.8;padding:7px 9px;font-size:12px;" placeholder="🔍 Yemek/Besin ara (Örn: Haşlanmış yumurta, tavuk sote, biber, soğan, pilav...)" oninput="onFoodSearchInput()" onfocus="onFoodSearchInput()" autocomplete="off" />
-              <div style="display:flex;align-items:center;gap:3px;flex:0.9;min-width:85px;">
-                <input type="number" id="foodGramsInput" class="form-input" style="padding:7px 7px;font-size:12px;text-align:center;" value="100" min="1" max="3000" oninput="updateFoodLiveMacroPreview()" placeholder="Gram" />
-                <span style="font-size:11px;font-weight:800;color:var(--text-muted);">gr</span>
-              </div>
-              <button type="button" class="btn-cream" style="padding:7px 11px;font-size:12px;flex-shrink:0;" onclick="addSelectedFoodToDailyLog()">+ Ekle</button>
-            </div>
-
-            <!-- Arama Sonucu Açılır Liste (185+ Besin İçinden Anında Seçim) -->
-            <div id="foodSearchDropdown" class="food-search-dropdown"></div>
-
-            <!-- Hızlı Gramaj Çipleri -->
-            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;">
-              <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="setQuickFoodGrams(50)">50g (1 Yumurta/Dilim)</span>
-              <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="setQuickFoodGrams(100)">100g</span>
-              <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="setQuickFoodGrams(150)">150g</span>
-              <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="setQuickFoodGrams(200)">200g (1 Porsiyon)</span>
-              <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="setQuickFoodGrams(250)">250g</span>
-              <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="setQuickFoodGrams(300)">300g</span>
-            </div>
-
-            <!-- Canlı Gramaj Hesaplama Önizlemesi -->
-            <div id="foodLiveMacroPreview" style="margin-top:6px;padding:6px 9px;border-radius:9px;background:rgba(255,255,255,0.03);border:1px dashed var(--border-color);font-size:11px;color:var(--accent-cream);">
-              👆 Yukarıdan bir yemek/besin seç ve gramajını gir; protein, karbonhidrat, yağ ve kalorisi anında hesaplansın!
-            </div>
-
-            <!-- Bugün Yenilen Besinler Listesi -->
-            <div id="dailyEatenFoodsList" style="display:flex;flex-direction:column;gap:4px;margin-top:8px;max-height:190px;overflow-y:auto;"></div>
-          </div>
-
-          <!-- ☀️ SABAH & 🌙 AKŞAM RUTİNİ TEK TIKLA KONTROL LİSTESİ -->
-          <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(245,216,181,0.3);">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <span style="font-weight:800;font-size:13px;">☀️ Sabah & 🌙 Akşam Rutini</span>
-              <div style="display:flex;gap:4px;">
-                <button type="button" class="tag-badge" id="btnMorningRoutine" style="border:none;cursor:pointer;padding:3px 8px;background:var(--accent-cream);color:#14141c;" onclick="switchDayNightRoutine('morning')">☀️ Sabah</button>
-                <button type="button" class="tag-badge" id="btnEveningRoutine" style="border:none;cursor:pointer;padding:3px 8px;" onclick="switchDayNightRoutine('evening')">🌙 Akşam</button>
-              </div>
-            </div>
-            <div id="dayNightRoutineList" style="display:flex;flex-direction:column;gap:5px;"></div>
-          </div>
-
-          <!-- 📅 HAFTALIK RUTİN & ANTRENMAN PROGRAMI TABLOSU (PZT - PAZ) -->
-          <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(200,244,236,0.3);">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-weight:800;font-size:13px;">📅 Haftalık Antrenman & Rutin Programım</span>
-              <span style="font-size:10.5px;color:var(--text-muted);">Güne dokunup düzenle ✎</span>
-            </div>
-            <div id="weeklyScheduleGrid" class="weekly-schedule-grid"></div>
-          </div>
-
-          <!-- 🏋️ 1RM (MAKSİMUM AĞIRLIK) & KALORİ/MAKRO HESAPLAYICI MİNİ ARAÇ -->
-          <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(255,156,110,0.35);">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <span style="font-weight:800;font-size:13px;">🏋️ 1RM & Kalori/Makro Hesaplayıcı</span>
-              <div style="display:flex;gap:4px;">
-                <button type="button" class="tag-badge" id="btnCalc1RM" style="border:none;cursor:pointer;padding:3px 8px;background:var(--accent-cream);color:#14141c;" onclick="switchSportCalcTab('1rm')">💪 1RM</button>
-                <button type="button" class="tag-badge" id="btnCalcMacro" style="border:none;cursor:pointer;padding:3px 8px;" onclick="switchSportCalcTab('macro')">🔥 Kalori/Makro</button>
+              <div id="bodyPrBody">
+                <div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap;">
+                  <select id="prMetricType" class="form-select" style="flex:1.2;min-width:110px;padding:6px 8px;font-size:11.5px;">
+                    <option value="⚖️ Güncel Kilo (kg)">⚖️ Güncel Kilo (kg)</option>
+                    <option value="🔥 Yağ Oranı (%)">🔥 Yağ Oranı (%)</option>
+                    <option value="🏋️ Bench Press PR (kg)">🏋️ Bench Press PR (kg)</option>
+                    <option value="🦵 Squat PR (kg)">🦵 Squat PR (kg)</option>
+                    <option value="💪 Deadlift PR (kg)">💪 Deadlift PR (kg)</option>
+                    <option value="🏃 Koşu / Kardiyo (dk)">🏃 Koşu / Kardiyo (dk)</option>
+                  </select>
+                  <input type="text" id="prMetricValue" class="form-input" style="flex:1;min-width:75px;padding:6px 8px;font-size:12px;" placeholder="Örn: 78.5 kg" onkeydown="if(event.key==='Enter'){event.preventDefault();addBodyPrRecord();}" />
+                  <button type="button" class="btn-cream" style="padding:6px 11px;font-size:12px;" onclick="addBodyPrRecord()">+ Kaydet</button>
+                </div>
+                <div id="bodyPrListContainer" style="display:flex;flex-direction:column;gap:5px;max-height:180px;overflow-y:auto;"></div>
               </div>
             </div>
 
-            <!-- 1RM Hesaplama Kutusu -->
-            <div id="sportCalc1RMBox">
-              <div style="display:flex;gap:6px;margin-bottom:6px;">
-                <input type="number" id="calc1RMWeight" class="form-input" style="padding:6px 8px;font-size:12px;" placeholder="Kaldırılan Kg (Örn: 80)" />
-                <input type="number" id="calc1RMReps" class="form-input" style="padding:6px 8px;font-size:12px;" placeholder="Tekrar (Örn: 8)" />
-                <button type="button" class="btn-cream" style="padding:6px 11px;font-size:12px;flex-shrink:0;" onclick="calculateOneRepMax()">Hesapla</button>
+            <!-- 🏋️ 1RM (MAKSİMUM AĞIRLIK) & KALORİ/MAKRO HESAPLAYICI MİNİ ARAÇ -->
+            <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(255,156,110,0.35);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="font-weight:800;font-size:13px;">🏋️ 1RM & Kalori/Makro Hesaplayıcı</span>
+                <div style="display:flex;gap:4px;">
+                  <button type="button" class="tag-badge" id="btnCalc1RM" style="border:none;cursor:pointer;padding:3px 8px;background:var(--accent-cream);color:#14141c;" onclick="switchSportCalcTab('1rm')">💪 1RM</button>
+                  <button type="button" class="tag-badge" id="btnCalcMacro" style="border:none;cursor:pointer;padding:3px 8px;" onclick="switchSportCalcTab('macro')">🔥 Kalori/Makro</button>
+                </div>
               </div>
-              <div id="calc1RMResult" style="font-size:11.5px;color:var(--text-muted);">Ağırlık ve tekrar girerek 1 Tekrar Maksimumunu (1RM) ve ideal çalışma kilolarını öğren.</div>
-            </div>
 
-            <!-- Kalori & Makro (TDEE) Hesaplama Kutusu -->
-            <div id="sportCalcMacroBox" style="display:none;">
-              <div style="display:flex;gap:5px;margin-bottom:6px;flex-wrap:wrap;">
-                <input type="number" id="calcMacroWeight" class="form-input" style="flex:1;min-width:65px;padding:6px 8px;font-size:12px;" placeholder="Kilo (kg)" />
-                <input type="number" id="calcMacroHeight" class="form-input" style="flex:1;min-width:65px;padding:6px 8px;font-size:12px;" placeholder="Boy (cm)" />
-                <select id="calcMacroGoal" class="form-select" style="flex:1.4;min-width:110px;padding:6px 8px;font-size:11.5px;">
-                  <option value="cut">🔥 Yağ Yakımı (Definasyon)</option>
-                  <option value="maintain" selected>⚖️ Form Koruma</option>
-                  <option value="bulk">💪 Kas İnşası (Clean Bulk)</option>
-                </select>
-                <button type="button" class="btn-cream" style="padding:6px 10px;font-size:12px;" onclick="calculateDailyMacros()">Hesapla</button>
+              <div id="sportCalc1RMBox">
+                <div style="display:flex;gap:6px;margin-bottom:6px;">
+                  <input type="number" id="calc1RMWeight" class="form-input" style="padding:6px 8px;font-size:12px;" placeholder="Kaldırılan Kg (Örn: 80)" />
+                  <input type="number" id="calc1RMReps" class="form-input" style="padding:6px 8px;font-size:12px;" placeholder="Tekrar (Örn: 8)" />
+                  <button type="button" class="btn-cream" style="padding:6px 11px;font-size:12px;flex-shrink:0;" onclick="calculateOneRepMax()">Hesapla</button>
+                </div>
+                <div id="calc1RMResult" style="font-size:11.5px;color:var(--text-muted);">Ağırlık ve tekrar girerek 1 Tekrar Maksimumunu (1RM) ve ideal çalışma kilolarını öğren.</div>
               </div>
-              <div id="calcMacroResult" style="font-size:11.5px;color:var(--text-muted);">Kilo, boy ve hedefini seçerek günlük kalori ve protein ihtiyacını hesapla.</div>
-            </div>
-          </div>
 
-          <!-- ⚖️ KİLO, YAĞ ORANI & ANTRENMAN REKORLARI (PR) TABLOSU -->
-          <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(96,165,250,0.3);">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-              <span style="font-weight:800;font-size:13px;">⚖️ Kilo, Yağ & PR Rekorları</span>
-              <span style="font-size:11px;color:#93c5fd;" id="latestWeightBadge">Kaydet</span>
-            </div>
-            <div id="bodyPrBody">
-              <div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap;">
-                <select id="prMetricType" class="form-select" style="flex:1.2;min-width:110px;padding:6px 8px;font-size:11.5px;">
-                  <option value="⚖️ Güncel Kilo (kg)">⚖️ Güncel Kilo (kg)</option>
-                  <option value="🔥 Yağ Oranı (%)">🔥 Yağ Oranı (%)</option>
-                  <option value="🏋️ Bench Press PR (kg)">🏋️ Bench Press PR (kg)</option>
-                  <option value="🦵 Squat PR (kg)">🦵 Squat PR (kg)</option>
-                  <option value="💪 Deadlift PR (kg)">💪 Deadlift PR (kg)</option>
-                  <option value="🏃 Koşu / Kardiyo (dk)">🏃 Koşu / Kardiyo (dk)</option>
-                </select>
-                <input type="text" id="prMetricValue" class="form-input" style="flex:1;min-width:75px;padding:6px 8px;font-size:12px;" placeholder="Örn: 78.5 kg" onkeydown="if(event.key==='Enter'){event.preventDefault();addBodyPrRecord();}" />
-                <button type="button" class="btn-cream" style="padding:6px 11px;font-size:12px;" onclick="addBodyPrRecord()">+ Kaydet</button>
+              <div id="sportCalcMacroBox" style="display:none;">
+                <div style="display:flex;gap:5px;margin-bottom:6px;flex-wrap:wrap;">
+                  <input type="number" id="calcMacroWeight" class="form-input" style="flex:1;min-width:65px;padding:6px 8px;font-size:12px;" placeholder="Kilo (kg)" />
+                  <input type="number" id="calcMacroHeight" class="form-input" style="flex:1;min-width:65px;padding:6px 8px;font-size:12px;" placeholder="Boy (cm)" />
+                  <select id="calcMacroGoal" class="form-select" style="flex:1.4;min-width:110px;padding:6px 8px;font-size:11.5px;">
+                    <option value="cut">🔥 Yağ Yakımı (Definasyon)</option>
+                    <option value="maintain" selected>⚖️ Form Koruma</option>
+                    <option value="bulk">💪 Kas İnşası (Clean Bulk)</option>
+                  </select>
+                  <button type="button" class="btn-cream" style="padding:6px 10px;font-size:12px;" onclick="calculateDailyMacros()">Hesapla</button>
+                </div>
+                <div id="calcMacroResult" style="font-size:11.5px;color:var(--text-muted);">Kilo, boy ve hedefini seçerek günlük kalori ve protein ihtiyacını hesapla.</div>
               </div>
-              <div id="bodyPrListContainer" style="display:flex;flex-direction:column;gap:5px;max-height:180px;overflow-y:auto;"></div>
             </div>
           </div>
         </div>
@@ -659,12 +686,12 @@
             <span id="currentMonthLabel">Ekim 2026</span>
             <span style="font-size:11px;background:var(--bg-surface);padding:4px 9px;border-radius:99px;color:var(--accent-cream);">Bugün</span>
           </div>
-          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-            <button class="pin-btn" onclick="openWeeklyReviewModal()" style="height:32px;padding:0 10px;font-size:11.5px;border-color:rgba(149,222,100,0.4);color:#95de64;" title="Haftalık Pazar Değerlendirmesi & Yeni Hafta Sihirbazı">🧹 Haftalık Değerlendirme</button>
-            <button class="pin-btn" id="voiceBriefingBtn" onclick="speakDailyBriefing()" style="height:32px;padding:0 10px;font-size:11.5px;border-color:rgba(245,216,181,0.35);color:var(--accent-cream);" title="Günün Planını Türkçe Sesli Asistanla Dinle">🔊 Sesli Brifing</button>
-            <button class="pin-btn" id="toggleMatrixViewBtn" onclick="toggleEisenhowerMatrixView()" style="height:32px;padding:0 10px;font-size:11.5px;" title="Eisenhower 4'lü Öncelik Matrisi">🧊 4'lü Matris</button>
-            <button class="pin-btn" onclick="shareOrCopyDailyPlan()" style="height:32px;padding:0 10px;font-size:11.5px;" title="Günün Planını WhatsApp'ta Paylaş veya Kopyala">📤 Planı Paylaş</button>
-            <button class="pin-btn" id="toggleMonthGridBtn" onclick="toggleMonthGridView()" style="height:32px;padding:0 10px;font-size:11.5px;">🗓️ Aylık Takvim</button>
+          <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">
+            <button class="pin-btn" onclick="shareFullDailyLifestyleSummary()" style="height:32px;padding:0 10px;font-size:11.5px;background:rgba(37,211,102,0.16);border-color:rgba(37,211,102,0.45);color:#95de64;" title="İçtiğin Su, Yediğin Yemekler ve Antrenmanlarını WhatsApp'ta Arkadaşlarınla Paylaş">📲 Günümü Paylaş (WP)</button>
+            <button class="pin-btn" id="toggleMonthGridBtn" onclick="toggleMonthGridView()" style="height:32px;padding:0 10px;font-size:11.5px;">🗓️ Takvim</button>
+            <button class="pin-btn" onclick="openWeeklyReviewModal()" style="height:32px;padding:0 9px;font-size:11.5px;" title="Haftalık Değerlendirme">🧹 Haftalık</button>
+            <button class="pin-btn" id="voiceBriefingBtn" onclick="speakDailyBriefing()" style="height:32px;padding:0 8px;font-size:11.5px;" title="Sesli Brifing">🔊</button>
+            <button class="pin-btn" id="toggleMatrixViewBtn" onclick="toggleEisenhowerMatrixView()" style="height:32px;padding:0 8px;font-size:11.5px;" title="4'lü Matris">🧊</button>
             <button class="btn-cream" id="toggleAllDatesBtn" onclick="toggleShowAllDates()" style="padding:6px 10px;font-size:11.5px;">Tüm Günler</button>
           </div>
         </div>
@@ -942,10 +969,133 @@
         </div>
       </section>
 
+      <!-- ================================================================== -->
+      <!-- SEKME 6: 🏆 120 MİSYON / CHALLENGE, KİŞİSEL PROFİL VİTRİNİ & ARKADAŞLARLA SOHBET -->
+      <!-- ================================================================== -->
+      <section id="viewSocial" style="display:none;">
+        <!-- ÜST KİŞİSEL PROFİL KARTI VE ROZET VİTRİNİ -->
+        <div class="social-profile-banner">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div id="socialProfileAvatar" style="width:52px;height:52px;border-radius:16px;background:var(--accent-cream);color:#121218;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,0,0,0.35);">A</div>
+              <div>
+                <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+                  <h2 id="socialProfileName" style="font-size:18px;font-weight:900;">Kullanıcı</h2>
+                  <span id="socialProfileRankBadge" class="tag-badge" style="background:rgba(245,216,181,0.2);color:var(--accent-cream);font-weight:800;">🌱 Seviye 1</span>
+                </div>
+                <div id="socialProfileBioText" style="font-size:12px;color:var(--text-muted);margin-top:2px;">"Disiplin ve gelişim yolculuğum devam ediyor! 💪"</div>
+                <div id="socialProfileStatsLine" style="font-size:11.5px;color:#93c5fd;font-weight:800;margin-top:4px;">0 XP • 🔥 1 Gün Seri • 🏅 0/120 Misyon Açıldı</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button type="button" class="pin-btn" style="height:34px;padding:0 10px;font-size:11.5px;" onclick="promptEditProfileBio()">✏️ Durum/Bio Yaz</button>
+              <button type="button" class="btn-cream" style="height:34px;padding:0 12px;font-size:11.5px;background:#25D366;color:#fff;" onclick="shareMyProfileAndShowcaseOnWP()">📲 Profilimi & Rozetlerimi Paylaş (WP)</button>
+            </div>
+          </div>
+
+          <!-- 📌 PROFİLDE SERGİLENEN ROZET VİTRİNİ (EN FAZLA 6 ROZET SEÇİLEBİLİR) -->
+          <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span style="font-size:11.5px;font-weight:900;color:var(--accent-cream);">🏅 Profilimde Sergilediğim Rozet Vitrinim (Misyonlardan 📌 Vitrine Koy ile seç):</span>
+              <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:3px 8px;color:#93c5fd;" onclick="copyMyFriendInviteCode()">🔗 Arkadaşlık / Profil Kodumu Kopyala</button>
+            </div>
+            <div id="socialShowcaseBadgesGrid" class="showcase-badges-strip"></div>
+          </div>
+        </div>
+
+        <!-- 2'Lİ SOSYAL ALT SEKME SEÇİCİ: 🏆 120 MİSYON & CHALLENGE | 👥 ARKADAŞLAR & SOHBET -->
+        <div class="sub-tab-switcher" style="grid-template-columns:repeat(2,1fr);margin-bottom:12px;">
+          <button type="button" class="sub-tab-btn active" id="socialSubBtnMissions" onclick="switchSocialSubTab('missions')">🏆 120 Misyon & Challenge (% İlerleme)</button>
+          <button type="button" class="sub-tab-btn" id="socialSubBtnFriends" onclick="switchSocialSubTab('friends')">👥 Arkadaşlarım, Profiller & Mesajlaşma</button>
+        </div>
+
+        <!-- ALT BÖLÜM 1: 🏆 120 MİSYON & CHALLENGE MERKEZİ -->
+        <div id="socialSubMissions">
+          <div class="task-card" style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+              <div>
+                <h3 style="font-size:16px;font-weight:900;">🏆 120 Kademeli Misyon & Challenge Merkezi</h3>
+                <p style="font-size:11.5px;color:var(--text-muted);">Görev yaptıkça, su içtikçe, protein aldıkça ve antrenman tamamladıkça yüzdelik ilerlemen artar, rozet açılır ve ekstra XP kazanıp seviye atlarsın!</p>
+              </div>
+              <span id="missionsTotalUnlockedText" style="font-size:12px;font-weight:900;padding:5px 11px;border-radius:99px;background:rgba(82,196,26,0.18);color:#95de64;">0 / 120 Tamamlandı</span>
+            </div>
+
+            <!-- Challenge Kategori Filtresi -->
+            <div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;scrollbar-width:none;">
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="all" style="border:none;cursor:pointer;padding:5px 10px;background:var(--accent-cream);color:#121218;font-weight:800;flex-shrink:0;" onclick="setMissionCategoryFilter('all', this)">🌟 Tümü (120)</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="closest" style="border:none;cursor:pointer;padding:5px 10px;color:#ffc069;font-weight:800;flex-shrink:0;" onclick="setMissionCategoryFilter('closest', this)">🎯 Kazanmaya En Yakınlar</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="unlocked" style="border:none;cursor:pointer;padding:5px 10px;color:#95de64;font-weight:800;flex-shrink:0;" onclick="setMissionCategoryFilter('unlocked', this)">✅ Kazanılan Rozetlerim</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="water" style="border:none;cursor:pointer;padding:5px 10px;flex-shrink:0;" onclick="setMissionCategoryFilter('water', this)">💧 Su Misyonları (20)</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="sport" style="border:none;cursor:pointer;padding:5px 10px;flex-shrink:0;" onclick="setMissionCategoryFilter('sport', this)">🏋️ Antrenman & PR (20)</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="nutrition" style="border:none;cursor:pointer;padding:5px 10px;flex-shrink:0;" onclick="setMissionCategoryFilter('nutrition', this)">🍽️ Beslenme & Protein (20)</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="tasks" style="border:none;cursor:pointer;padding:5px 10px;flex-shrink:0;" onclick="setMissionCategoryFilter('tasks', this)">📋 Görev Avcısı (20)</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="streak" style="border:none;cursor:pointer;padding:5px 10px;flex-shrink:0;" onclick="setMissionCategoryFilter('streak', this)">🔥 Seri & Rutin (20)</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="growth" style="border:none;cursor:pointer;padding:5px 10px;flex-shrink:0;" onclick="setMissionCategoryFilter('growth', this)">🧠 Gelişim & Sosyal (20)</button>
+            </div>
+
+            <div id="missionsCardsContainer" class="challenge-card-grid"></div>
+          </div>
+        </div>
+
+        <!-- ALT BÖLÜM 2: 👥 ARKADAŞ EKLEME, PROFİL İNCELEME & MESAJLAŞMA -->
+        <div id="socialSubFriends" style="display:none;">
+          <div class="task-card" style="margin-bottom:12px;">
+            <h3 style="font-size:16px;font-weight:900;margin-bottom:4px;">➕ Arkadaş Ekle & Profil / Rozet Vitrini Gör</h3>
+            <p style="font-size:11.5px;color:var(--text-muted);margin-bottom:10px;">
+              Arkadaşının kullanıcı adını veya WhatsApp'tan gönderdiği <b>Profil Davet Kodunu (`TF-...`)</b> aşağıya yapıştırarak arkadaş ekle, sergilediği rozetleri gör ve mesajlaş!
+            </p>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <input type="text" id="addFriendInput" class="form-input" style="flex:1;min-width:190px;padding:8px 10px;font-size:12.5px;" placeholder="Kullanıcı adı (Örn: ahmet) veya Profil Kodu (TF-...) yapıştır..." onkeydown="if(event.key==='Enter'){event.preventDefault();addFriendByCodeOrUsername();}" />
+              <button type="button" class="btn-cream" onclick="addFriendByCodeOrUsername()">+ Arkadaş Ekle</button>
+              <button type="button" class="pin-btn" style="height:38px;padding:0 11px;font-size:11.5px;" onclick="copyMyFriendInviteCode()">🔗 Kendi Kodumu Kopyala</button>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px;">
+            <!-- Sol: Arkadaş Listesi ve Profilleri -->
+            <div class="task-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <h4 style="font-size:14px;font-weight:800;">👥 Arkadaş Listem & Profilleri</h4>
+                <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:3px 8px;" onclick="syncSocialFriendsAndMessages()">🔄 Yenile</button>
+              </div>
+              <div id="friendsListContainer" style="display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;"></div>
+            </div>
+
+            <!-- Sağ: Seçili Arkadaşla Uygulama İçi Mesajlaşma & Motivasyon Gönderme -->
+            <div class="task-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;flex-wrap:wrap;">
+                <h4 id="activeChatFriendTitle" style="font-size:14px;font-weight:800;color:var(--accent-cream);">💬 Mesajlaşma & Motivasyon</h4>
+                <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:3px 8px;background:rgba(37,211,102,0.18);color:#95de64;" onclick="sendChatToWhatsAppDirect()">📲 WP'den Gönder</button>
+              </div>
+
+              <!-- Seçili Arkadaşın Rozet Vitrini Özeti -->
+              <div id="activeChatFriendBadgesBar" style="font-size:11px;color:var(--text-muted);margin-bottom:8px;padding:6px 9px;background:var(--bg-surface);border-radius:10px;">
+                Soldaki listeden bir arkadaşına dokunarak sohbeti ve sergilediği rozetleri açabilirsin.
+              </div>
+
+              <div id="chatMessagesContainer" class="chat-messages-box"></div>
+
+              <!-- Hızlı Motivasyon Dürtmeleri -->
+              <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;">
+                <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="sendQuickSocialMessage('💪 Bugün antrenmanımı tamamladım, sıra sende şampiyon!')">💪 Antrenman Bitti!</span>
+                <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="sendQuickSocialMessage('💧 Su hedefimi devirdim, bugün kaç bardak su içtin?')">💧 Su İçtin mi?</span>
+                <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="sendQuickSocialMessage('🥩 Protein ve beslenme tam gaz! Pes etmek yok 🔥')">🥩 Beslenme Tam Gaz!</span>
+                <span class="quick-chip" style="font-size:10px;padding:2px 7px;" onclick="sendQuickDailyReportToFriendChat()">📊 Günlük Özetimi At</span>
+              </div>
+
+              <div style="display:flex;gap:6px;">
+                <input type="text" id="chatMessageInput" class="form-input" style="flex:1;padding:8px 10px;font-size:12.5px;" placeholder="Arkadaşına mesaj veya motivasyon yaz..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendSocialChatMessage();}" />
+                <button type="button" class="btn-cream" style="padding:8px 14px;font-size:12.5px;" onclick="sendSocialChatMessage()">Gönder ➤</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
-  <!-- ALT YÜZEN MENÜ: GÖREVLER | HEDEFLER | (+) | ARŞİV | ODAK & KARNE -->
+  <!-- ALT YÜZEN MENÜ: GÖREVLER | HEDEFLER | (+) | SOSYAL & MİSYON | ARŞİV | ODAK -->
   <div class="bottom-nav-wrap">
     <nav class="bottom-nav">
       <button class="nav-item active" id="navTasks" onclick="switchView('tasks')">
@@ -959,13 +1109,17 @@
 
       <button class="fab-add" onclick="handleFabClick()" title="Yeni Görev veya Hedef Ekle">+</button>
 
+      <button class="nav-item" id="navSocial" onclick="switchView('social')">
+        <span class="nav-icon">🏆</span>
+        <span>Misyon & Sosyal</span>
+      </button>
       <button class="nav-item" id="navArchive" onclick="switchView('archive')">
         <span class="nav-icon">📦</span>
         <span>Arşiv</span>
       </button>
       <button class="nav-item" id="navStats" onclick="switchView('stats')">
         <span class="nav-icon">🔥</span>
-        <span>Odak & Karne</span>
+        <span>Odak</span>
       </button>
     </nav>
   </div>
@@ -1268,14 +1422,82 @@
     </div>
   </div>
 
-  <!-- 🤖 AKILLI KİŞİSEL KOÇ & SÜRPRİZ MOTİVASYON / ANALİZ POP-UP KARTI (v18.0) -->
+  <!-- 👨‍🍳 KENDİ ÖZEL TARİFİMİ EKLE (MAKRO + MİKRO + GRAMAJ) MODALI (v19.0) -->
+  <div id="customRecipeModal" class="modal-backdrop hidden" style="align-items:center;padding:16px;">
+    <div class="modal-sheet" style="max-width:480px;border-radius:26px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h3 style="font-size:18px;font-weight:900;">👨‍🍳 Kendi Tarifini / Yemeğini Tanımla</h3>
+        <button class="icon-btn" onclick="closeCustomRecipeModal()">✕</button>
+      </div>
+      <p style="font-size:11.5px;color:var(--text-muted);margin-bottom:12px;">
+        Kendi yaptığın yemeğin porsiyon gramajını, makro (Kalori, Protein, Karb, Yağ) ve mikro (Lif, Şeker, Vitamin/Mineral) değerlerini girerek kişisel besin kütüphanene kaydet!
+      </p>
+
+      <div class="form-row">
+        <div class="form-group" style="flex:2;">
+          <label>Tarif / Yemek Adı</label>
+          <input type="text" id="recipeNameInput" class="form-input" placeholder="Örn: Yulaflı Protein Pankek / Ev Köftesi" />
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label>Referans Gramaj (g)</label>
+          <input type="number" id="recipeBaseGramsInput" class="form-input" value="100" min="10" max="2000" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>🔥 Kalori (kcal)</label>
+          <input type="number" id="recipeKcalInput" class="form-input" placeholder="Örn: 220" step="1" />
+        </div>
+        <div class="form-group">
+          <label>🥩 Protein (g)</label>
+          <input type="number" id="recipeProtInput" class="form-input" placeholder="Örn: 24" step="0.1" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>🍞 Karbonhidrat (g)</label>
+          <input type="number" id="recipeCarbInput" class="form-input" placeholder="Örn: 18" step="0.1" />
+        </div>
+        <div class="form-group">
+          <label>🥑 Yağ (g)</label>
+          <input type="number" id="recipeFatInput" class="form-input" placeholder="Örn: 6.5" step="0.1" />
+        </div>
+      </div>
+
+      <!-- Mikro Besin Değerleri (Lif, Şeker, Vitamin/Mineral) -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>🌾 Lif (g - Opsiyonel)</label>
+          <input type="number" id="recipeFiberInput" class="form-input" placeholder="Örn: 4.5" step="0.1" />
+        </div>
+        <div class="form-group">
+          <label>💊 Mikro / Vitamin Notu</label>
+          <input type="text" id="recipeMicrosInput" class="form-input" placeholder="Örn: Demir, B12, Magnezyum, Omega-3" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>📝 Malzemeler & Hazırlanış Notu (Opsiyonel)</label>
+        <input type="text" id="recipeNotesInput" class="form-input" placeholder="Örn: 2 yumurta, 50g yulaf, 1 ölçek whey, tarçın..." />
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <button type="button" class="pin-btn" style="flex:1;height:44px;" onclick="closeCustomRecipeModal()">Vazgeç</button>
+        <button type="button" class="btn-cream" style="flex:2;height:44px;font-size:13.5px;" onclick="saveCustomRecipeToDB()">👨‍🍳 Tarifi Kaydet & Bugüne Ekle ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🤖 AKILLI KİŞİSEL KOÇ & CHALLENGE REHBERLİ POP-UP KARTI (v19.0) -->
   <div id="smartCoachPopup" class="smart-coach-popup">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <div id="smartCoachIcon" style="font-size:28px;line-height:1;">🤖</div>
         <div>
           <div id="smartCoachTitle" style="font-size:13.5px;font-weight:900;color:var(--accent-cream);">Kişisel Koç & Başarı Analizi</div>
-          <div style="font-size:10px;color:var(--pastel-purple);font-weight:700;">Canlı Performans & Gelişim Asistanı</div>
+          <div style="font-size:10px;color:var(--pastel-purple);font-weight:700;">Canlı Performans & Rozet Rehberi</div>
         </div>
       </div>
       <button type="button" class="icon-btn" style="width:26px;height:26px;font-size:12px;" onclick="closeSmartCoachPopup()">✕</button>
@@ -1283,12 +1505,15 @@
     <div id="smartCoachBody" style="font-size:12.5px;line-height:1.5;color:var(--text-main);margin-top:10px;background:rgba(255,255,255,0.04);padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.08);">
       Vay be, harika gidiyorsun! Bugün disiplinini koruyarak hedeflerine adım adım yaklaşıyorsun.
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;">
-      <button type="button" class="pin-btn" style="height:32px;padding:0 10px;font-size:11px;flex:1;" onclick="triggerRandomPersonalInsightPopup()">🎲 Başka Bilgi Göster</button>
-      <button type="button" class="btn-cream" style="height:32px;padding:0 14px;font-size:11.5px;flex:1;" onclick="closeSmartCoachPopup()">Harika, Devam! 💪</button>
+    <!-- 🎯 Sıradaki Rozet & Challenge Yüzde Rehberi -->
+    <div id="smartCoachNextBadgeBox" style="margin-top:8px;padding:8px 10px;border-radius:11px;background:rgba(245,216,181,0.08);border:1px dashed rgba(245,216,181,0.3);font-size:11px;"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:10px;">
+      <button type="button" class="pin-btn" style="height:32px;padding:0 9px;font-size:11px;flex:1;" onclick="triggerRandomPersonalInsightPopup()">🎲 Başka Bilgi</button>
+      <button type="button" class="pin-btn" style="height:32px;padding:0 9px;font-size:11px;flex:1;color:#95de64;border-color:rgba(82,196,26,0.4);" onclick="shareFullDailyLifestyleSummary()">📲 WP Paylaş</button>
+      <button type="button" class="btn-cream" style="height:32px;padding:0 12px;font-size:11.5px;flex:1;" onclick="closeSmartCoachPopup()">Harika! 💪</button>
     </div>
   </div>
 
-  <script src="app.js?v=18"></script>
+  <script src="app.js?v=19"></script>
 </body>
 </html>
