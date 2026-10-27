@@ -7,8 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>TaskFlow+ — Günlük Görev, Hedefler & Odak</title>
-  <link rel="manifest" href="manifest.json?v=16" />
-  <link rel="stylesheet" href="styles.css?v=16" />
+  <link rel="manifest" href="manifest.json?v=17" />
+  <link rel="stylesheet" href="styles.css?v=17" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -166,17 +166,16 @@
         <!-- ÜS MODU 1: 🗂️ KATEGORİLER + MİNİ SU/KAHVE BARI (VARSAYILAN SADE EKRAN) -->
         <!-- ============================================================== -->
         <div id="hubTabCategories">
-          <!-- Tek Satırlık Hızlı Su, Kahve ve Protein Mini Barı -->
+          <!-- Tek Satırlık Hızlı Su, Kahve, Enerji ve Uyku Mini Barı -->
           <div class="quick-mini-vital-bar">
-            <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;">
+            <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;">
               <span>💧 <b id="miniWaterQuickText" style="color:#93c5fd;">0.00L</b></span>
-              <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:3px 7px;background:rgba(96,165,250,0.22);color:#93c5fd;" onclick="changeWaterCount(1)">+1 Brd</button>
-              <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:3px 7px;background:#60a5fa;color:#09090d;" onclick="changeWaterCount(2)">+500ml</button>
+              <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:3px 6px;background:rgba(96,165,250,0.22);color:#93c5fd;" onclick="changeWaterCount(1)">+1</button>
+              <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:3px 6px;background:#60a5fa;color:#09090d;" onclick="changeWaterCount(2)">+500ml</button>
             </div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;">
-              <span>☕ <b id="miniCoffeeQuickText" style="color:var(--accent-cream);">0</b></span>
-              <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:3px 7px;" onclick="changeCoffeeCount(1)">+1</button>
-              <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:3px 7px;color:#ff9c6e;" onclick="switchLeftHubMode('sport')">Detay ▸</button>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;">
+              <button type="button" class="tag-badge" id="miniEnergyQuickBtn" style="border:none;cursor:pointer;padding:3px 7px;background:rgba(255,192,105,0.18);color:#ffc069;" onclick="cycleDailyEnergyLevel()" title="Günlük Enerji Seviyeni Değiştir (Dokun)">⚡ Enerji: Yüksek</button>
+              <button type="button" class="tag-badge" id="miniSleepQuickBtn" style="border:none;cursor:pointer;padding:3px 7px;background:rgba(216,208,248,0.18);color:var(--pastel-purple);" onclick="cycleDailySleepHours()" title="Uyku Süreni Değiştir (Dokun)">💤 8s Uyku</button>
             </div>
           </div>
 
@@ -284,6 +283,25 @@
                 <div style="display:flex;gap:4px;">
                   <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;background:rgba(96,165,250,0.2);color:#93c5fd;" onclick="startQuickRestTimer(60)">60sn</button>
                   <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;background:rgba(96,165,250,0.2);color:#93c5fd;" onclick="startQuickRestTimer(90)">90sn</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 🔋 GÜNLÜK ENERJİ SEVİYESİ & 💤 UYKU KALİTESİ SEÇİCİ -->
+            <div class="micro-vitals-grid" style="margin-top:6px;">
+              <div class="vital-mini-box">
+                <span>🔋 Enerji:</span>
+                <div style="display:flex;gap:3px;">
+                  <button type="button" class="tag-badge" id="energyBtnHigh" style="border:none;cursor:pointer;padding:2px 6px;" onclick="setDailyEnergyLevel('Yüksek')">🔥 Yüksek</button>
+                  <button type="button" class="tag-badge" id="energyBtnMed" style="border:none;cursor:pointer;padding:2px 6px;" onclick="setDailyEnergyLevel('Orta')">⚡ Orta</button>
+                  <button type="button" class="tag-badge" id="energyBtnLow" style="border:none;cursor:pointer;padding:2px 6px;" onclick="setDailyEnergyLevel('Düşük')">🪫 Düşük</button>
+                </div>
+              </div>
+              <div class="vital-mini-box">
+                <span>💤 Uyku: <b id="sleepHoursText" style="color:var(--pastel-purple);">8 Saat</b></span>
+                <div style="display:flex;gap:4px;">
+                  <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;" onclick="changeDailySleepHours(-0.5)">-</button>
+                  <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;background:rgba(216,208,248,0.2);color:var(--pastel-purple);" onclick="changeDailySleepHours(0.5)">+0.5s</button>
                 </div>
               </div>
             </div>
@@ -569,6 +587,7 @@
             <span style="font-size:11px;background:var(--bg-surface);padding:4px 9px;border-radius:99px;color:var(--accent-cream);">Bugün</span>
           </div>
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <button class="pin-btn" onclick="openWeeklyReviewModal()" style="height:32px;padding:0 10px;font-size:11.5px;border-color:rgba(149,222,100,0.4);color:#95de64;" title="Haftalık Pazar Değerlendirmesi & Yeni Hafta Sihirbazı">🧹 Haftalık Değerlendirme</button>
             <button class="pin-btn" id="voiceBriefingBtn" onclick="speakDailyBriefing()" style="height:32px;padding:0 10px;font-size:11.5px;border-color:rgba(245,216,181,0.35);color:var(--accent-cream);" title="Günün Planını Türkçe Sesli Asistanla Dinle">🔊 Sesli Brifing</button>
             <button class="pin-btn" id="toggleMatrixViewBtn" onclick="toggleEisenhowerMatrixView()" style="height:32px;padding:0 10px;font-size:11.5px;" title="Eisenhower 4'lü Öncelik Matrisi">🧊 4'lü Matris</button>
             <button class="pin-btn" onclick="shareOrCopyDailyPlan()" style="height:32px;padding:0 10px;font-size:11.5px;" title="Günün Planını WhatsApp'ta Paylaş veya Kopyala">📤 Planı Paylaş</button>
@@ -592,6 +611,9 @@
           </div>
           <div id="monthGridDays" class="month-grid-days"></div>
         </div>
+
+        <!-- 📊 SEÇİLİ GÜNÜN GÜNLÜK DEĞERLERİ VE YAPILAN İŞLER ÖZET BARI (OTOMATİK GÖRÜNÜM) -->
+        <div id="selectedDayDailyValuesBar" class="scratchpad-card" style="margin-bottom:10px;border-color:rgba(82,196,26,0.3);background:linear-gradient(135deg, rgba(82,196,26,0.08), rgba(96,165,250,0.06));"></div>
 
         <div class="section-header">
           <h2 class="section-title" id="activeListTitle">Devam Eden Görevler</h2>
@@ -1144,6 +1166,35 @@
     <img id="photoViewerImg" src="" alt="Görev Fotoğrafı" style="max-width:92vw;max-height:88vh;border-radius:18px;box-shadow:var(--shadow);" />
   </div>
 
-  <script src="app.js?v=16"></script>
+  <!-- 🧹 HAFTALIK PAZAR DEĞERLENDİRMESİ (WEEKLY REVIEW SİHİRBAZI) MODALI -->
+  <div id="weeklyReviewModal" class="modal-backdrop hidden" style="align-items:center;padding:16px;">
+    <div class="modal-sheet" style="max-width:480px;border-radius:26px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h3 style="font-size:18px;font-weight:900;">🧹 Haftalık Değerlendirme & Yeni Hafta Sihirbazı</h3>
+        <button class="icon-btn" onclick="closeWeeklyReviewModal()">✕</button>
+      </div>
+
+      <div id="weeklyReviewStatsSummary" style="background:var(--bg-surface);padding:12px;border-radius:16px;margin-bottom:12px;font-size:12.5px;line-height:1.5;"></div>
+
+      <div style="background:rgba(255,156,110,0.1);border:1px solid rgba(255,156,110,0.3);padding:10px 12px;border-radius:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span id="weeklyReviewOverdueText" style="font-size:12px;font-weight:700;color:#ff9c6e;">⏳ Geçmişten kalan görev kontrolü</span>
+        <button type="button" class="btn-cream" style="padding:5px 10px;font-size:11.5px;" onclick="rolloverOverdueTasks();openWeeklyReviewModal();">↪️ Hepsini Bugüne Taşı</button>
+      </div>
+
+      <div class="form-group">
+        <label style="color:var(--accent-cream);">🚀 Yeni Haftanın En Önemli 3 Odak Görevini Belirle</label>
+        <input type="text" id="weeklyTop1Input" class="form-input" style="margin-bottom:6px;font-size:12.5px;" placeholder="1. En Önemli Odak Görevim (Örn: 4 Antrenmanı Eksiksiz Tamamla)" />
+        <input type="text" id="weeklyTop2Input" class="form-input" style="margin-bottom:6px;font-size:12.5px;" placeholder="2. Önemli Odak Görevim (Örn: Proje / İş Teslimini Bitir)" />
+        <input type="text" id="weeklyTop3Input" class="form-input" style="font-size:12.5px;" placeholder="3. Önemli Odak Görevim (Örn: 100 Sayfa Kitap Oku)" />
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <button type="button" class="pin-btn" style="flex:1;height:44px;" onclick="closeWeeklyReviewModal()">Kapat</button>
+        <button type="button" class="btn-cream" style="flex:2;height:44px;font-size:13.5px;" onclick="completeWeeklyReviewWizard()">🚀 Görevleri Ekle & Haftayı Başlat ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=17"></script>
 </body>
 </html>

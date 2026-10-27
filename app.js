@@ -205,10 +205,18 @@ function syncTodayDailyLog(targetDate = null) {
       coffeeCount: appData.coffeeCount || 0,
       proteinGrams: appData.proteinGrams || 0,
       proteinTarget: appData.proteinTarget || 160,
+      sleepHours: appData.sleepHours !== undefined ? appData.sleepHours : (existing.sleepHours || 8),
+      energyLevel: appData.energyLevel || existing.energyLevel || 'Yüksek',
       habitsDone: (appData.habits || []).filter((h) => h.done).map((h) => h.title),
-      habitsTotal: (appData.habits || []).length || 5
+      habitsTotal: (appData.habits || []).length || 5,
+      completedTasksSnapshot: (appData.tasks || [])
+        .filter((t) => t.completed && t.date === d)
+        .map((t) => `${t.completionEmoji || '✅'} ${t.title}`)
     };
   } else {
+    existing.completedTasksSnapshot = (appData.tasks || [])
+      .filter((t) => t.completed && t.date === d)
+      .map((t) => `${t.completionEmoji || '✅'} ${t.title}`);
     appData.dailyLogs[d] = existing;
   }
 }
@@ -1311,10 +1319,23 @@ function renderMonthGrid() {
     const tzOffset = d.getTimezoneOffset() * 60000;
     const iso = new Date(d - tzOffset).toISOString().split('T')[0];
 
-    const hasTasks = appData.tasks.some((t) => !t.completed && t.date === iso);
+    const dayTasks = (appData.tasks || []).filter((t) => t.date === iso);
+    const doneTasks = dayTasks.filter((t) => t.completed);
+    const hasTasks = dayTasks.some((t) => !t.completed);
+    const allDone = dayTasks.length > 0 && doneTasks.length === dayTasks.length;
+
+    const dLog = (appData.dailyLogs && appData.dailyLogs[iso]) ? appData.dailyLogs[iso] : (iso === getTodayISO() ? getDailyLogForArchiveDate(iso) : null);
+    const waterCnt = dLog ? (dLog.waterCount || 0) : 0;
+    const firstDoneTitle = doneTasks.length > 0 ? doneTasks[0].title : (dayTasks.length > 0 ? dayTasks[0].title : '');
+
     const cell = document.createElement('div');
-    cell.className = `grid-day-cell ${!showAllDates && iso === selectedDate ? 'active' : ''} ${hasTasks ? 'has-tasks' : ''}`;
-    cell.textContent = day;
+    cell.className = `grid-day-cell ${!showAllDates && iso === selectedDate ? 'active' : ''} ${hasTasks ? 'has-tasks' : ''} ${allDone ? 'all-done' : ''}`;
+    cell.innerHTML = `
+      <span class="archive-day-num">${day}</span>
+      ${dayTasks.length > 0 ? `<div class="archive-day-ticks" style="color:${doneTasks.length > 0 ? '#95de64' : '#ff9c6e'};">${doneTasks.length > 0 ? '✅' : '⏳'} ${doneTasks.length}/${dayTasks.length}</div>` : ''}
+      ${waterCnt > 0 ? `<div class="archive-day-vitals">💧${waterCnt}</div>` : ''}
+      ${firstDoneTitle ? `<div class="archive-day-work-preview">${escapeHtml(firstDoneTitle)}</div>` : ''}
+    `;
     cell.onclick = () => {
       showAllDates = false;
       selectedDate = iso;
@@ -1392,6 +1413,8 @@ function renderAll() {
   checkOverdueTasks();
   checkAndRenderWaterTracker();
   renderProteinTracker();
+  renderEnergyAndSleepUI();
+  renderSelectedDayDailyValuesBar();
   renderGamificationRank();
   renderMotivationQuoteBar();
   renderCountdownStrip();
@@ -2062,8 +2085,11 @@ function getDailyLogForArchiveDate(dateISO) {
     coffeeCount: 0,
     proteinGrams: 0,
     proteinTarget: appData.proteinTarget || 160,
+    sleepHours: 8,
+    energyLevel: 'Yüksek',
     habitsDone: [],
-    habitsTotal: (appData.habits || []).length || 5
+    habitsTotal: (appData.habits || []).length || 5,
+    completedTasksSnapshot: []
   };
 }
 
@@ -2081,10 +2107,20 @@ function adjustArchiveDateMetric(dateISO, metric, delta) {
   } else if (metric === 'protein') {
     current.proteinGrams = Math.max(0, (current.proteinGrams || 0) + delta);
     if (dateISO === getTodayISO()) appData.proteinGrams = current.proteinGrams;
+  } else if (metric === 'sleep') {
+    current.sleepHours = Math.min(14, Math.max(3, (current.sleepHours || 8) + delta));
+    if (dateISO === getTodayISO()) appData.sleepHours = current.sleepHours;
+  } else if (metric === 'energy') {
+    const levels = ['Yüksek', 'Orta', 'Düşük'];
+    const idx = levels.indexOf(current.energyLevel || 'Yüksek');
+    current.energyLevel = levels[(idx + 1) % levels.length];
+    if (dateISO === getTodayISO()) appData.energyLevel = current.energyLevel;
   }
   appData.dailyLogs[dateISO] = current;
   checkAndRenderWaterTracker();
   renderProteinTracker();
+  renderEnergyAndSleepUI();
+  renderSelectedDayDailyValuesBar();
   renderArchive();
   saveProfileData();
 }
@@ -2107,7 +2143,7 @@ function renderArchiveCalendar() {
 
   for (let i = 0; i < startOffset; i++) {
     const empty = document.createElement('div');
-    empty.className = 'grid-day-cell empty';
+    empty.className = 'archive-day-cell empty';
     gridEl.appendChild(empty);
   }
 
@@ -2120,6 +2156,7 @@ function renderArchiveCalendar() {
     const doneTasks = dayTasks.filter((t) => t.completed);
     const dLog = (appData.dailyLogs && appData.dailyLogs[iso]) ? appData.dailyLogs[iso] : (iso === getTodayISO() ? getDailyLogForArchiveDate(iso) : null);
     const waterCnt = dLog ? (dLog.waterCount || 0) : 0;
+    const sleepHrs = dLog && dLog.sleepHours ? dLog.sleepHours : 0;
     const habitsDoneCnt = dLog && Array.isArray(dLog.habitsDone) ? dLog.habitsDone.length : 0;
 
     const hasTicks = doneTasks.length > 0 || habitsDoneCnt > 0;
@@ -2139,20 +2176,26 @@ function renderArchiveCalendar() {
     if (doneTasks.length > 0) {
       ticksBadge = `<div class="archive-day-ticks">✅ ${doneTasks.length}/${dayTasks.length}</div>`;
     } else if (dayTasks.length > 0) {
-      ticksBadge = `<div style="font-size:9.5px;color:var(--text-muted);margin-top:2px;">⏳ 0/${dayTasks.length}</div>`;
+      ticksBadge = `<div class="archive-day-ticks" style="color:var(--text-muted);">⏳ 0/${dayTasks.length}</div>`;
     } else if (habitsDoneCnt > 0) {
       ticksBadge = `<div class="archive-day-ticks">✓ ${habitsDoneCnt} Alşk</div>`;
     }
 
     let vitalsBadge = '';
-    if (waterCnt > 0) {
-      vitalsBadge = `<div class="archive-day-vitals">💧${waterCnt}</div>`;
+    if (waterCnt > 0 || sleepHrs > 0) {
+      vitalsBadge = `<div class="archive-day-vitals">${waterCnt > 0 ? `💧${waterCnt}` : ''}${sleepHrs > 0 ? ` 💤${sleepHrs}s` : ''}</div>`;
     }
+
+    const firstWorkTitle = doneTasks.length > 0 ? doneTasks[0].title : '';
+    const workPreviewHTML = firstWorkTitle
+      ? `<div class="archive-day-work-preview">✓ ${escapeHtml(firstWorkTitle)}</div>`
+      : '';
 
     cell.innerHTML = `
       <span class="archive-day-num">${day}</span>
       ${ticksBadge}
       ${vitalsBadge}
+      ${workPreviewHTML}
     `;
     gridEl.appendChild(cell);
   }
@@ -2175,6 +2218,9 @@ function renderArchiveDailySummary(dateISO) {
 
   const coffeeCnt = log.coffeeCount || 0;
   const proteinGrams = log.proteinGrams || 0;
+  const sleepHours = log.sleepHours !== undefined ? log.sleepHours : 8;
+  const energyLevel = log.energyLevel || 'Yüksek';
+  const energyIcon = energyLevel === 'Yüksek' ? '🔥' : (energyLevel === 'Orta' ? '⚡' : '🪫');
   const habitsDone = Array.isArray(log.habitsDone) ? log.habitsDone : [];
 
   const journalEntry = (appData.microJournal || []).find((j) => j.date === dateISO);
@@ -2182,19 +2228,31 @@ function renderArchiveDailySummary(dateISO) {
 
   const isToday = dateISO === getTodayISO();
 
+  const completedWorkPillsHTML = doneTasks.length > 0
+    ? doneTasks.map((t) => `<span class="tag-badge" style="background:rgba(82,196,26,0.16);color:#95de64;border:1px solid rgba(82,196,26,0.35);padding:4px 8px;font-size:11.5px;">${t.completionEmoji || '✅'} ${escapeHtml(t.title)} (${escapeHtml(t.category)})</span>`).join(' ')
+    : `<span style="font-size:11.5px;color:var(--text-muted);">Bu tarihte henüz tamamlanmış görev yok. Görev tiklediğinde otomatik olarak buraya günlük değer olarak işlenir.</span>`;
+
   card.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
       <div>
         <div style="font-size:15px;font-weight:900;color:var(--accent-cream);">
-          📊 ${dateISO} ${isToday ? '(Bugün)' : ''} — Günlük Yaşam & Arşiv Özeti
+          📊 ${dateISO} ${isToday ? '(Bugün)' : ''} — Günlük Değerlerim & Yaptığım İşler
         </div>
         <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">
-          O gün içtiğin su, kahve, protein, tiklediğin görevler ve alışkanlıkların tam kaydı:
+          O gün yaptığın işler, su, kahve, protein, uyku, enerji ve alışkanlık değerlerin:
         </div>
       </div>
       <span style="font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;background:rgba(82,196,26,0.18);color:#95de64;">
-        ✅ %${pct} Başarı (${doneTasks.length}/${dayTasks.length} Görev)
+        ✅ %${pct} Başarı (${doneTasks.length}/${dayTasks.length} İş)
       </span>
+    </div>
+
+    <!-- ✅ O GÜN YAPILAN İŞLER (OTOMATİK GÜNLÜK DEĞER LİSTESİ) -->
+    <div style="margin-top:10px;background:var(--bg-surface);padding:9px 11px;border-radius:13px;border:1px solid rgba(82,196,26,0.28);">
+      <div style="font-size:11px;font-weight:800;color:#95de64;margin-bottom:6px;">✅ O GÜN TAMAMLADIĞIM İŞLER (${doneTasks.length} Adet):</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        ${completedWorkPillsHTML}
+      </div>
     </div>
 
     <div class="archive-summary-grid">
@@ -2230,12 +2288,19 @@ function renderArchiveDailySummary(dateISO) {
         </div>
       </div>
 
-      <!-- KUTU 3: TİKLENEN GÖREVLER & EMOJİLER -->
+      <!-- KUTU 3: UYKU & ENERJİ KALİTESİ -->
       <div class="archive-stat-box">
-        <div style="font-size:11px;color:var(--text-muted);font-weight:700;">✅ GÖREV TİKLERİ</div>
-        <div style="font-size:15px;font-weight:900;color:#95de64;">${doneTasks.length} Görev Bitti</div>
-        <div style="font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-          ${emojisList || '<span style="color:var(--text-muted);font-size:11px;">Henüz görev tiklenmedi</span>'}
+        <div style="font-size:11px;color:var(--text-muted);font-weight:700;">💤 UYKU & 🔋 ENERJİ</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:800;">
+          <span style="color:var(--pastel-purple);">💤 ${sleepHours} Saat</span>
+          <div style="display:flex;gap:3px;">
+            <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:1px 5px;" onclick="adjustArchiveDateMetric('${dateISO}','sleep',-0.5)">-</button>
+            <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:1px 5px;" onclick="adjustArchiveDateMetric('${dateISO}','sleep',0.5)">+</button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;font-weight:800;margin-top:2px;">
+          <span style="color:#ffc069;">${energyIcon} Enerji: ${energyLevel}</span>
+          <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:1px 6px;" onclick="adjustArchiveDateMetric('${dateISO}','energy',1)">Değiştir</button>
         </div>
       </div>
 
@@ -4301,9 +4366,255 @@ function speakDailyBriefing() {
   window.speechSynthesis.speak(utter);
 }
 
+// ===== 27. ENERJİ & UYKU KALİTESİ SEÇİCİ + SEÇİLİ GÜN GÜNLÜK DEĞERLER BARI + HAFTALIK DEĞERLENDİRME SİHİRBAZI (v17.0) =====
+
+function renderEnergyAndSleepUI() {
+  const energy = appData.dailyEnergy || 'medium';
+  const sleep = appData.dailySleepHours !== undefined ? appData.dailySleepHours : 7.5;
+  const energyLabels = { high: '⚡ Yüksek', medium: '⚖️ Orta', low: '🪫 Düşük' };
+
+  const miniEnergy = document.getElementById('miniEnergyQuickBtn');
+  if (miniEnergy) miniEnergy.textContent = energyLabels[energy] || '⚖️ Orta';
+
+  const miniSleep = document.getElementById('miniSleepQuickBtn');
+  if (miniSleep) miniSleep.textContent = `💤 ${sleep}s`;
+
+  const sleepText = document.getElementById('sleepHoursText');
+  if (sleepText) sleepText.textContent = `${sleep}s`;
+
+  const btnHigh = document.getElementById('energyBtnHigh');
+  const btnMed = document.getElementById('energyBtnMed');
+  const btnLow = document.getElementById('energyBtnLow');
+
+  if (btnHigh) {
+    btnHigh.style.background = energy === 'high' ? 'rgba(16,185,129,0.22)' : 'var(--bg-glass)';
+    btnHigh.style.borderColor = energy === 'high' ? 'var(--accent-success)' : 'var(--border-subtle)';
+    btnHigh.style.color = energy === 'high' ? '#34d399' : 'var(--text-secondary)';
+  }
+  if (btnMed) {
+    btnMed.style.background = energy === 'medium' ? 'rgba(99,102,241,0.22)' : 'var(--bg-glass)';
+    btnMed.style.borderColor = energy === 'medium' ? 'var(--accent-primary)' : 'var(--border-subtle)';
+    btnMed.style.color = energy === 'medium' ? '#a5b4fc' : 'var(--text-secondary)';
+  }
+  if (btnLow) {
+    btnLow.style.background = energy === 'low' ? 'rgba(245,158,11,0.22)' : 'var(--bg-glass)';
+    btnLow.style.borderColor = energy === 'low' ? 'var(--accent-warning)' : 'var(--border-subtle)';
+    btnLow.style.color = energy === 'low' ? '#fbbf24' : 'var(--text-secondary)';
+  }
+}
+
+function setDailyEnergyLevel(level) {
+  appData.dailyEnergy = level;
+  saveData();
+  renderEnergyAndSleepUI();
+  renderSelectedDayDailyValuesBar();
+  renderMonthGrid();
+  const labels = { high: '⚡ Yüksek Enerji', medium: '⚖️ Orta Enerji', low: '🪫 Düşük Enerji' };
+  showToast(`Günlük enerji durumu güncellendi: ${labels[level] || level}`);
+}
+
+function cycleDailyEnergyLevel() {
+  const order = ['high', 'medium', 'low'];
+  const curr = appData.dailyEnergy || 'medium';
+  const next = order[(order.indexOf(curr) + 1) % order.length];
+  setDailyEnergyLevel(next);
+}
+
+function changeDailySleepHours(delta) {
+  const curr = appData.dailySleepHours !== undefined ? Number(appData.dailySleepHours) : 7.5;
+  const next = Math.max(0, Math.min(16, Math.round((curr + delta) * 2) / 2));
+  appData.dailySleepHours = next;
+  saveData();
+  renderEnergyAndSleepUI();
+  renderSelectedDayDailyValuesBar();
+  renderMonthGrid();
+}
+
+function cycleDailySleepHours() {
+  const presets = [6, 6.5, 7, 7.5, 8, 8.5, 9, 5];
+  const curr = appData.dailySleepHours !== undefined ? Number(appData.dailySleepHours) : 7.5;
+  const idx = presets.indexOf(curr);
+  const next = presets[(idx + 1) % presets.length];
+  appData.dailySleepHours = next;
+  saveData();
+  renderEnergyAndSleepUI();
+  renderSelectedDayDailyValuesBar();
+  renderMonthGrid();
+  showToast(`💤 Uyku süresi: ${next} saat olarak kaydedildi`);
+}
+
+function renderSelectedDayDailyValuesBar() {
+  const bar = document.getElementById('selectedDayDailyValuesBar');
+  if (!bar) return;
+
+  const dateStr = selectedDate || getTodayStr();
+  const log = getDailyLogForArchiveDate(dateStr);
+  const dayTasks = appData.tasks.filter((t) => t.date === dateStr);
+  const doneTasks = dayTasks.filter((t) => t.completed);
+
+  const energyLabels = { high: '⚡ Yüksek', medium: '⚖️ Orta', low: '🪫 Düşük' };
+  const energyText = energyLabels[log.energy || 'medium'] || '⚖️ Orta';
+  const sleepVal = log.sleepHours !== undefined ? log.sleepHours : 7.5;
+  const waterL = (((log.water || 0) * 250) / 1000).toFixed(2);
+
+  const dateObj = new Date(dateStr + 'T00:00:00');
+  const formattedDate = dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', weekday: 'short' });
+
+  const doneItemsHtml =
+    doneTasks.length > 0
+      ? doneTasks
+          .map(
+            (t) =>
+              `<span style="font-size:10px; padding:3px 8px; border-radius:99px; background:rgba(16,185,129,0.14); border:1px solid rgba(16,185,129,0.3); color:#34d399; font-weight:700; display:inline-flex; align-items:center; gap:4px;">✓ ${escapeHtml(t.title)}</span>`
+          )
+          .join('')
+      : `<span style="font-size:10px; color:var(--text-muted); font-style:italic;">Henüz tamamlanan görev yok — görev tikledikçe buraya ve takvim kutusuna otomatik işlenir.</span>`;
+
+  bar.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
+      <div style="font-size:11px; font-weight:800; color:var(--accent-secondary); display:flex; align-items:center; gap:6px;">
+        <span>📊 ${formattedDate} — Günlük Değerlerim & Yaptığım İşler</span>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center;">
+        <span style="font-size:10px; padding:2px 7px; border-radius:6px; background:rgba(59,130,246,0.12); color:#60a5fa; font-weight:700;">💧 ${log.water || 0}/${log.waterGoal || 12} (${waterL}L)</span>
+        <span style="font-size:10px; padding:2px 7px; border-radius:6px; background:rgba(245,158,11,0.12); color:#fbbf24; font-weight:700;">☕ ${log.coffee || 0}</span>
+        <span style="font-size:10px; padding:2px 7px; border-radius:6px; background:rgba(16,185,129,0.12); color:#34d399; font-weight:700;">🥩 ${log.protein || 0}g</span>
+        <span style="font-size:10px; padding:2px 7px; border-radius:6px; background:rgba(139,92,246,0.12); color:#c4b5fd; font-weight:700;">💤 ${sleepVal}s</span>
+        <span style="font-size:10px; padding:2px 7px; border-radius:6px; background:rgba(99,102,241,0.12); color:#a5b4fc; font-weight:700;">${energyText}</span>
+        <span style="font-size:10px; padding:2px 7px; border-radius:6px; background:rgba(16,185,129,0.16); color:#10b981; font-weight:800;">✅ ${doneTasks.length}/${dayTasks.length} İş</span>
+      </div>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center; padding-top:4px; border-top:1px solid rgba(255,255,255,0.05);">
+      <span style="font-size:10px; font-weight:800; color:var(--text-secondary);">Tamamlananlar:</span>
+      ${doneItemsHtml}
+    </div>
+  `;
+}
+
+function openWeeklyReviewModal() {
+  const modal = document.getElementById('weeklyReviewModal');
+  if (!modal) return;
+
+  const statsGrid = document.getElementById('weeklyReviewStatsGrid');
+  const overdueBox = document.getElementById('weeklyReviewOverdueBox');
+  const todayStr = getTodayStr();
+
+  let totalTasks7d = 0;
+  let doneTasks7d = 0;
+  let totalWaterGlasses7d = 0;
+  let totalSleep7d = 0;
+  let sleepCountDays = 0;
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const log = getDailyLogForArchiveDate(dStr);
+    const dayTasks = appData.tasks.filter((t) => t.date === dStr);
+    totalTasks7d += dayTasks.length;
+    doneTasks7d += dayTasks.filter((t) => t.completed).length;
+    totalWaterGlasses7d += log.water || 0;
+    if (log.sleepHours) {
+      totalSleep7d += Number(log.sleepHours);
+      sleepCountDays++;
+    }
+  }
+
+  const completionPct = totalTasks7d > 0 ? Math.round((doneTasks7d / totalTasks7d) * 100) : 0;
+  const totalWaterLiters = ((totalWaterGlasses7d * 250) / 1000).toFixed(1);
+  const avgSleep = sleepCountDays > 0 ? (totalSleep7d / sleepCountDays).toFixed(1) : '7.5';
+
+  if (statsGrid) {
+    statsGrid.innerHTML = `
+      <div style="padding:10px; border-radius:10px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.25); text-align:center;">
+        <div style="font-size:18px; font-weight:800; color:#34d399;">✅ ${doneTasks7d}/${totalTasks7d} (%${completionPct})</div>
+        <div style="font-size:10px; color:var(--text-secondary);">Son 7 Gün Tamamlanan İş</div>
+      </div>
+      <div style="padding:10px; border-radius:10px; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.25); text-align:center;">
+        <div style="font-size:18px; font-weight:800; color:#60a5fa;">💧 ${totalWaterLiters} Litre</div>
+        <div style="font-size:10px; color:var(--text-secondary);">Son 7 Gün Toplam Su (${totalWaterGlasses7d} brd)</div>
+      </div>
+      <div style="padding:10px; border-radius:10px; background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.25); text-align:center;">
+        <div style="font-size:18px; font-weight:800; color:#c4b5fd;">💤 Ort. ${avgSleep} Saat</div>
+        <div style="font-size:10px; color:var(--text-secondary);">Haftalık Uyku Ortalaması</div>
+      </div>
+      <div style="padding:10px; border-radius:10px; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25); text-align:center;">
+        <div style="font-size:18px; font-weight:800; color:#fbbf24;">🔥 ${appData.streak || 0} Gün</div>
+        <div style="font-size:10px; color:var(--text-secondary);">Aktif Disiplin Serisi</div>
+      </div>
+    `;
+  }
+
+  const overdueTasks = appData.tasks.filter((t) => !t.completed && t.date < todayStr);
+  if (overdueBox) {
+    if (overdueTasks.length === 0) {
+      overdueBox.innerHTML = `<span style="color:#34d399; font-weight:700;">🎉 Harika! Geçmiş günlerden kalan gecikmiş hiçbir göreviniz yok.</span>`;
+    } else {
+      overdueBox.innerHTML = `
+        <div style="margin-bottom:6px; font-weight:700; color:#fbbf24;">⚠️ Geçmiş günlerden kalan <strong>${overdueTasks.length} adet</strong> tamamlanmamış görev var:</div>
+        <div style="max-height:90px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; font-size:11px;">
+          ${overdueTasks.map((t) => `<div>• ${escapeHtml(t.title)} <span style="color:var(--text-muted);">(${t.date})</span></div>`).join('')}
+        </div>
+      `;
+    }
+  }
+
+  modal.style.display = 'flex';
+}
+
+function closeWeeklyReviewModal() {
+  const modal = document.getElementById('weeklyReviewModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function completeWeeklyReviewWizard() {
+  const todayStr = getTodayStr();
+  const moveOverdue = document.getElementById('weeklyReviewMoveOverdueCheck')?.checked;
+  let movedCount = 0;
+
+  if (moveOverdue) {
+    appData.tasks.forEach((t) => {
+      if (!t.completed && t.date < todayStr) {
+        t.date = todayStr;
+        movedCount++;
+      }
+    });
+  }
+
+  const inputs = ['weeklyGoalInput1', 'weeklyGoalInput2', 'weeklyGoalInput3'];
+  let addedCount = 0;
+  inputs.forEach((id) => {
+    const el = document.getElementById(id);
+    const val = el ? el.value.trim() : '';
+    if (val) {
+      appData.tasks.unshift({
+        id: 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        title: val,
+        category: 'work',
+        priority: 'high',
+        date: todayStr,
+        time: '',
+        completed: false,
+        pinned: true,
+        recurrence: 'none',
+        subtasks: [],
+        notes: '🧹 Haftalık Değerlendirme Sihirbazı ile eklendi',
+        createdAt: new Date().toISOString()
+      });
+      el.value = '';
+      addedCount++;
+    }
+  });
+
+  saveData();
+  renderAll();
+  closeWeeklyReviewModal();
+  showToast(`🚀 Haftalık planlama tamamlandı! (${movedCount} görev bugüne taşındı, ${addedCount} yeni hedef eklendi)`);
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=16').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=17').catch(() => {});
   }
   await initDB();
 
