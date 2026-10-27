@@ -198,13 +198,26 @@ function syncTodayDailyLog(targetDate = null) {
     appData.dailyLogs = {};
   }
   const existing = appData.dailyLogs[d] || {};
+  const dayFoods = (appData.dailyFoods && Array.isArray(appData.dailyFoods[d])) ? appData.dailyFoods[d] : (existing.foodsEaten || []);
+  const foodTotals = dayFoods.reduce((acc, f) => {
+    acc.kcal += Number(f.kcal) || 0;
+    acc.prot += Number(f.protein) || 0;
+    acc.carb += Number(f.carbs) || 0;
+    acc.fat += Number(f.fat) || 0;
+    return acc;
+  }, { kcal: 0, prot: 0, carb: 0, fat: 0 });
+
   if (!targetDate || d === (appData.waterDate || getTodayISO())) {
     appData.dailyLogs[d] = {
       waterCount: appData.waterCount || 0,
       waterTarget: appData.waterTarget || 12,
       coffeeCount: appData.coffeeCount || 0,
-      proteinGrams: appData.proteinGrams || 0,
+      proteinGrams: Math.max(appData.proteinGrams || 0, Math.round(foodTotals.prot)),
       proteinTarget: appData.proteinTarget || 160,
+      dailyCalories: Math.round(foodTotals.kcal),
+      dailyCarbs: Math.round(foodTotals.carb),
+      dailyFat: Math.round(foodTotals.fat),
+      foodsEaten: dayFoods,
       sleepHours: appData.sleepHours !== undefined ? appData.sleepHours : (existing.sleepHours || 8),
       energyLevel: appData.energyLevel || existing.energyLevel || 'Yüksek',
       habitsDone: (appData.habits || []).filter((h) => h.done).map((h) => h.title),
@@ -217,6 +230,13 @@ function syncTodayDailyLog(targetDate = null) {
     existing.completedTasksSnapshot = (appData.tasks || [])
       .filter((t) => t.completed && t.date === d)
       .map((t) => `${t.completionEmoji || '✅'} ${t.title}`);
+    existing.foodsEaten = dayFoods;
+    existing.dailyCalories = Math.round(foodTotals.kcal);
+    existing.dailyCarbs = Math.round(foodTotals.carb);
+    existing.dailyFat = Math.round(foodTotals.fat);
+    if (foodTotals.prot > (existing.proteinGrams || 0)) {
+      existing.proteinGrams = Math.round(foodTotals.prot);
+    }
     appData.dailyLogs[d] = existing;
   }
 }
@@ -289,6 +309,7 @@ function checkAndRenderWaterTracker() {
 function changeWaterTarget(newVal) {
   appData.waterTarget = parseInt(newVal, 10) || 12;
   checkAndRenderWaterTracker();
+  renderSelectedDayDailyValuesBar();
   saveProfileData();
 }
 
@@ -306,6 +327,11 @@ function changeWaterCount(delta) {
     playAlertTone('success');
   }
   checkAndRenderWaterTracker();
+  renderSelectedDayDailyValuesBar();
+  if (showMonthGrid) renderMonthGrid();
+  if (typeof checkWaterCoachMilestone === 'function' && delta > 0) {
+    checkWaterCoachMilestone(prev, appData.waterCount, target);
+  }
   saveProfileData();
 }
 
@@ -318,6 +344,7 @@ function changeCoffeeCount(delta) {
   }
   appData.coffeeCount = Math.max(0, (appData.coffeeCount || 0) + delta);
   checkAndRenderWaterTracker();
+  renderSelectedDayDailyValuesBar();
   saveProfileData();
 }
 
@@ -348,6 +375,10 @@ function toggleDailyHabit(idx) {
   }
   renderDailyHabitsStrip();
   syncTodayDailyLog();
+  renderSelectedDayDailyValuesBar();
+  if (typeof checkHabitCoachMilestone === 'function' && appData.habits[idx].done) {
+    checkHabitCoachMilestone(appData.habits[idx], allDone);
+  }
   if (currentViewName === 'archive') renderArchive();
   saveProfileData();
 }
@@ -1413,6 +1444,7 @@ function renderAll() {
   checkOverdueTasks();
   checkAndRenderWaterTracker();
   renderProteinTracker();
+  if (typeof renderFoodMacroTracker === 'function') renderFoodMacroTracker();
   renderEnergyAndSleepUI();
   renderSelectedDayDailyValuesBar();
   renderGamificationRank();
@@ -2026,6 +2058,9 @@ function confirmTaskCompletion() {
   saveProfileData();
   applyUserPreferences();
   renderAll();
+  if (typeof checkTaskCompletionCoachPopup === 'function') {
+    checkTaskCompletionCoachPopup(t);
+  }
 }
 
 function reopenTask(taskId) {
@@ -2232,6 +2267,18 @@ function renderArchiveDailySummary(dateISO) {
     ? doneTasks.map((t) => `<span class="tag-badge" style="background:rgba(82,196,26,0.16);color:#95de64;border:1px solid rgba(82,196,26,0.35);padding:4px 8px;font-size:11.5px;">${t.completionEmoji || '✅'} ${escapeHtml(t.title)} (${escapeHtml(t.category)})</span>`).join(' ')
     : `<span style="font-size:11.5px;color:var(--text-muted);">Bu tarihte henüz tamamlanmış görev yok. Görev tiklediğinde otomatik olarak buraya günlük değer olarak işlenir.</span>`;
 
+  const dayFoods = (appData.dailyFoods && Array.isArray(appData.dailyFoods[dateISO])) ? appData.dailyFoods[dateISO] : (Array.isArray(log.foodsEaten) ? log.foodsEaten : []);
+  const foodTotals = dayFoods.reduce((acc, f) => {
+    acc.kcal += Number(f.kcal) || 0;
+    acc.prot += Number(f.protein) || 0;
+    acc.carb += Number(f.carbs) || 0;
+    acc.fat += Number(f.fat) || 0;
+    return acc;
+  }, { kcal: 0, prot: 0, carb: 0, fat: 0 });
+  const eatenPillsHTML = dayFoods.length > 0
+    ? dayFoods.map((f) => `<span class="tag-badge" style="background:rgba(255,192,105,0.14);color:#ffc069;border:1px solid rgba(255,192,105,0.3);padding:3px 7px;font-size:11px;">🍽️ ${escapeHtml(f.name)} (${f.grams}g → ${Math.round(f.kcal)} kcal | 🥩${f.protein}g P)</span>`).join(' ')
+    : `<span style="font-size:11px;color:var(--text-muted);">Bu tarihte gramajlı yemek/besin kaydı girilmedi.</span>`;
+
   card.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
       <div>
@@ -2239,7 +2286,7 @@ function renderArchiveDailySummary(dateISO) {
           📊 ${dateISO} ${isToday ? '(Bugün)' : ''} — Günlük Değerlerim & Yaptığım İşler
         </div>
         <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">
-          O gün yaptığın işler, su, kahve, protein, uyku, enerji ve alışkanlık değerlerin:
+          O gün yaptığın işler, yediklerin, su, kahve, protein, uyku, enerji ve alışkanlık değerlerin:
         </div>
       </div>
       <span style="font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;background:rgba(82,196,26,0.18);color:#95de64;">
@@ -2252,6 +2299,17 @@ function renderArchiveDailySummary(dateISO) {
       <div style="font-size:11px;font-weight:800;color:#95de64;margin-bottom:6px;">✅ O GÜN TAMAMLADIĞIM İŞLER (${doneTasks.length} Adet):</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
         ${completedWorkPillsHTML}
+      </div>
+    </div>
+
+    <!-- 🍽️ O GÜN YEDİKLERİM & MAKRO BESİN DEĞERLERİ -->
+    <div style="margin-top:8px;background:var(--bg-surface);padding:9px 11px;border-radius:13px;border:1px solid rgba(255,192,105,0.28);">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+        <span style="font-size:11px;font-weight:800;color:#ffc069;">🍽️ O GÜN YEDİKLERİM (${dayFoods.length} Besin):</span>
+        <span style="font-size:10.5px;font-weight:800;color:var(--text-main);">🔥 ${Math.round(foodTotals.kcal)} kcal | 🥩 ${foodTotals.prot.toFixed(1)}g Protein | 🍞 ${foodTotals.carb.toFixed(1)}g Karb | 🥑 ${foodTotals.fat.toFixed(1)}g Yağ</span>
+      </div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;">
+        ${eatenPillsHTML}
       </div>
     </div>
 
@@ -4368,94 +4426,108 @@ function speakDailyBriefing() {
 
 // ===== 27. ENERJİ & UYKU KALİTESİ SEÇİCİ + SEÇİLİ GÜN GÜNLÜK DEĞERLER BARI + HAFTALIK DEĞERLENDİRME SİHİRBAZI (v17.0) =====
 
+function normalizeEnergyValue(val) {
+  if (!val) return 'Yüksek';
+  const v = String(val).toLowerCase();
+  if (v === 'high' || v.includes('yüksek')) return 'Yüksek';
+  if (v === 'low' || v.includes('düşük')) return 'Düşük';
+  return 'Orta';
+}
+
 function renderEnergyAndSleepUI() {
-  const energy = appData.dailyEnergy || 'medium';
-  const sleep = appData.dailySleepHours !== undefined ? appData.dailySleepHours : 7.5;
-  const energyLabels = { high: '⚡ Yüksek', medium: '⚖️ Orta', low: '🪫 Düşük' };
+  const energy = normalizeEnergyValue(appData.energyLevel || appData.dailyEnergy || 'Yüksek');
+  appData.energyLevel = energy;
+  const sleep = appData.sleepHours !== undefined ? appData.sleepHours : (appData.dailySleepHours !== undefined ? appData.dailySleepHours : 8);
+  appData.sleepHours = sleep;
+
+  const energyLabels = { 'Yüksek': '🔥 Enerji: Yüksek', 'Orta': '⚡ Enerji: Orta', 'Düşük': '🪫 Enerji: Düşük' };
 
   const miniEnergy = document.getElementById('miniEnergyQuickBtn');
-  if (miniEnergy) miniEnergy.textContent = energyLabels[energy] || '⚖️ Orta';
+  if (miniEnergy) miniEnergy.textContent = energyLabels[energy] || '🔥 Enerji: Yüksek';
 
   const miniSleep = document.getElementById('miniSleepQuickBtn');
-  if (miniSleep) miniSleep.textContent = `💤 ${sleep}s`;
+  if (miniSleep) miniSleep.textContent = `💤 ${sleep}s Uyku`;
 
   const sleepText = document.getElementById('sleepHoursText');
-  if (sleepText) sleepText.textContent = `${sleep}s`;
+  if (sleepText) sleepText.textContent = `${sleep} Saat`;
 
   const btnHigh = document.getElementById('energyBtnHigh');
   const btnMed = document.getElementById('energyBtnMed');
   const btnLow = document.getElementById('energyBtnLow');
 
   if (btnHigh) {
-    btnHigh.style.background = energy === 'high' ? 'rgba(16,185,129,0.22)' : 'var(--bg-glass)';
-    btnHigh.style.borderColor = energy === 'high' ? 'var(--accent-success)' : 'var(--border-subtle)';
-    btnHigh.style.color = energy === 'high' ? '#34d399' : 'var(--text-secondary)';
+    btnHigh.style.background = energy === 'Yüksek' ? 'rgba(82,196,26,0.25)' : 'var(--bg-surface)';
+    btnHigh.style.color = energy === 'Yüksek' ? '#95de64' : 'var(--text-muted)';
   }
   if (btnMed) {
-    btnMed.style.background = energy === 'medium' ? 'rgba(99,102,241,0.22)' : 'var(--bg-glass)';
-    btnMed.style.borderColor = energy === 'medium' ? 'var(--accent-primary)' : 'var(--border-subtle)';
-    btnMed.style.color = energy === 'medium' ? '#a5b4fc' : 'var(--text-secondary)';
+    btnMed.style.background = energy === 'Orta' ? 'rgba(255,192,105,0.25)' : 'var(--bg-surface)';
+    btnMed.style.color = energy === 'Orta' ? '#ffc069' : 'var(--text-muted)';
   }
   if (btnLow) {
-    btnLow.style.background = energy === 'low' ? 'rgba(245,158,11,0.22)' : 'var(--bg-glass)';
-    btnLow.style.borderColor = energy === 'low' ? 'var(--accent-warning)' : 'var(--border-subtle)';
-    btnLow.style.color = energy === 'low' ? '#fbbf24' : 'var(--text-secondary)';
+    btnLow.style.background = energy === 'Düşük' ? 'rgba(255,120,117,0.25)' : 'var(--bg-surface)';
+    btnLow.style.color = energy === 'Düşük' ? '#ff7875' : 'var(--text-muted)';
   }
 }
 
 function setDailyEnergyLevel(level) {
-  appData.dailyEnergy = level;
-  saveData();
+  const norm = normalizeEnergyValue(level);
+  appData.energyLevel = norm;
+  syncTodayDailyLog();
   renderEnergyAndSleepUI();
   renderSelectedDayDailyValuesBar();
-  renderMonthGrid();
-  const labels = { high: '⚡ Yüksek Enerji', medium: '⚖️ Orta Enerji', low: '🪫 Düşük Enerji' };
-  showToast(`Günlük enerji durumu güncellendi: ${labels[level] || level}`);
+  if (showMonthGrid) renderMonthGrid();
+  saveProfileData();
 }
 
 function cycleDailyEnergyLevel() {
-  const order = ['high', 'medium', 'low'];
-  const curr = appData.dailyEnergy || 'medium';
+  const order = ['Yüksek', 'Orta', 'Düşük'];
+  const curr = normalizeEnergyValue(appData.energyLevel || 'Yüksek');
   const next = order[(order.indexOf(curr) + 1) % order.length];
   setDailyEnergyLevel(next);
 }
 
 function changeDailySleepHours(delta) {
-  const curr = appData.dailySleepHours !== undefined ? Number(appData.dailySleepHours) : 7.5;
-  const next = Math.max(0, Math.min(16, Math.round((curr + delta) * 2) / 2));
-  appData.dailySleepHours = next;
-  saveData();
+  const curr = appData.sleepHours !== undefined ? Number(appData.sleepHours) : 8;
+  const next = Math.max(3, Math.min(14, Math.round((curr + delta) * 2) / 2));
+  appData.sleepHours = next;
+  syncTodayDailyLog();
   renderEnergyAndSleepUI();
   renderSelectedDayDailyValuesBar();
-  renderMonthGrid();
+  if (showMonthGrid) renderMonthGrid();
+  saveProfileData();
 }
 
 function cycleDailySleepHours() {
-  const presets = [6, 6.5, 7, 7.5, 8, 8.5, 9, 5];
-  const curr = appData.dailySleepHours !== undefined ? Number(appData.dailySleepHours) : 7.5;
+  const presets = [6, 6.5, 7, 7.5, 8, 8.5, 9, 5.5];
+  const curr = appData.sleepHours !== undefined ? Number(appData.sleepHours) : 8;
   const idx = presets.indexOf(curr);
   const next = presets[(idx + 1) % presets.length];
-  appData.dailySleepHours = next;
-  saveData();
+  appData.sleepHours = next;
+  syncTodayDailyLog();
   renderEnergyAndSleepUI();
   renderSelectedDayDailyValuesBar();
-  renderMonthGrid();
-  showToast(`💤 Uyku süresi: ${next} saat olarak kaydedildi`);
+  if (showMonthGrid) renderMonthGrid();
+  saveProfileData();
 }
 
 function renderSelectedDayDailyValuesBar() {
   const bar = document.getElementById('selectedDayDailyValuesBar');
   if (!bar) return;
 
-  const dateStr = selectedDate || getTodayStr();
+  const dateStr = selectedDate || getTodayISO();
   const log = getDailyLogForArchiveDate(dateStr);
-  const dayTasks = appData.tasks.filter((t) => t.date === dateStr);
+  const dayTasks = (appData.tasks || []).filter((t) => t.date === dateStr);
   const doneTasks = dayTasks.filter((t) => t.completed);
 
-  const energyLabels = { high: '⚡ Yüksek', medium: '⚖️ Orta', low: '🪫 Düşük' };
-  const energyText = energyLabels[log.energy || 'medium'] || '⚖️ Orta';
-  const sleepVal = log.sleepHours !== undefined ? log.sleepHours : 7.5;
-  const waterL = (((log.water || 0) * 250) / 1000).toFixed(2);
+  const energyLevel = normalizeEnergyValue(log.energyLevel || 'Yüksek');
+  const energyIcon = energyLevel === 'Yüksek' ? '🔥' : (energyLevel === 'Orta' ? '⚡' : '🪫');
+  const sleepVal = log.sleepHours !== undefined ? log.sleepHours : 8;
+  const waterCnt = log.waterCount || 0;
+  const waterTarget = log.waterTarget || 12;
+  const waterL = ((waterCnt * 250) / 1000).toFixed(2);
+  const dayFoods = (appData.dailyFoods && Array.isArray(appData.dailyFoods[dateStr])) ? appData.dailyFoods[dateStr] : (Array.isArray(log.foodsEaten) ? log.foodsEaten : []);
+  const totalKcal = dayFoods.reduce((acc, f) => acc + (Number(f.kcal) || 0), 0);
+  const totalProt = Math.max(log.proteinGrams || 0, Math.round(dayFoods.reduce((acc, f) => acc + (Number(f.protein) || 0), 0)));
 
   const dateObj = new Date(dateStr + 'T00:00:00');
   const formattedDate = dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', weekday: 'short' });
@@ -4465,29 +4537,37 @@ function renderSelectedDayDailyValuesBar() {
       ? doneTasks
           .map(
             (t) =>
-              `<span style="font-size:10px; padding:3px 8px; border-radius:99px; background:rgba(16,185,129,0.14); border:1px solid rgba(16,185,129,0.3); color:#34d399; font-weight:700; display:inline-flex; align-items:center; gap:4px;">✓ ${escapeHtml(t.title)}</span>`
+              `<span style="font-size:10.5px; padding:3px 8px; border-radius:99px; background:rgba(82,196,26,0.16); border:1px solid rgba(82,196,26,0.35); color:#95de64; font-weight:700; display:inline-flex; align-items:center; gap:4px;">${t.completionEmoji || '✅'} ${escapeHtml(t.title)}</span>`
           )
           .join('')
-      : `<span style="font-size:10px; color:var(--text-muted); font-style:italic;">Henüz tamamlanan görev yok — görev tikledikçe buraya ve takvim kutusuna otomatik işlenir.</span>`;
+      : `<span style="font-size:10.5px; color:var(--text-muted); font-style:italic;">Henüz tamamlanan görev yok — görev tikledikçe buraya ve takvim kutusuna otomatik işlenir.</span>`;
+
+  const foodsSummaryHtml = dayFoods.length > 0
+    ? `<div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center; padding-top:5px; margin-top:5px; border-top:1px solid rgba(255,255,255,0.06);">
+         <span style="font-size:10.5px; font-weight:800; color:#ffc069;">🍽️ Yediklerim (${Math.round(totalKcal)} kcal):</span>
+         ${dayFoods.map((f) => `<span style="font-size:10px; padding:2px 7px; border-radius:99px; background:rgba(255,192,105,0.14); color:#ffc069; font-weight:700;">${escapeHtml(f.name)} (${f.grams}g • 🥩${f.protein}g)</span>`).join('')}
+       </div>`
+    : '';
 
   bar.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
-      <div style="font-size:11px; font-weight:800; color:var(--accent-secondary); display:flex; align-items:center; gap:6px;">
+      <div style="font-size:11.5px; font-weight:900; color:var(--accent-cream); display:flex; align-items:center; gap:6px;">
         <span>📊 ${formattedDate} — Günlük Değerlerim & Yaptığım İşler</span>
       </div>
       <div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center;">
-        <span style="font-size:10px; padding:2px 7px; border-radius:6px; background:rgba(59,130,246,0.12); color:#60a5fa; font-weight:700;">💧 ${log.water || 0}/${log.waterGoal || 12} (${waterL}L)</span>
-        <span style="font-size:10px; padding:2px 7px; border-radius:6px; background:rgba(245,158,11,0.12); color:#fbbf24; font-weight:700;">☕ ${log.coffee || 0}</span>
-        <span style="font-size:10px; padding:2px 7px; border-radius:6px; background:rgba(16,185,129,0.12); color:#34d399; font-weight:700;">🥩 ${log.protein || 0}g</span>
-        <span style="font-size:10px; padding:2px 7px; border-radius:6px; background:rgba(139,92,246,0.12); color:#c4b5fd; font-weight:700;">💤 ${sleepVal}s</span>
-        <span style="font-size:10px; padding:2px 7px; border-radius:6px; background:rgba(99,102,241,0.12); color:#a5b4fc; font-weight:700;">${energyText}</span>
-        <span style="font-size:10px; padding:2px 7px; border-radius:6px; background:rgba(16,185,129,0.16); color:#10b981; font-weight:800;">✅ ${doneTasks.length}/${dayTasks.length} İş</span>
+        <span style="font-size:10.5px; padding:2px 7px; border-radius:6px; background:rgba(96,165,250,0.16); color:#93c5fd; font-weight:800;">💧 ${waterCnt}/${waterTarget} (${waterL}L)</span>
+        <span style="font-size:10.5px; padding:2px 7px; border-radius:6px; background:rgba(245,216,181,0.15); color:var(--accent-cream); font-weight:800;">☕ ${log.coffeeCount || 0}</span>
+        <span style="font-size:10.5px; padding:2px 7px; border-radius:6px; background:rgba(255,156,110,0.16); color:#ff9c6e; font-weight:800;">🥩 ${totalProt}g P ${totalKcal > 0 ? `(${Math.round(totalKcal)} kcal)` : ''}</span>
+        <span style="font-size:10.5px; padding:2px 7px; border-radius:6px; background:rgba(216,208,248,0.16); color:var(--pastel-purple); font-weight:800;">💤 ${sleepVal}s</span>
+        <span style="font-size:10.5px; padding:2px 7px; border-radius:6px; background:rgba(255,192,105,0.16); color:#ffc069; font-weight:800;">${energyIcon} ${energyLevel}</span>
+        <span style="font-size:10.5px; padding:2px 7px; border-radius:6px; background:rgba(82,196,26,0.18); color:#95de64; font-weight:800;">✅ ${doneTasks.length}/${dayTasks.length} İş</span>
       </div>
     </div>
-    <div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center; padding-top:4px; border-top:1px solid rgba(255,255,255,0.05);">
-      <span style="font-size:10px; font-weight:800; color:var(--text-secondary);">Tamamlananlar:</span>
+    <div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center; padding-top:4px; border-top:1px solid rgba(255,255,255,0.06);">
+      <span style="font-size:10.5px; font-weight:800; color:var(--text-muted);">Tamamlanan İşler:</span>
       ${doneItemsHtml}
     </div>
+    ${foodsSummaryHtml}
   `;
 }
 
@@ -4495,25 +4575,28 @@ function openWeeklyReviewModal() {
   const modal = document.getElementById('weeklyReviewModal');
   if (!modal) return;
 
-  const statsGrid = document.getElementById('weeklyReviewStatsGrid');
-  const overdueBox = document.getElementById('weeklyReviewOverdueBox');
-  const todayStr = getTodayStr();
+  const summaryBox = document.getElementById('weeklyReviewStatsSummary');
+  const overdueText = document.getElementById('weeklyReviewOverdueText');
+  const todayStr = getTodayISO();
 
   let totalTasks7d = 0;
   let doneTasks7d = 0;
   let totalWaterGlasses7d = 0;
   let totalSleep7d = 0;
   let sleepCountDays = 0;
+  let totalProt7d = 0;
 
   for (let i = 0; i < 7; i++) {
     const d = new Date();
     d.setDate(d.getDate() - i);
-    const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const tzOffset = d.getTimezoneOffset() * 60000;
+    const dStr = new Date(d - tzOffset).toISOString().split('T')[0];
     const log = getDailyLogForArchiveDate(dStr);
-    const dayTasks = appData.tasks.filter((t) => t.date === dStr);
+    const dayTasks = (appData.tasks || []).filter((t) => t.date === dStr);
     totalTasks7d += dayTasks.length;
     doneTasks7d += dayTasks.filter((t) => t.completed).length;
-    totalWaterGlasses7d += log.water || 0;
+    totalWaterGlasses7d += log.waterCount || 0;
+    totalProt7d += log.proteinGrams || 0;
     if (log.sleepHours) {
       totalSleep7d += Number(log.sleepHours);
       sleepCountDays++;
@@ -4522,99 +4605,770 @@ function openWeeklyReviewModal() {
 
   const completionPct = totalTasks7d > 0 ? Math.round((doneTasks7d / totalTasks7d) * 100) : 0;
   const totalWaterLiters = ((totalWaterGlasses7d * 250) / 1000).toFixed(1);
-  const avgSleep = sleepCountDays > 0 ? (totalSleep7d / sleepCountDays).toFixed(1) : '7.5';
+  const avgSleep = sleepCountDays > 0 ? (totalSleep7d / sleepCountDays).toFixed(1) : '8.0';
 
-  if (statsGrid) {
-    statsGrid.innerHTML = `
-      <div style="padding:10px; border-radius:10px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.25); text-align:center;">
-        <div style="font-size:18px; font-weight:800; color:#34d399;">✅ ${doneTasks7d}/${totalTasks7d} (%${completionPct})</div>
-        <div style="font-size:10px; color:var(--text-secondary);">Son 7 Gün Tamamlanan İş</div>
-      </div>
-      <div style="padding:10px; border-radius:10px; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.25); text-align:center;">
-        <div style="font-size:18px; font-weight:800; color:#60a5fa;">💧 ${totalWaterLiters} Litre</div>
-        <div style="font-size:10px; color:var(--text-secondary);">Son 7 Gün Toplam Su (${totalWaterGlasses7d} brd)</div>
-      </div>
-      <div style="padding:10px; border-radius:10px; background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.25); text-align:center;">
-        <div style="font-size:18px; font-weight:800; color:#c4b5fd;">💤 Ort. ${avgSleep} Saat</div>
-        <div style="font-size:10px; color:var(--text-secondary);">Haftalık Uyku Ortalaması</div>
-      </div>
-      <div style="padding:10px; border-radius:10px; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25); text-align:center;">
-        <div style="font-size:18px; font-weight:800; color:#fbbf24;">🔥 ${appData.streak || 0} Gün</div>
-        <div style="font-size:10px; color:var(--text-secondary);">Aktif Disiplin Serisi</div>
+  if (summaryBox) {
+    summaryBox.innerHTML = `
+      <div style="font-weight:900;color:var(--accent-cream);margin-bottom:8px;">📊 Son 7 Günün Otomatik Performans Karnesi:</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+        <div style="padding:8px;border-radius:10px;background:rgba(82,196,26,0.12);border:1px solid rgba(82,196,26,0.3);text-align:center;">
+          <div style="font-size:16px;font-weight:900;color:#95de64;">✅ ${doneTasks7d}/${totalTasks7d} (%${completionPct})</div>
+          <div style="font-size:10.5px;color:var(--text-muted);">Tamamlanan Görev</div>
+        </div>
+        <div style="padding:8px;border-radius:10px;background:rgba(96,165,250,0.12);border:1px solid rgba(96,165,250,0.3);text-align:center;">
+          <div style="font-size:16px;font-weight:900;color:#93c5fd;">💧 ${totalWaterLiters} Litre</div>
+          <div style="font-size:10.5px;color:var(--text-muted);">Toplam Su (${totalWaterGlasses7d} Brd)</div>
+        </div>
+        <div style="padding:8px;border-radius:10px;background:rgba(216,208,248,0.12);border:1px solid rgba(216,208,248,0.3);text-align:center;">
+          <div style="font-size:16px;font-weight:900;color:var(--pastel-purple);">💤 Ort. ${avgSleep} Saat</div>
+          <div style="font-size:10.5px;color:var(--text-muted);">Uyku Ortalaması</div>
+        </div>
+        <div style="padding:8px;border-radius:10px;background:rgba(255,156,110,0.12);border:1px solid rgba(255,156,110,0.3);text-align:center;">
+          <div style="font-size:16px;font-weight:900;color:#ff9c6e;">🥩 ${totalProt7d}g Protein</div>
+          <div style="font-size:10.5px;color:var(--text-muted);">7 Günlük Protein</div>
+        </div>
       </div>
     `;
   }
 
-  const overdueTasks = appData.tasks.filter((t) => !t.completed && t.date < todayStr);
-  if (overdueBox) {
-    if (overdueTasks.length === 0) {
-      overdueBox.innerHTML = `<span style="color:#34d399; font-weight:700;">🎉 Harika! Geçmiş günlerden kalan gecikmiş hiçbir göreviniz yok.</span>`;
-    } else {
-      overdueBox.innerHTML = `
-        <div style="margin-bottom:6px; font-weight:700; color:#fbbf24;">⚠️ Geçmiş günlerden kalan <strong>${overdueTasks.length} adet</strong> tamamlanmamış görev var:</div>
-        <div style="max-height:90px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; font-size:11px;">
-          ${overdueTasks.map((t) => `<div>• ${escapeHtml(t.title)} <span style="color:var(--text-muted);">(${t.date})</span></div>`).join('')}
-        </div>
-      `;
-    }
+  const overdueTasks = (appData.tasks || []).filter((t) => !t.completed && t.date < todayStr);
+  if (overdueText) {
+    overdueText.textContent = overdueTasks.length === 0
+      ? '🎉 Harika! Geçmiş günlerden kalan gecikmiş hiçbir görevin yok.'
+      : `⏳ Geçmiş günlerden kalan ${overdueTasks.length} adet tamamlanmamış görev var.`;
   }
 
-  modal.style.display = 'flex';
+  modal.classList.remove('hidden');
 }
 
 function closeWeeklyReviewModal() {
   const modal = document.getElementById('weeklyReviewModal');
-  if (modal) modal.style.display = 'none';
+  if (modal) modal.classList.add('hidden');
 }
 
 function completeWeeklyReviewWizard() {
-  const todayStr = getTodayStr();
-  const moveOverdue = document.getElementById('weeklyReviewMoveOverdueCheck')?.checked;
-  let movedCount = 0;
-
-  if (moveOverdue) {
-    appData.tasks.forEach((t) => {
-      if (!t.completed && t.date < todayStr) {
-        t.date = todayStr;
-        movedCount++;
-      }
-    });
-  }
-
-  const inputs = ['weeklyGoalInput1', 'weeklyGoalInput2', 'weeklyGoalInput3'];
+  const todayStr = getTodayISO();
+  const inputs = ['weeklyTop1Input', 'weeklyTop2Input', 'weeklyTop3Input'];
   let addedCount = 0;
+
   inputs.forEach((id) => {
     const el = document.getElementById(id);
     const val = el ? el.value.trim() : '';
     if (val) {
       appData.tasks.unshift({
-        id: 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        id: 't_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
         title: val,
-        category: 'work',
+        category: 'İş & Proje',
         priority: 'high',
         date: todayStr,
         time: '',
+        location: '',
+        link: '',
+        alarmEnabled: true,
+        alarmSound: 'system',
         completed: false,
+        completedAt: null,
+        completionEmoji: '',
+        completionComment: '',
         pinned: true,
-        recurrence: 'none',
+        repeat: 'none',
+        tags: ['#haftalık-odak'],
         subtasks: [],
-        notes: '🧹 Haftalık Değerlendirme Sihirbazı ile eklendi',
-        createdAt: new Date().toISOString()
+        photos: [],
+        audios: [],
+        desc: '🧹 Haftalık Değerlendirme Sihirbazı ile eklendi'
       });
       el.value = '';
       addedCount++;
     }
   });
 
-  saveData();
+  saveProfileData();
   renderAll();
   closeWeeklyReviewModal();
-  showToast(`🚀 Haftalık planlama tamamlandı! (${movedCount} görev bugüne taşındı, ${addedCount} yeni hedef eklendi)`);
+  if (addedCount > 0) {
+    showSmartCoachPopup('🚀', 'Yeni Hafta Planın Hazır!', `Yeni haftanın ${addedCount} öncelikli hedefi bugünün listesine sabitlendi. Bu hafta senin haftan olacak, başarılar!`);
+  }
 }
+
+// ===== 28. 185+ TÜRK MUTFAĞI & SPORCU BESİNİ VERİTABANI + GRAMAJLI OTOMATİK MAKRO HESAPLAYICI (v18.0) =====
+// Tüm değerler 100 GRAM (100g) besin içindir: kcal, protein (g), carbs (g), fat (g), defGrams (varsayılan porsiyon gramajı)
+const FOOD_DATABASE_TR = [
+  // 🥚 KAHVALTILIKLAR, YUMURTA & PEYNİR (28 Besin)
+  { name: 'Haşlanmış Yumurta (Tam)', cat: 'kahvalti', kcal: 155, protein: 12.6, carbs: 1.1, fat: 10.6, defGrams: 100, hint: '2 Adet ≈ 100g' },
+  { name: 'Yumurta (1 Adet Orta Boy)', cat: 'kahvalti', kcal: 155, protein: 12.6, carbs: 1.1, fat: 10.6, defGrams: 50, hint: '1 Adet ≈ 50g' },
+  { name: 'Yumurta Beyazı (Haşlanmış/Çiğ)', cat: 'kahvalti', kcal: 52, protein: 10.9, carbs: 0.7, fat: 0.2, defGrams: 100, hint: '3 Adet Beyaz ≈ 100g' },
+  { name: 'Yumurta Sarısı', cat: 'kahvalti', kcal: 322, protein: 15.9, carbs: 3.6, fat: 26.5, defGrams: 35, hint: '2 Adet Sarı ≈ 35g' },
+  { name: 'Sahanda Yumurta (Tereyağlı)', cat: 'kahvalti', kcal: 196, protein: 13.0, carbs: 0.9, fat: 15.2, defGrams: 120, hint: '1 Porsiyon ≈ 120g' },
+  { name: 'Sade Omlet (2 Yumurtalı)', cat: 'kahvalti', kcal: 175, protein: 11.8, carbs: 1.2, fat: 13.5, defGrams: 120, hint: '1 Porsiyon ≈ 120g' },
+  { name: 'Peynirli Omlet', cat: 'kahvalti', kcal: 215, protein: 14.5, carbs: 1.5, fat: 16.8, defGrams: 150, hint: '1 Porsiyon ≈ 150g' },
+  { name: 'Menemen (Domatesli Biberli Yumurta)', cat: 'kahvalti', kcal: 118, protein: 6.8, carbs: 4.5, fat: 8.2, defGrams: 200, hint: '1 Porsiyon ≈ 200g' },
+  { name: 'Sucuklu Yumurta', cat: 'kahvalti', kcal: 265, protein: 15.2, carbs: 1.4, fat: 22.0, defGrams: 150, hint: '1 Porsiyon ≈ 150g' },
+  { name: 'Beyaz Peynir (Tam Yağlı)', cat: 'kahvalti', kcal: 264, protein: 17.5, carbs: 2.5, fat: 21.0, defGrams: 60, hint: '2 Dilim ≈ 60g' },
+  { name: 'Beyaz Peynir (Az Yağlı / Light)', cat: 'kahvalti', kcal: 158, protein: 19.5, carbs: 3.0, fat: 7.5, defGrams: 60, hint: '2 Dilim ≈ 60g' },
+  { name: 'Lor Peyniri (Sporcu / Kahvaltılık)', cat: 'kahvalti', kcal: 98, protein: 14.2, carbs: 3.2, fat: 3.0, defGrams: 100, hint: '1 Kase ≈ 100g' },
+  { name: 'Kaşar Peyniri (Taze/Eski)', cat: 'kahvalti', kcal: 355, protein: 25.0, carbs: 1.8, fat: 27.5, defGrams: 40, hint: '2 Dilim ≈ 40g' },
+  { name: 'Süzme Peynir', cat: 'kahvalti', kcal: 235, protein: 14.0, carbs: 3.2, fat: 18.5, defGrams: 60, hint: '2 Dilim ≈ 60g' },
+  { name: 'Çeçil / Tel / Dil Peyniri', cat: 'kahvalti', kcal: 280, protein: 23.5, carbs: 1.5, fat: 20.0, defGrams: 50, hint: '1 Porsiyon ≈ 50g' },
+  { name: 'Hellim Peyniri (Izgara)', cat: 'kahvalti', kcal: 320, protein: 21.0, carbs: 2.0, fat: 25.0, defGrams: 60, hint: '2 Dilim ≈ 60g' },
+  { name: 'Labne Peyniri', cat: 'kahvalti', kcal: 205, protein: 5.5, carbs: 4.5, fat: 18.5, defGrams: 30, hint: '1 Yemek Kaşığı ≈ 30g' },
+  { name: 'Cottage Cheese (Köy Peyniri)', cat: 'kahvalti', kcal: 98, protein: 11.1, carbs: 3.4, fat: 4.3, defGrams: 100, hint: '100g' },
+  { name: 'Siyah Zeytin', cat: 'kahvalti', kcal: 235, protein: 1.5, carbs: 4.0, fat: 24.0, defGrams: 30, hint: '7-8 Adet ≈ 30g' },
+  { name: 'Yeşil Zeytin', cat: 'kahvalti', kcal: 145, protein: 1.2, carbs: 3.8, fat: 15.0, defGrams: 30, hint: '7-8 Adet ≈ 30g' },
+  { name: 'Fıstık Ezmesi (Şekersiz %100)', cat: 'kahvalti', kcal: 588, protein: 25.8, carbs: 16.0, fat: 50.0, defGrams: 30, hint: '1 Yemek Kaşığı ≈ 30g' },
+  { name: 'Fındık Ezmesi', cat: 'kahvalti', kcal: 610, protein: 14.5, carbs: 22.0, fat: 52.0, defGrams: 25, hint: '1 Yemek Kaşığı ≈ 25g' },
+  { name: 'Tahin', cat: 'kahvalti', kcal: 595, protein: 17.0, carbs: 21.0, fat: 53.0, defGrams: 20, hint: '1 Yemek Kaşığı ≈ 20g' },
+  { name: 'Üzüm / Keçiboynuzu Pekmezi', cat: 'kahvalti', kcal: 290, protein: 1.2, carbs: 71.0, fat: 0.2, defGrams: 20, hint: '1 Yemek Kaşığı ≈ 20g' },
+  { name: 'Süzme Çiçek / Çam Balı', cat: 'kahvalti', kcal: 304, protein: 0.3, carbs: 82.4, fat: 0.0, defGrams: 20, hint: '1 Yemek Kaşığı ≈ 20g' },
+  { name: 'Tereyağı (Doğal)', cat: 'kahvalti', kcal: 717, protein: 0.9, carbs: 0.1, fat: 81.1, defGrams: 15, hint: '1 Tatlı Kaşığı ≈ 15g' },
+  { name: 'Kaymak', cat: 'kahvalti', kcal: 585, protein: 2.2, carbs: 3.0, fat: 62.0, defGrams: 30, hint: '1 Porsiyon ≈ 30g' },
+  { name: 'Çilek / Vişne Reçeli', cat: 'kahvalti', kcal: 278, protein: 0.4, carbs: 69.0, fat: 0.1, defGrams: 20, hint: '1 Yemek Kaşığı ≈ 20g' },
+
+  // 🍗 TAVUK, HİNDİ, KIRMIZI ET & BALIK (38 Besin)
+  { name: 'Tavuk Göğsü (Haşlama / Izgara Pişmiş)', cat: 'et', kcal: 165, protein: 31.0, carbs: 0.0, fat: 3.6, defGrams: 200, hint: '1 Porsiyon ≈ 200g' },
+  { name: 'Tavuk Göğsü (Çiğ Tartım)', cat: 'et', kcal: 120, protein: 22.5, carbs: 0.0, fat: 2.6, defGrams: 200, hint: '200g Çiğ' },
+  { name: 'Tavuk Sote (Biberli Domatesli Soğanlı)', cat: 'et', kcal: 145, protein: 19.0, carbs: 3.5, fat: 6.0, defGrams: 250, hint: '1 Tabak ≈ 250g' },
+  { name: 'Tavuk But / Kalça (Izgara / Fırın)', cat: 'et', kcal: 209, protein: 26.0, carbs: 0.0, fat: 10.9, defGrams: 180, hint: '1 Porsiyon ≈ 180g' },
+  { name: 'Tavuk Pirzola (Izgara)', cat: 'et', kcal: 215, protein: 25.0, carbs: 0.0, fat: 12.2, defGrams: 200, hint: '1 Porsiyon ≈ 200g' },
+  { name: 'Tavuk Şiş (Izgara)', cat: 'et', kcal: 178, protein: 28.5, carbs: 0.5, fat: 6.4, defGrams: 200, hint: '1 Porsiyon ≈ 200g' },
+  { name: 'Tavuk Kanat (Izgara / Fırın)', cat: 'et', kcal: 266, protein: 23.5, carbs: 0.0, fat: 18.5, defGrams: 200, hint: '1 Porsiyon ≈ 200g' },
+  { name: 'Tavuk Döner (Ekmeksiz Porsiyon)', cat: 'et', kcal: 215, protein: 24.5, carbs: 2.0, fat: 12.0, defGrams: 150, hint: '1 Porsiyon ≈ 150g' },
+  { name: 'Tavuk Tantuni (Lavaşlı)', cat: 'et', kcal: 220, protein: 16.5, carbs: 21.0, fat: 7.5, defGrams: 200, hint: '1 Dürüm ≈ 200g' },
+  { name: 'Tavuk Ciğeri (Sote/Haşlama)', cat: 'et', kcal: 167, protein: 24.5, carbs: 0.9, fat: 6.5, defGrams: 150, hint: '1 Porsiyon ≈ 150g' },
+  { name: 'Hindi Göğsü (Haşlama / Izgara)', cat: 'et', kcal: 135, protein: 29.5, carbs: 0.0, fat: 1.5, defGrams: 200, hint: '1 Porsiyon ≈ 200g' },
+  { name: 'Hindi Füme (Şarküteri)', cat: 'et', kcal: 108, protein: 18.5, carbs: 2.0, fat: 2.5, defGrams: 60, hint: '3-4 Dilim ≈ 60g' },
+  { name: 'Dana Bonfile / Biftek (Izgara)', cat: 'et', kcal: 218, protein: 28.5, carbs: 0.0, fat: 11.0, defGrams: 200, hint: '1 Porsiyon ≈ 200g' },
+  { name: 'Dana Antrikot (Izgara)', cat: 'et', kcal: 271, protein: 25.5, carbs: 0.0, fat: 18.5, defGrams: 200, hint: '1 Porsiyon ≈ 200g' },
+  { name: 'Dana Kuşbaşı (Yağsız Pişmiş)', cat: 'et', kcal: 205, protein: 29.0, carbs: 0.0, fat: 9.2, defGrams: 150, hint: '1 Porsiyon ≈ 150g' },
+  { name: 'Et Sote (Biberli Domatesli Dana)', cat: 'et', kcal: 175, protein: 18.5, carbs: 3.8, fat: 9.5, defGrams: 220, hint: '1 Tabak ≈ 220g' },
+  { name: 'Dana Kıyma (Az Yağlı Pişmiş %10)', cat: 'et', kcal: 212, protein: 26.5, carbs: 0.0, fat: 11.2, defGrams: 150, hint: '150g' },
+  { name: 'Dana Kıyma (Orta Yağlı Pişmiş %20)', cat: 'et', kcal: 254, protein: 24.0, carbs: 0.0, fat: 17.0, defGrams: 150, hint: '150g' },
+  { name: 'Izgara Köfte / Anne Köftesi', cat: 'et', kcal: 245, protein: 21.0, carbs: 6.5, fat: 15.0, defGrams: 180, hint: '5-6 Adet ≈ 180g' },
+  { name: 'İnegöl / Kasap Köfte', cat: 'et', kcal: 268, protein: 20.5, carbs: 5.0, fat: 18.2, defGrams: 180, hint: '1 Porsiyon ≈ 180g' },
+  { name: 'Kuzu Pirzola (Izgara)', cat: 'et', kcal: 295, protein: 24.5, carbs: 0.0, fat: 21.5, defGrams: 180, hint: '1 Porsiyon ≈ 180g' },
+  { name: 'Kuzu Şiş (Izgara)', cat: 'et', kcal: 248, protein: 26.0, carbs: 0.5, fat: 15.5, defGrams: 180, hint: '1 Porsiyon ≈ 180g' },
+  { name: 'Adana / Urfa Kebap (Porsiyon)', cat: 'et', kcal: 285, protein: 21.5, carbs: 2.0, fat: 21.0, defGrams: 180, hint: '1 Porsiyon ≈ 180g' },
+  { name: 'Et Döner / İskender Eti (Ekmeksiz)', cat: 'et', kcal: 260, protein: 25.0, carbs: 1.5, fat: 17.0, defGrams: 150, hint: '1 Porsiyon ≈ 150g' },
+  { name: 'Dana Kavurma', cat: 'et', kcal: 315, protein: 28.0, carbs: 0.0, fat: 22.5, defGrams: 120, hint: '1 Porsiyon ≈ 120g' },
+  { name: 'Dana Sucuk', cat: 'et', kcal: 452, protein: 17.5, carbs: 2.0, fat: 41.5, defGrams: 50, hint: '50g' },
+  { name: 'Kayseri Pastırması', cat: 'et', kcal: 250, protein: 29.0, carbs: 1.0, fat: 14.0, defGrams: 40, hint: '4-5 Dilim ≈ 40g' },
+  { name: 'Arnavut Ciğeri (Dana Ciğer)', cat: 'et', kcal: 215, protein: 23.0, carbs: 6.0, fat: 11.0, defGrams: 150, hint: '1 Porsiyon ≈ 150g' },
+  { name: 'Somon Balığı (Izgara / Fırın)', cat: 'et', kcal: 208, protein: 22.5, carbs: 0.0, fat: 13.0, defGrams: 200, hint: '1 Fileto ≈ 200g' },
+  { name: 'Ton Balığı (Konserve Suda / Süzülmüş)', cat: 'et', kcal: 116, protein: 25.5, carbs: 0.0, fat: 1.0, defGrams: 120, hint: '1 Konserve ≈ 120g' },
+  { name: 'Ton Balığı (Konserve Yağlı / Süzülmüş)', cat: 'et', kcal: 198, protein: 26.5, carbs: 0.0, fat: 10.0, defGrams: 100, hint: '1 Konserve ≈ 100g' },
+  { name: 'Levrek (Izgara / Fırın)', cat: 'et', kcal: 124, protein: 23.6, carbs: 0.0, fat: 2.6, defGrams: 250, hint: '1 Porsiyon ≈ 250g' },
+  { name: 'Çupra / Çipura (Izgara / Fırın)', cat: 'et', kcal: 135, protein: 21.5, carbs: 0.0, fat: 5.2, defGrams: 250, hint: '1 Porsiyon ≈ 250g' },
+  { name: 'Hamsi (Fırın / Buğulama)', cat: 'et', kcal: 131, protein: 20.4, carbs: 0.0, fat: 4.8, defGrams: 200, hint: '1 Porsiyon ≈ 200g' },
+  { name: 'Hamsi Tava (Mısır Unlu)', cat: 'et', kcal: 225, protein: 19.0, carbs: 9.5, fat: 12.5, defGrams: 200, hint: '1 Porsiyon ≈ 200g' },
+  { name: 'Uskumru / Palamut (Izgara)', cat: 'et', kcal: 205, protein: 23.0, carbs: 0.0, fat: 12.0, defGrams: 200, hint: '1 Porsiyon ≈ 200g' },
+  { name: 'Alabalık (Izgara / Fırın)', cat: 'et', kcal: 148, protein: 20.8, carbs: 0.0, fat: 6.6, defGrams: 220, hint: '1 Porsiyon ≈ 220g' },
+  { name: 'Karides (Tereyağlı / Izgara)', cat: 'et', kcal: 119, protein: 22.8, carbs: 1.2, fat: 2.2, defGrams: 150, hint: '1 Porsiyon ≈ 150g' },
+
+  // 🍲 EV YEMEKLERİ, ÇORBALAR, BAKLİYATLAR & GELENEKSEL LEZZETLER (36 Besin)
+  { name: 'Kuru Fasulye Yemeği (Etli)', cat: 'yemek', kcal: 138, protein: 8.8, carbs: 15.5, fat: 4.5, defGrams: 250, hint: '1 Tabak ≈ 250g' },
+  { name: 'Kuru Fasulye Yemeği (Etsiz)', cat: 'yemek', kcal: 118, protein: 7.2, carbs: 16.5, fat: 2.8, defGrams: 250, hint: '1 Tabak ≈ 250g' },
+  { name: 'Nohut Yemeği (Etli)', cat: 'yemek', kcal: 148, protein: 8.9, carbs: 17.2, fat: 4.9, defGrams: 250, hint: '1 Tabak ≈ 250g' },
+  { name: 'Yeşil Mercimek Yemeği', cat: 'yemek', kcal: 116, protein: 8.5, carbs: 16.8, fat: 1.8, defGrams: 250, hint: '1 Tabak ≈ 250g' },
+  { name: 'Barbunya Pilaki (Zeytinyağlı)', cat: 'yemek', kcal: 132, protein: 6.5, carbs: 16.0, fat: 4.8, defGrams: 200, hint: '1 Tabak ≈ 200g' },
+  { name: 'Mercimek Çorbası', cat: 'yemek', kcal: 68, protein: 4.2, carbs: 9.5, fat: 1.6, defGrams: 250, hint: '1 Kase ≈ 250g' },
+  { name: 'Ezogelin Çorbası', cat: 'yemek', kcal: 72, protein: 3.8, carbs: 10.5, fat: 1.8, defGrams: 250, hint: '1 Kase ≈ 250g' },
+  { name: 'Tarhana Çorbası', cat: 'yemek', kcal: 65, protein: 2.9, carbs: 9.2, fat: 1.8, defGrams: 250, hint: '1 Kase ≈ 250g' },
+  { name: 'Yayla Çorbası (Yoğurtlu)', cat: 'yemek', kcal: 62, protein: 2.8, carbs: 7.5, fat: 2.2, defGrams: 250, hint: '1 Kase ≈ 250g' },
+  { name: 'Tavuk Suyu / Şehriye Çorbası', cat: 'yemek', kcal: 58, protein: 4.8, carbs: 6.2, fat: 1.5, defGrams: 250, hint: '1 Kase ≈ 250g' },
+  { name: 'Domates Çorbası (Kaşarlı)', cat: 'yemek', kcal: 64, protein: 2.4, carbs: 8.0, fat: 2.5, defGrams: 250, hint: '1 Kase ≈ 250g' },
+  { name: 'İşkembe / Kelle Paça Çorbası', cat: 'yemek', kcal: 115, protein: 11.5, carbs: 2.5, fat: 6.5, defGrams: 250, hint: '1 Kase ≈ 250g' },
+  { name: 'Kıymalı Taze Fasulye Yemeği', cat: 'yemek', kcal: 88, protein: 5.8, carbs: 6.2, fat: 4.5, defGrams: 250, hint: '1 Tabak ≈ 250g' },
+  { name: 'Zeytinyağlı Taze Fasulye', cat: 'yemek', kcal: 65, protein: 1.8, carbs: 6.8, fat: 3.5, defGrams: 250, hint: '1 Tabak ≈ 250g' },
+  { name: 'Kıymalı Ispanak Yemeği', cat: 'yemek', kcal: 92, protein: 6.5, carbs: 4.8, fat: 5.2, defGrams: 250, hint: '1 Tabak ≈ 250g' },
+  { name: 'Kıymalı Kabak Yemeği', cat: 'yemek', kcal: 84, protein: 5.6, carbs: 5.2, fat: 4.5, defGrams: 250, hint: '1 Tabak ≈ 250g' },
+  { name: 'Kıymalı Karnabahar Yemeği', cat: 'yemek', kcal: 86, protein: 6.0, carbs: 5.0, fat: 4.6, defGrams: 250, hint: '1 Tabak ≈ 250g' },
+  { name: 'Zeytinyağlı Pırasa Yemeği', cat: 'yemek', kcal: 74, protein: 1.5, carbs: 8.5, fat: 3.8, defGrams: 220, hint: '1 Tabak ≈ 220g' },
+  { name: 'Karnıyarık (Kıymalı Patlıcan)', cat: 'yemek', kcal: 142, protein: 7.5, carbs: 6.5, fat: 9.8, defGrams: 250, hint: '1 Porsiyon ≈ 250g' },
+  { name: 'Patlıcan Musakka', cat: 'yemek', kcal: 128, protein: 7.2, carbs: 6.8, fat: 8.2, defGrams: 250, hint: '1 Porsiyon ≈ 250g' },
+  { name: 'Kıymalı Biber Dolması', cat: 'yemek', kcal: 124, protein: 6.8, carbs: 12.5, fat: 5.2, defGrams: 220, hint: '2 Adet ≈ 220g' },
+  { name: 'Zeytinyağlı Yaprak Sarma', cat: 'yemek', kcal: 158, protein: 3.2, carbs: 21.0, fat: 6.8, defGrams: 150, hint: '6-7 Adet ≈ 150g' },
+  { name: 'Etli Yaprak Sarma', cat: 'yemek', kcal: 168, protein: 9.2, carbs: 14.5, fat: 8.2, defGrams: 200, hint: '1 Porsiyon ≈ 200g' },
+  { name: 'İzmir Köfte (Fırında Patatesli)', cat: 'yemek', kcal: 152, protein: 10.5, carbs: 10.8, fat: 7.5, defGrams: 250, hint: '1 Porsiyon ≈ 250g' },
+  { name: 'Tas Kebabı (Etli Patatesli)', cat: 'yemek', kcal: 164, protein: 13.5, carbs: 8.5, fat: 8.5, defGrams: 250, hint: '1 Porsiyon ≈ 250g' },
+  { name: 'Bezelye Yemeği (Etli/Tavuklu)', cat: 'yemek', kcal: 112, protein: 8.2, carbs: 11.5, fat: 3.8, defGrams: 250, hint: '1 Tabak ≈ 250g' },
+  { name: 'Mantı (Yoğurtlu Soslu)', cat: 'yemek', kcal: 195, protein: 9.2, carbs: 26.5, fat: 5.8, defGrams: 250, hint: '1 Tabak ≈ 250g' },
+  { name: 'Lahmacun', cat: 'yemek', kcal: 235, protein: 11.5, carbs: 28.0, fat: 8.5, defGrams: 130, hint: '1 Adet ≈ 130g' },
+  { name: 'Kıymalı / Kuşbaşılı Pide', cat: 'yemek', kcal: 255, protein: 13.5, carbs: 29.0, fat: 9.5, defGrams: 250, hint: '1 Porsiyon ≈ 250g' },
+  { name: 'Kaşarlı Pide', cat: 'yemek', kcal: 278, protein: 13.0, carbs: 30.0, fat: 11.5, defGrams: 250, hint: '1 Porsiyon ≈ 250g' },
+  { name: 'Çiğ Köfte (Etsiz Bulgurlu)', cat: 'yemek', kcal: 185, protein: 4.8, carbs: 32.0, fat: 4.2, defGrams: 150, hint: '6-7 Sıkım ≈ 150g' },
+  { name: 'Kısır', cat: 'yemek', kcal: 162, protein: 4.2, carbs: 25.5, fat: 4.8, defGrams: 180, hint: '1 Kase ≈ 180g' },
+  { name: 'Mercimek Köftesi', cat: 'yemek', kcal: 158, protein: 6.5, carbs: 24.5, fat: 3.8, defGrams: 150, hint: '5-6 Adet ≈ 150g' },
+  { name: 'Humus (Nohut Ezmesi)', cat: 'yemek', kcal: 177, protein: 7.9, carbs: 14.3, fat: 9.6, defGrams: 100, hint: '1 Porsiyon ≈ 100g' },
+  { name: 'Kabak Mücver', cat: 'yemek', kcal: 165, protein: 5.8, carbs: 12.0, fat: 10.5, defGrams: 150, hint: '3 Adet ≈ 150g' },
+  { name: 'Şakşuka', cat: 'yemek', kcal: 135, protein: 2.2, carbs: 8.5, fat: 10.2, defGrams: 150, hint: '1 Porsiyon ≈ 150g' },
+
+  // 🍚 PİLAV, MAKARNA, YULAF, TAHIL & EKMEKLER (24 Besin)
+  { name: 'Pirinç Pilavı (Tereyağlı / Şehriyeli)', cat: 'tahil', kcal: 158, protein: 3.0, carbs: 28.5, fat: 3.5, defGrams: 180, hint: '1 Porsiyon ≈ 180g' },
+  { name: 'Haşlanmış Beyaz Pirinç / Lapa (Yağsız)', cat: 'tahil', kcal: 130, protein: 2.7, carbs: 28.2, fat: 0.3, defGrams: 200, hint: '1 Tabak ≈ 200g' },
+  { name: 'Basmati / Yasemin Pirinç (Pişmiş)', cat: 'tahil', kcal: 125, protein: 3.1, carbs: 26.8, fat: 0.4, defGrams: 200, hint: '1 Porsiyon ≈ 200g' },
+  { name: 'Bulgur Pilavı (Domatesli Biberli)', cat: 'tahil', kcal: 135, protein: 4.2, carbs: 24.5, fat: 2.4, defGrams: 180, hint: '1 Porsiyon ≈ 180g' },
+  { name: 'Haşlanmış Bulgur (Sade Sporcu)', cat: 'tahil', kcal: 112, protein: 3.8, carbs: 23.0, fat: 0.4, defGrams: 200, hint: '200g Pişmiş' },
+  { name: 'Karabuğday / Greçka (Haşlanmış)', cat: 'tahil', kcal: 110, protein: 4.2, carbs: 21.5, fat: 0.8, defGrams: 180, hint: '1 Porsiyon ≈ 180g' },
+  { name: 'Kinoa (Haşlanmış)', cat: 'tahil', kcal: 120, protein: 4.4, carbs: 21.3, fat: 1.9, defGrams: 150, hint: '1 Porsiyon ≈ 150g' },
+  { name: 'Yulaf Ezmesi (Kuru Tartım)', cat: 'tahil', kcal: 375, protein: 13.2, carbs: 62.0, fat: 6.8, defGrams: 60, hint: '6 Yemek Kaşığı ≈ 60g' },
+  { name: 'Sütlü Yulaf Lapası (Porridge)', cat: 'tahil', kcal: 115, protein: 4.8, carbs: 17.5, fat: 2.6, defGrams: 250, hint: '1 Kase ≈ 250g' },
+  { name: 'Granola / Müsli', cat: 'tahil', kcal: 425, protein: 9.5, carbs: 64.0, fat: 14.0, defGrams: 50, hint: '1 Kase ≈ 50g' },
+  { name: 'Haşlanmış Makarna (Sade)', cat: 'tahil', kcal: 155, protein: 5.6, carbs: 30.8, fat: 0.9, defGrams: 200, hint: '1 Tabak ≈ 200g' },
+  { name: 'Salçalı / Domates Soslu Makarna', cat: 'tahil', kcal: 168, protein: 5.4, carbs: 29.5, fat: 3.2, defGrams: 200, hint: '1 Tabak ≈ 200g' },
+  { name: 'Kıymalı Makarna', cat: 'tahil', kcal: 192, protein: 9.8, carbs: 24.5, fat: 6.2, defGrams: 220, hint: '1 Tabak ≈ 220g' },
+  { name: 'Tam Buğday / Kepekli Makarna (Pişmiş)', cat: 'tahil', kcal: 142, protein: 5.8, carbs: 27.5, fat: 0.9, defGrams: 200, hint: '1 Tabak ≈ 200g' },
+  { name: 'Erişte (Tereyağlı / Cevizli)', cat: 'tahil', kcal: 185, protein: 6.2, carbs: 29.0, fat: 4.8, defGrams: 180, hint: '1 Tabak ≈ 180g' },
+  { name: 'Tam Buğday Ekmeği', cat: 'tahil', kcal: 247, protein: 10.5, carbs: 43.0, fat: 3.2, defGrams: 50, hint: '2 İnce Dilim ≈ 50g' },
+  { name: 'Çavdar / Karabuğday Ekmeği', cat: 'tahil', kcal: 250, protein: 8.8, carbs: 46.5, fat: 2.8, defGrams: 50, hint: '2 Dilim ≈ 50g' },
+  { name: 'Ekşi Mayalı Köy Ekmeği', cat: 'tahil', kcal: 255, protein: 9.0, carbs: 49.0, fat: 1.8, defGrams: 50, hint: '1 Kalın Dilim ≈ 50g' },
+  { name: 'Beyaz Ekmek', cat: 'tahil', kcal: 265, protein: 8.5, carbs: 51.0, fat: 2.5, defGrams: 50, hint: '2 Dilim ≈ 50g' },
+  { name: 'Lavaş / Tortilla Dürüm Ekmeği', cat: 'tahil', kcal: 295, protein: 8.2, carbs: 54.0, fat: 4.5, defGrams: 65, hint: '1 Adet Lavaş ≈ 65g' },
+  { name: 'Pirinç Patlağı (Rice Cake)', cat: 'tahil', kcal: 382, protein: 8.0, carbs: 81.0, fat: 2.8, defGrams: 20, hint: '2 Adet ≈ 20g' },
+  { name: 'Simit (Susamlı)', cat: 'tahil', kcal: 325, protein: 10.5, carbs: 54.0, fat: 7.5, defGrams: 100, hint: '1 Adet Simit ≈ 100g' },
+  { name: 'Peynirli Su Böreği / Tepsi Böreği', cat: 'tahil', kcal: 275, protein: 9.8, carbs: 28.5, fat: 13.5, defGrams: 150, hint: '1 Dilim ≈ 150g' },
+  { name: 'Peynirli / Zeytinli Poğaça', cat: 'tahil', kcal: 345, protein: 7.5, carbs: 41.0, fat: 16.5, defGrams: 80, hint: '1 Adet ≈ 80g' },
+
+  // 🥦 SEBZELER, BİBER, SOĞAN, PATATES & SALATALAR (32 Besin)
+  { name: 'Yeşil Biber (Sivri / Çarliston)', cat: 'sebze', kcal: 20, protein: 0.9, carbs: 4.6, fat: 0.2, defGrams: 50, hint: '2 Adet Biber ≈ 50g' },
+  { name: 'Kırmızı Kapya Biber (Çiğ / Közlenmiş)', cat: 'sebze', kcal: 31, protein: 1.0, carbs: 6.0, fat: 0.3, defGrams: 80, hint: '1 Büyük Kapya ≈ 80g' },
+  { name: 'Dolmalık Biber', cat: 'sebze', kcal: 22, protein: 0.9, carbs: 4.8, fat: 0.2, defGrams: 60, hint: '1-2 Adet ≈ 60g' },
+  { name: 'Kuru Soğan (Çiğ / Yemeklik)', cat: 'sebze', kcal: 40, protein: 1.1, carbs: 9.3, fat: 0.1, defGrams: 75, hint: '1 Orta Boy Soğan ≈ 75g' },
+  { name: 'Taze Yeşil Soğan', cat: 'sebze', kcal: 32, protein: 1.8, carbs: 7.3, fat: 0.2, defGrams: 40, hint: '3-4 Dal ≈ 40g' },
+  { name: 'Soğan & Biber Sote (Zeytinyağlı Pişmiş)', cat: 'sebze', kcal: 78, protein: 1.3, carbs: 8.5, fat: 4.2, defGrams: 100, hint: '1 Porsiyon ≈ 100g' },
+  { name: 'Domates', cat: 'sebze', kcal: 18, protein: 0.9, carbs: 3.9, fat: 0.2, defGrams: 120, hint: '1 Orta Domates ≈ 120g' },
+  { name: 'Çeri (Cherry) Domates', cat: 'sebze', kcal: 20, protein: 1.0, carbs: 4.2, fat: 0.2, defGrams: 100, hint: '6-7 Adet ≈ 100g' },
+  { name: 'Salatalık (Hıyar)', cat: 'sebze', kcal: 15, protein: 0.7, carbs: 3.6, fat: 0.1, defGrams: 120, hint: '1 Adet ≈ 120g' },
+  { name: 'Kıvırcık Marul / Göbek Salata', cat: 'sebze', kcal: 15, protein: 1.4, carbs: 2.9, fat: 0.2, defGrams: 80, hint: '1 Kase ≈ 80g' },
+  { name: 'Roka / Maydanoz / Dereotu / Yeşillik', cat: 'sebze', kcal: 25, protein: 2.6, carbs: 3.7, fat: 0.6, defGrams: 50, hint: '1 Demet/Kase ≈ 50g' },
+  { name: 'Havuç (Çiğ / Rendelenmiş)', cat: 'sebze', kcal: 41, protein: 0.9, carbs: 9.6, fat: 0.2, defGrams: 80, hint: '1 Orta Havuç ≈ 80g' },
+  { name: 'Brokoli (Haşlanmış / Buharda)', cat: 'sebze', kcal: 35, protein: 2.4, carbs: 7.2, fat: 0.4, defGrams: 150, hint: '1 Tabak ≈ 150g' },
+  { name: 'Karnabahar (Haşlanmış / Fırın)', cat: 'sebze', kcal: 25, protein: 1.9, carbs: 5.0, fat: 0.3, defGrams: 150, hint: '1 Tabak ≈ 150g' },
+  { name: 'Kabak (Izgara / Haşlama)', cat: 'sebze', kcal: 19, protein: 1.2, carbs: 3.5, fat: 0.3, defGrams: 150, hint: '1 Adet ≈ 150g' },
+  { name: 'Patlıcan (Közlenmiş / Izgara)', cat: 'sebze', kcal: 35, protein: 1.0, carbs: 8.2, fat: 0.2, defGrams: 150, hint: '1 Porsiyon ≈ 150g' },
+  { name: 'Ispanak (Çiğ / Haşlanmış)', cat: 'sebze', kcal: 23, protein: 2.9, carbs: 3.6, fat: 0.4, defGrams: 100, hint: '100g' },
+  { name: 'Kültür Mantarı (Çiğ / Izgara)', cat: 'sebze', kcal: 22, protein: 3.1, carbs: 3.3, fat: 0.3, defGrams: 100, hint: '100g' },
+  { name: 'Mantar Sote (Biberli Soğanlı)', cat: 'sebze', kcal: 68, protein: 3.5, carbs: 5.2, fat: 3.8, defGrams: 180, hint: '1 Tabak ≈ 180g' },
+  { name: 'Haşlanmış Patates', cat: 'sebze', kcal: 87, protein: 1.9, carbs: 20.1, fat: 0.1, defGrams: 200, hint: '1 Orta/Büyük ≈ 200g' },
+  { name: 'Fırında Elma Dilim Patates', cat: 'sebze', kcal: 128, protein: 2.4, carbs: 22.5, fat: 3.2, defGrams: 180, hint: '1 Porsiyon ≈ 180g' },
+  { name: 'Patates Kızartması', cat: 'sebze', kcal: 312, protein: 3.4, carbs: 41.0, fat: 15.0, defGrams: 120, hint: '1 Porsiyon ≈ 120g' },
+  { name: 'Tatlı Patates (Fırın / Haşlama)', cat: 'sebze', kcal: 86, protein: 1.6, carbs: 20.1, fat: 0.1, defGrams: 180, hint: '1 Porsiyon ≈ 180g' },
+  { name: 'Haşlanmış Mısır (Tane)', cat: 'sebze', kcal: 96, protein: 3.4, carbs: 21.0, fat: 1.5, defGrams: 100, hint: '1 Kase ≈ 100g' },
+  { name: 'Haşlanmış Bezelye', cat: 'sebze', kcal: 81, protein: 5.4, carbs: 14.5, fat: 0.4, defGrams: 100, hint: '1 Kase ≈ 100g' },
+  { name: 'Avokado', cat: 'sebze', kcal: 160, protein: 2.0, carbs: 8.5, fat: 14.7, defGrams: 100, hint: 'Yarım/Tam ≈ 100g' },
+  { name: 'Sarımsak', cat: 'sebze', kcal: 149, protein: 6.4, carbs: 33.1, fat: 0.5, defGrams: 10, hint: '2-3 Diş ≈ 10g' },
+  { name: 'Brüksel Lahanası / Kuşkonmaz', cat: 'sebze', kcal: 38, protein: 3.0, carbs: 7.0, fat: 0.3, defGrams: 120, hint: '1 Porsiyon ≈ 120g' },
+  { name: 'Pancar (Haşlanmış / Turşu)', cat: 'sebze', kcal: 43, protein: 1.6, carbs: 9.6, fat: 0.2, defGrams: 100, hint: '100g' },
+  { name: 'Çoban Salata (Zeytinyağlı)', cat: 'sebze', kcal: 48, protein: 1.0, carbs: 4.5, fat: 3.0, defGrams: 200, hint: '1 Kase ≈ 200g' },
+  { name: 'Mevsim / Yeşil Salata (Az Yağlı)', cat: 'sebze', kcal: 38, protein: 1.2, carbs: 4.0, fat: 2.0, defGrams: 180, hint: '1 Kase ≈ 180g' },
+  { name: 'Ton Balıklı / Tavuklu Salata', cat: 'sebze', kcal: 112, protein: 14.5, carbs: 4.8, fat: 3.8, defGrams: 280, hint: '1 Büyük Kase ≈ 280g' },
+
+  // 🍎 MEYVELER & KURUYEMİŞLER (30 Besin)
+  { name: 'Muz', cat: 'meyve', kcal: 89, protein: 1.1, carbs: 22.8, fat: 0.3, defGrams: 120, hint: '1 Orta Muz ≈ 120g' },
+  { name: 'Elma (Kırmızı / Yeşil)', cat: 'meyve', kcal: 52, protein: 0.3, carbs: 13.8, fat: 0.2, defGrams: 150, hint: '1 Orta Elma ≈ 150g' },
+  { name: 'Portakal', cat: 'meyve', kcal: 47, protein: 0.9, carbs: 11.8, fat: 0.1, defGrams: 160, hint: '1 Adet ≈ 160g' },
+  { name: 'Mandalina', cat: 'meyve', kcal: 53, protein: 0.8, carbs: 13.3, fat: 0.3, defGrams: 100, hint: '2 Küçük Adet ≈ 100g' },
+  { name: 'Çilek', cat: 'meyve', kcal: 32, protein: 0.7, carbs: 7.7, fat: 0.3, defGrams: 150, hint: '1 Kase ≈ 150g' },
+  { name: 'Karpuz', cat: 'meyve', kcal: 30, protein: 0.6, carbs: 7.6, fat: 0.2, defGrams: 250, hint: '1 Dilim ≈ 250g' },
+  { name: 'Kavun', cat: 'meyve', kcal: 34, protein: 0.8, carbs: 8.2, fat: 0.2, defGrams: 200, hint: '1 Dilim ≈ 200g' },
+  { name: 'Üzüm (Yeşil / Siyah)', cat: 'meyve', kcal: 69, protein: 0.7, carbs: 18.1, fat: 0.2, defGrams: 120, hint: '1 Küçük Salkım ≈ 120g' },
+  { name: 'Şeftali / Nektarin', cat: 'meyve', kcal: 39, protein: 0.9, carbs: 9.5, fat: 0.3, defGrams: 150, hint: '1 Adet ≈ 150g' },
+  { name: 'Kayısı (Taze)', cat: 'meyve', kcal: 48, protein: 1.4, carbs: 11.1, fat: 0.4, defGrams: 100, hint: '3-4 Adet ≈ 100g' },
+  { name: 'Kuru Kayısı / Gün Kurusu', cat: 'meyve', kcal: 241, protein: 3.4, carbs: 62.6, fat: 0.5, defGrams: 40, hint: '4 Adet ≈ 40g' },
+  { name: 'Kuru İncir', cat: 'meyve', kcal: 249, protein: 3.3, carbs: 63.9, fat: 0.9, defGrams: 40, hint: '2 Adet ≈ 40g' },
+  { name: 'Hurma (Medine / Kudüs)', cat: 'meyve', kcal: 282, protein: 2.5, carbs: 75.0, fat: 0.4, defGrams: 30, hint: '3 Adet Hurma ≈ 30g' },
+  { name: 'Kivi', cat: 'meyve', kcal: 61, protein: 1.1, carbs: 14.7, fat: 0.5, defGrams: 90, hint: '1 Adet ≈ 90g' },
+  { name: 'Ananas', cat: 'meyve', kcal: 50, protein: 0.5, carbs: 13.1, fat: 0.1, defGrams: 150, hint: '2 Dilim ≈ 150g' },
+  { name: 'Yaban Mersini (Blueberry)', cat: 'meyve', kcal: 57, protein: 0.7, carbs: 14.5, fat: 0.3, defGrams: 100, hint: '1 Küçük Kase ≈ 100g' },
+  { name: 'Kiraz / Vişne', cat: 'meyve', kcal: 63, protein: 1.1, carbs: 16.0, fat: 0.2, defGrams: 120, hint: '1 Kase ≈ 120g' },
+  { name: 'Erik (Yeşil / Kırmızı)', cat: 'meyve', kcal: 46, protein: 0.7, carbs: 11.4, fat: 0.3, defGrams: 100, hint: '1 Kase ≈ 100g' },
+  { name: 'Armut', cat: 'meyve', kcal: 57, protein: 0.4, carbs: 15.2, fat: 0.1, defGrams: 160, hint: '1 Adet ≈ 160g' },
+  { name: 'Nar (Ayıklanmış)', cat: 'meyve', kcal: 83, protein: 1.7, carbs: 18.7, fat: 1.2, defGrams: 120, hint: '1 Kase ≈ 120g' },
+  { name: 'Ceviz İçi', cat: 'meyve', kcal: 654, protein: 15.2, carbs: 13.7, fat: 65.2, defGrams: 30, hint: '1 Avuç (5-6 Tam) ≈ 30g' },
+  { name: 'Çiğ Badem', cat: 'meyve', kcal: 579, protein: 21.2, carbs: 21.6, fat: 49.9, defGrams: 30, hint: '1 Avuç (20 Adet) ≈ 30g' },
+  { name: 'Kavrulmuş / Çiğ Fındık', cat: 'meyve', kcal: 628, protein: 15.0, carbs: 16.7, fat: 60.8, defGrams: 30, hint: '1 Avuç ≈ 30g' },
+  { name: 'Yer Fıstığı', cat: 'meyve', kcal: 567, protein: 25.8, carbs: 16.1, fat: 49.2, defGrams: 30, hint: '1 Avuç ≈ 30g' },
+  { name: 'Kaju', cat: 'meyve', kcal: 553, protein: 18.2, carbs: 30.2, fat: 43.9, defGrams: 30, hint: '1 Avuç ≈ 30g' },
+  { name: 'Antep Fıstığı', cat: 'meyve', kcal: 560, protein: 20.2, carbs: 27.2, fat: 45.3, defGrams: 30, hint: '1 Avuç ≈ 30g' },
+  { name: 'Kabak Çekirdeği İçi', cat: 'meyve', kcal: 559, protein: 30.2, carbs: 10.7, fat: 49.0, defGrams: 30, hint: '1 Avuç ≈ 30g' },
+  { name: 'Ay Çekirdeği İçi', cat: 'meyve', kcal: 584, protein: 20.8, carbs: 20.0, fat: 51.5, defGrams: 30, hint: '1 Avuç ≈ 30g' },
+  { name: 'Chia Tohumu', cat: 'meyve', kcal: 486, protein: 16.5, carbs: 42.1, fat: 30.7, defGrams: 15, hint: '1 Yemek Kaşığı ≈ 15g' },
+  { name: 'Keten Tohumu', cat: 'meyve', kcal: 534, protein: 18.3, carbs: 28.9, fat: 42.2, defGrams: 15, hint: '1 Yemek Kaşığı ≈ 15g' },
+
+  // 🥛 SÜT ÜRÜNLERİ, YAĞLAR, TATLILAR & SPORCU SUPPLEMENTLERİ (20 Besin)
+  { name: 'Ev Yoğurdu / Tam Yağlı Yoğurt', cat: 'sut', kcal: 61, protein: 3.5, carbs: 4.7, fat: 3.3, defGrams: 200, hint: '1 Kase ≈ 200g' },
+  { name: 'Süzme Yoğurt', cat: 'sut', kcal: 115, protein: 8.5, carbs: 4.2, fat: 7.0, defGrams: 150, hint: '1 Kase ≈ 150g' },
+  { name: 'Yüksek Proteinli Sporcu Yoğurdu / Quark', cat: 'sut', kcal: 72, protein: 10.5, carbs: 4.0, fat: 1.2, defGrams: 150, hint: '1 Kutu ≈ 150g' },
+  { name: 'Cacık (Yoğurtlu Salatalıklı)', cat: 'sut', kcal: 45, protein: 2.5, carbs: 3.8, fat: 2.2, defGrams: 200, hint: '1 Kase ≈ 200g' },
+  { name: 'Ayran', cat: 'sut', kcal: 37, protein: 2.0, carbs: 2.8, fat: 2.0, defGrams: 250, hint: '1 Bardak ≈ 250ml' },
+  { name: 'Kefir (Sade)', cat: 'sut', kcal: 52, protein: 3.3, carbs: 4.5, fat: 2.4, defGrams: 250, hint: '1 Bardak ≈ 250ml' },
+  { name: 'Tam Yağlı Süt', cat: 'sut', kcal: 61, protein: 3.2, carbs: 4.8, fat: 3.3, defGrams: 200, hint: '1 Su Bardağı ≈ 200ml' },
+  { name: 'Yarım Yağlı / Light Süt', cat: 'sut', kcal: 46, protein: 3.3, carbs: 4.9, fat: 1.5, defGrams: 200, hint: '1 Su Bardağı ≈ 200ml' },
+  { name: 'Proteinli Süt (Kakaolu/Vanilyalı)', cat: 'sut', kcal: 62, protein: 7.0, carbs: 5.2, fat: 1.2, defGrams: 500, hint: '1 Şişe ≈ 500ml' },
+  { name: 'Zeytinyağı (Sızma)', cat: 'sut', kcal: 884, protein: 0.0, carbs: 0.0, fat: 100.0, defGrams: 10, hint: '1 Yemek Kaşığı ≈ 10g' },
+  { name: 'Hindistan Cevizi Yağı', cat: 'sut', kcal: 862, protein: 0.0, carbs: 0.0, fat: 100.0, defGrams: 10, hint: '1 Yemek Kaşığı ≈ 10g' },
+  { name: 'Whey Protein Tozu (1 Ölçek ≈ 30g)', cat: 'sut', kcal: 390, protein: 78.0, carbs: 7.0, fat: 5.5, defGrams: 30, hint: '1 Ölçek ≈ 30g (23.4g P)' },
+  { name: 'İzole Whey Protein Tozu', cat: 'sut', kcal: 375, protein: 86.0, carbs: 2.5, fat: 1.5, defGrams: 30, hint: '1 Ölçek ≈ 30g (25.8g P)' },
+  { name: 'Casein (Kazein) Protein Tozu', cat: 'sut', kcal: 365, protein: 76.0, carbs: 6.0, fat: 3.0, defGrams: 30, hint: '1 Ölçek ≈ 30g' },
+  { name: 'Protein Bar (Şekersiz Sporcu Barı)', cat: 'sut', kcal: 360, protein: 34.0, carbs: 32.0, fat: 11.0, defGrams: 60, hint: '1 Bar ≈ 60g (20g P)' },
+  { name: 'Gainer (Karbonhidrat & Kilo Hacim Tozu)', cat: 'sut', kcal: 385, protein: 18.0, carbs: 72.0, fat: 2.5, defGrams: 100, hint: '1 Servis ≈ 100g' },
+  { name: 'Bitter Çikolata (%70-%80 Kakao)', cat: 'sut', kcal: 598, protein: 7.8, carbs: 45.9, fat: 42.6, defGrams: 30, hint: '3-4 Kare ≈ 30g' },
+  { name: 'Sütlü Çikolata', cat: 'sut', kcal: 535, protein: 7.6, carbs: 59.4, fat: 29.7, defGrams: 30, hint: '3-4 Kare ≈ 30g' },
+  { name: 'Fırın Sütlaç / Kazandibi', cat: 'sut', kcal: 145, protein: 3.8, carbs: 25.0, fat: 3.2, defGrams: 200, hint: '1 Kase ≈ 200g' },
+  { name: 'Baklava (Fıstıklı / Cevizli)', cat: 'sut', kcal: 428, protein: 6.5, carbs: 52.0, fat: 22.0, defGrams: 80, hint: '2 Dilim ≈ 80g' }
+];
+
+let currentFoodCatFilter = 'all';
+let selectedFoodObj = FOOD_DATABASE_TR[0];
+
+function getCombinedFoodDatabase() {
+  const custom = Array.isArray(appData.customFoodDB) ? appData.customFoodDB : [];
+  return [...custom, ...FOOD_DATABASE_TR];
+}
+
+function openFoodTrackerQuick() {
+  switchLeftHubMode('sport');
+  setTimeout(() => {
+    const card = document.getElementById('foodMacroTrackerCard');
+    const inp = document.getElementById('foodSearchInput');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (inp) {
+      inp.focus();
+      onFoodSearchInput();
+    }
+  }, 80);
+}
+
+function setFoodCategoryFilter(cat, btnEl) {
+  currentFoodCatFilter = cat;
+  document.querySelectorAll('.food-cat-chip').forEach((b) => {
+    const active = b.getAttribute('data-cat') === cat;
+    b.style.background = active ? 'var(--accent-cream)' : 'var(--bg-surface)';
+    b.style.color = active ? '#121218' : 'var(--text-main)';
+  });
+  onFoodSearchInput();
+}
+
+function onFoodSearchInput() {
+  const inp = document.getElementById('foodSearchInput');
+  const drop = document.getElementById('foodSearchDropdown');
+  if (!inp || !drop) return;
+
+  const q = (inp.value || '').toLowerCase().trim();
+  const all = getCombinedFoodDatabase();
+
+  let filtered = all.filter((f) => {
+    if (currentFoodCatFilter !== 'all' && f.cat !== currentFoodCatFilter) return false;
+    if (!q) return true;
+    return f.name.toLowerCase().includes(q);
+  });
+
+  if (filtered.length === 0) {
+    drop.classList.add('open');
+    drop.innerHTML = `<div style="font-size:11px;color:var(--text-muted);padding:8px;text-align:center;">Sonuç bulunamadı. Sağ üstten <b>+ Özel Besin Tanımla</b> ile ekleyebilirsin!</div>`;
+    return;
+  }
+
+  // Eğer arama tam eşleşiyorsa veya ilk sonuç varsa seçili besini güncelle
+  selectedFoodObj = filtered[0];
+  updateFoodLiveMacroPreview();
+
+  drop.classList.add('open');
+  drop.innerHTML = filtered.slice(0, 35).map((f, idx) => `
+    <div class="food-dropdown-item ${idx === 0 ? 'selected' : ''}" onclick="selectFoodFromDropdown('${escapeHtml(f.name).replace(/'/g, "\\'")}')">
+      <div>
+        <div style="font-weight:800;color:var(--text-main);">${escapeHtml(f.name)}</div>
+        <div style="font-size:10px;color:var(--text-muted);">100g: 🔥${f.kcal} kcal • 🥩${f.protein}g P • 🍞${f.carbs}g K • 🥑${f.fat}g Y ${f.hint ? `(${escapeHtml(f.hint)})` : ''}</div>
+      </div>
+      <span style="font-size:10.5px;font-weight:800;color:#95de64;flex-shrink:0;">Seç ↵</span>
+    </div>
+  `).join('');
+}
+
+function selectFoodFromDropdown(foodName) {
+  const all = getCombinedFoodDatabase();
+  const found = all.find((f) => f.name === foodName);
+  if (!found) return;
+  selectedFoodObj = found;
+
+  const inp = document.getElementById('foodSearchInput');
+  const gInp = document.getElementById('foodGramsInput');
+  const drop = document.getElementById('foodSearchDropdown');
+
+  if (inp) inp.value = found.name;
+  if (gInp && found.defGrams) gInp.value = found.defGrams;
+  if (drop) drop.classList.remove('open');
+
+  updateFoodLiveMacroPreview();
+}
+
+function setQuickFoodGrams(grams) {
+  const gInp = document.getElementById('foodGramsInput');
+  if (gInp) gInp.value = grams;
+  updateFoodLiveMacroPreview();
+}
+
+function updateFoodLiveMacroPreview() {
+  const prevEl = document.getElementById('foodLiveMacroPreview');
+  const gInp = document.getElementById('foodGramsInput');
+  if (!prevEl || !selectedFoodObj) return;
+
+  const grams = Math.max(1, parseFloat(gInp ? gInp.value : '100') || 100);
+  const ratio = grams / 100;
+  const kcal = Math.round(selectedFoodObj.kcal * ratio);
+  const prot = (selectedFoodObj.protein * ratio).toFixed(1);
+  const carb = (selectedFoodObj.carbs * ratio).toFixed(1);
+  const fat = (selectedFoodObj.fat * ratio).toFixed(1);
+
+  prevEl.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">
+      <span>📌 <b>${grams}g ${escapeHtml(selectedFoodObj.name)}</b>:</span>
+      <span>🔥 <b style="color:#ffc069;">${kcal} kcal</b> | 🥩 <b style="color:#ff9c6e;">${prot}g P</b> | 🍞 <b style="color:#93c5fd;">${carb}g K</b> | 🥑 <b style="color:#95de64;">${fat}g Y</b></span>
+    </div>
+  `;
+}
+
+function addSelectedFoodToDailyLog() {
+  const inp = document.getElementById('foodSearchInput');
+  const gInp = document.getElementById('foodGramsInput');
+  const drop = document.getElementById('foodSearchDropdown');
+
+  const query = (inp ? inp.value : '').trim();
+  const all = getCombinedFoodDatabase();
+  let food = selectedFoodObj;
+  if (query) {
+    const exact = all.find((f) => f.name.toLowerCase() === query.toLowerCase()) ||
+                  all.find((f) => f.name.toLowerCase().includes(query.toLowerCase()));
+    if (exact) food = exact;
+  }
+  if (!food) {
+    alert('Lütfen listeden bir yemek veya besin seçin!');
+    return;
+  }
+
+  const grams = Math.max(1, parseFloat(gInp ? gInp.value : '100') || 100);
+  const ratio = grams / 100;
+  const kcal = Math.round(food.kcal * ratio);
+  const protein = Number((food.protein * ratio).toFixed(1));
+  const carbs = Number((food.carbs * ratio).toFixed(1));
+  const fat = Number((food.fat * ratio).toFixed(1));
+
+  const targetDate = selectedDate || getTodayISO();
+  if (!appData.dailyFoods || typeof appData.dailyFoods !== 'object') {
+    appData.dailyFoods = {};
+  }
+  if (!Array.isArray(appData.dailyFoods[targetDate])) {
+    appData.dailyFoods[targetDate] = [];
+  }
+
+  const prevProt = appData.proteinGrams || 0;
+  appData.dailyFoods[targetDate].unshift({
+    id: 'fd_' + Date.now(),
+    name: food.name,
+    grams,
+    kcal,
+    protein,
+    carbs,
+    fat
+  });
+
+  if (targetDate === getTodayISO()) {
+    appData.proteinDate = targetDate;
+    appData.proteinGrams = Math.round((appData.proteinGrams || 0) + protein);
+  }
+
+  if (inp) inp.value = '';
+  if (drop) drop.classList.remove('open');
+
+  playAlertTone('success');
+  syncTodayDailyLog(targetDate);
+  renderProteinTracker();
+  renderFoodMacroTracker();
+  renderSelectedDayDailyValuesBar();
+  if (currentViewName === 'archive') renderArchive();
+  saveProfileData();
+
+  checkFoodCoachMilestone(food.name, grams, kcal, protein, prevProt, appData.proteinGrams || 0);
+}
+
+function removeDailyFoodItem(idx) {
+  const targetDate = selectedDate || getTodayISO();
+  if (!appData.dailyFoods || !Array.isArray(appData.dailyFoods[targetDate])) return;
+  const removed = appData.dailyFoods[targetDate][idx];
+  if (!removed) return;
+
+  appData.dailyFoods[targetDate].splice(idx, 1);
+  if (targetDate === getTodayISO()) {
+    appData.proteinGrams = Math.max(0, Math.round((appData.proteinGrams || 0) - (Number(removed.protein) || 0)));
+  }
+
+  syncTodayDailyLog(targetDate);
+  renderProteinTracker();
+  renderFoodMacroTracker();
+  renderSelectedDayDailyValuesBar();
+  if (currentViewName === 'archive') renderArchive();
+  saveProfileData();
+}
+
+function promptAddCustomFoodToDB() {
+  const name = prompt('Yeni yemek veya besin adı (Örn: Annemin Mercimek Çorbası / Özel Protein Shake):');
+  if (!name || !name.trim()) return;
+  const kcal = parseFloat(prompt('100 gramı için Kalori (kcal) değeri:', '150') || '150') || 150;
+  const protein = parseFloat(prompt('100 gramı için Protein (g) değeri:', '12') || '12') || 0;
+  const carbs = parseFloat(prompt('100 gramı için Karbonhidrat (g) değeri:', '15') || '15') || 0;
+  const fat = parseFloat(prompt('100 gramı için Yağ (g) değeri:', '5') || '5') || 0;
+
+  if (!Array.isArray(appData.customFoodDB)) appData.customFoodDB = [];
+  const newFood = {
+    name: name.trim(),
+    cat: 'yemek',
+    kcal,
+    protein,
+    carbs,
+    fat,
+    defGrams: 100,
+    hint: 'Özel Besin (100g)'
+  };
+  appData.customFoodDB.unshift(newFood);
+  selectedFoodObj = newFood;
+  const inp = document.getElementById('foodSearchInput');
+  if (inp) inp.value = newFood.name;
+  updateFoodLiveMacroPreview();
+  saveProfileData();
+  alert(`✅ "${newFood.name}" besin veritabanına eklendi! Şimdi gramajını girip "+ Ekle"ye basabilirsin.`);
+}
+
+function renderFoodMacroTracker() {
+  const targetDate = selectedDate || getTodayISO();
+  const listEl = document.getElementById('dailyEatenFoodsList');
+  const kcalEl = document.getElementById('dailyTotalKcalText');
+  const protEl = document.getElementById('dailyTotalProtText');
+  const carbEl = document.getElementById('dailyTotalCarbText');
+  const fatEl = document.getElementById('dailyTotalFatText');
+  if (!listEl) return;
+
+  const foods = (appData.dailyFoods && Array.isArray(appData.dailyFoods[targetDate])) ? appData.dailyFoods[targetDate] : [];
+  const totals = foods.reduce((acc, f) => {
+    acc.kcal += Number(f.kcal) || 0;
+    acc.prot += Number(f.protein) || 0;
+    acc.carb += Number(f.carbs) || 0;
+    acc.fat += Number(f.fat) || 0;
+    return acc;
+  }, { kcal: 0, prot: 0, carb: 0, fat: 0 });
+
+  if (kcalEl) kcalEl.textContent = `${Math.round(totals.kcal)} kcal`;
+  if (protEl) protEl.textContent = `${totals.prot.toFixed(1)}g`;
+  if (carbEl) carbEl.textContent = `${totals.carb.toFixed(1)}g`;
+  if (fatEl) fatEl.textContent = `${totals.fat.toFixed(1)}g`;
+
+  updateFoodLiveMacroPreview();
+
+  if (foods.length === 0) {
+    listEl.innerHTML = `<div style="font-size:11px;color:var(--text-muted);text-align:center;padding:6px;">Seçili gün (${targetDate}) için henüz yemek eklenmedi. Yukarıdan haşlanmış yumurta, tavuk sote, pilav, biber, soğan vb. arayıp gramajıyla ekle!</div>`;
+    return;
+  }
+
+  listEl.innerHTML = foods.map((f, idx) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;background:var(--bg-surface);padding:6px 9px;border-radius:9px;font-size:11.5px;">
+      <div style="min-width:0;flex:1;">
+        <div style="font-weight:800;color:var(--text-main);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🍽️ ${escapeHtml(f.name)} <span style="color:var(--accent-cream);">(${f.grams}g)</span></div>
+        <div style="font-size:10px;color:var(--text-muted);">🔥 ${Math.round(f.kcal)} kcal • 🥩 <b style="color:#ff9c6e;">${f.protein}g P</b> • 🍞 ${f.carbs}g K • 🥑 ${f.fat}g Y</div>
+      </div>
+      <button type="button" style="background:none;border:none;color:#ff7875;cursor:pointer;font-weight:900;font-size:14px;" onclick="removeDailyFoodItem(${idx})" title="Sil">×</button>
+    </div>
+  `).join('');
+}
+
+// ===== 29. 🤖 AKILLI KİŞİSEL KOÇ & SÜRPRİZ MOTİVASYON POP-UP SİSTEMİ (v18.0) =====
+let smartCoachTimer = null;
+
+function showSmartCoachPopup(icon, title, message, durationMs = 9500) {
+  const popup = document.getElementById('smartCoachPopup');
+  const iconEl = document.getElementById('smartCoachIcon');
+  const titleEl = document.getElementById('smartCoachTitle');
+  const bodyEl = document.getElementById('smartCoachBody');
+  if (!popup || !bodyEl) return;
+
+  if (iconEl) iconEl.textContent = icon || '🤖';
+  if (titleEl) titleEl.textContent = title || 'Kişisel Koç & Başarı Analizi';
+  bodyEl.innerHTML = message;
+
+  popup.classList.add('show');
+  if (smartCoachTimer) clearTimeout(smartCoachTimer);
+  smartCoachTimer = setTimeout(() => {
+    popup.classList.remove('show');
+  }, durationMs);
+}
+
+function closeSmartCoachPopup() {
+  const popup = document.getElementById('smartCoachPopup');
+  if (popup) popup.classList.remove('show');
+  if (smartCoachTimer) clearTimeout(smartCoachTimer);
+}
+
+function checkWaterCoachMilestone(prevCount, newCount, target) {
+  const name = escapeHtml(appData.profileName || appData.username || 'Şampiyon');
+  const liters = ((newCount * 250) / 1000).toFixed(2);
+  const targetLiters = ((target * 250) / 1000).toFixed(1);
+
+  if (prevCount < 4 && newCount >= 4 && newCount < 8) {
+    showSmartCoachPopup('💧', 'Harika Başlangıç, Devam Et!', `Bravo <b>${name}</b>! Bugün şimdiden <b>${newCount} bardak (${liters} Litre)</b> su içtin. Metabolizman ve zihnin tam kapasite çalışmaya başladı bile!`);
+  } else if (prevCount < 8 && newCount >= 8 && newCount < target) {
+    showSmartCoachPopup('🌊', 'Vay Be, 2 Litreyi Devirdin!', `Süper gidiyorsun <b>${name}</b>! Bugün <b>${newCount} bardak (${liters} Litre)</b> suya ulaştın. Günlük ${targetLiters}L hedefine çok az kaldı, aynen devam!`);
+  } else if (prevCount < target && newCount >= target) {
+    showSmartCoachPopup('🏆', 'Günlük Su Hedefi Tamamlandı!', `Helal olsun <b>${name}</b>! Bugün tam <b>${newCount} bardak (${liters} Litre)</b> su içerek günlük su hedefini %100 tamamladın! Vücudun ve kasların sana teşekkür ediyor!`);
+  }
+}
+
+function checkTaskCompletionCoachPopup(task) {
+  const name = escapeHtml(appData.profileName || appData.username || 'Şampiyon');
+  const today = getTodayISO();
+  const todayTasks = (appData.tasks || []).filter((t) => t.date === today);
+  const doneToday = todayTasks.filter((t) => t.completed).length;
+  const pct = todayTasks.length > 0 ? Math.round((doneToday / todayTasks.length) * 100) : 100;
+  const waterL = (((appData.waterCount || 0) * 250) / 1000).toFixed(2);
+
+  const isSport = task.category === 'Spor ve Sağlık' ||
+                  /antrenman|spor|push|pull|bacak|leg|full body|kardiyo|koşu|idman/i.test(task.title);
+
+  if (isSport) {
+    showSmartCoachPopup(
+      '💪',
+      'Vay Be, Antrenmanı Devirdin!',
+      `Muhteşem gidiyorsun <b>${name}</b>! Bugün <b>"${escapeHtml(task.title)}"</b> antrenmanını tamamladın. Bugün ayrıca <b>${waterL}L su</b> içtin ve <b>${appData.proteinGrams || 0}g protein</b> aldın. Kasların gelişiyor, disiplinin çelik gibi!`
+    );
+    return;
+  }
+
+  if (todayTasks.length > 0 && doneToday === todayTasks.length) {
+    showSmartCoachPopup(
+      '👑',
+      'Günün Tüm Görevlerini Bitirdin (%100)!',
+      `Vay be <b>${name}</b>, bugün planladığın <b>${todayTasks.length} görevin tamamını (%100)</b> eksiksiz tamamladın! Disiplin serin <b>🔥 ${appData.streak || 1} güne</b> çıktı. Kendinle gurur duyabilirsin!`
+    );
+  } else if (doneToday === 1 || doneToday === 3 || doneToday === 5) {
+    showSmartCoachPopup(
+      '🔥',
+      'Harika Tempo, Bravo Devam Et!',
+      `Vay be güzel gidiyorsun <b>${name}</b>! <b>"${escapeHtml(task.title)}"</b> göreviyle birlikte bugün <b>${doneToday}/${todayTasks.length} (%${pct})</b> görev tamamladın bile!`
+    );
+  }
+}
+
+function checkHabitCoachMilestone(habit, allDone) {
+  const name = escapeHtml(appData.profileName || appData.username || 'Şampiyon');
+  if (allDone) {
+    showSmartCoachPopup('🌟', 'Zinciri Kırmadın: Tüm Alışkanlıklar Tamam!', `Tebrikler <b>${name}</b>! Bugünkü tüm günlük alışkanlıklarını eksiksiz tikledin. Küçük alışkanlıklar büyük zaferler yaratır!`);
+  } else if (/antrenman|spor/i.test(habit.title)) {
+    showSmartCoachPopup('🏋️', 'Bugün Antrenman Tiklendi!', `Vay be güzel gidiyorsun <b>${name}</b>! Bugün antrenman alışkanlığını tamamladın. Su ve proteinini de eksik etme, bravo devam et!`);
+  }
+}
+
+function checkFoodCoachMilestone(foodName, grams, kcal, protAdded, prevProt, newProt) {
+  const name = escapeHtml(appData.profileName || appData.username || 'Şampiyon');
+  const targetProt = appData.proteinTarget || 160;
+
+  if (prevProt < targetProt && newProt >= targetProt) {
+    showSmartCoachPopup(
+      '🥩',
+      'Günlük Protein Hedefini Yakaladın!',
+      `Harika besleniyorsun <b>${name}</b>! <b>${grams}g ${escapeHtml(foodName)}</b> ile bugün toplam <b>${newProt}g proteine</b> ulaştın ve ${targetProt}g hedefini devirdin!`
+    );
+  } else if (prevProt < 100 && newProt >= 100) {
+    showSmartCoachPopup(
+      '🍽️',
+      '100 Gram Protein Barajı Aşıldı!',
+      `Vay be süper gidiyorsun <b>${name}</b>! <b>${grams}g ${escapeHtml(foodName)} (+${protAdded}g P)</b> eklendi. Bugün toplam <b>${newProt}g proteine</b> ulaştın, kas onarımı tam gaz devam ediyor!`
+    );
+  } else {
+    showSmartCoachPopup(
+      '🍽️',
+      'Öğün & Makro Kaydedildi!',
+      `Afiyet olsun <b>${name}</b>! <b>${grams}g ${escapeHtml(foodName)}</b> (🔥 ${kcal} kcal | 🥩 ${protAdded}g Protein) günlük değerlerine ve takvime otomatik işlendi.`
+    );
+  }
+}
+
+function triggerRandomPersonalInsightPopup() {
+  const name = escapeHtml(appData.profileName || appData.username || 'Şampiyon');
+  const today = getTodayISO();
+  const allTasks = appData.tasks || [];
+  const totalDoneAllTime = allTasks.filter((t) => t.completed).length;
+  const todayTasks = allTasks.filter((t) => t.date === today);
+  const todayDone = todayTasks.filter((t) => t.completed).length;
+  const waterCnt = appData.waterCount || 0;
+  const waterL = ((waterCnt * 250) / 1000).toFixed(2);
+  const prot = appData.proteinGrams || 0;
+  const streak = appData.streak || 1;
+  const sleep = appData.sleepHours !== undefined ? appData.sleepHours : 8;
+
+  // Son 7 gün su ve görev toplamı
+  let water7d = 0;
+  let done7d = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const tzOffset = d.getTimezoneOffset() * 60000;
+    const dStr = new Date(d - tzOffset).toISOString().split('T')[0];
+    const log = getDailyLogForArchiveDate(dStr);
+    water7d += log.waterCount || 0;
+    done7d += allTasks.filter((t) => t.date === dStr && t.completed).length;
+  }
+  const water7dLiters = ((water7d * 250) / 1000).toFixed(1);
+
+  // En çok görev bitirilen kategori
+  const catCounts = {};
+  allTasks.filter((t) => t.completed).forEach((t) => {
+    const c = t.category || 'İş & Proje';
+    catCounts[c] = (catCounts[c] || 0) + 1;
+  });
+  let topCat = 'Spor ve Sağlık';
+  let topCatMax = 0;
+  Object.keys(catCounts).forEach((c) => {
+    if (catCounts[c] > topCatMax) {
+      topCatMax = catCounts[c];
+      topCat = c;
+    }
+  });
+
+  const insights = [
+    {
+      icon: '💧',
+      title: 'Seninle İlgili İlginç Su & Sağlık İstatistiği',
+      msg: `Vay be <b>${name}</b>! Bugün <b>${waterCnt} bardak (${waterL}L)</b> su içtin, son 7 günde ise toplam <b>${water7dLiters} Litre (${water7d} bardak)</b> su tükettin! Bravo, vücuduna çok iyi bakıyorsun, aynen devam et!`
+    },
+    {
+      icon: '💪',
+      title: 'Kişisel Disiplin & Görev Analizin',
+      msg: `Harika gidiyorsun <b>${name}</b>! Şimdiye kadar toplam <b>${totalDoneAllTime} görevi</b> başarıyla devirdin (son 7 günde <b>${done7d} iş</b> bitti). En güçlü olduğun kategori: <b>${escapeHtml(topCat)}</b>!`
+    },
+    {
+      icon: '🥩',
+      title: 'Günlük Beslenme & Enerji Durumun',
+      msg: `Bugün şimdiye kadar <b>${prot}g protein</b> aldın, <b>${sleep} saat</b> uyudun ve enerji modun <b>${escapeHtml(appData.energyLevel || 'Yüksek')}</b>! Hedeflerine adım adım yaklaşıyorsun, pes etmek yok!`
+    },
+    {
+      icon: '🔥',
+      title: 'Aktif Seri & Bugünün Özeti',
+      msg: `Tam <b>${streak} gündür</b> disiplin serini bozmadın <b>${name}</b>! Bugün planlanan ${todayTasks.length} görevden ${todayDone} tanesini tamamladın. Her gün %1 daha iyiye gidiyorsun!`
+    }
+  ];
+
+  const pick = insights[Math.floor(Math.random() * insights.length)];
+  showSmartCoachPopup(pick.icon, pick.title, pick.msg, 11000);
+}
+
+// Dışarı tıklanınca besin arama listesini kapat
+document.addEventListener('click', (e) => {
+  const card = document.getElementById('foodMacroTrackerCard');
+  const drop = document.getElementById('foodSearchDropdown');
+  if (card && drop && !card.contains(e.target)) {
+    drop.classList.remove('open');
+  }
+});
 
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=17').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=18').catch(() => {});
   }
   await initDB();
 
@@ -4622,6 +5376,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     const saved = await loadProfileData(currentProfile);
     if (saved) {
       unlockApp();
+      setTimeout(() => {
+        triggerRandomPersonalInsightPopup();
+      }, 1800);
       return;
     }
   }
