@@ -1404,6 +1404,7 @@ function renderAll() {
   renderWeeklyScheduleGrid();
   renderVaultProgressPhotos();
   renderSevenDayTrendChart();
+  renderAchievementsVitrin();
   updateBentoCountsAndDailyProgress();
   renderOngoingTasks();
   if (showEisenhowerMatrix) renderEisenhowerMatrix();
@@ -1608,6 +1609,7 @@ function buildTaskCardHTML(t, isArchive) {
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           ${!isArchive ? `<button class="tag-badge" style="cursor:pointer;border:none;" onclick="togglePinTask('${t.id}')" title="Üste Sabitle">⭐</button>` : ''}
+          ${!isArchive ? `<button class="tag-badge" style="cursor:pointer;border:none;color:var(--accent-cream);" onclick="postponeTaskToTomorrow('${t.id}')" title="Tek Tıkla Yarına (+1 Gün) Ertele">↪️ Yarın</button>` : ''}
           ${!isArchive ? `<button class="tag-badge" style="cursor:pointer;border:none;" onclick="focusTaskInPomodoro('${t.id}')">⏱️ Odak</button>` : ''}
           <button class="tag-badge" style="cursor:pointer;border:none;" onclick="openTaskModal('${t.id}')">✏️ Düzenle</button>
           <button class="tag-badge" style="cursor:pointer;border:none;color:#ff7875;" onclick="deleteTask('${t.id}')">🗑️ Sil</button>
@@ -4097,9 +4099,211 @@ function renderSevenDayTrendChart() {
   wrap.innerHTML = cols.join('');
 }
 
+// ----------------------------------------------------------------------------
+// 17. v16.0 ÖZELLİKLERİ: TEK TUŞLA YARINA ERTELE, 1RM & MAKRO HESAPLAYICI,
+//     ROZET & BAŞARIM KOLEKSİYONU, TÜRKÇE SESLİ GÜNLÜK BRİFİNG ASİSTANI
+// ----------------------------------------------------------------------------
+
+// 1) ⚡ GÖREVİ TEK TUŞLA YARINA (+1 GÜN) ERTELEME
+function postponeTaskToTomorrow(taskId) {
+  const t = appData.tasks.find((x) => x.id === taskId);
+  if (!t) return;
+  const base = new Date((t.date || getTodayISO()) + 'T00:00:00');
+  base.setDate(base.getDate() + 1);
+  const tzOffset = base.getTimezoneOffset() * 60000;
+  const nextIso = new Date(base - tzOffset).toISOString().split('T')[0];
+
+  t.date = nextIso;
+  t.notified = false;
+  playAlertTone('notify');
+  saveProfileData();
+  renderAll();
+}
+
+// 2) 🏋️ 1RM (MAKSİMUM AĞIRLIK) & GÜNLÜK KALORİ/MAKRO HESAPLAYICI
+function switchSportCalcTab(tab) {
+  const box1rm = document.getElementById('sportCalc1RMBox');
+  const boxMacro = document.getElementById('sportCalcMacroBox');
+  const btn1rm = document.getElementById('btnCalc1RM');
+  const btnMacro = document.getElementById('btnCalcMacro');
+  if (!box1rm || !boxMacro) return;
+
+  if (tab === 'macro') {
+    box1rm.style.display = 'none';
+    boxMacro.style.display = 'block';
+    if (btn1rm) { btn1rm.style.background = 'var(--bg-surface)'; btn1rm.style.color = 'var(--text-main)'; }
+    if (btnMacro) { btnMacro.style.background = 'var(--accent-cream)'; btnMacro.style.color = '#14141c'; }
+  } else {
+    box1rm.style.display = 'block';
+    boxMacro.style.display = 'none';
+    if (btn1rm) { btn1rm.style.background = 'var(--accent-cream)'; btn1rm.style.color = '#14141c'; }
+    if (btnMacro) { btnMacro.style.background = 'var(--bg-surface)'; btnMacro.style.color = 'var(--text-main)'; }
+  }
+}
+
+function calculateOneRepMax() {
+  const w = parseFloat(document.getElementById('calc1RMWeight').value || '0');
+  const r = parseInt(document.getElementById('calc1RMReps').value || '0', 10);
+  const resEl = document.getElementById('calc1RMResult');
+  if (!resEl) return;
+
+  if (w <= 0 || r <= 0) {
+    resEl.innerHTML = `<span style="color:#ff7875;">Lütfen geçerli bir ağırlık (kg) ve tekrar sayısı girin.</span>`;
+    return;
+  }
+
+  const oneRM = r === 1 ? w : Math.round(w * (1 + r / 30));
+  const hypertrophy = Math.round(oneRM * 0.75);
+  const strength = Math.round(oneRM * 0.85);
+
+  resEl.innerHTML = `
+    <div style="background:var(--bg-surface);padding:8px 10px;border-radius:10px;margin-top:4px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+      <div>
+        🔥 <b>Tahmini 1RM: <span style="color:#ff9c6e;font-size:14px;">${oneRM} kg</span></b><br>
+        <span style="font-size:11px;color:var(--text-muted);">Hipertrofi (%75): <b>${hypertrophy}kg</b> • Kuvvet (%85): <b>${strength}kg</b></span>
+      </div>
+      <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:4px 8px;background:rgba(96,165,250,0.2);color:#93c5fd;" onclick="saveCalculated1RMToPR(${oneRM})">+ PR Tablosuna Kaydet</button>
+    </div>
+  `;
+}
+
+function saveCalculated1RMToPR(oneRMVal) {
+  if (!Array.isArray(appData.bodyPrRecords)) appData.bodyPrRecords = [];
+  appData.bodyPrRecords.unshift({
+    id: 'pr_' + Date.now(),
+    type: '🏋️ Hesaplanan 1RM Rekoru',
+    value: `${oneRMVal} kg`,
+    date: getTodayISO()
+  });
+  playAlertTone('success');
+  renderBodyPrTracker();
+  renderGamificationRank();
+  saveProfileData();
+}
+
+function calculateDailyMacros() {
+  const w = parseFloat(document.getElementById('calcMacroWeight').value || '0');
+  const h = parseFloat(document.getElementById('calcMacroHeight').value || '0');
+  const goal = document.getElementById('calcMacroGoal').value;
+  const resEl = document.getElementById('calcMacroResult');
+  if (!resEl) return;
+
+  if (w < 30 || h < 100) {
+    resEl.innerHTML = `<span style="color:#ff7875;">Lütfen geçerli kilo (kg) ve boy (cm) girin.</span>`;
+    return;
+  }
+
+  // Mifflin-St Jeor + Orta Aktif Sporcu Çarpanı
+  const bmr = (10 * w) + (6.25 * h) - (5 * 26) + 5;
+  let tdee = Math.round(bmr * 1.55);
+  if (goal === 'cut') tdee -= 450;
+  if (goal === 'bulk') tdee += 350;
+
+  const proteinTarget = Math.round(w * (goal === 'cut' ? 2.1 : 1.9));
+
+  resEl.innerHTML = `
+    <div style="background:var(--bg-surface);padding:8px 10px;border-radius:10px;margin-top:4px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+      <div>
+        🔥 <b>Günlük Kalori: <span style="color:#95de64;">${tdee} kcal</span></b><br>
+        🥩 <b>İdeal Protein Hedefi: <span style="color:#ff9c6e;">${proteinTarget}g / gün</span></b>
+      </div>
+      <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:4px 8px;background:rgba(255,156,110,0.2);color:#ff9c6e;" onclick="applyCalculatedProteinTarget(${proteinTarget})">Hedefim Yap ✓</button>
+    </div>
+  `;
+}
+
+function applyCalculatedProteinTarget(newTarget) {
+  appData.proteinTarget = newTarget;
+  renderProteinTracker();
+  saveProfileData();
+  alert(`✅ Günlük protein hedefin ${newTarget}g olarak güncellendi!`);
+}
+
+// 3) 🏅 ROZET & BAŞARIM KOLEKSİYONU (ACHIEVEMENTS VİTRİNİ)
+function renderAchievementsVitrin() {
+  const grid = document.getElementById('achievementsGrid');
+  const badgeEl = document.getElementById('achievementsUnlockedBadge');
+  if (!grid || !badgeEl) return;
+
+  const doneTasks = (appData.tasks || []).filter((t) => t.completed).length;
+  const waterHit = (appData.waterCount || 0) >= (appData.waterTarget || 12);
+  const streakCount = appData.streak || 1;
+  const prCount = (appData.bodyPrRecords || []).length;
+  const goalStepDone = (appData.goals || []).some((g) => (g.steps || []).some((s) => s.done));
+  const libCount = (appData.libraryItems || []).some((b) => (b.current || 0) > 0);
+  const journalCount = (appData.microJournal || []).length;
+
+  const badges = [
+    { icon: '🌱', title: 'İlk Kıvılcım', desc: 'İlk görevini tamamla', unlocked: doneTasks >= 1 },
+    { icon: '⚡', title: 'Görev Avcısı', desc: '10 görev tamamla', unlocked: doneTasks >= 10 },
+    { icon: '👑', title: 'Plan Efsanesi', desc: '50 görev tamamla', unlocked: doneTasks >= 50 },
+    { icon: '💧', title: 'Su Disiplini', desc: 'Günlük su hedefine ulaş', unlocked: waterHit },
+    { icon: '🔥', title: 'Demir Seri', desc: '3+ gün üst üste seri yap', unlocked: streakCount >= 3 },
+    { icon: '🏋️', title: 'Sporcu Ruhu', desc: 'Kilo veya PR rekoru kaydet', unlocked: prCount >= 1 },
+    { icon: '🎯', title: 'Vizyoner', desc: 'Bir hedef adımını bitir', unlocked: goalStepDone },
+    { icon: '🌙', title: 'Öz Farkındalık', desc: 'Günün 1 cümle özetini yaz', unlocked: journalCount >= 1 || libCount }
+  ];
+
+  const unlockedCnt = badges.filter((b) => b.unlocked).length;
+  badgeEl.textContent = `${unlockedCnt} / ${badges.length} Rozet Açıldı`;
+
+  grid.innerHTML = badges.map((b) => `
+    <div style="background:var(--bg-surface);border:1px solid ${b.unlocked ? 'rgba(245,216,181,0.45)' : 'var(--border-color)'};border-radius:14px;padding:10px;text-align:center;opacity:${b.unlocked ? '1' : '0.42'};">
+      <div style="font-size:26px;">${b.unlocked ? b.icon : '🔒'}</div>
+      <div style="font-size:12px;font-weight:800;margin-top:4px;color:${b.unlocked ? 'var(--accent-cream)' : 'var(--text-main)'};">${b.title}</div>
+      <div style="font-size:10.5px;color:var(--text-muted);margin-top:2px;">${b.desc}</div>
+    </div>
+  `).join('');
+}
+
+// 4) 🔊 TÜRKÇE SESLİ GÜNLÜK BRİFİNG ASİSTANI (WEB SPEECH SYNTHESIS)
+function speakDailyBriefing() {
+  if (!('speechSynthesis' in window)) {
+    alert('Cihazınız sesli okuma (SpeechSynthesis) özelliğini desteklemiyor.');
+    return;
+  }
+
+  const btn = document.getElementById('voiceBriefingBtn');
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    if (btn) btn.textContent = '🔊 Sesli Brifing';
+    return;
+  }
+
+  const name = appData.profileName || appData.username || 'Dostum';
+  const dayTasks = (appData.tasks || []).filter((t) => t.date === selectedDate);
+  const doneCnt = dayTasks.filter((t) => t.completed).length;
+  const pending = dayTasks.filter((t) => !t.completed);
+  const waterCnt = appData.waterCount || 0;
+  const waterL = ((waterCnt * 250) / 1000).toFixed(1);
+
+  let speechText = `Merhaba ${name}! ${selectedDate} tarihi için toplam ${dayTasks.length} görevin var ve ${doneCnt} tanesini tamamladın. `;
+  if (pending.length > 0) {
+    const topTitles = pending.slice(0, 4).map((t) => (t.time ? `Saat ${t.time} ${t.title}` : t.title)).join(', ');
+    speechText += `Sıradaki bekleyen görevlerin: ${topTitles}. `;
+  } else {
+    speechText += `Bugün için bekleyen hiçbir görevin kalmadı, harika iş çıkardın! `;
+  }
+  speechText += `Bugün şimdiye kadar ${waterCnt} bardak, yani ${waterL} litre su içtin. Disiplinli ve enerjik bir gün dilerim!`;
+
+  const utter = new SpeechSynthesisUtterance(speechText);
+  utter.lang = 'tr-TR';
+  utter.rate = 1.02;
+  if (btn) btn.textContent = '⏹️ Okumayı Durdur';
+
+  utter.onend = () => {
+    if (btn) btn.textContent = '🔊 Sesli Brifing';
+  };
+  utter.onerror = () => {
+    if (btn) btn.textContent = '🔊 Sesli Brifing';
+  };
+
+  window.speechSynthesis.speak(utter);
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=15').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=16').catch(() => {});
   }
   await initDB();
 

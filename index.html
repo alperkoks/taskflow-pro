@@ -7,8 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>TaskFlow+ — Günlük Görev, Hedefler & Odak</title>
-  <link rel="manifest" href="manifest.json?v=15" />
-  <link rel="stylesheet" href="styles.css?v=15" />
+  <link rel="manifest" href="manifest.json?v=16" />
+  <link rel="stylesheet" href="styles.css?v=16" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -324,6 +324,42 @@
             <div id="weeklyScheduleGrid" class="weekly-schedule-grid"></div>
           </div>
 
+          <!-- 🏋️ 1RM (MAKSİMUM AĞIRLIK) & KALORİ/MAKRO HESAPLAYICI MİNİ ARAÇ -->
+          <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(255,156,110,0.35);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-weight:800;font-size:13px;">🏋️ 1RM & Kalori/Makro Hesaplayıcı</span>
+              <div style="display:flex;gap:4px;">
+                <button type="button" class="tag-badge" id="btnCalc1RM" style="border:none;cursor:pointer;padding:3px 8px;background:var(--accent-cream);color:#14141c;" onclick="switchSportCalcTab('1rm')">💪 1RM</button>
+                <button type="button" class="tag-badge" id="btnCalcMacro" style="border:none;cursor:pointer;padding:3px 8px;" onclick="switchSportCalcTab('macro')">🔥 Kalori/Makro</button>
+              </div>
+            </div>
+
+            <!-- 1RM Hesaplama Kutusu -->
+            <div id="sportCalc1RMBox">
+              <div style="display:flex;gap:6px;margin-bottom:6px;">
+                <input type="number" id="calc1RMWeight" class="form-input" style="padding:6px 8px;font-size:12px;" placeholder="Kaldırılan Kg (Örn: 80)" />
+                <input type="number" id="calc1RMReps" class="form-input" style="padding:6px 8px;font-size:12px;" placeholder="Tekrar (Örn: 8)" />
+                <button type="button" class="btn-cream" style="padding:6px 11px;font-size:12px;flex-shrink:0;" onclick="calculateOneRepMax()">Hesapla</button>
+              </div>
+              <div id="calc1RMResult" style="font-size:11.5px;color:var(--text-muted);">Ağırlık ve tekrar girerek 1 Tekrar Maksimumunu (1RM) ve ideal çalışma kilolarını öğren.</div>
+            </div>
+
+            <!-- Kalori & Makro (TDEE) Hesaplama Kutusu -->
+            <div id="sportCalcMacroBox" style="display:none;">
+              <div style="display:flex;gap:5px;margin-bottom:6px;flex-wrap:wrap;">
+                <input type="number" id="calcMacroWeight" class="form-input" style="flex:1;min-width:65px;padding:6px 8px;font-size:12px;" placeholder="Kilo (kg)" />
+                <input type="number" id="calcMacroHeight" class="form-input" style="flex:1;min-width:65px;padding:6px 8px;font-size:12px;" placeholder="Boy (cm)" />
+                <select id="calcMacroGoal" class="form-select" style="flex:1.4;min-width:110px;padding:6px 8px;font-size:11.5px;">
+                  <option value="cut">🔥 Yağ Yakımı (Definasyon)</option>
+                  <option value="maintain" selected>⚖️ Form Koruma</option>
+                  <option value="bulk">💪 Kas İnşası (Clean Bulk)</option>
+                </select>
+                <button type="button" class="btn-cream" style="padding:6px 10px;font-size:12px;" onclick="calculateDailyMacros()">Hesapla</button>
+              </div>
+              <div id="calcMacroResult" style="font-size:11.5px;color:var(--text-muted);">Kilo, boy ve hedefini seçerek günlük kalori ve protein ihtiyacını hesapla.</div>
+            </div>
+          </div>
+
           <!-- ⚖️ KİLO, YAĞ ORANI & ANTRENMAN REKORLARI (PR) TABLOSU -->
           <div class="scratchpad-card" style="margin-top:6px;border-color:rgba(96,165,250,0.3);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -533,6 +569,7 @@
             <span style="font-size:11px;background:var(--bg-surface);padding:4px 9px;border-radius:99px;color:var(--accent-cream);">Bugün</span>
           </div>
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <button class="pin-btn" id="voiceBriefingBtn" onclick="speakDailyBriefing()" style="height:32px;padding:0 10px;font-size:11.5px;border-color:rgba(245,216,181,0.35);color:var(--accent-cream);" title="Günün Planını Türkçe Sesli Asistanla Dinle">🔊 Sesli Brifing</button>
             <button class="pin-btn" id="toggleMatrixViewBtn" onclick="toggleEisenhowerMatrixView()" style="height:32px;padding:0 10px;font-size:11.5px;" title="Eisenhower 4'lü Öncelik Matrisi">🧊 4'lü Matris</button>
             <button class="pin-btn" onclick="shareOrCopyDailyPlan()" style="height:32px;padding:0 10px;font-size:11.5px;" title="Günün Planını WhatsApp'ta Paylaş veya Kopyala">📤 Planı Paylaş</button>
             <button class="pin-btn" id="toggleMonthGridBtn" onclick="toggleMonthGridView()" style="height:32px;padding:0 10px;font-size:11.5px;">🗓️ Aylık Takvim</button>
@@ -700,6 +737,15 @@
         <div class="task-card" style="margin-bottom:16px;">
           <h3 style="font-size:17px;font-weight:800;margin-bottom:10px;">📊 4 Ana Kategoriye Göre Başarı & Dağılım Analizi</h3>
           <div id="categoryBreakdownContainer" style="display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+
+        <!-- 🏆 ROZET & BAŞARIM KOLEKSİYONU (ACHIEVEMENTS VİTRİNİ) -->
+        <div class="task-card" style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+            <h3 style="font-size:17px;font-weight:800;">🏅 Rozet & Başarım Koleksiyonum</h3>
+            <span id="achievementsUnlockedBadge" style="font-size:12px;font-weight:800;color:var(--accent-cream);">0 / 8 Rozet Açıldı</span>
+          </div>
+          <div id="achievementsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;"></div>
         </div>
 
         <div class="task-card">
@@ -1098,6 +1144,6 @@
     <img id="photoViewerImg" src="" alt="Görev Fotoğrafı" style="max-width:92vw;max-height:88vh;border-radius:18px;box-shadow:var(--shadow);" />
   </div>
 
-  <script src="app.js?v=15"></script>
+  <script src="app.js?v=16"></script>
 </body>
 </html>
