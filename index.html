@@ -7,8 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>TaskFlow+ — Günlük Görev, Hedefler & Odak</title>
-  <link rel="manifest" href="manifest.json?v=13" />
-  <link rel="stylesheet" href="styles.css?v=13" />
+  <link rel="manifest" href="manifest.json?v=14" />
+  <link rel="stylesheet" href="styles.css?v=14" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -516,13 +516,38 @@
       </section>
 
       <!-- ================================================================== -->
-      <!-- SEKME 3: 📦 ARŞİV & BİTEN GÖREVLER -->
+      <!-- SEKME 3: 📦 ARŞİV TAKVİMİ (GÜN GÜN TİKLER), GÜN ÖZETİ & BİTEN GÖREVLER -->
       <!-- ================================================================== -->
       <section id="viewArchive" style="display:none;">
+        <!-- ARŞİV AYLIK TAKVİMİ (GÜN GÜN TİKLERİ VE SU/ALIŞKANLIK İZLERİNİ GÖR) -->
+        <div class="month-grid-box" style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <button class="pin-btn" style="height:32px;padding:0 10px;font-size:12px;" onclick="changeArchiveCalendarMonth(-1)">◀ Önceki</button>
+              <span id="archiveCalendarMonthTitle" style="font-weight:900;font-size:14.5px;min-width:110px;text-align:center;">Ekim 2026</span>
+              <button class="pin-btn" style="height:32px;padding:0 10px;font-size:12px;" onclick="changeArchiveCalendarMonth(1)">Sonraki ▶</button>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="pin-btn" style="height:32px;padding:0 10px;font-size:11.5px;" onclick="jumpArchiveToToday()">📅 Bugün</button>
+              <button class="btn-cream" id="archiveToggleAllDaysBtn" style="padding:6px 11px;font-size:11.5px;" onclick="toggleArchiveAllDays()">Tüm Günleri Listele</button>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">
+            💡 Takvimdeki günlerin üzerinde o gün <b>kaç görev tiklediğin (✅)</b> ve <b>kaç bardak su içtiğin (💧)</b> görünür. Güne dokunarak o günün tam özetini açabilirsin!
+          </div>
+          <div class="month-grid-weekdays">
+            <span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span>
+          </div>
+          <div id="archiveMonthGridDays" class="month-grid-days"></div>
+        </div>
+
+        <!-- SEÇİLİ GÜNÜN YAŞAM, SU, KAHVE, PROTEİN, ALIŞKANLIK VE BAŞARI ÖZETİ KARTI -->
+        <div id="archiveDailySummaryCard" class="archive-summary-card"></div>
+
         <div class="section-header">
           <div>
-            <h2 class="section-title">📦 Tamamlanan Görevler Arşivi</h2>
-            <p style="font-size:12px;color:var(--text-muted);">Biten görevlerin fotoğrafları, sesli notları, yorumları ve emojileri burada saklanır.</p>
+            <h2 class="section-title" id="archiveListHeaderTitle">📦 Tamamlanan Görevler Arşivi</h2>
+            <p style="font-size:12px;color:var(--text-muted);" id="archiveListHeaderSub">Seçili günde biten görevlerin fotoğrafları, sesli notları ve emojileri.</p>
           </div>
           <select id="archiveSortSelect" class="form-select" style="width:auto;font-size:12.5px;" onchange="renderArchive()">
             <option value="date">Tarihe Göre Sırala</option>
@@ -978,6 +1003,6 @@
     <img id="photoViewerImg" src="" alt="Görev Fotoğrafı" style="max-width:92vw;max-height:88vh;border-radius:18px;box-shadow:var(--shadow);" />
   </div>
 
-  <script src="app.js?v=13"></script>
+  <script src="app.js?v=14"></script>
 </body>
 </html>

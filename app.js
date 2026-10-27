@@ -192,15 +192,44 @@ function createDefaultHabits() {
   ];
 }
 
+function syncTodayDailyLog(targetDate = null) {
+  const d = targetDate || appData.waterDate || getTodayISO();
+  if (!appData.dailyLogs || typeof appData.dailyLogs !== 'object') {
+    appData.dailyLogs = {};
+  }
+  const existing = appData.dailyLogs[d] || {};
+  if (!targetDate || d === (appData.waterDate || getTodayISO())) {
+    appData.dailyLogs[d] = {
+      waterCount: appData.waterCount || 0,
+      waterTarget: appData.waterTarget || 12,
+      coffeeCount: appData.coffeeCount || 0,
+      proteinGrams: appData.proteinGrams || 0,
+      proteinTarget: appData.proteinTarget || 160,
+      habitsDone: (appData.habits || []).filter((h) => h.done).map((h) => h.title),
+      habitsTotal: (appData.habits || []).length || 5
+    };
+  } else {
+    appData.dailyLogs[d] = existing;
+  }
+}
+
 function checkAndRenderWaterTracker() {
   const today = getTodayISO();
-  if (appData.waterDate !== today) {
+  if (!appData.dailyLogs || typeof appData.dailyLogs !== 'object') {
+    appData.dailyLogs = {};
+  }
+  if (appData.waterDate && appData.waterDate !== today) {
+    // Yeni güne geçmeden önce dünün su/kahve/protein/alışkanlık özetini Arşiv Günlüğüne kaydet
+    syncTodayDailyLog(appData.waterDate);
     appData.waterDate = today;
     appData.waterCount = 0;
     appData.coffeeCount = 0;
+    appData.proteinGrams = 0;
     if (Array.isArray(appData.habits)) {
       appData.habits.forEach((h) => { h.done = false; });
     }
+  } else if (!appData.waterDate) {
+    appData.waterDate = today;
   }
   if (!appData.waterTarget || appData.waterTarget < 8) {
     appData.waterTarget = 12; // Varsayılan: 12 Bardak (3.0 Litre)
@@ -208,6 +237,7 @@ function checkAndRenderWaterTracker() {
   if (!Array.isArray(appData.habits) || appData.habits.length === 0) {
     appData.habits = createDefaultHabits();
   }
+  syncTodayDailyLog(today);
 
   const target = appData.waterTarget;
   const cnt = appData.waterCount || 0;
@@ -304,6 +334,8 @@ function toggleDailyHabit(idx) {
     playAlertTone('success');
   }
   renderDailyHabitsStrip();
+  syncTodayDailyLog();
+  if (currentViewName === 'archive') renderArchive();
   saveProfileData();
 }
 
@@ -318,6 +350,8 @@ function promptAddCustomHabit() {
     custom: true
   });
   renderDailyHabitsStrip();
+  syncTodayDailyLog();
+  if (currentViewName === 'archive') renderArchive();
   saveProfileData();
 }
 
@@ -325,6 +359,8 @@ function deleteCustomHabit(idx) {
   if (!Array.isArray(appData.habits)) return;
   appData.habits.splice(idx, 1);
   renderDailyHabitsStrip();
+  syncTodayDailyLog();
+  if (currentViewName === 'archive') renderArchive();
   saveProfileData();
 }
 
@@ -1965,12 +2001,263 @@ function deleteTask(taskId) {
   renderAll();
 }
 
+// ----------------------------------------------------------------------------
+// 📦 ARŞİV TAKVİMİ (GÜN GÜN TİKLER) VE SEÇİLİ GÜN YAŞAM ÖZETİ SİSTEMİ
+// ----------------------------------------------------------------------------
+let archiveCalendarMonth = new Date();
+let archiveSelectedDate = getTodayISO();
+let archiveShowAllDays = false;
+
+function changeArchiveCalendarMonth(delta) {
+  archiveCalendarMonth.setMonth(archiveCalendarMonth.getMonth() + delta);
+  renderArchive();
+}
+
+function jumpArchiveToToday() {
+  archiveSelectedDate = getTodayISO();
+  archiveCalendarMonth = new Date();
+  archiveShowAllDays = false;
+  renderArchive();
+}
+
+function toggleArchiveAllDays() {
+  archiveShowAllDays = !archiveShowAllDays;
+  const btn = document.getElementById('archiveToggleAllDaysBtn');
+  if (btn) {
+    btn.textContent = archiveShowAllDays ? '📅 Seçili Güne Dön' : 'Tüm Günleri Listele';
+  }
+  renderArchive();
+}
+
+function getDailyLogForArchiveDate(dateISO) {
+  if (!appData.dailyLogs || typeof appData.dailyLogs !== 'object') {
+    appData.dailyLogs = {};
+  }
+  if (dateISO === getTodayISO()) {
+    syncTodayDailyLog(dateISO);
+  }
+  return appData.dailyLogs[dateISO] || {
+    waterCount: 0,
+    waterTarget: appData.waterTarget || 12,
+    coffeeCount: 0,
+    proteinGrams: 0,
+    proteinTarget: appData.proteinTarget || 160,
+    habitsDone: [],
+    habitsTotal: (appData.habits || []).length || 5
+  };
+}
+
+function adjustArchiveDateMetric(dateISO, metric, delta) {
+  if (!appData.dailyLogs || typeof appData.dailyLogs !== 'object') {
+    appData.dailyLogs = {};
+  }
+  const current = getDailyLogForArchiveDate(dateISO);
+  if (metric === 'water') {
+    current.waterCount = Math.max(0, (current.waterCount || 0) + delta);
+    if (dateISO === getTodayISO()) appData.waterCount = current.waterCount;
+  } else if (metric === 'coffee') {
+    current.coffeeCount = Math.max(0, (current.coffeeCount || 0) + delta);
+    if (dateISO === getTodayISO()) appData.coffeeCount = current.coffeeCount;
+  } else if (metric === 'protein') {
+    current.proteinGrams = Math.max(0, (current.proteinGrams || 0) + delta);
+    if (dateISO === getTodayISO()) appData.proteinGrams = current.proteinGrams;
+  }
+  appData.dailyLogs[dateISO] = current;
+  checkAndRenderWaterTracker();
+  renderProteinTracker();
+  renderArchive();
+  saveProfileData();
+}
+
+function renderArchiveCalendar() {
+  const gridEl = document.getElementById('archiveMonthGridDays');
+  const titleEl = document.getElementById('archiveCalendarMonthTitle');
+  if (!gridEl || !titleEl) return;
+
+  gridEl.innerHTML = '';
+  const year = archiveCalendarMonth.getFullYear();
+  const month = archiveCalendarMonth.getMonth();
+  const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  titleEl.textContent = `${monthNames[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const totalDays = lastDay.getDate();
+  const startOffset = (firstDay.getDay() + 6) % 7;
+
+  for (let i = 0; i < startOffset; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'grid-day-cell empty';
+    gridEl.appendChild(empty);
+  }
+
+  for (let day = 1; day <= totalDays; day++) {
+    const d = new Date(year, month, day);
+    const tzOffset = d.getTimezoneOffset() * 60000;
+    const iso = new Date(d - tzOffset).toISOString().split('T')[0];
+
+    const dayTasks = (appData.tasks || []).filter((t) => t.date === iso);
+    const doneTasks = dayTasks.filter((t) => t.completed);
+    const dLog = (appData.dailyLogs && appData.dailyLogs[iso]) ? appData.dailyLogs[iso] : (iso === getTodayISO() ? getDailyLogForArchiveDate(iso) : null);
+    const waterCnt = dLog ? (dLog.waterCount || 0) : 0;
+    const habitsDoneCnt = dLog && Array.isArray(dLog.habitsDone) ? dLog.habitsDone.length : 0;
+
+    const hasTicks = doneTasks.length > 0 || habitsDoneCnt > 0;
+    const allDone = dayTasks.length > 0 && doneTasks.length === dayTasks.length;
+
+    const cell = document.createElement('div');
+    cell.className = `archive-day-cell ${!archiveShowAllDays && iso === archiveSelectedDate ? 'active' : ''} ${hasTicks ? 'has-ticks' : ''} ${allDone ? 'all-done' : ''}`;
+    cell.onclick = () => {
+      archiveSelectedDate = iso;
+      archiveShowAllDays = false;
+      const btn = document.getElementById('archiveToggleAllDaysBtn');
+      if (btn) btn.textContent = 'Tüm Günleri Listele';
+      renderArchive();
+    };
+
+    let ticksBadge = '';
+    if (doneTasks.length > 0) {
+      ticksBadge = `<div class="archive-day-ticks">✅ ${doneTasks.length}/${dayTasks.length}</div>`;
+    } else if (dayTasks.length > 0) {
+      ticksBadge = `<div style="font-size:9.5px;color:var(--text-muted);margin-top:2px;">⏳ 0/${dayTasks.length}</div>`;
+    } else if (habitsDoneCnt > 0) {
+      ticksBadge = `<div class="archive-day-ticks">✓ ${habitsDoneCnt} Alşk</div>`;
+    }
+
+    let vitalsBadge = '';
+    if (waterCnt > 0) {
+      vitalsBadge = `<div class="archive-day-vitals">💧${waterCnt}</div>`;
+    }
+
+    cell.innerHTML = `
+      <span class="archive-day-num">${day}</span>
+      ${ticksBadge}
+      ${vitalsBadge}
+    `;
+    gridEl.appendChild(cell);
+  }
+}
+
+function renderArchiveDailySummary(dateISO) {
+  const card = document.getElementById('archiveDailySummaryCard');
+  if (!card) return;
+
+  const dayTasks = (appData.tasks || []).filter((t) => t.date === dateISO);
+  const doneTasks = dayTasks.filter((t) => t.completed);
+  const pct = dayTasks.length > 0 ? Math.round((doneTasks.length / dayTasks.length) * 100) : 0;
+  const emojisList = doneTasks.map((t) => t.completionEmoji || '✅').join(' ');
+
+  const log = getDailyLogForArchiveDate(dateISO);
+  const waterCnt = log.waterCount || 0;
+  const waterTarget = log.waterTarget || 12;
+  const waterLiters = ((waterCnt * 250) / 1000).toFixed(2);
+  const targetLiters = ((waterTarget * 250) / 1000).toFixed(1);
+
+  const coffeeCnt = log.coffeeCount || 0;
+  const proteinGrams = log.proteinGrams || 0;
+  const habitsDone = Array.isArray(log.habitsDone) ? log.habitsDone : [];
+
+  const journalEntry = (appData.microJournal || []).find((j) => j.date === dateISO);
+  const dayPrs = (appData.bodyPrRecords || []).filter((r) => r.date === dateISO);
+
+  const isToday = dateISO === getTodayISO();
+
+  card.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:15px;font-weight:900;color:var(--accent-cream);">
+          📊 ${dateISO} ${isToday ? '(Bugün)' : ''} — Günlük Yaşam & Arşiv Özeti
+        </div>
+        <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">
+          O gün içtiğin su, kahve, protein, tiklediğin görevler ve alışkanlıkların tam kaydı:
+        </div>
+      </div>
+      <span style="font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;background:rgba(82,196,26,0.18);color:#95de64;">
+        ✅ %${pct} Başarı (${doneTasks.length}/${dayTasks.length} Görev)
+      </span>
+    </div>
+
+    <div class="archive-summary-grid">
+      <!-- KUTU 1: İÇİLEN SU -->
+      <div class="archive-stat-box">
+        <div style="font-size:11px;color:var(--text-muted);font-weight:700;">💧 İÇİLEN SU</div>
+        <div style="font-size:15px;font-weight:900;color:#93c5fd;">${waterLiters} L <span style="font-size:11.5px;font-weight:600;color:var(--text-muted);">/ ${targetLiters}L</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px;">
+          <span style="font-size:11px;color:var(--accent-cream);">${waterCnt} Bardak</span>
+          <div style="display:flex;gap:4px;">
+            <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;" onclick="adjustArchiveDateMetric('${dateISO}','water',-1)">-</button>
+            <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:2px 6px;background:rgba(96,165,250,0.2);color:#93c5fd;" onclick="adjustArchiveDateMetric('${dateISO}','water',1)">+1💧</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KUTU 2: KAHVE & PROTEİN -->
+      <div class="archive-stat-box">
+        <div style="font-size:11px;color:var(--text-muted);font-weight:700;">☕ KAHVE & 🥩 PROTEİN</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:800;">
+          <span style="color:var(--accent-cream);">☕ ${coffeeCnt} Fincan</span>
+          <div style="display:flex;gap:3px;">
+            <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:1px 5px;" onclick="adjustArchiveDateMetric('${dateISO}','coffee',-1)">-</button>
+            <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:1px 5px;" onclick="adjustArchiveDateMetric('${dateISO}','coffee',1)">+</button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:800;margin-top:2px;">
+          <span style="color:#ff9c6e;">🥩 ${proteinGrams}g Protein</span>
+          <div style="display:flex;gap:3px;">
+            <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:1px 5px;" onclick="adjustArchiveDateMetric('${dateISO}','protein',-10)">-</button>
+            <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:1px 5px;" onclick="adjustArchiveDateMetric('${dateISO}','protein',25)">+25g</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KUTU 3: TİKLENEN GÖREVLER & EMOJİLER -->
+      <div class="archive-stat-box">
+        <div style="font-size:11px;color:var(--text-muted);font-weight:700;">✅ GÖREV TİKLERİ</div>
+        <div style="font-size:15px;font-weight:900;color:#95de64;">${doneTasks.length} Görev Bitti</div>
+        <div style="font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          ${emojisList || '<span style="color:var(--text-muted);font-size:11px;">Henüz görev tiklenmedi</span>'}
+        </div>
+      </div>
+
+      <!-- KUTU 4: ZİNCİR ALIŞKANLIKLAR -->
+      <div class="archive-stat-box">
+        <div style="font-size:11px;color:var(--text-muted);font-weight:700;">🔥 ZİNCİR ALIŞKANLIKLAR</div>
+        <div style="font-size:14px;font-weight:900;color:var(--pastel-purple);">${habitsDone.length} Alışkanlık Tiklendi</div>
+        <div style="font-size:11px;color:var(--text-main);line-height:1.35;">
+          ${habitsDone.length > 0 ? habitsDone.map((h) => `✅ ${escapeHtml(h)}`).join(' • ') : '<span style="color:var(--text-muted);">Kayıtlı alışkanlık tiki yok</span>'}
+        </div>
+      </div>
+    </div>
+
+    ${(journalEntry || dayPrs.length > 0) ? `
+      <div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:4px;font-size:12px;">
+        ${journalEntry ? `<div>🌙 <b>Günün Özeti (${journalEntry.score}/10 ⭐):</b> "${escapeHtml(journalEntry.sentence)}"</div>` : ''}
+        ${dayPrs.length > 0 ? `<div>⚖️ <b>O Gün Kaydedilen Ölçüm / PR:</b> ${dayPrs.map((r) => `${escapeHtml(r.type)}: <b style="color:#93c5fd;">${escapeHtml(r.value)}</b>`).join(' | ')}</div>` : ''}
+      </div>
+    ` : ''}
+  `;
+}
+
 function renderArchive() {
+  renderArchiveCalendar();
+  renderArchiveDailySummary(archiveSelectedDate);
+
   const container = document.getElementById('archiveTaskList');
   const sortMode = document.getElementById('archiveSortSelect').value;
   const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+  const titleEl = document.getElementById('archiveListHeaderTitle');
+  const subEl = document.getElementById('archiveListHeaderSub');
 
   let doneList = appData.tasks.filter((t) => t.completed);
+
+  if (!archiveShowAllDays && !query) {
+    doneList = doneList.filter((t) => t.date === archiveSelectedDate);
+    if (titleEl) titleEl.textContent = `📦 ${archiveSelectedDate} Tarihinde Tamamlanan Görevler (${doneList.length})`;
+    if (subEl) subEl.textContent = 'Başka bir günün tiklerini görmek için üstteki Arşiv Takviminden güne dokun veya "Tüm Günleri Listele"ye bas.';
+  } else {
+    if (titleEl) titleEl.textContent = `📦 Tüm Zamanların Tamamlanan Görevleri (${doneList.length})`;
+    if (subEl) subEl.textContent = 'Biten tüm görevlerin fotoğrafları, sesli notları, yorumları ve emojileri.';
+  }
 
   if (query) {
     doneList = doneList.filter((t) =>
@@ -1988,7 +2275,13 @@ function renderArchive() {
   });
 
   if (doneList.length === 0) {
-    container.innerHTML = `<div class="task-card" style="text-align:center;color:var(--text-muted);padding:30px;">Henüz arşivlenmiş görev yok.</div>`;
+    container.innerHTML = `
+      <div class="task-card" style="text-align:center;color:var(--text-muted);padding:26px;">
+        <div style="font-size:28px;margin-bottom:6px;">📅</div>
+        <div style="font-weight:700;color:var(--text-main);">${archiveShowAllDays ? 'Henüz arşivlenmiş görev yok.' : `${archiveSelectedDate} tarihinde tamamlanmış görev bulunmuyor.`}</div>
+        ${!archiveShowAllDays ? `<button type="button" class="btn-cream" style="margin-top:10px;padding:6px 14px;font-size:12px;" onclick="toggleArchiveAllDays()">📂 Tüm Arşivlenmiş Görevleri Göster</button>` : ''}
+      </div>
+    `;
     return;
   }
 
@@ -3035,6 +3328,7 @@ function changeProteinCount(deltaGrams) {
     playAlertTone('success');
   }
   renderProteinTracker();
+  syncTodayDailyLog();
   renderGamificationRank();
   saveProfileData();
 }
@@ -3477,7 +3771,7 @@ function deleteMicroJournalEntry(idx) {
 
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=13').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=14').catch(() => {});
   }
   await initDB();
 
