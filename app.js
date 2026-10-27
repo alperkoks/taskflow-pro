@@ -270,6 +270,11 @@ function checkAndRenderWaterTracker() {
   const coffeeEl = document.getElementById('coffeeCountText');
   if (coffeeEl) coffeeEl.textContent = `${appData.coffeeCount || 0} Fincan`;
 
+  const miniWaterEl = document.getElementById('miniWaterQuickText');
+  if (miniWaterEl) miniWaterEl.textContent = `${currentLiters}L (${cnt}/${target})`;
+  const miniCoffeeEl = document.getElementById('miniCoffeeQuickText');
+  if (miniCoffeeEl) miniCoffeeEl.textContent = `${appData.coffeeCount || 0}`;
+
   renderDailyHabitsStrip();
 }
 
@@ -1344,6 +1349,15 @@ function setCategoryFilter(cat) {
   } else {
     renderAll();
   }
+  // Mobilde kategoriye tıklayınca aşağı inmek zorunda kalmadan doğrudan görev başlığına yumuşak odaklan
+  if (window.innerWidth < 960 && currentViewName === 'tasks') {
+    const targetEl = document.getElementById('activeListTitle');
+    if (targetEl) {
+      setTimeout(() => {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 60);
+    }
+  }
 }
 
 function checkOverdueTasks() {
@@ -1386,6 +1400,10 @@ function renderAll() {
   renderLibraryTracker();
   renderMicroJournal();
   renderBudgetTracker();
+  renderDayNightRoutine();
+  renderWeeklyScheduleGrid();
+  renderVaultProgressPhotos();
+  renderSevenDayTrendChart();
   updateBentoCountsAndDailyProgress();
   renderOngoingTasks();
   if (showEisenhowerMatrix) renderEisenhowerMatrix();
@@ -3181,6 +3199,8 @@ window.addEventListener('offline', () => {
 // ----------------------------------------------------------------------------
 function switchView(viewName, fromBackButton = false) {
   currentViewName = viewName;
+  document.body.setAttribute('data-active-view', viewName);
+
   document.getElementById('viewTasks').style.display = viewName === 'tasks' ? 'block' : 'none';
   document.getElementById('viewGoals').style.display = viewName === 'goals' ? 'block' : 'none';
   document.getElementById('viewArchive').style.display = viewName === 'archive' ? 'block' : 'none';
@@ -3196,6 +3216,8 @@ function switchView(viewName, fromBackButton = false) {
     pushAppHistoryState();
   }
   renderAll();
+  // Alt menüden hangi sekmeye tıklanırsa tıklansın anında ekranın EN ÜSTÜNDE açılır!
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -3769,9 +3791,315 @@ function deleteMicroJournalEntry(idx) {
   saveProfileData();
 }
 
+// ----------------------------------------------------------------------------
+// 16. v15.0 ULTRA-SADE 3'LÜ ÜS SEÇİCİ, ARAÇ SEÇİCİ & 5 YENİ SÜPER ÖZELLİK
+// ----------------------------------------------------------------------------
+function switchLeftHubMode(mode) {
+  const tabCat = document.getElementById('hubTabCategories');
+  const tabSport = document.getElementById('hubTabSport');
+  const tabTools = document.getElementById('hubTabTools');
+
+  if (tabCat) tabCat.style.display = mode === 'categories' ? 'block' : 'none';
+  if (tabSport) tabSport.style.display = mode === 'sport' ? 'block' : 'none';
+  if (tabTools) tabTools.style.display = mode === 'tools' ? 'block' : 'none';
+
+  const btnCat = document.getElementById('hubBtnCategories');
+  const btnSport = document.getElementById('hubBtnSport');
+  const btnTools = document.getElementById('hubBtnTools');
+
+  if (btnCat) btnCat.classList.toggle('active', mode === 'categories');
+  if (btnSport) btnSport.classList.toggle('active', mode === 'sport');
+  if (btnTools) btnTools.classList.toggle('active', mode === 'tools');
+}
+
+function switchActiveToolPanel(toolKey) {
+  const keys = ['shopping', 'library', 'budget', 'journal', 'scratch', 'vault'];
+  keys.forEach((k) => {
+    const cap = k.charAt(0).toUpperCase() + k.slice(1);
+    const panel = document.getElementById('toolPanel' + cap);
+    const btn = document.getElementById('toolBtn' + cap);
+    if (panel) panel.style.display = k === toolKey ? 'block' : 'none';
+    if (btn) btn.classList.toggle('active', k === toolKey);
+  });
+}
+
+// 1) ☀️ SABAH & 🌙 AKŞAM RUTİNİ TEK TIKLA BAŞLATICI
+let activeDayNightRoutineMode = 'morning';
+const DEFAULT_MORNING_ROUTINE = [
+  { text: '💧 Uyanınca 2 Bardak (500ml) Su İç', done: false },
+  { text: '🛏️ Yatağı Topla & Odayı Havalandır', done: false },
+  { text: '💊 Günlük Vitamin / Kreatin Al', done: false },
+  { text: '🎯 Bugünün En Önemli 3 Görevine Odaklan', done: false }
+];
+const DEFAULT_EVENING_ROUTINE = [
+  { text: '🎒 Yarının Spor Çantasını & Kıyafetini Hazırla', done: false },
+  { text: '📅 Yarının Görevlerini & Saatlerini Planla', done: false },
+  { text: '🌙 Günün 1 Cümlelik Özetini & Puanını Yaz', done: false },
+  { text: '📖 Yatmadan Önce 15 Sayfa Kitap Oku', done: false }
+];
+
+function switchDayNightRoutine(mode) {
+  activeDayNightRoutineMode = mode;
+  const mBtn = document.getElementById('btnMorningRoutine');
+  const eBtn = document.getElementById('btnEveningRoutine');
+  if (mBtn) {
+    mBtn.style.background = mode === 'morning' ? 'var(--accent-cream)' : 'var(--bg-surface)';
+    mBtn.style.color = mode === 'morning' ? '#14141c' : 'var(--text-main)';
+  }
+  if (eBtn) {
+    eBtn.style.background = mode === 'evening' ? 'var(--accent-cream)' : 'var(--bg-surface)';
+    eBtn.style.color = mode === 'evening' ? '#14141c' : 'var(--text-main)';
+  }
+  renderDayNightRoutine();
+}
+
+function renderDayNightRoutine() {
+  const listEl = document.getElementById('dayNightRoutineList');
+  if (!listEl) return;
+
+  const today = getTodayISO();
+  if (appData.routineCheckDate !== today) {
+    appData.routineCheckDate = today;
+    appData.morningRoutine = JSON.parse(JSON.stringify(DEFAULT_MORNING_ROUTINE));
+    appData.eveningRoutine = JSON.parse(JSON.stringify(DEFAULT_EVENING_ROUTINE));
+  }
+  if (!Array.isArray(appData.morningRoutine)) {
+    appData.morningRoutine = JSON.parse(JSON.stringify(DEFAULT_MORNING_ROUTINE));
+  }
+  if (!Array.isArray(appData.eveningRoutine)) {
+    appData.eveningRoutine = JSON.parse(JSON.stringify(DEFAULT_EVENING_ROUTINE));
+  }
+
+  const arr = activeDayNightRoutineMode === 'morning' ? appData.morningRoutine : appData.eveningRoutine;
+  listEl.innerHTML = arr.map((item, idx) => `
+    <div style="display:flex;align-items:center;gap:8px;background:var(--bg-surface);padding:7px 10px;border-radius:10px;font-size:12px;cursor:pointer;" onclick="toggleDayNightRoutineItem(${idx})">
+      <span>${item.done ? '✅' : '⬜'}</span>
+      <span style="${item.done ? 'text-decoration:line-through;color:var(--text-muted);' : 'font-weight:700;'}">${escapeHtml(item.text)}</span>
+    </div>
+  `).join('');
+}
+
+function toggleDayNightRoutineItem(idx) {
+  const arr = activeDayNightRoutineMode === 'morning' ? appData.morningRoutine : appData.eveningRoutine;
+  if (!Array.isArray(arr) || !arr[idx]) return;
+  arr[idx].done = !arr[idx].done;
+  if (arr[idx].done && arr.every((x) => x.done)) {
+    playAlertTone('success');
+  }
+  renderDayNightRoutine();
+  saveProfileData();
+}
+
+// 2) 📅 HAFTALIK RUTİN & ANTRENMAN PROGRAMI TABLOSU (PZT - PAZ)
+const DEFAULT_WEEKLY_SCHEDULE = [
+  { day: 'Pazartesi', plan: '💪 İtiş (Push) + İş' },
+  { day: 'Salı', plan: '📚 Gelişim & Kardiyo' },
+  { day: 'Çarşamba', plan: '🏋️ Çekiş (Pull) + İş' },
+  { day: 'Perşembe', plan: '🧘 Aktif Dinlenme' },
+  { day: 'Cuma', plan: '🦵 Bacak (Leg Day)' },
+  { day: 'Cumartesi', plan: '🔥 Full Body & Doğa' },
+  { day: 'Pazar', plan: '📋 Haftalık Planlama' }
+];
+
+function renderWeeklyScheduleGrid() {
+  const grid = document.getElementById('weeklyScheduleGrid');
+  if (!grid) return;
+
+  if (!Array.isArray(appData.weeklySchedule) || appData.weeklySchedule.length !== 7) {
+    appData.weeklySchedule = JSON.parse(JSON.stringify(DEFAULT_WEEKLY_SCHEDULE));
+  }
+
+  grid.innerHTML = appData.weeklySchedule.map((item, idx) => `
+    <div class="weekly-day-box" onclick="editWeeklyScheduleDay(${idx})" title="Düzenlemek için dokun">
+      <div style="font-size:10.5px;font-weight:900;color:var(--accent-cream);">${escapeHtml(item.day)}</div>
+      <div style="font-size:11.5px;font-weight:700;margin-top:3px;line-height:1.3;">${escapeHtml(item.plan)}</div>
+    </div>
+  `).join('');
+}
+
+function editWeeklyScheduleDay(idx) {
+  if (!Array.isArray(appData.weeklySchedule) || !appData.weeklySchedule[idx]) return;
+  const current = appData.weeklySchedule[idx];
+  const nextVal = prompt(`${current.day} günü için sabit antrenman veya rutin programın:`, current.plan);
+  if (nextVal === null) return;
+  appData.weeklySchedule[idx].plan = nextVal.trim() || 'Dinlenme';
+  renderWeeklyScheduleGrid();
+  saveProfileData();
+}
+
+// 3) 📸 FİZİKSEL DEĞİŞİM (BEFORE / AFTER) FORM FOTOĞRAF GALERİSİ (GİZLİ KASA İÇİ)
+function handleVaultProgressPhotoUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const labelInp = document.getElementById('vaultPhotoLabelInput');
+  const label = (labelInp && labelInp.value.trim()) ? labelInp.value.trim() : `${getTodayISO()} Form`;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX_W = 680;
+      let w = img.width || 600;
+      let h = img.height || 800;
+      if (w > MAX_W) {
+        h = Math.round((h * MAX_W) / w);
+        w = MAX_W;
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const compressed = canvas.toDataURL('image/jpeg', 0.72);
+
+      if (!Array.isArray(appData.vaultProgressPhotos)) appData.vaultProgressPhotos = [];
+      appData.vaultProgressPhotos.unshift({
+        id: 'vp_' + Date.now(),
+        label,
+        date: getTodayISO(),
+        src: compressed
+      });
+      if (labelInp) labelInp.value = '';
+      renderVaultProgressPhotos();
+      saveProfileData();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function renderVaultProgressPhotos() {
+  const grid = document.getElementById('vaultProgressPhotosGrid');
+  if (!grid) return;
+
+  const list = Array.isArray(appData.vaultProgressPhotos) ? appData.vaultProgressPhotos : [];
+  if (list.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1;font-size:11px;color:var(--text-muted);text-align:center;padding:8px;">Henüz form (Before/After) fotoğrafı eklenmedi.</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map((p, idx) => `
+    <div style="background:var(--bg-surface);padding:6px;border-radius:11px;position:relative;text-align:center;">
+      <img src="${p.src}" style="width:100%;height:110px;object-fit:cover;border-radius:8px;cursor:pointer;" onclick="openPhotoViewer('${p.src}')" />
+      <div style="font-size:10.5px;font-weight:800;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(p.label)}</div>
+      <button type="button" onclick="deleteVaultProgressPhoto(${idx})" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.7);color:#ff7875;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-weight:900;">×</button>
+    </div>
+  `).join('');
+}
+
+function deleteVaultProgressPhoto(idx) {
+  if (!Array.isArray(appData.vaultProgressPhotos)) return;
+  appData.vaultProgressPhotos.splice(idx, 1);
+  renderVaultProgressPhotos();
+  saveProfileData();
+}
+
+// 4) 🎧 ODAKLANMA & ANTRENMAN ARKA PLAN SESLERİ (ÇEVRİMDIŞI WEB AUDIO GENERATOR)
+let focusAudioCtx = null;
+let focusNoiseNode = null;
+let activeSoundscapeMode = null;
+
+function stopFocusSoundscape() {
+  if (focusNoiseNode) {
+    try { focusNoiseNode.disconnect(); } catch (e) {}
+    focusNoiseNode = null;
+  }
+  if (focusAudioCtx) {
+    try { focusAudioCtx.close(); } catch (e) {}
+    focusAudioCtx = null;
+  }
+  activeSoundscapeMode = null;
+  ['Rain', 'Deep', 'Waves'].forEach((k) => {
+    const b = document.getElementById('soundBtn' + k);
+    if (b) b.classList.remove('active');
+  });
+}
+
+function toggleFocusSoundscape(mode) {
+  if (activeSoundscapeMode === mode) {
+    stopFocusSoundscape();
+    return;
+  }
+  stopFocusSoundscape();
+  activeSoundscapeMode = mode;
+
+  const mapBtn = { rain: 'soundBtnRain', deep: 'soundBtnDeep', waves: 'soundBtnWaves' };
+  const btn = document.getElementById(mapBtn[mode]);
+  if (btn) btn.classList.add('active');
+
+  try {
+    focusAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const bufferSize = 2 * focusAudioCtx.sampleRate;
+    const noiseBuffer = focusAudioCtx.createBuffer(1, bufferSize, focusAudioCtx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+
+    let lastOut = 0.0;
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      output[i] = (lastOut + (0.02 * white)) / 1.02;
+      lastOut = output[i];
+      output[i] *= 3.2;
+    }
+
+    const whiteNoise = focusAudioCtx.createBufferSource();
+    whiteNoise.buffer = noiseBuffer;
+    whiteNoise.loop = true;
+
+    const filter = focusAudioCtx.createBiquadFilter();
+    filter.type = mode === 'rain' ? 'bandpass' : 'lowpass';
+    filter.frequency.value = mode === 'rain' ? 950 : (mode === 'deep' ? 240 : 480);
+
+    const gainNode = focusAudioCtx.createGain();
+    gainNode.gain.value = 0.14;
+
+    whiteNoise.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(focusAudioCtx.destination);
+    whiteNoise.start(0);
+    focusNoiseNode = gainNode;
+  } catch (e) {}
+}
+
+// 5) 📈 SON 7 GÜNLÜK SU TÜKETİMİ VE BİTİRİLEN GÖREV TREND GRAFİĞİ
+function renderSevenDayTrendChart() {
+  const wrap = document.getElementById('sevenDayTrendChart');
+  if (!wrap) return;
+
+  const dayNames = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+  const cols = [];
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const tzOffset = d.getTimezoneOffset() * 60000;
+    const iso = new Date(d - tzOffset).toISOString().split('T')[0];
+
+    const doneCnt = (appData.tasks || []).filter((t) => t.completed && t.date === iso).length;
+    const dLog = getDailyLogForArchiveDate(iso);
+    const waterCnt = dLog ? (dLog.waterCount || 0) : 0;
+
+    const taskHeight = Math.min(78, Math.max(6, doneCnt * 14));
+    const waterHeight = Math.min(78, Math.max(6, waterCnt * 5));
+
+    cols.push(`
+      <div class="trend-bar-col">
+        <div style="font-size:9.5px;color:var(--text-muted);font-weight:700;">${doneCnt}✓/${waterCnt}💧</div>
+        <div class="trend-bar-pair">
+          <div class="trend-bar-item" style="height:${taskHeight}px;background:#95de64;" title="${iso}: ${doneCnt} Görev Bitti"></div>
+          <div class="trend-bar-item" style="height:${waterHeight}px;background:#60a5fa;" title="${iso}: ${waterCnt} Bardak Su"></div>
+        </div>
+        <div style="font-size:10.5px;font-weight:800;color:${i === 0 ? 'var(--accent-cream)' : 'var(--text-muted)'};">${dayNames[d.getDay()]}</div>
+      </div>
+    `);
+  }
+
+  wrap.innerHTML = cols.join('');
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=14').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=15').catch(() => {});
   }
   await initDB();
 
