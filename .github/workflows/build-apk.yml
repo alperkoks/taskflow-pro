@@ -31,6 +31,10 @@ jobs:
       run: |
         npm install
 
+    - name: Patch Capacitor AGP Version to Stable
+      run: |
+        sed -i 's/8.13.0/8.7.2/g' node_modules/@capacitor/android/capacitor/build.gradle
+
     - name: Prepare Web Assets for Android
       run: |
         node scripts/prepare-www.js
@@ -42,11 +46,7 @@ jobs:
     - name: Build Android APK
       run: |
         cd android
-        ./gradlew assembleDebug --no-daemon 2>&1 | tee ../gradle.log || true
-        echo "=== GRADLE LOG START ==="
-        tail -n 60 ../gradle.log
-        echo "=== GRADLE LOG END ==="
-        exit $(cat ../gradle.log | grep -q "BUILD SUCCESSFUL" && echo 0 || echo 1)
+        ./gradlew assembleDebug --no-daemon --stacktrace
 
     - name: Prepare APK Outputs
       run: |
