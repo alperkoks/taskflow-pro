@@ -42,7 +42,11 @@ jobs:
     - name: Build Android APK
       run: |
         cd android
-        ./gradlew assembleDebug --no-daemon --stacktrace
+        ./gradlew assembleDebug --no-daemon 2>&1 | tee ../gradle.log || true
+        echo "=== GRADLE LOG START ==="
+        tail -n 60 ../gradle.log
+        echo "=== GRADLE LOG END ==="
+        exit $(cat ../gradle.log | grep -q "BUILD SUCCESSFUL" && echo 0 || echo 1)
 
     - name: Prepare APK Outputs
       run: |
