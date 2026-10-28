@@ -6,7 +6,9 @@
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "prepare-www": "node scripts/prepare-www.js",
+    "cap-sync": "node scripts/prepare-www.js && cap sync android"
   },
   "build": {
     "appId": "com.taskflow.pro",
@@ -33,10 +35,12 @@
   ],
   "author": "TaskFlow Team",
   "license": "MIT",
-  "devDependencies": {
+  "dependencies": {
     "@capacitor/android": "^8.5.3",
     "@capacitor/cli": "^8.5.3",
-    "@capacitor/core": "^8.5.3",
+    "@capacitor/core": "^8.5.3"
+  },
+  "devDependencies": {
     "electron": "^40.8.0",
     "electron-builder": "^26.18.0"
   }

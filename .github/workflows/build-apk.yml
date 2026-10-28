@@ -5,9 +5,15 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+    env:
+      CAPACITOR_TELEMETRY: '0'
+      CI: 'false'
 
     steps:
     - name: Checkout Code
@@ -23,15 +29,17 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 20
+        cache: 'npm'
 
-    - name: Install Node Dependencies
+    - name: Install Dependencies
       run: |
-        npm install
+        npm install --include=dev
 
-    - name: Prepare Web Assets & Sync Capacitor
+    - name: Build Web Bundle & Sync Android
       run: |
         node scripts/prepare-www.js
-        npx cap sync android
+        ./node_modules/.bin/cap telemetry off || true
+        ./node_modules/.bin/cap sync android
 
     - name: Grant Execute Permission for Gradle
       run: |
@@ -40,9 +48,9 @@ jobs:
     - name: Build Android APK
       run: |
         cd android
-        ./gradlew assembleDebug
+        ./gradlew assembleDebug --stacktrace
 
-    - name: Rename & Prepare APK Output
+    - name: Prepare APK Outputs
       run: |
         mkdir -p dist-apk
         cp android/app/build/outputs/apk/debug/app-debug.apk dist-apk/TaskFlow_Pro.apk
@@ -55,7 +63,7 @@ jobs:
         path: dist-apk/TaskFlow_Pro.apk
         retention-days: 30
 
-    - name: Commit Updated APK to Repository
+    - name: Commit and Push Updated APK
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
