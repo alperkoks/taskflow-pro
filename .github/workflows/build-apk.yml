@@ -27,9 +27,6 @@ jobs:
       with:
         node-version: 20
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
-
     - name: Install Node Dependencies
       run: |
         npm install
