@@ -4558,39 +4558,32 @@ function renderSelectedDayDailyValuesBar() {
 
   const doneItemsHtml =
     doneTasks.length > 0
-      ? doneTasks
-          .map(
-            (t) =>
-              `<span style="font-size:10.5px; padding:3px 8px; border-radius:99px; background:rgba(82,196,26,0.16); border:1px solid rgba(82,196,26,0.35); color:#95de64; font-weight:700; display:inline-flex; align-items:center; gap:4px;">${t.completionEmoji || '✅'} ${escapeHtml(t.title)}</span>`
-          )
-          .join('')
-      : `<span style="font-size:10.5px; color:var(--text-muted); font-style:italic;">Henüz tamamlanan görev yok — görev tikledikçe buraya ve takvim kutusuna otomatik işlenir.</span>`;
+      ? `<div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center; padding-top:6px; margin-top:6px; border-top:1px solid rgba(255,255,255,0.06);">
+           <span style="font-size:10.5px; font-weight:800; color:#95de64;">✅ Bitenler:</span>
+           ${doneTasks.map((t) => `<span style="font-size:10.5px; padding:2px 8px; border-radius:99px; background:rgba(82,196,26,0.16); color:#95de64; font-weight:700;">${t.completionEmoji || '✅'} ${escapeHtml(t.title)}</span>`).join('')}
+         </div>`
+      : '';
 
   const foodsSummaryHtml = dayFoods.length > 0
     ? `<div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center; padding-top:5px; margin-top:5px; border-top:1px solid rgba(255,255,255,0.06);">
          <span style="font-size:10.5px; font-weight:800; color:#ffc069;">🍽️ Yediklerim (${Math.round(totalKcal)} kcal):</span>
-         ${dayFoods.map((f) => `<span style="font-size:10px; padding:2px 7px; border-radius:99px; background:rgba(255,192,105,0.14); color:#ffc069; font-weight:700;">${escapeHtml(f.name)} (${f.grams}g • 🥩${f.protein}g)</span>`).join('')}
+         ${dayFoods.slice(0, 6).map((f) => `<span style="font-size:10px; padding:2px 7px; border-radius:99px; background:rgba(255,192,105,0.14); color:#ffc069; font-weight:700;">${escapeHtml(f.name)} (${f.grams}g)</span>`).join('')}
        </div>`
     : '';
 
   bar.innerHTML = `
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
-      <div style="font-size:11.5px; font-weight:900; color:var(--accent-cream); display:flex; align-items:center; gap:6px;">
-        <span>📊 ${formattedDate} — Günlük Değerlerim & Yaptığım İşler</span>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+      <div style="font-size:11.5px; font-weight:900; color:var(--accent-cream);">
+        📊 ${formattedDate} Özeti
       </div>
       <div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center;">
-        <span style="font-size:10.5px; padding:2px 7px; border-radius:6px; background:rgba(96,165,250,0.16); color:#93c5fd; font-weight:800;">💧 ${waterCnt}/${waterTarget} (${waterL}L)</span>
-        <span style="font-size:10.5px; padding:2px 7px; border-radius:6px; background:rgba(245,216,181,0.15); color:var(--accent-cream); font-weight:800;">☕ ${log.coffeeCount || 0}</span>
-        <span style="font-size:10.5px; padding:2px 7px; border-radius:6px; background:rgba(255,156,110,0.16); color:#ff9c6e; font-weight:800;">🥩 ${totalProt}g P ${totalKcal > 0 ? `(${Math.round(totalKcal)} kcal)` : ''}</span>
-        <span style="font-size:10.5px; padding:2px 7px; border-radius:6px; background:rgba(216,208,248,0.16); color:var(--pastel-purple); font-weight:800;">💤 ${sleepVal}s</span>
-        <span style="font-size:10.5px; padding:2px 7px; border-radius:6px; background:rgba(255,192,105,0.16); color:#ffc069; font-weight:800;">${energyIcon} ${energyLevel}</span>
-        <span style="font-size:10.5px; padding:2px 7px; border-radius:6px; background:rgba(82,196,26,0.18); color:#95de64; font-weight:800;">✅ ${doneTasks.length}/${dayTasks.length} İş</span>
+        <span style="font-size:10.5px; padding:3px 8px; border-radius:8px; background:rgba(96,165,250,0.16); color:#93c5fd; font-weight:800;">💧 ${waterL}L</span>
+        <span style="font-size:10.5px; padding:3px 8px; border-radius:8px; background:rgba(255,156,110,0.16); color:#ff9c6e; font-weight:800;">🥩 ${totalProt}g P ${totalKcal > 0 ? `• 🔥 ${Math.round(totalKcal)} kcal` : ''}</span>
+        <span style="font-size:10.5px; padding:3px 8px; border-radius:8px; background:rgba(216,208,248,0.16); color:var(--pastel-purple); font-weight:800;">💤 ${sleepVal}s • ${energyIcon}</span>
+        <span style="font-size:10.5px; padding:3px 8px; border-radius:8px; background:rgba(82,196,26,0.18); color:#95de64; font-weight:800;">✅ ${doneTasks.length}/${dayTasks.length} Görev</span>
       </div>
     </div>
-    <div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center; padding-top:4px; border-top:1px solid rgba(255,255,255,0.06);">
-      <span style="font-size:10.5px; font-weight:800; color:var(--text-muted);">Tamamlanan İşler:</span>
-      ${doneItemsHtml}
-    </div>
+    ${doneItemsHtml}
     ${foodsSummaryHtml}
   `;
 }
@@ -5408,6 +5401,98 @@ function triggerRandomPersonalInsightPopup() {
 
 // ===== 30. 🎨 v20.0 ULTRA-BASİT "DOKUN & GERİ DÖN" ARAYÜZÜ, 🍱 FAVORİ ÖĞÜNLER & 👨‍🍳 ÖZEL TARİF SİSTEMİ =====
 
+function switchWaterInnerTab(tab) {
+  const vBox = document.getElementById('waterInnerTabVitals');
+  const rBox = document.getElementById('waterInnerTabRoutine');
+  const bV = document.getElementById('waterSubBtnVitals');
+  const bR = document.getElementById('waterSubBtnRoutine');
+  if (vBox) vBox.style.display = tab === 'routine' ? 'none' : 'block';
+  if (rBox) rBox.style.display = tab === 'routine' ? 'block' : 'none';
+  if (bV) bV.classList.toggle('active', tab !== 'routine');
+  if (bR) bR.classList.toggle('active', tab === 'routine');
+}
+
+function switchFoodInnerTab(tab) {
+  const aBox = document.getElementById('foodInnerTabAdd');
+  const rBox = document.getElementById('foodInnerTabRecipe');
+  const cBox = document.getElementById('foodInnerTabCombos');
+  const bA = document.getElementById('foodTabBtnAdd');
+  const bR = document.getElementById('foodTabBtnRecipe');
+  const bC = document.getElementById('foodTabBtnCombos');
+
+  if (aBox) aBox.style.display = tab === 'add' ? 'block' : 'none';
+  if (rBox) rBox.style.display = tab === 'recipe' ? 'block' : 'none';
+  if (cBox) cBox.style.display = tab === 'combos' ? 'block' : 'none';
+
+  if (bA) bA.classList.toggle('active', tab === 'add');
+  if (bR) bR.classList.toggle('active', tab === 'recipe');
+  if (bC) bC.classList.toggle('active', tab === 'combos');
+
+  if (tab === 'recipe') {
+    const recBox = document.getElementById('inlineCustomRecipeBox');
+    if (recBox) recBox.style.display = 'block';
+    renderSavedCustomRecipesList();
+  }
+}
+
+function switchWorkoutInnerTab(tab) {
+  const pBox = document.getElementById('workoutInnerTabPlan');
+  const rBox = document.getElementById('workoutInnerTabPR');
+  const cBox = document.getElementById('workoutInnerTabCalc');
+  const bP = document.getElementById('workoutSubBtnPlan');
+  const bR = document.getElementById('workoutSubBtnPR');
+  const bC = document.getElementById('workoutSubBtnCalc');
+
+  if (pBox) pBox.style.display = tab === 'plan' ? 'block' : 'none';
+  if (rBox) rBox.style.display = tab === 'pr' ? 'block' : 'none';
+  if (cBox) cBox.style.display = tab === 'calc' ? 'block' : 'none';
+
+  if (bP) bP.classList.toggle('active', tab === 'plan');
+  if (bR) bR.classList.toggle('active', tab === 'pr');
+  if (bC) bC.classList.toggle('active', tab === 'calc');
+}
+
+function switchStatsInnerTab(tab) {
+  const tBox = document.getElementById('statsInnerTabTimer');
+  const cBox = document.getElementById('statsInnerTabCharts');
+  const bT = document.getElementById('statsSubBtnTimer');
+  const bC = document.getElementById('statsSubBtnCharts');
+
+  if (tBox) tBox.style.display = tab === 'charts' ? 'none' : 'block';
+  if (cBox) cBox.style.display = tab === 'charts' ? 'block' : 'none';
+  if (bT) bT.classList.toggle('active', tab !== 'charts');
+  if (bC) bC.classList.toggle('active', tab === 'charts');
+}
+
+function quickAddPopularFood(foodName, grams) {
+  const all = getCombinedFoodDatabase();
+  const found = all.find((f) => f.name === foodName) || all.find((f) => f.name.toLowerCase().includes(foodName.toLowerCase()));
+  if (!found) return;
+  selectedFoodObj = found;
+  const inp = document.getElementById('foodSearchInput');
+  const gInp = document.getElementById('foodGramsInput');
+  if (inp) inp.value = found.name;
+  if (gInp) gInp.value = grams || found.defGrams || 100;
+  addSelectedFoodToDailyLog();
+}
+
+function fillSmartRecipePreset(name, grams, kcal, prot, carb, fat) {
+  const nameEl = document.getElementById('inlineRecipeName');
+  const gramsEl = document.getElementById('inlineRecipeGrams');
+  const kcalEl = document.getElementById('inlineRecipeKcal');
+  const protEl = document.getElementById('inlineRecipeProt');
+  const carbEl = document.getElementById('inlineRecipeCarb');
+  const fatEl = document.getElementById('inlineRecipeFat');
+
+  if (nameEl) nameEl.value = name;
+  if (gramsEl) gramsEl.value = grams;
+  if (kcalEl) kcalEl.value = kcal;
+  if (protEl) protEl.value = prot;
+  if (carbEl) carbEl.value = carb;
+  if (fatEl) fatEl.value = fat;
+  if (nameEl) nameEl.focus();
+}
+
 function openSimpleDrilldown(target) {
   // Önce Görevler ana görünümünde olduğumuzdan emin ol
   if (currentViewName !== 'tasks') {
@@ -5422,13 +5507,16 @@ function openSimpleDrilldown(target) {
   if (target === 'water') {
     switchLeftHubMode('sport');
     switchSportSubTab('water');
+    switchWaterInnerTab('vitals');
   } else if (target === 'food') {
     switchLeftHubMode('sport');
     switchSportSubTab('food');
+    switchFoodInnerTab('add');
     renderSavedCustomRecipesList();
   } else if (target === 'workout') {
     switchLeftHubMode('sport');
     switchSportSubTab('workout');
+    switchWorkoutInnerTab('plan');
   } else if (target === 'tools') {
     switchLeftHubMode('tools');
   }
@@ -5630,14 +5718,9 @@ function deleteFavoriteMealCombo(idx, event) {
 
 // 👨‍🍳 KENDİ TARİFLERİMİZİ EKLEME (DOĞRUDAN SAYFA İÇİ BÜYÜK FORM + MODAL DESTEĞİ)
 function toggleInlineCustomRecipeForm() {
-  const box = document.getElementById('inlineCustomRecipeBox');
-  if (!box) return;
-  const isHidden = box.style.display === 'none' || !box.style.display;
-  box.style.display = isHidden ? 'block' : 'none';
-  if (isHidden) {
-    const nameInp = document.getElementById('inlineRecipeName');
-    if (nameInp) nameInp.focus();
-  }
+  switchFoodInnerTab('recipe');
+  const nameInp = document.getElementById('inlineRecipeName');
+  if (nameInp) nameInp.focus();
 }
 
 function saveInlineCustomRecipe() {
@@ -5657,13 +5740,13 @@ function saveInlineCustomRecipe() {
     return;
   }
 
-  const refGrams = Math.max(1, parseFloat(gramsEl ? gramsEl.value : '100') || 100);
+  const refGrams = Math.max(1, parseFloat(gramsEl ? gramsEl.value : '150') || 150);
   const ratioTo100 = 100 / refGrams;
 
-  const rawKcal = parseFloat(kcalEl ? kcalEl.value : '200') || 0;
-  const rawProt = parseFloat(protEl ? protEl.value : '15') || 0;
+  const rawKcal = parseFloat(kcalEl ? kcalEl.value : '250') || 250;
+  const rawProt = parseFloat(protEl ? protEl.value : '20') || 0;
   const rawCarb = parseFloat(carbEl ? carbEl.value : '18') || 0;
-  const rawFat = parseFloat(fatEl ? fatEl.value : '7') || 0;
+  const rawFat = parseFloat(fatEl ? fatEl.value : '8') || 0;
   const rawFiber = parseFloat(fiberEl ? fiberEl.value : '0') || 0;
   const microNote = (microEl ? microEl.value : '').trim();
 
@@ -5681,7 +5764,7 @@ function saveInlineCustomRecipe() {
     rawPortionProt: Number(rawProt.toFixed(1)),
     rawPortionCarb: Number(rawCarb.toFixed(1)),
     rawPortionFat: Number(rawFat.toFixed(1)),
-    hint: `Özel Tarif (${refGrams}g Porsiyon${rawFiber ? `, 🌾${rawFiber}g Lif` : ''}${microNote ? `, 💊${microNote}` : ''})`
+    hint: `Özel Tarif (${refGrams}g Porsiyon)`
   };
 
   if (!Array.isArray(appData.customFoodDB)) appData.customFoodDB = [];
@@ -5709,7 +5792,7 @@ function saveInlineCustomRecipe() {
     appData.proteinGrams = Math.round((appData.proteinGrams || 0) + rawProt);
   }
 
-  // Formu temizle ve kapat
+  // Formu temizle (kutuyu kapatma ki kullanıcı tarif sekmesinde kalmaya devam etsin)
   if (nameEl) nameEl.value = '';
   if (kcalEl) kcalEl.value = '';
   if (protEl) protEl.value = '';
@@ -5717,8 +5800,6 @@ function saveInlineCustomRecipe() {
   if (fatEl) fatEl.value = '';
   if (fiberEl) fiberEl.value = '';
   if (microEl) microEl.value = '';
-  const box = document.getElementById('inlineCustomRecipeBox');
-  if (box) box.style.display = 'none';
 
   playAlertTone('success');
   syncTodayDailyLog(targetDate);
@@ -5737,13 +5818,13 @@ function renderSavedCustomRecipesList() {
   const listEl = document.getElementById('savedCustomRecipesList');
   if (!sec || !listEl) return;
 
+  sec.style.display = 'block';
   const customList = Array.isArray(appData.customFoodDB) ? appData.customFoodDB : [];
   if (customList.length === 0) {
-    sec.style.display = 'none';
+    listEl.innerHTML = `<div style="font-size:12px;color:var(--text-muted);padding:8px;text-align:center;">Henüz kayıtlı özel tarifin yok. Yukarıdan tarif adını yazıp <b>Kaydet</b> butonuna bastığında burada listelenir!</div>`;
     return;
   }
 
-  sec.style.display = 'block';
   listEl.innerHTML = customList.map((r, idx) => {
     const g = r.defGrams || 100;
     const ratio = g / 100;
@@ -5752,10 +5833,10 @@ function renderSavedCustomRecipesList() {
     const carb = ((r.carbs || 0) * ratio).toFixed(1);
     const fat = ((r.fat || 0) * ratio).toFixed(1);
     return `
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--bg-surface);padding:9px 11px;border-radius:11px;border:1px solid var(--border-color);flex-wrap:wrap;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--bg-surface);padding:10px 12px;border-radius:12px;border:1px solid var(--border-color);flex-wrap:wrap;">
         <div style="min-width:0;flex:1;">
-          <div style="font-size:13px;font-weight:900;color:var(--text-main);">${escapeHtml(r.name)} <span style="color:var(--accent-cream);">(${g}g Porsiyon)</span></div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">🔥 ${kcal} kcal • 🥩 <b style="color:#ff9c6e;">${prot}g P</b> • 🍞 ${carb}g K • 🥑 ${fat}g Y ${r.micros ? `• 💊 ${escapeHtml(r.micros)}` : ''}</div>
+          <div style="font-size:13.5px;font-weight:900;color:var(--text-main);">${escapeHtml(r.name)} <span style="color:var(--accent-cream);">(${g}g Porsiyon)</span></div>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">🔥 ${kcal} kcal • 🥩 <b style="color:#ff9c6e;">${prot}g P</b> • 🍞 ${carb}g K • 🥑 ${fat}g Y</div>
         </div>
         <div style="display:flex;gap:6px;align-items:center;">
           <button type="button" class="btn-cream" style="height:38px;padding:0 12px;font-size:12px;background:#95de64;color:#09090d;font-weight:900;" onclick="quickAddSavedCustomRecipeToToday(${idx})">+ Bugüne Ekle</button>
@@ -6995,7 +7076,7 @@ document.addEventListener('click', (e) => {
 
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=21').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=22').catch(() => {});
   }
   await initDB();
 

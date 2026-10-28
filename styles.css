@@ -2269,6 +2269,60 @@ body:not([data-active-view="tasks"]) #rolloverBanner {
   background: rgba(245, 216, 181, 0.14);
 }
 
+/* ============================================================================
+   v22.0 TEK TIKLA HIZLI YEMEK GRİDİ & ADIM ADIM SADE GÖRÜNÜM STİLLERİ
+   ============================================================================ */
+
+body[data-drilldown-open="true"] .search-bar-wrap,
+body[data-drilldown-open="true"] #rolloverBanner {
+  display: none !important;
+}
+
+.instant-food-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+@media (min-width: 540px) {
+  .instant-food-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.instant-food-btn {
+  min-height: 54px;
+  padding: 8px 10px;
+  border-radius: 13px;
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-main);
+  font-size: 12.5px;
+  font-weight: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.instant-food-btn span {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #95de64;
+}
+
+.instant-food-btn:hover,
+.instant-food-btn:active {
+  border-color: #95de64;
+  background: rgba(82, 196, 26, 0.14);
+  transform: translateY(-1px);
+}
+
+
 
 
 

@@ -1,10 +1,10 @@
-const CACHE_NAME = 'taskflow-pro-live-v21';
+const CACHE_NAME = 'taskflow-pro-live-v22';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=21',
-  './app.js?v=21',
-  './manifest.json?v=21',
+  './styles.css?v=22',
+  './app.js?v=22',
+  './manifest.json?v=22',
   './icon-192.png',
   './icon-512.png'
 ];
