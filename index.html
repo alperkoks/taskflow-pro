@@ -7,8 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>TaskFlow+ — Günlük Görev, Hedefler & Odak</title>
-  <link rel="manifest" href="manifest.json?v=22" />
-  <link rel="stylesheet" href="styles.css?v=22" />
+  <link rel="manifest" href="manifest.json?v=23" />
+  <link rel="stylesheet" href="styles.css?v=23" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -116,10 +116,12 @@
           </div>
           <h1 class="greeting-title">Yaşam & Plan Üssü</h1>
         </div>
-        <!-- Sağ Üstte Kişisel Koç Pop-up Tuşu + Panik Gizlilik Tuşu + Şık Profil & Ayarlar Rozeti -->
-        <div style="display:flex;align-items:center;gap:6px;">
-          <button type="button" class="pin-btn" onclick="triggerRandomPersonalInsightPopup()" style="height:36px;padding:0 10px;font-size:12px;border-color:rgba(245,216,181,0.4);color:var(--accent-cream);" title="Kişisel Koç Analizi & Sürpriz Motivasyon Pop-up'ı Göster">🤖 Koç</button>
-          <button type="button" class="pin-btn" id="panicBlurToggleBtn" onclick="togglePanicBlurMode()" style="height:36px;padding:0 10px;font-size:12px;" title="Panik / Gizlilik Modu: Ekranı Tek Tuşla Bulanıklaştır">🕵️</button>
+        <!-- Sağ Üstte Sabah Özeti + Story Görseli + Kişisel Koç + Panik Gizlilik + Ayarlar Rozeti -->
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+          <button type="button" class="pin-btn" onclick="openMorningFocusModal(true)" style="height:38px;padding:0 11px;font-size:12px;border-color:rgba(255,192,105,0.45);color:#ffc069;font-weight:800;" title="Bugünün 3 Önemli İşi (Sabah Karşılama Ekranı)">🌅 3 Odak</button>
+          <button type="button" class="pin-btn" onclick="openStoryGeneratorModal()" style="height:38px;padding:0 11px;font-size:12px;border-color:rgba(149,222,100,0.45);color:#95de64;font-weight:800;" title="Instagram / WhatsApp Story Görseli Oluştur">📸 Story</button>
+          <button type="button" class="pin-btn" onclick="triggerRandomPersonalInsightPopup()" style="height:38px;padding:0 10px;font-size:12px;border-color:rgba(245,216,181,0.4);color:var(--accent-cream);" title="Kişisel Koç Analizi">🤖 Koç</button>
+          <button type="button" class="pin-btn" id="panicBlurToggleBtn" onclick="togglePanicBlurMode()" style="height:38px;padding:0 10px;font-size:12px;" title="Panik / Gizlilik Modu">🕵️</button>
           <div class="user-avatar-pill" onclick="switchView('settings')" title="Ayarlar ve Hesap">
             <div class="user-avatar-circle" id="headerAvatarLetter">U</div>
             <span style="font-size:11.5px;font-weight:700;color:var(--text-muted);">Ayarlar ⚙️</span>
@@ -289,27 +291,27 @@
                 </div>
                 <div class="water-drops" id="waterDropsDisplay" style="font-size:13px;line-height:1.4;margin-bottom:10px;"></div>
 
-                <!-- 3 Eşit Büyük Su Ekleme Butonu -->
+                <!-- 3 Eşit Büyük Su Ekleme Butonu (Büyük Dokunmatik Stepper!) -->
                 <div style="display:grid;grid-template-columns:1fr 1.4fr 1.4fr;gap:8px;margin-bottom:14px;">
-                  <button type="button" class="water-btn-chip" style="color:var(--text-muted);" onclick="changeWaterCount(-1)">-1 Bardak</button>
-                  <button type="button" class="water-btn-chip" style="background:rgba(96,165,250,0.2);color:#93c5fd;border-color:rgba(96,165,250,0.45);" onclick="changeWaterCount(1)">💧 +1 Bardak (250ml)</button>
-                  <button type="button" class="water-btn-chip" style="background:#60a5fa;color:#09090d;font-weight:900;" onclick="changeWaterCount(2)">🍼 +1 Şişe (500ml)</button>
+                  <button type="button" class="lux-stepper-btn minus" onclick="changeWaterCount(-1)">➖ 1 Brd</button>
+                  <button type="button" class="lux-stepper-btn plus" onclick="changeWaterCount(1)">➕ 1 Bardak (250ml)</button>
+                  <button type="button" class="lux-stepper-btn plus-green" onclick="changeWaterCount(2)">🍼 +1 Şişe (500ml)</button>
                 </div>
 
-                <!-- Kahve, Uyku & Enerji (2x2 Temiz Kutu) -->
+                <!-- Kahve, Uyku & Enerji (Büyük + / - Stepper Butonlu Lüks Kartlar) -->
                 <div class="micro-vitals-grid" style="gap:10px;">
-                  <div class="vital-mini-box" style="padding:10px 12px;">
-                    <span>☕ Kahve: <b id="coffeeCountText" style="color:var(--accent-cream);">0</b></span>
-                    <div style="display:flex;gap:6px;">
-                      <button type="button" class="tag-badge" style="border:none;cursor:pointer;" onclick="changeCoffeeCount(-1)">-</button>
-                      <button type="button" class="tag-badge" style="border:none;cursor:pointer;background:rgba(245,216,181,0.2);color:var(--accent-cream);" onclick="changeCoffeeCount(1)">+1 ☕</button>
+                  <div class="vital-mini-box" style="padding:12px 14px;">
+                    <span style="font-size:13.5px;font-weight:800;">☕ Kahve: <b id="coffeeCountText" style="color:var(--accent-cream);font-size:15px;">0</b></span>
+                    <div style="display:flex;gap:8px;">
+                      <button type="button" class="lux-stepper-btn minus" onclick="changeCoffeeCount(-1)">➖</button>
+                      <button type="button" class="lux-stepper-btn plus" onclick="changeCoffeeCount(1)">➕ ☕</button>
                     </div>
                   </div>
-                  <div class="vital-mini-box" style="padding:10px 12px;">
-                    <span>💤 Uyku: <b id="sleepHoursText" style="color:var(--pastel-purple);">8 Saat</b></span>
-                    <div style="display:flex;gap:6px;">
-                      <button type="button" class="tag-badge" style="border:none;cursor:pointer;" onclick="changeDailySleepHours(-0.5)">-</button>
-                      <button type="button" class="tag-badge" style="border:none;cursor:pointer;background:rgba(216,208,248,0.2);color:var(--pastel-purple);" onclick="changeDailySleepHours(0.5)">+0.5s</button>
+                  <div class="vital-mini-box" style="padding:12px 14px;">
+                    <span style="font-size:13.5px;font-weight:800;">💤 Uyku: <b id="sleepHoursText" style="color:var(--pastel-purple);font-size:15px;">8 Saat</b></span>
+                    <div style="display:flex;gap:8px;">
+                      <button type="button" class="lux-stepper-btn minus" onclick="changeDailySleepHours(-0.5)">➖</button>
+                      <button type="button" class="lux-stepper-btn plus" onclick="changeDailySleepHours(0.5)">➕ 0.5s</button>
                     </div>
                   </div>
                 </div>
@@ -377,7 +379,17 @@
                 </div>
               </div>
 
-              <!-- 2. 3 EŞİT BÜYÜK SEKME SEÇİCİ (TIKLAYINCA SADECE SEÇİLEN ALAN GÖRÜNÜR!) -->
+              <!-- 1.5. 🕒 TEK TIKLA "DÜN NE YEDİYSEM AYNISINI BUGÜNE KOPYALA" + 📸 STORY KARTI BARI -->
+              <div style="display:grid;grid-template-columns:1.35fr 1fr;gap:8px;margin-bottom:12px;">
+                <button type="button" class="btn-cream" style="min-height:46px;font-size:12.5px;font-weight:900;background:linear-gradient(135deg,rgba(245,216,181,0.22),rgba(216,208,248,0.16));color:var(--accent-cream);border:1.5px solid rgba(245,216,181,0.45);" onclick="copyYesterdayFoodsToToday()">
+                  🕒 Dün Ne Yediysem Bugüne Kopyala
+                </button>
+                <button type="button" class="btn-cream" style="min-height:46px;font-size:12.5px;font-weight:900;background:linear-gradient(135deg,rgba(82,196,26,0.22),rgba(37,211,102,0.14));color:#95de64;border:1.5px solid rgba(149,222,100,0.45);" onclick="openStoryGeneratorModal()">
+                  📸 Story Görseli Oluştur
+                </button>
+              </div>
+
+              <!-- 2. 3 EŞİT BÜYÜK SEKME SEÇİCİ (TIKLAYINCA YUMUŞAKÇA SPAWN OLUR!) -->
               <div class="sub-tab-switcher" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px;">
                 <button type="button" class="sub-tab-btn active" id="foodTabBtnAdd" onclick="switchFoodInnerTab('add')">🍽️ Yemek Ekle</button>
                 <button type="button" class="sub-tab-btn" id="foodTabBtnRecipe" onclick="switchFoodInnerTab('recipe')">👨‍🍳 Kendi Tarifim</button>
@@ -385,119 +397,148 @@
               </div>
 
               <!-- ======================================================== -->
-              <!-- YEMEK ALT SEKME 1: 🍽️ HIZLI YEMEK EKLE & ARAMA (SADE!) -->
+              <!-- YEMEK ALT SEKME 1: 🍽️ HIZLI YEMEK EKLE & ARAMA (SPAWN BAŞLIKLI!) -->
               <!-- ======================================================== -->
               <div id="foodInnerTabAdd">
-                <!-- A) ⚡ TEK DOKUNUŞLA EN SIK YENİLEN 8 BESİN (YAZMADAN ANINDA EKLE!) -->
-                <div style="margin-bottom:12px;">
-                  <div style="font-size:12px;font-weight:900;color:var(--accent-cream);margin-bottom:7px;">⚡ Tek Dokunuşla Hızlı Ekle (Yazmaya Gerek Yok):</div>
-                  <div class="instant-food-grid">
-                    <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Haşlanmış Yumurta (Tam)', 100)">🥚 2 Yumurta<span>155 kcal • 13g P</span></button>
-                    <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Tavuk Göğsü (Haşlama / Izgara Pişmiş)', 200)">🍗 200g Tavuk<span>330 kcal • 62g P</span></button>
-                    <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Tavuk Sote (Biberli Domatesli Soğanlı)', 250)">🍲 Tavuk Sote<span>363 kcal • 48g P</span></button>
-                    <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Pirinç Pilavı (Tereyağlı / Şehriyeli)', 180)">🍚 1 Pors. Pilav<span>284 kcal • 5g P</span></button>
-                    <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Yulaf Ezmesi (Kuru Tartım)', 60)">🥣 60g Yulaf<span>225 kcal • 8g P</span></button>
-                    <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Izgara Köfte / Anne Köftesi', 180)">🥩 Pors. Köfte<span>441 kcal • 38g P</span></button>
-                    <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Whey Protein Tozu (1 Ölçek ≈ 30g)', 30)">🥛 1 Ölçek Whey<span>117 kcal • 23g P</span></button>
-                    <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Muz', 120)">🍌 1 Adet Muz<span>107 kcal • 27g K</span></button>
+                <!-- BAŞLIK 1: ⚡ TEK DOKUNUŞLA EN SIK YENİLEN 8 BESİN (BAŞLIĞA TIKLAYINCA SPAWNLANIR) -->
+                <div class="luxury-spawn-box open" id="spawnBoxQuickFoods">
+                  <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxQuickFoods')">
+                    <span>⚡ Tek Dokunuşla Hızlı Yemek Ekle (8 Popüler Besin)</span>
+                    <span class="luxury-spawn-chevron">▾</span>
+                  </button>
+                  <div class="luxury-spawn-body">
+                    <div class="instant-food-grid" style="margin-top:6px;">
+                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Haşlanmış Yumurta (Tam)', 100)">🥚 2 Yumurta<span>➕ 155 kcal • 13g P</span></button>
+                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Tavuk Göğsü (Haşlama / Izgara Pişmiş)', 200)">🍗 200g Tavuk<span>➕ 330 kcal • 62g P</span></button>
+                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Tavuk Sote (Biberli Domatesli Soğanlı)', 250)">🍲 Tavuk Sote<span>➕ 363 kcal • 48g P</span></button>
+                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Pirinç Pilavı (Tereyağlı / Şehriyeli)', 180)">🍚 1 Pors. Pilav<span>➕ 284 kcal • 5g P</span></button>
+                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Yulaf Ezmesi (Kuru Tartım)', 60)">🥣 60g Yulaf<span>➕ 225 kcal • 8g P</span></button>
+                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Izgara Köfte / Anne Köftesi', 180)">🥩 Pors. Köfte<span>➕ 441 kcal • 38g P</span></button>
+                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Whey Protein Tozu (1 Ölçek ≈ 30g)', 30)">🥛 1 Ölçek Whey<span>➕ 117 kcal • 23g P</span></button>
+                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Muz', 120)">🍌 1 Adet Muz<span>➕ 107 kcal • 27g K</span></button>
+                    </div>
                   </div>
                 </div>
 
-                <!-- B) 🔍 188+ YEMEK VEYA BESİN ARA & GRAMAJLA EKLE -->
-                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:14px;padding:12px;">
-                  <div style="font-size:12px;font-weight:900;color:#95de64;margin-bottom:7px;">🔍 188+ Yemek Listesinden Ara & Gramaj Seç:</div>
-
-                  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-                    <input type="text" id="foodSearchInput" class="form-input" style="flex:2;min-width:165px;height:46px;font-size:13.5px;" placeholder="🔍 Yemek yaz (Örn: Mercimek, peynir, makarna...)" oninput="onFoodSearchInput()" onclick="onFoodSearchInput()" autocomplete="off" />
-                    <div style="display:flex;align-items:center;gap:4px;flex:1;min-width:95px;">
-                      <input type="number" id="foodGramsInput" class="form-input" style="height:46px;font-size:14px;font-weight:900;text-align:center;" value="100" min="1" max="3000" oninput="updateFoodLiveMacroPreview()" placeholder="Gram" />
-                      <span style="font-size:12px;font-weight:800;color:var(--text-muted);">gr</span>
+                <!-- BAŞLIK 2: 🔍 188+ YEMEK LİSTESİNDEN ARA & BÜYÜK +/- GRAMAJLA EKLE -->
+                <div class="luxury-spawn-box open" id="spawnBoxSearchFoods">
+                  <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxSearchFoods')">
+                    <span style="color:#95de64;">🔍 188+ Yemek & Besin Ara (Gramajlı Hesapla)</span>
+                    <span class="luxury-spawn-chevron">▾</span>
+                  </button>
+                  <div class="luxury-spawn-body">
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px;">
+                      <input type="text" id="foodSearchInput" class="form-input" style="flex:2;min-width:175px;height:48px;font-size:14px;" placeholder="🔍 Yemek yaz (Örn: Mercimek, peynir, makarna...)" oninput="onFoodSearchInput()" onclick="onFoodSearchInput()" autocomplete="off" />
+                      <!-- Büyük Dokunmatik -25g / Gram / +25g Stepper -->
+                      <div style="display:flex;align-items:center;gap:6px;flex:1.2;min-width:170px;">
+                        <button type="button" class="lux-stepper-btn minus" onclick="stepFoodGrams(-25)" title="25 Gram Azalt">➖</button>
+                        <input type="number" id="foodGramsInput" class="form-input" style="height:48px;font-size:15px;font-weight:900;text-align:center;min-width:70px;" value="100" min="1" max="3000" oninput="updateFoodLiveMacroPreview()" placeholder="Gram" />
+                        <button type="button" class="lux-stepper-btn plus" onclick="stepFoodGrams(25)" title="25 Gram Artır">➕</button>
+                      </div>
+                      <button type="button" class="btn-cream" style="height:48px;padding:0 20px;font-size:14.5px;font-weight:900;background:#95de64;color:#09090d;flex-shrink:0;" onclick="addSelectedFoodToDailyLog()">➕ Bugüne Ekle</button>
                     </div>
-                    <button type="button" class="btn-cream" style="height:46px;padding:0 18px;font-size:14px;font-weight:900;background:#95de64;color:#09090d;flex-shrink:0;" onclick="addSelectedFoodToDailyLog()">+ Ekle</button>
-                  </div>
 
-                  <!-- Arama Sonucu Açılır Liste (Sadece Yazınca/Dokununca Açılır!) -->
-                  <div id="foodSearchDropdown" class="food-search-dropdown"></div>
+                    <!-- Arama Sonucu Açılır Liste -->
+                    <div id="foodSearchDropdown" class="food-search-dropdown"></div>
 
-                  <!-- 4 Eşit Porsiyon Gramaj Butonu -->
-                  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;">
-                    <button type="button" class="quick-chip" onclick="setQuickFoodGrams(50)">50g (Küçük)</button>
-                    <button type="button" class="quick-chip" onclick="setQuickFoodGrams(100)">100g (Normal)</button>
-                    <button type="button" class="quick-chip" onclick="setQuickFoodGrams(150)">150g (Orta)</button>
-                    <button type="button" class="quick-chip" onclick="setQuickFoodGrams(200)">200g (Büyük)</button>
-                  </div>
+                    <!-- 4 Eşit Porsiyon Gramaj Butonu -->
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;">
+                      <button type="button" class="quick-chip" onclick="setQuickFoodGrams(50)">50g (Küçük)</button>
+                      <button type="button" class="quick-chip" onclick="setQuickFoodGrams(100)">100g (Normal)</button>
+                      <button type="button" class="quick-chip" onclick="setQuickFoodGrams(150)">150g (Orta)</button>
+                      <button type="button" class="quick-chip" onclick="setQuickFoodGrams(200)">200g (Büyük)</button>
+                    </div>
 
-                  <!-- Canlı Gramaj Hesaplama Önizlemesi -->
-                  <div id="foodLiveMacroPreview" style="margin-top:8px;padding:9px 11px;border-radius:11px;background:rgba(255,255,255,0.04);border:1px dashed var(--border-color);font-size:12px;color:var(--accent-cream);">
-                    👆 Yukarıdan bir yemek seç, değerleri anında hesaplansın!
+                    <!-- Canlı Gramaj Hesaplama Önizlemesi -->
+                    <div id="foodLiveMacroPreview" style="margin-top:8px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px dashed var(--border-color);font-size:12.5px;color:var(--accent-cream);">
+                      👆 Yukarıdan bir yemek seç, değerleri anında hesaplansın!
+                    </div>
                   </div>
                 </div>
               </div>
 
               <!-- ======================================================== -->
-              <!-- YEMEK ALT SEKME 2: 👨‍🍳 KENDİ TARİFİM (SÜPER BASİT 2 ADIM!) -->
+              <!-- YEMEK ALT SEKME 2: 👨‍🍳 KENDİ TARİFİM (OTOMATİK MALZEME HESAPLAYICILI!) -->
               <!-- ======================================================== -->
               <div id="foodInnerTabRecipe" style="display:none;">
-                <div id="inlineCustomRecipeBox" style="background:linear-gradient(145deg,rgba(245,216,181,0.1),rgba(15,16,24,0.92));border:1.5px solid var(--accent-cream);border-radius:16px;padding:14px;margin-bottom:12px;">
-                  <div style="font-size:15px;font-weight:900;color:var(--accent-cream);margin-bottom:4px;">👨‍🍳 Kendi Yemeğini / Tarifini Ekle</div>
-                  <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">
-                    Değerleri bilmiyorsan aşağıdaki <b>Hazır Şablonlardan</b> birine dokunup otomatik doldurabilir veya kendin yazabilirsin:
-                  </div>
-
-                  <!-- ✨ TEK TIKLA AKILLI TARİF ŞABLONLARI (DEĞERLERİ OTOMATİK DOLDURUR!) -->
-                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;">
-                    <button type="button" class="quick-chip" onclick="fillSmartRecipePreset('🍗 Tavuklu Ev Yemeği', 200, 290, 36, 8, 12)">🍗 Tavuklu</button>
-                    <button type="button" class="quick-chip" onclick="fillSmartRecipePreset('🥩 Kıymalı / Etli Yemek', 200, 350, 32, 10, 20)">🥩 Etli/Kıymalı</button>
-                    <button type="button" class="quick-chip" onclick="fillSmartRecipePreset('🥣 Yulaflı Fit Pankek', 150, 310, 18, 42, 7)">🥣 Yulaflı/Fit</button>
-                    <button type="button" class="quick-chip" onclick="fillSmartRecipePreset('🥗 Proteinli Salata Bowl', 250, 275, 26, 15, 11)">🥗 Salata Bowl</button>
-                    <button type="button" class="quick-chip" onclick="fillSmartRecipePreset('🍲 Ev Çorbası / Bakliyat', 250, 195, 11, 26, 5)">🍲 Çorba/Bakliyat</button>
-                    <button type="button" class="quick-chip" onclick="fillSmartRecipePreset('🥤 Ev Yapımı Protein Shake', 300, 260, 27, 24, 6)">🥤 Özel Shake</button>
-                  </div>
-
-                  <!-- ADIM 1: YEMEK ADI & GRAMAJ -->
-                  <div class="form-row stack-mobile" style="margin-bottom:8px;">
-                    <div class="form-group" style="flex:2;margin:0;">
-                      <label>🍲 1. Yemeğin / Tarifin Adı</label>
-                      <input type="text" id="inlineRecipeName" class="form-input" style="height:46px;font-size:13.5px;" placeholder="Örn: Annemin Köftesi / Yulaflı Omlet" />
-                    </div>
-                    <div class="form-group" style="flex:1;margin:0;">
-                      <label>⚖️ Porsiyon Gramı (g)</label>
-                      <input type="number" id="inlineRecipeGrams" class="form-input" style="height:46px;font-size:14px;font-weight:800;" value="150" min="1" max="3000" />
+                <div id="inlineCustomRecipeBox">
+                  <!-- BAŞLIK 1: 🧮 MALZEMELERİ SEÇ, TARİFİ KENDİ HESAPLASIN (OTOMATİK TARİF OLUŞTURUCU) -->
+                  <div class="luxury-spawn-box open" id="spawnBoxAutoRecipeBuilder">
+                    <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxAutoRecipeBuilder')">
+                      <span style="color:#95de64;">🧮 Malzemeleri Seç, Tarifi Kendi Hesaplasın!</span>
+                      <span class="luxury-spawn-chevron">▾</span>
+                    </button>
+                    <div class="luxury-spawn-body">
+                      <p style="font-size:12px;color:var(--text-muted);margin:6px 0 10px;">
+                        Kalori veya protein bilmene gerek yok! Yemeğinin içindeki malzemelerin <b>➕</b> ve <b>➖</b> tuşlarına bas; toplam gramaj, kalori ve protein <b>otomatik hesaplansın</b>:
+                      </p>
+                      <div id="autoRecipeIngredientsGrid" class="ingredient-picker-grid"></div>
+                      <div id="autoRecipeSummaryBanner" style="padding:11px 13px;border-radius:14px;background:linear-gradient(135deg,rgba(82,196,26,0.16),rgba(96,165,250,0.12));border:1.5px solid rgba(149,222,100,0.45);font-size:12.5px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                        <span>🥣 <b>Seçilen Malzemeler:</b> Henüz malzeme seçilmedi (Yukarıdan ➕ tuşuna bas)</span>
+                        <button type="button" class="pin-btn" style="height:34px;padding:0 10px;font-size:11.5px;" onclick="resetAutoRecipeBuilder()">🔄 Sıfırla</button>
+                      </div>
                     </div>
                   </div>
 
-                  <!-- ADIM 2: 4 MAKRO KUTUSU (2x2 BÜYÜK VE NET) -->
-                  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;">
-                    <div class="form-group" style="margin:0;">
-                      <label>🔥 Kalori (kcal)</label>
-                      <input type="number" id="inlineRecipeKcal" class="form-input" style="height:44px;" placeholder="Örn: 280" />
-                    </div>
-                    <div class="form-group" style="margin:0;">
-                      <label>🥩 Protein (g)</label>
-                      <input type="number" id="inlineRecipeProt" class="form-input" style="height:44px;" placeholder="Örn: 25" step="0.1" />
-                    </div>
-                    <div class="form-group" style="margin:0;">
-                      <label>🍞 Karbonhidrat (g)</label>
-                      <input type="number" id="inlineRecipeCarb" class="form-input" style="height:44px;" placeholder="Örn: 18" step="0.1" />
-                    </div>
-                    <div class="form-group" style="margin:0;">
-                      <label>🥑 Yağ (g)</label>
-                      <input type="number" id="inlineRecipeFat" class="form-input" style="height:44px;" placeholder="Örn: 10" step="0.1" />
+                  <!-- BAŞLIK 2: 🍲 TARİFİN ADI, DEĞERLERİ VE KAYDET BUTONU -->
+                  <div class="luxury-spawn-box open" id="spawnBoxManualRecipeForm">
+                    <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxManualRecipeForm')">
+                      <span style="color:var(--accent-cream);">🍲 Tarif Adı & Besin Değerleri (Otomatik Dolar / Düzenlenebilir)</span>
+                      <span class="luxury-spawn-chevron">▾</span>
+                    </button>
+                    <div class="luxury-spawn-body">
+                      <div style="font-size:11.5px;color:var(--text-muted);margin:6px 0 8px;">
+                        İstersen hazır şablona da dokunabilirsin:
+                      </div>
+                      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;">
+                        <button type="button" class="quick-chip" onclick="fillSmartRecipePreset('🍗 Tavuklu Ev Yemeği', 200, 290, 36, 8, 12)">🍗 Tavuklu</button>
+                        <button type="button" class="quick-chip" onclick="fillSmartRecipePreset('🥩 Kıymalı / Etli Yemek', 200, 350, 32, 10, 20)">🥩 Etli/Kıymalı</button>
+                        <button type="button" class="quick-chip" onclick="fillSmartRecipePreset('🥣 Yulaflı Fit Pankek', 150, 310, 18, 42, 7)">🥣 Yulaflı/Fit</button>
+                      </div>
+
+                      <div class="form-row stack-mobile" style="margin-bottom:8px;">
+                        <div class="form-group" style="flex:2;margin:0;">
+                          <label>🍲 1. Yemeğin / Tarifin Adı</label>
+                          <input type="text" id="inlineRecipeName" class="form-input" style="height:48px;font-size:14px;font-weight:800;" placeholder="Örn: Yulaflı Muzlu Omlet / Annemin Köftesi" />
+                        </div>
+                        <div class="form-group" style="flex:1;margin:0;">
+                          <label>⚖️ Toplam Gramaj (g)</label>
+                          <input type="number" id="inlineRecipeGrams" class="form-input" style="height:48px;font-size:15px;font-weight:900;" value="150" min="1" max="5000" />
+                        </div>
+                      </div>
+
+                      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;">
+                        <div class="form-group" style="margin:0;">
+                          <label>🔥 Kalori (kcal)</label>
+                          <input type="number" id="inlineRecipeKcal" class="form-input" style="height:46px;font-weight:800;" placeholder="Örn: 280" />
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                          <label>🥩 Protein (g)</label>
+                          <input type="number" id="inlineRecipeProt" class="form-input" style="height:46px;font-weight:800;" placeholder="Örn: 25" step="0.1" />
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                          <label>🍞 Karbonhidrat (g)</label>
+                          <input type="number" id="inlineRecipeCarb" class="form-input" style="height:46px;font-weight:800;" placeholder="Örn: 18" step="0.1" />
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                          <label>🥑 Yağ (g)</label>
+                          <input type="number" id="inlineRecipeFat" class="form-input" style="height:46px;font-weight:800;" placeholder="Örn: 10" step="0.1" />
+                        </div>
+                      </div>
+
+                      <input type="hidden" id="inlineRecipeFiber" value="" />
+                      <input type="hidden" id="inlineRecipeMicro" value="" />
+
+                      <button type="button" class="btn-cream" style="width:100%;min-height:50px;font-size:14.5px;font-weight:900;background:#95de64;color:#09090d;" onclick="saveInlineCustomRecipe()">
+                        💾 Tarifimi Kaydet ve Bugün Yediklerime Ekle ✓
+                      </button>
                     </div>
                   </div>
-
-                  <!-- Gizli opsiyonel alanlar (karmaşa yaratmaması için sadeleştirildi) -->
-                  <input type="hidden" id="inlineRecipeFiber" value="" />
-                  <input type="hidden" id="inlineRecipeMicro" value="" />
-
-                  <button type="button" class="btn-cream" style="width:100%;min-height:48px;font-size:14px;font-weight:900;background:#95de64;color:#09090d;" onclick="saveInlineCustomRecipe()">
-                    💾 Tarifimi Kaydet ve Bugün Yediklerime Ekle ✓
-                  </button>
                 </div>
 
                 <!-- 📚 KAYITLI ÖZEL TARİFLERİM LİSTESİ -->
-                <div id="savedCustomRecipesSection" style="background:rgba(255,192,105,0.08);border:1px solid rgba(255,192,105,0.35);border-radius:14px;padding:12px;">
-                  <div style="font-size:13px;font-weight:900;color:#ffc069;margin-bottom:8px;">👨‍🍳 Kayıtlı Özel Tariflerim (Tek Tıkla Bugüne Ekle):</div>
+                <div id="savedCustomRecipesSection" style="background:rgba(255,192,105,0.08);border:1px solid rgba(255,192,105,0.35);border-radius:16px;padding:13px;">
+                  <div style="font-size:13.5px;font-weight:900;color:#ffc069;margin-bottom:8px;">👨‍🍳 Kayıtlı Özel Tariflerim (Tek Tıkla Bugüne Ekle):</div>
                   <div id="savedCustomRecipesList" style="display:flex;flex-direction:column;gap:8px;"></div>
                 </div>
               </div>
@@ -1159,21 +1200,57 @@
           <button type="button" class="sub-tab-btn" id="socialSubBtnMissions" onclick="switchSocialSubTab('missions')">🏆 120 Rozet & Görevler</button>
         </div>
 
-        <!-- ALT BÖLÜM 1: 💬 MODERN ARKADAŞ EKLEME & CANLI MESAJLAŞMA (VARSAYILAN AÇIK!) -->
+        <!-- ALT BÖLÜM 1: 💬 MODERN ARKADAŞLAR, LİDERLİK TABLOSU, 7 GÜNLÜK DÜELLO & SOHBET -->
         <div id="socialSubFriends">
-          <!-- KART 1: ➕ HIZLI VE BASİT ARKADAŞ EKLEME -->
-          <div class="task-card" style="margin-bottom:14px;border-color:rgba(82,196,26,0.4);">
-            <div style="font-size:16px;font-weight:900;color:#95de64;margin-bottom:4px;">➕ Yeni Arkadaş Ekle</div>
-            <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:10px;">
-              Arkadaşının adını yazıp hemen listene ekle ve mesajlaşmaya başla! (İstersen WhatsApp numarasını da yazabilirsin):
-            </p>
-            <div class="form-row stack-mobile" style="margin-bottom:8px;">
-              <input type="text" id="addFriendInput" class="form-input" style="height:46px;font-size:13.5px;" placeholder="👤 Arkadaşının Adı (Örn: Ahmet, Berk, Ayşe)..." onkeydown="if(event.key==='Enter'){event.preventDefault();addFriendByCodeOrUsername();}" />
-              <input type="tel" id="addFriendPhoneInput" class="form-input" style="height:46px;font-size:13.5px;" placeholder="📱 WhatsApp No (Opsiyonel: 05...)" onkeydown="if(event.key==='Enter'){event.preventDefault();addFriendByCodeOrUsername();}" />
+          <!-- BAŞLIK 1: 🏆 HAFTALIK LİDERLİK TABLOSU (PUAN SIRALAMASI) -->
+          <div class="luxury-spawn-box open" id="spawnBoxLeaderboard">
+            <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxLeaderboard')">
+              <span style="color:#ffd700;">🏆 Haftalık Arkadaş Liderlik Tablosu (Puan Sıralaması)</span>
+              <span class="luxury-spawn-chevron">▾</span>
+            </button>
+            <div class="luxury-spawn-body">
+              <div style="font-size:12px;color:var(--text-muted);margin:6px 0 10px;">
+                İçilen su, alınan protein, biten görevler ve disiplin serisine göre canlı haftalık sıralama:
+              </div>
+              <div id="friendsLeaderboardContainer"></div>
             </div>
-            <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;">
-              <button type="button" class="btn-cream" style="height:46px;font-size:14px;font-weight:900;background:#95de64;color:#09090d;" onclick="addFriendByCodeOrUsername()">➕ Arkadaş Olarak Ekle</button>
-              <button type="button" class="pin-btn" style="height:46px;font-size:12.5px;font-weight:800;" onclick="copyMyFriendInviteCode()">🔗 Davet Kodum</button>
+          </div>
+
+          <!-- BAŞLIK 2: 🔥 ARKADAŞLA ORTAK 7 GÜNLÜK DÜELLO / CHALLENGE BAŞLATMA -->
+          <div class="luxury-spawn-box open" id="spawnBoxFriendDuel">
+            <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxFriendDuel')">
+              <span style="color:#ff9c6e;">🔥 Arkadaşla "Ortak 7 Günlük Düello / Challenge"</span>
+              <span class="luxury-spawn-chevron">▾</span>
+            </button>
+            <div class="luxury-spawn-body">
+              <div id="activeFriendDuelBox" style="margin-top:6px;"></div>
+              <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px;">
+                <button type="button" class="quick-chat-btn" onclick="startFriendSevenDayDuel('💧 7 Gün Günde 3L Su Düellosu')">💧 7 Gün 3L Su Düellosu</button>
+                <button type="button" class="quick-chat-btn" onclick="startFriendSevenDayDuel('🏋️ 7 Gün 5 Antrenman Düellosu')">🏋️ 7 Gün 5 İdman Düellosu</button>
+                <button type="button" class="quick-chat-btn" onclick="startFriendSevenDayDuel('🍬 7 Gün Şekersiz & Fit Düello')">🍬 7 Gün Şekersiz Düello</button>
+                <button type="button" class="quick-chat-btn" onclick="startFriendSevenDayDuel('🔥 7 Gün %100 Görev Düellosu')">🔥 7 Gün %100 Görev Düellosu</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- BAŞLIK 3: ➕ YENİ ARKADAŞ EKLE (BAŞLIĞA TIKLAYINCA SPAWNLANIR) -->
+          <div class="luxury-spawn-box" id="spawnBoxAddFriend">
+            <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxAddFriend')">
+              <span style="color:#95de64;">➕ Yeni Arkadaş Ekle (İsim veya WhatsApp No ile)</span>
+              <span class="luxury-spawn-chevron">▾</span>
+            </button>
+            <div class="luxury-spawn-body">
+              <p style="font-size:12.5px;color:var(--text-muted);margin:6px 0 10px;">
+                Arkadaşının adını yazıp hemen listene ekle ve mesajlaşmaya başla! (İstersen WhatsApp numarasını da yazabilirsin):
+              </p>
+              <div class="form-row stack-mobile" style="margin-bottom:8px;">
+                <input type="text" id="addFriendInput" class="form-input" style="height:46px;font-size:13.5px;" placeholder="👤 Arkadaşının Adı (Örn: Ahmet, Berk, Ayşe)..." onkeydown="if(event.key==='Enter'){event.preventDefault();addFriendByCodeOrUsername();}" />
+                <input type="tel" id="addFriendPhoneInput" class="form-input" style="height:46px;font-size:13.5px;" placeholder="📱 WhatsApp No (Opsiyonel: 05...)" onkeydown="if(event.key==='Enter'){event.preventDefault();addFriendByCodeOrUsername();}" />
+              </div>
+              <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;">
+                <button type="button" class="btn-cream" style="height:46px;font-size:14px;font-weight:900;background:#95de64;color:#09090d;" onclick="addFriendByCodeOrUsername()">➕ Arkadaş Olarak Ekle</button>
+                <button type="button" class="pin-btn" style="height:46px;font-size:12.5px;font-weight:800;" onclick="copyMyFriendInviteCode()">🔗 Davet Kodum</button>
+              </div>
             </div>
           </div>
 
@@ -1187,7 +1264,7 @@
           </div>
 
           <!-- KART 3: 💬 SEÇİLİ ARKADAŞLA MESAJLAŞMA & WHATSAPP GÖNDERİMİ -->
-          <div class="task-card" style="border-color:rgba(245,216,181,0.4);">
+          <div class="task-card" id="activeChatCardBox" style="border-color:rgba(245,216,181,0.4);">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap;">
               <h4 id="activeChatFriendTitle" style="font-size:15.5px;font-weight:900;color:var(--accent-cream);">💬 Sohbet & Motivasyon</h4>
               <button type="button" class="btn-cream" style="height:38px;padding:0 14px;font-size:12.5px;background:#25D366;color:#fff;font-weight:900;" onclick="sendChatToWhatsAppDirect()">📲 WhatsApp'tan Gönder</button>
@@ -1676,6 +1753,74 @@
     </div>
   </div>
 
-  <script src="app.js?v=22"></script>
+  <!-- ⚡ SAĞ ALTTA TEK BİR "HIZLI EKLE (+)" YÜZEN MENÜSÜ (FLOATING QUICK ACTION) -->
+  <div id="quickFabBackdrop" class="quick-fab-backdrop" onclick="toggleQuickFabMenu(false)"></div>
+  <div id="quickFabContainer" class="quick-fab-container">
+    <div class="quick-fab-menu">
+      <button type="button" class="quick-fab-item" onclick="toggleQuickFabMenu(false);openTaskModal();">
+        <span style="font-size:19px;">📋</span>
+        <span>Yeni Görev Ekle</span>
+      </button>
+      <button type="button" class="quick-fab-item" onclick="toggleQuickFabMenu(false);openSimpleDrilldown('food');">
+        <span style="font-size:19px;">🍽️</span>
+        <span>Yemek / Tarif Ekle</span>
+      </button>
+      <button type="button" class="quick-fab-item" onclick="toggleQuickFabMenu(false);changeWaterCount(1);">
+        <span style="font-size:19px;">💧</span>
+        <span>+1 Bardak Su İç (250ml)</span>
+      </button>
+      <button type="button" class="quick-fab-item" onclick="toggleQuickFabMenu(false);openStoryGeneratorModal();">
+        <span style="font-size:19px;">📸</span>
+        <span>Instagram / WP Story Oluştur</span>
+      </button>
+    </div>
+    <button type="button" class="quick-fab-trigger" onclick="toggleQuickFabMenu()" title="Hızlı Ekle Menüsü">＋</button>
+  </div>
+
+  <!-- 🌅 SABAH AÇILIŞTA "GÜNAYDIN! BUGÜN SADECE ŞU 3 ÖNEMLİ İŞİNE ODAKLAN" KARŞILAMA EKRANI -->
+  <div id="morningWelcomeModal" class="modal-backdrop hidden" style="align-items:center;padding:16px;z-index:21000;">
+    <div class="modal-sheet spawn-anim" style="max-width:460px;border-radius:26px;border:1.5px solid rgba(245,216,181,0.45);background:linear-gradient(155deg,#181926,#0c0d14);">
+      <div style="text-align:center;margin-bottom:14px;">
+        <div style="font-size:40px;line-height:1;">🌅</div>
+        <h3 id="morningGreetingTitle" style="font-size:20px;font-weight:900;color:var(--accent-cream);margin-top:8px;">Günaydın Şampiyon!</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:4px;">
+          Karmaşayı unut. <b>Bugün sadece şu 3 önemli işine odaklan</b> ve günü zaferle bitir:
+        </p>
+      </div>
+
+      <div id="morningTop3ListContainer" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
+
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <input type="text" id="morningQuickAddInput" class="form-input" style="height:46px;font-size:13.5px;" placeholder="✨ Bugünün önceliğini yaz ve + Ekle'ye bas..." onkeydown="if(event.key==='Enter'){event.preventDefault();addMorningFocusTask();}" />
+        <button type="button" class="btn-cream" style="height:46px;padding:0 16px;font-weight:900;flex-shrink:0;" onclick="addMorningFocusTask()">➕ Ekle</button>
+      </div>
+
+      <button type="button" class="btn-cream" style="width:100%;height:50px;font-size:15px;font-weight:900;background:linear-gradient(135deg,#95de64,#60a5fa);color:#09090d;" onclick="closeMorningFocusModal()">
+        🚀 Harika! Odaklan ve Günü Başlat →
+      </button>
+    </div>
+  </div>
+
+  <!-- 📸 INSTAGRAM / WHATSAPP HİKAYE (STORY) ÖZETİ GÖRSELİ OLUŞTURUCU MODALI -->
+  <div id="storyGeneratorModal" class="modal-backdrop hidden" style="align-items:center;padding:16px;z-index:21500;">
+    <div class="modal-sheet spawn-anim" style="max-width:440px;border-radius:26px;text-align:center;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h3 style="font-size:17px;font-weight:900;color:var(--accent-cream);">📸 Instagram / WP Story Özeti</h3>
+        <button type="button" class="icon-btn" onclick="closeStoryGeneratorModal()">✕</button>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">
+        Bugünkü su, protein, kalori, görev ve rozet başarını içeren HD Story kartın hazır!
+      </p>
+      <div style="background:#09090d;border-radius:18px;padding:8px;border:1px solid var(--border-color);margin-bottom:12px;">
+        <canvas id="storyShareCanvas" width="1080" height="1920" style="width:100%;max-height:54vh;object-fit:contain;border-radius:12px;display:block;margin:0 auto;"></canvas>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button type="button" class="btn-cream" style="height:48px;font-size:13.5px;font-weight:900;" onclick="downloadStoryCardImage()">📥 Resmi İndir (PNG)</button>
+        <button type="button" class="btn-cream" style="height:48px;font-size:13.5px;font-weight:900;background:#25D366;color:#fff;" onclick="shareStoryCardImageOrText()">📲 Story Paylaş</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=23"></script>
 </body>
 </html>

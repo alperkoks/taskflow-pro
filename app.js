@@ -5188,12 +5188,16 @@ function renderFoodMacroTracker() {
   }
 
   listEl.innerHTML = foods.map((f, idx) => `
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;background:var(--bg-surface);padding:6px 9px;border-radius:9px;font-size:11.5px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--bg-surface);padding:9px 11px;border-radius:12px;border:1px solid var(--border-color);font-size:12px;">
       <div style="min-width:0;flex:1;">
         <div style="font-weight:800;color:var(--text-main);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🍽️ ${escapeHtml(f.name)} <span style="color:var(--accent-cream);">(${f.grams}g)</span></div>
-        <div style="font-size:10px;color:var(--text-muted);">🔥 ${Math.round(f.kcal)} kcal • 🥩 <b style="color:#ff9c6e;">${f.protein}g P</b> • 🍞 ${f.carbs}g K • 🥑 ${f.fat}g Y</div>
+        <div style="font-size:10.5px;color:var(--text-muted);margin-top:2px;">🔥 ${Math.round(f.kcal)} kcal • 🥩 <b style="color:#ff9c6e;">${f.protein}g P</b> • 🍞 ${f.carbs}g K • 🥑 ${f.fat}g Y</div>
       </div>
-      <button type="button" style="background:none;border:none;color:#ff7875;cursor:pointer;font-weight:900;font-size:14px;" onclick="removeDailyFoodItem(${idx})" title="Sil">×</button>
+      <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
+        <button type="button" class="lux-stepper-btn minus" style="width:36px !important;height:36px !important;min-width:36px !important;min-height:36px !important;font-size:13px !important;border-radius:10px !important;" onclick="adjustDailyFoodItemGrams(${idx}, -50)" title="-50g Azalt">-50</button>
+        <button type="button" class="lux-stepper-btn plus" style="width:36px !important;height:36px !important;min-width:36px !important;min-height:36px !important;font-size:13px !important;border-radius:10px !important;" onclick="adjustDailyFoodItemGrams(${idx}, 50)" title="+50g Artır">+50</button>
+        <button type="button" class="lux-stepper-btn minus" style="width:36px !important;height:36px !important;min-width:36px !important;min-height:36px !important;font-size:15px !important;border-radius:10px !important;" onclick="removeDailyFoodItem(${idx})" title="Sil">🗑️</button>
+      </div>
     </div>
   `).join('');
 }
@@ -5431,6 +5435,9 @@ function switchFoodInnerTab(tab) {
   if (tab === 'recipe') {
     const recBox = document.getElementById('inlineCustomRecipeBox');
     if (recBox) recBox.style.display = 'block';
+    if (typeof renderAutoRecipeIngredientsBuilder === 'function') {
+      renderAutoRecipeIngredientsBuilder();
+    }
     renderSavedCustomRecipesList();
   }
 }
@@ -6807,6 +6814,8 @@ function renderSocialFriendsList() {
   }).join('');
 
   renderSelectedFriendChat();
+  if (typeof renderFriendsLeaderboard === 'function') renderFriendsLeaderboard();
+  if (typeof renderFriendDuelArena === 'function') renderFriendDuelArena();
 }
 
 function selectFriendForChat(idx, focusInput = false) {
@@ -7065,18 +7074,600 @@ async function syncSocialFriendsAndMessages(silent = false) {
   }
 }
 
-// Dışarı tıklanınca besin arama listesini kapat
+// Dışarı tıklanınca besin arama listesini ve hızlı (+) menüsünü kapat
 document.addEventListener('click', (e) => {
   const card = document.getElementById('foodMacroTrackerCard');
   const drop = document.getElementById('foodSearchDropdown');
   if (card && drop && !card.contains(e.target)) {
     drop.classList.remove('open');
   }
+  const fabContainer = document.getElementById('quickFabContainer');
+  if (fabContainer && fabContainer.classList.contains('open') && !fabContainer.contains(e.target)) {
+    fabContainer.classList.remove('open');
+  }
 });
+
+// =========================================================================
+// 💎 v23.0 ULTRA-LUXURY ÖZELLİKLER (SPAWN ANİMASYONLARI, OTOMATİK TARİF,
+// HAFTALIK LİDERLİK, 7 GÜNLÜK DÜELLO, SABAH 3 ODAK & STORY OLUŞTURUCU)
+// =========================================================================
+
+function toggleLuxurySpawnBox(boxId) {
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  box.classList.toggle('open');
+}
+
+function toggleQuickFabMenu(forceState) {
+  const fab = document.getElementById('quickFabContainer');
+  if (!fab) return;
+  if (typeof forceState === 'boolean') {
+    fab.classList.toggle('open', forceState);
+  } else {
+    fab.classList.toggle('open');
+  }
+}
+
+function stepFoodGrams(delta) {
+  const inp = document.getElementById('foodGramsInput');
+  if (!inp) return;
+  const cur = Number(inp.value) || 100;
+  const next = Math.max(10, Math.min(3000, cur + delta));
+  inp.value = next;
+  updateFoodLiveMacroPreview();
+}
+
+function adjustDailyFoodItemGrams(idx, deltaGrams) {
+  const targetDate = getActiveFoodTargetDate();
+  if (!appData.dailyFoodsByDate || !Array.isArray(appData.dailyFoodsByDate[targetDate])) return;
+  const item = appData.dailyFoodsByDate[targetDate][idx];
+  if (!item) return;
+
+  const oldGrams = Number(item.grams) || 100;
+  const newGrams = Math.max(10, oldGrams + deltaGrams);
+  const ratio = newGrams / oldGrams;
+
+  item.grams = Math.round(newGrams);
+  item.kcal = Math.round((Number(item.kcal) || 0) * ratio);
+  item.protein = Number(((Number(item.protein) || 0) * ratio).toFixed(1));
+  item.carbs = Number(((Number(item.carbs) || 0) * ratio).toFixed(1));
+  item.fat = Number(((Number(item.fat) || 0) * ratio).toFixed(1));
+
+  if (targetDate === getTodayISO()) {
+    const totalProt = appData.dailyFoodsByDate[targetDate].reduce((s, f) => s + (Number(f.protein) || 0), 0);
+    appData.proteinGrams = Math.round(totalProt);
+  }
+
+  saveProfileData();
+  renderFoodMacroTracker();
+  renderQuickDailyTrackers();
+}
+
+function copyYesterdayFoodsToToday() {
+  if (!appData.dailyFoodsByDate || typeof appData.dailyFoodsByDate !== 'object') {
+    appData.dailyFoodsByDate = {};
+  }
+  const todayISO = getTodayISO();
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  const yesterdayISO = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+  let sourceDate = yesterdayISO;
+  let sourceFoods = appData.dailyFoodsByDate[yesterdayISO];
+
+  if (!Array.isArray(sourceFoods) || sourceFoods.length === 0) {
+    const pastDates = Object.keys(appData.dailyFoodsByDate)
+      .filter((k) => k < todayISO && Array.isArray(appData.dailyFoodsByDate[k]) && appData.dailyFoodsByDate[k].length > 0)
+      .sort()
+      .reverse();
+    if (pastDates.length > 0) {
+      sourceDate = pastDates[0];
+      sourceFoods = appData.dailyFoodsByDate[sourceDate];
+    }
+  }
+
+  if (!Array.isArray(sourceFoods) || sourceFoods.length === 0) {
+    showSmartCoachPopup('🕒', 'Kopyalanacak Geçmiş Öğün Bulunamadı', 'Dün veya önceki günlerde kayıtlı bir yemek bulunamadı. Bugün ilk öğünlerini ekledikten sonra yarın tek tıkla kopyalayabilirsin!');
+    return;
+  }
+
+  if (!Array.isArray(appData.dailyFoodsByDate[todayISO])) {
+    appData.dailyFoodsByDate[todayISO] = [];
+  }
+
+  const cloned = sourceFoods.map((f) => ({ ...f }));
+  appData.dailyFoodsByDate[todayISO].push(...cloned);
+
+  const totalProt = appData.dailyFoodsByDate[todayISO].reduce((s, f) => s + (Number(f.protein) || 0), 0);
+  appData.proteinGrams = Math.round(totalProt);
+
+  const datePicker = document.getElementById('foodTargetDateInput');
+  if (datePicker) datePicker.value = todayISO;
+
+  saveProfileData();
+  renderFoodMacroTracker();
+  renderQuickDailyTrackers();
+
+  showSmartCoachPopup('🕒', 'Dünkü Öğünlerin Bugüne Kopyalandı! ✅', `<b>${sourceDate}</b> tarihindeki <b>${cloned.length} öğün</b> tek tıkla bugüne eklendi ve protein/kalori değerlerin güncellendi!`);
+}
+
+// 🧮 OTOMATİK TARİF HESAPLAYICI (MALZEMELERİ SEÇ, KENDİ HESAPLASIN)
+const AUTO_RECIPE_INGREDIENTS = [
+  { id: 'egg', icon: '🥚', name: 'Yumurta', unitLabel: '1 Adet (60g)', grams: 60, kcal: 93, prot: 7.8, carb: 0.6, fat: 6.6 },
+  { id: 'oats', icon: '🥣', name: 'Yulaf Ezmesi', unitLabel: '1 Porsiyon (40g)', grams: 40, kcal: 155, prot: 5.4, carb: 26.8, fat: 2.8 },
+  { id: 'chicken', icon: '🍗', name: 'Tavuk Göğsü', unitLabel: '1 Porsiyon (100g)', grams: 100, kcal: 165, prot: 31.0, carb: 0.0, fat: 3.6 },
+  { id: 'meat', icon: '🥩', name: 'Kıyma / Kırmızı Et', unitLabel: '1 Porsiyon (100g)', grams: 100, kcal: 240, prot: 26.0, carb: 0.0, fat: 15.0 },
+  { id: 'rice', icon: '🍚', name: 'Pirinç / Bulgur Pilavı', unitLabel: '1 Porsiyon (100g)', grams: 100, kcal: 130, prot: 2.8, carb: 28.0, fat: 0.4 },
+  { id: 'banana', icon: '🍌', name: 'Muz', unitLabel: '1 Adet (100g)', grams: 100, kcal: 89, prot: 1.1, carb: 22.8, fat: 0.3 },
+  { id: 'milk', icon: '🥛', name: 'Süt / Yoğurt', unitLabel: '1 Bardak/Kase (200g)', grams: 200, kcal: 122, prot: 6.8, carb: 9.6, fat: 6.4 },
+  { id: 'whey', icon: '💪', name: 'Whey Protein Tozu', unitLabel: '1 Ölçek (30g)', grams: 30, kcal: 120, prot: 24.0, carb: 2.0, fat: 1.5 },
+  { id: 'cheese', icon: '🧀', name: 'Peynir / Lor', unitLabel: '1 Porsiyon (50g)', grams: 50, kcal: 95, prot: 9.5, carb: 1.2, fat: 5.5 },
+  { id: 'oliveoil', icon: '🫒', name: 'Zeytinyağı / Tereyağı', unitLabel: '1 Yemek Kaşığı (10g)', grams: 10, kcal: 88, prot: 0.0, carb: 0.0, fat: 10.0 },
+  { id: 'nuts', icon: '🥜', name: 'Fıstık Ezmesi / Ceviz', unitLabel: '1 Kaşık/Avuç (20g)', grams: 20, kcal: 118, prot: 5.0, carb: 4.0, fat: 10.0 },
+  { id: 'veggies', icon: '🥦', name: 'Sebze / Yeşillik', unitLabel: '1 Porsiyon (100g)', grams: 100, kcal: 32, prot: 2.2, carb: 5.5, fat: 0.3 }
+];
+
+let autoRecipeCounts = {};
+
+function renderAutoRecipeIngredientsBuilder() {
+  const gridEl = document.getElementById('autoRecipeIngredientsGrid');
+  if (!gridEl) return;
+
+  gridEl.innerHTML = AUTO_RECIPE_INGREDIENTS.map((ing) => {
+    const count = autoRecipeCounts[ing.id] || 0;
+    return `
+      <div class="ingredient-chip-card ${count > 0 ? 'selected' : ''}">
+        <div class="ingredient-chip-title">${ing.icon} ${escapeHtml(ing.name)}</div>
+        <div class="ingredient-chip-sub">${escapeHtml(ing.unitLabel)} • ${Math.round(ing.prot)}g P</div>
+        <div class="ingredient-chip-controls">
+          <button type="button" class="lux-stepper-btn minus" style="width:40px !important;height:38px !important;min-width:40px !important;min-height:38px !important;font-size:18px !important;" onclick="changeAutoRecipeIngredientCount('${ing.id}', -1)">−</button>
+          <span class="ingredient-chip-count">${count}</span>
+          <button type="button" class="lux-stepper-btn plus" style="width:40px !important;height:38px !important;min-width:40px !important;min-height:38px !important;font-size:18px !important;" onclick="changeAutoRecipeIngredientCount('${ing.id}', 1)">+</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  updateAutoRecipeLiveSummary();
+}
+
+function changeAutoRecipeIngredientCount(id, delta) {
+  const cur = autoRecipeCounts[id] || 0;
+  const next = Math.max(0, Math.min(20, cur + delta));
+  if (next === 0) {
+    delete autoRecipeCounts[id];
+  } else {
+    autoRecipeCounts[id] = next;
+  }
+  renderAutoRecipeIngredientsBuilder();
+}
+
+function resetAutoRecipeBuilder() {
+  autoRecipeCounts = {};
+  renderAutoRecipeIngredientsBuilder();
+}
+
+function updateAutoRecipeLiveSummary() {
+  let totalGrams = 0;
+  let totalKcal = 0;
+  let totalProt = 0;
+  let totalCarb = 0;
+  let totalFat = 0;
+  const chosenNames = [];
+
+  AUTO_RECIPE_INGREDIENTS.forEach((ing) => {
+    const count = autoRecipeCounts[ing.id] || 0;
+    if (count > 0) {
+      totalGrams += ing.grams * count;
+      totalKcal += ing.kcal * count;
+      totalProt += ing.prot * count;
+      totalCarb += ing.carb * count;
+      totalFat += ing.fat * count;
+      chosenNames.push(`${count}x ${ing.name}`);
+    }
+  });
+
+  const summaryEl = document.getElementById('autoRecipeCalculatedSummary');
+  if (summaryEl) {
+    if (chosenNames.length === 0) {
+      summaryEl.innerHTML = `🧮 <b>Otomatik Hesaplanan Tarif:</b> Yukarıdan + butonlarıyla malzemeleri seçtikçe toplam gramaj, kalori ve protein otomatik dolacak!`;
+    } else {
+      summaryEl.innerHTML = `
+        <div style="font-weight:900;color:#d8b4fe;margin-bottom:3px;">✨ Seçilen Malzemeler: ${escapeHtml(chosenNames.join(' + '))}</div>
+        <div>⚖️ Toplam: <b>${Math.round(totalGrams)}g</b> • 🔥 <b>${Math.round(totalKcal)} kcal</b> • 🥩 <b style="color:#86efac;">${totalProt.toFixed(1)}g Protein</b> • 🍞 ${totalCarb.toFixed(1)}g K • 🥑 ${totalFat.toFixed(1)}g Y</div>
+      `;
+
+      const gramsInp = document.getElementById('customRecipeGramsInput');
+      const kcalInp = document.getElementById('customRecipeKcalInput');
+      const protInp = document.getElementById('customRecipeProtInput');
+      const carbInp = document.getElementById('customRecipeCarbInput');
+      const fatInp = document.getElementById('customRecipeFatInput');
+      const nameInp = document.getElementById('customRecipeNameInput');
+
+      if (gramsInp) gramsInp.value = Math.round(totalGrams);
+      if (kcalInp) kcalInp.value = Math.round(totalKcal);
+      if (protInp) protInp.value = Number(totalProt.toFixed(1));
+      if (carbInp) carbInp.value = Number(totalCarb.toFixed(1));
+      if (fatInp) fatInp.value = Number(totalFat.toFixed(1));
+      if (nameInp && !nameInp.value.trim()) {
+        nameInp.value = `Özel Karışım (${chosenNames.slice(0, 2).join(' & ')})`;
+      }
+    }
+  }
+}
+
+// 🏆 ARKADAŞLARLA HAFTALIK LİDERLİK TABLOSU (PUAN SIRALAMASI)
+function renderFriendsLeaderboard() {
+  const boxEl = document.getElementById('friendsLeaderboardContainer');
+  if (!boxEl) return;
+
+  ensureDefaultAiCoachFriend();
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+
+  const todayISO = getTodayISO();
+  const myDoneToday = (appData.tasks || []).filter((t) => t.date === todayISO && t.completed).length;
+  const myScore = Math.round(
+    (appData.waterCount || 0) * 35 +
+    (appData.proteinGrams || 0) * 4 +
+    myDoneToday * 90 +
+    (appData.streak || 1) * 50
+  );
+
+  const entries = [
+    {
+      name: `${appData.profileName || appData.username || 'Sen'} (Sen)`,
+      isMe: true,
+      score: Math.max(150, myScore),
+      detail: `💧 ${appData.waterCount || 0} bardak • 🥩 ${appData.proteinGrams || 0}g P • ✅ ${myDoneToday} görev`
+    }
+  ];
+
+  friends.forEach((f, i) => {
+    const fWater = f.waterCount ?? (f.isAiCoach ? 10 : 7 + (i % 4));
+    const fProt = f.proteinGrams ?? (f.isAiCoach ? 145 : 95 + (i * 15));
+    const fScore = Math.round(fWater * 35 + fProt * 4 + (f.isAiCoach ? 420 : 260 + i * 45));
+    entries.push({
+      name: f.displayName || f.username || 'Arkadaş',
+      isMe: false,
+      score: fScore,
+      detail: `💧 ${fWater} bardak • 🥩 ${fProt}g P • ${f.rank || 'Sporcu'}`
+    });
+  });
+
+  entries.sort((a, b) => b.score - a.score);
+
+  const medals = ['🥇', '🥈', '🥉'];
+  boxEl.innerHTML = entries.map((item, idx) => `
+    <div class="leaderboard-item" style="${item.isMe ? 'border-color:rgba(250,204,21,0.55);background:rgba(250,204,21,0.1);' : ''}">
+      <div class="leaderboard-rank">${medals[idx] || `#${idx + 1}`}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:900;color:${item.isMe ? '#fef08a' : 'var(--text-main)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          ${escapeHtml(item.name)}
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);">${escapeHtml(item.detail)}</div>
+      </div>
+      <div class="leaderboard-score">${item.score} Puan</div>
+    </div>
+  `).join('');
+}
+
+// 🔥 ARKADAŞLA ORTAK 7 GÜNLÜK DÜELLO / CHALLENGE SİSTEMİ
+function startFriendSevenDayDuel(title) {
+  ensureDefaultAiCoachFriend();
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+  const friend = friends[activeSelectedFriendIdx] || friends[0];
+  const partnerName = friend ? (friend.displayName || friend.username) : 'AI Koç';
+
+  appData.activeFriendDuel = {
+    title,
+    partnerName,
+    myDays: 1,
+    partnerDays: 1,
+    targetDays: 7,
+    startedAt: getTodayISO()
+  };
+
+  saveProfileData();
+  renderFriendDuelArena();
+  appendMessageToActiveFriend(`🔥 Seninle "${title}" 7 Günlük Ortak Düellosunu başlattım! İlk günü tamamladım bile (1/7). Bakalım 7 günü kim eksiksiz tamamlayacak! 💪`);
+}
+
+function stepActiveDuelDay(delta) {
+  if (!appData.activeFriendDuel) {
+    startFriendSevenDayDuel('💧 7 Gün 3L Su Düellosu');
+    return;
+  }
+  const cur = Number(appData.activeFriendDuel.myDays) || 0;
+  const next = Math.max(0, Math.min(7, cur + delta));
+  appData.activeFriendDuel.myDays = next;
+  if (delta > 0 && appData.activeFriendDuel.partnerDays < 7) {
+    appData.activeFriendDuel.partnerDays = Math.min(7, Math.max(appData.activeFriendDuel.partnerDays, next - 1));
+  }
+  saveProfileData();
+  renderFriendDuelArena();
+
+  if (next === 7) {
+    showSmartCoachPopup('🏆', '7 Günlük Ortak Düello Tamamlandı! 🔥', `Tebrikler! <b>${escapeHtml(appData.activeFriendDuel.title)}</b> düellosunda 7/7 günü eksiksiz tamamladın!`);
+  }
+}
+
+function renderFriendDuelArena() {
+  const box = document.getElementById('activeFriendDuelBox');
+  if (!box) return;
+
+  if (!appData.activeFriendDuel) {
+    box.style.display = 'none';
+    return;
+  }
+
+  box.style.display = 'block';
+  const duel = appData.activeFriendDuel;
+  const titleEl = document.getElementById('activeDuelTitleText');
+  const progressEl = document.getElementById('activeDuelProgressText');
+  const subEl = document.getElementById('activeDuelSubText');
+  const barEl = document.getElementById('activeDuelProgressBar');
+
+  const pct = Math.min(100, Math.round(((duel.myDays || 0) / 7) * 100));
+  if (titleEl) titleEl.textContent = `${duel.title} (Sen vs ${duel.partnerName})`;
+  if (progressEl) progressEl.textContent = `Gün ${duel.myDays || 0} / 7 (%${pct})`;
+  if (subEl) subEl.textContent = `Sen: ${duel.myDays || 0}/7 Gün • ${duel.partnerName}: ${duel.partnerDays || 1}/7 Gün`;
+  if (barEl) barEl.style.width = `${pct}%`;
+}
+
+function shareActiveDuelOnWP() {
+  if (!appData.activeFriendDuel) {
+    startFriendSevenDayDuel('💧 7 Gün 3L Su Düellosu');
+  }
+  const d = appData.activeFriendDuel;
+  const msg = `🔥 *TaskFlow+ 7 Günlük Ortak Düello Daveti!*\n\n⚔️ *Düello:* ${d.title}\n💪 *Benim Durumum:* ${d.myDays}/7 Gün Tamamlandı!\n🎯 *Hedef:* 7 gün boyunca pes etmeden hedefi tamamlamak! Var mısın?`;
+  openWhatsAppOrShareText(msg);
+}
+
+// 🌅 SABAH AÇILIŞTA "BUGÜN SADECE ŞU 3 ÖNEMLİ İŞİNE ODAKLAN" KARŞILAMA EKRANI
+function openMorningFocusModal(forceOpen = false) {
+  const modal = document.getElementById('morningWelcomeModal');
+  if (!modal) return;
+
+  const todayISO = getTodayISO();
+  const seenKey = `taskflow_morning_focus_seen_${currentProfile || 'guest'}_${todayISO}`;
+  if (!forceOpen && localStorage.getItem(seenKey) === '1') {
+    return;
+  }
+  localStorage.setItem(seenKey, '1');
+
+  const h = new Date().getHours();
+  let greeting = 'Günaydın';
+  if (h >= 12 && h < 18) greeting = 'Tünaydın';
+  else if (h >= 18 || h < 5) greeting = 'İyi Akşamlar';
+
+  const titleEl = document.getElementById('morningWelcomeTitle');
+  if (titleEl) {
+    titleEl.textContent = `${greeting} ${appData.profileName || appData.username || 'Şampiyon'}!`;
+  }
+
+  renderMorningTop3List();
+  modal.style.display = 'flex';
+}
+
+function closeMorningFocusModal() {
+  const modal = document.getElementById('morningWelcomeModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function renderMorningTop3List() {
+  const listEl = document.getElementById('morningTop3TasksList');
+  if (!listEl) return;
+
+  const todayISO = getTodayISO();
+  const todayTasks = (appData.tasks || []).filter((t) => t.date === todayISO);
+  const top3 = todayTasks.slice(0, 3);
+
+  if (top3.length === 0) {
+    listEl.innerHTML = `
+      <div style="padding:14px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.18);text-align:center;font-size:12.5px;color:var(--text-muted);">
+        🎯 Bugün için henüz görev eklenmemiş. Hemen aşağıdan <b>en önemli 3 hedefini</b> yazıp ekle!
+      </div>
+    `;
+    return;
+  }
+
+  listEl.innerHTML = top3.map((t, idx) => `
+    <div onclick="toggleMorningFocusTask('${t.id}')" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;border-radius:16px;background:${t.completed ? 'rgba(34,197,94,0.16)' : 'rgba(255,255,255,0.05)'};border:1px solid ${t.completed ? 'rgba(34,197,94,0.45)' : 'rgba(255,255,255,0.12)'};cursor:pointer;transition:all 0.2s ease;">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
+        <span style="width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;background:${t.completed ? '#22c55e' : 'rgba(250,204,21,0.2)'};color:${t.completed ? '#052e16' : '#fef08a'};flex-shrink:0;">
+          ${t.completed ? '✓' : idx + 1}
+        </span>
+        <span style="font-size:14px;font-weight:800;color:var(--text-main);text-decoration:${t.completed ? 'line-through' : 'none'};opacity:${t.completed ? '0.75' : '1'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          ${escapeHtml(t.title)}
+        </span>
+      </div>
+      <span style="font-size:11.5px;font-weight:900;color:${t.completed ? '#86efac' : '#fde047'};flex-shrink:0;">
+        ${t.completed ? 'Tamamlandı' : 'Dokun Bitir'}
+      </span>
+    </div>
+  `).join('');
+}
+
+function toggleMorningFocusTask(taskId) {
+  toggleTask(taskId);
+  renderMorningTop3List();
+}
+
+function addMorningFocusTask() {
+  const inp = document.getElementById('morningQuickTaskInput');
+  if (!inp) return;
+  const val = inp.value.trim();
+  if (!val) {
+    inp.focus();
+    return;
+  }
+  const todayISO = getTodayISO();
+  if (!Array.isArray(appData.tasks)) appData.tasks = [];
+  appData.tasks.unshift({
+    id: 't_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+    title: val,
+    category: 'Genel',
+    priority: 'Yüksek',
+    date: todayISO,
+    time: '',
+    completed: false,
+    subtasks: []
+  });
+  inp.value = '';
+  saveProfileData();
+  renderAll();
+  renderMorningTop3List();
+}
+
+// 📸 INSTAGRAM / WHATSAPP HİKAYE (STORY) ÖZETİ GÖRSELİ OLUŞTURUCU
+function openStoryGeneratorModal() {
+  const modal = document.getElementById('storyGeneratorModal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  drawLuxuryStoryCanvas();
+}
+
+function closeStoryGeneratorModal() {
+  const modal = document.getElementById('storyGeneratorModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function drawLuxuryStoryCanvas() {
+  const canvas = document.getElementById('storyShareCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+
+  // Arka plan lüks koyu gradyan
+  const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+  bgGrad.addColorStop(0, '#090d16');
+  bgGrad.addColorStop(0.5, '#131c31');
+  bgGrad.addColorStop(1, '#1e1b4b');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Dekoratif ışık küreleri
+  const glow1 = ctx.createRadialGradient(W * 0.8, H * 0.18, 20, W * 0.8, H * 0.18, 420);
+  glow1.addColorStop(0, 'rgba(99, 102, 241, 0.35)');
+  glow1.addColorStop(1, 'rgba(99, 102, 241, 0)');
+  ctx.fillStyle = glow1;
+  ctx.fillRect(0, 0, W, H);
+
+  const glow2 = ctx.createRadialGradient(W * 0.2, H * 0.82, 20, W * 0.2, H * 0.82, 420);
+  glow2.addColorStop(0, 'rgba(16, 185, 129, 0.28)');
+  glow2.addColorStop(1, 'rgba(16, 185, 129, 0)');
+  ctx.fillStyle = glow2;
+  ctx.fillRect(0, 0, W, H);
+
+  // Üst Başlık
+  ctx.fillStyle = '#a5b4fc';
+  ctx.font = '900 36px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('⚡ TASKFLOW+ GÜNLÜK PERFORMANS', W / 2, 160);
+
+  const userName = (appData.profileName || appData.username || 'ŞAMPİYON').toUpperCase();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '900 72px Inter, sans-serif';
+  ctx.fillText(userName, W / 2, 260);
+
+  const dateStr = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' });
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '700 32px Inter, sans-serif';
+  ctx.fillText(dateStr, W / 2, 325);
+
+  // Verileri hesapla
+  const todayISO = getTodayISO();
+  const waterL = (((appData.waterCount || 0) * 250) / 1000).toFixed(2);
+  const foodsToday = (appData.dailyFoodsByDate && appData.dailyFoodsByDate[todayISO]) || [];
+  const totalKcal = Math.round(foodsToday.reduce((s, f) => s + (Number(f.kcal) || 0), 0));
+  const totalProt = Math.round(appData.proteinGrams || foodsToday.reduce((s, f) => s + (Number(f.protein) || 0), 0));
+  const doneToday = (appData.tasks || []).filter((t) => t.date === todayISO && t.completed).length;
+  const streak = appData.streak || 1;
+
+  const cards = [
+    { icon: '💧', label: 'İÇİLEN SU', val: `${waterL} Litre`, sub: `${appData.waterCount || 0} Bardak Tamamlandı`, color: '#38bdf8' },
+    { icon: '🥩', label: 'PROTEİN & BESLENME', val: `${totalProt}g Protein`, sub: `${totalKcal} kcal Alındı`, color: '#4ade80' },
+    { icon: '✅', label: 'TAMAMLANAN GÖREV', val: `${doneToday} Görev`, sub: 'Disiplinle Tamamlandı', color: '#facc15' },
+    { icon: '🔥', label: 'GÜNLÜK SERİ (STREAK)', val: `${streak} Gün Seri`, sub: 'Zinciri Kırma!', color: '#fb923c' }
+  ];
+
+  let startY = 430;
+  cards.forEach((c) => {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.roundRect(90, startY, W - 180, 260, 38);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.textAlign = 'left';
+    ctx.font = '82px Inter, sans-serif';
+    ctx.fillText(c.icon, 145, startY + 155);
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '800 28px Inter, sans-serif';
+    ctx.fillText(c.label, 275, startY + 88);
+
+    ctx.fillStyle = c.color;
+    ctx.font = '900 64px Inter, sans-serif';
+    ctx.fillText(c.val, 275, startY + 165);
+
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = '600 28px Inter, sans-serif';
+    ctx.fillText(c.sub, 275, startY + 215);
+
+    startY += 300;
+  });
+
+  // Alt Slogan
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fef08a';
+  ctx.font = '900 40px Inter, sans-serif';
+  ctx.fillText('🏆 HER GÜN %1 DAHA İYİYE!', W / 2, 1740);
+
+  ctx.fillStyle = '#64748b';
+  ctx.font = '700 28px Inter, sans-serif';
+  ctx.fillText('TaskFlow+ Kişisel Performans & Yaşam Koçu', W / 2, 1805);
+}
+
+function downloadStoryCardImage() {
+  const canvas = document.getElementById('storyShareCanvas');
+  if (!canvas) return;
+  const link = document.createElement('a');
+  link.download = `TaskFlow-Story-${getTodayISO()}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+async function shareStoryCardImageOrText() {
+  const canvas = document.getElementById('storyShareCanvas');
+  if (canvas && navigator.canShare) {
+    try {
+      const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
+      if (blob) {
+        const file = new File([blob], `TaskFlow-Story-${getTodayISO()}.png`, { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: 'TaskFlow+ Günlük Performans Özeti',
+            text: 'Bugünkü TaskFlow+ performans özetim! 💪🔥',
+            files: [file]
+          });
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Story image share fallback:', e);
+    }
+  }
+  downloadStoryCardImage();
+  shareDailySummaryToWhatsApp('all');
+}
 
 window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=22').catch(() => {});
+    navigator.serviceWorker.register('sw.js?v=23').catch(() => {});
   }
   await initDB();
 
@@ -7085,8 +7676,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (saved) {
       unlockApp();
       setTimeout(() => {
+        openMorningFocusModal(false);
         triggerRandomPersonalInsightPopup();
-      }, 1800);
+      }, 900);
       return;
     }
   }

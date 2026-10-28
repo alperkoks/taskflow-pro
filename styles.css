@@ -2322,6 +2322,350 @@ body[data-drilldown-open="true"] #rolloverBanner {
   transform: translateY(-1px);
 }
 
+/* ============================================================================
+   v23.0 ULTRA-PREMIUM "EXPENSIVE APP VIBE", YUMUŞAK SPAWN ANİMASYONLARI & DEV + / - BUTONLAR
+   ============================================================================ */
+
+@keyframes luxurySpawnIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.975);
+    filter: blur(3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes springPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.88) translateY(14px);
+  }
+  70% {
+    transform: scale(1.02) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Tüm sekme ve görünüm geçişlerine ipeksi yumuşak spawn animasyonu */
+#viewTasks,
+#viewGoals,
+#viewSocial,
+#viewArchive,
+#viewStats,
+#viewSettings,
+#hubTabCategories,
+#hubTabSport,
+#hubTabTools,
+#sportSubWater,
+#sportSubFood,
+#sportSubWorkout,
+#waterInnerTabVitals,
+#waterInnerTabRoutine,
+#foodInnerTabAdd,
+#foodInnerTabRecipe,
+#foodInnerTabCombos,
+#workoutInnerTabPlan,
+#workoutInnerTabPR,
+#workoutInnerTabCalc,
+#statsInnerTabTimer,
+#statsInnerTabCharts,
+#socialSubFriends,
+#socialSubMissions,
+.spawn-anim {
+  animation: luxurySpawnIn 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Lüks Cam (Glassmorphism) & Pahalı Uygulama Kart Dokusu */
+.task-card,
+.scratchpad-card,
+.vitality-hub-card,
+.daily-progress-card,
+.social-profile-banner {
+  background: linear-gradient(155deg, rgba(28, 30, 44, 0.88), rgba(14, 15, 23, 0.94)) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  border-radius: 22px !important;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.22s ease, box-shadow 0.22s ease !important;
+}
+
+/* BÜYÜK, DOKUNMASI KEYİFLİ + / - STEPPER BUTONLARI (ASLA KÜÇÜK KALMAZ!) */
+.lux-stepper-btn {
+  min-width: 48px !important;
+  min-height: 46px !important;
+  padding: 0 14px !important;
+  border-radius: 14px !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.14) !important;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03)) !important;
+  color: var(--text-main) !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), background 0.15s ease, border-color 0.15s ease !important;
+}
+
+.lux-stepper-btn:active {
+  transform: scale(0.91) !important;
+}
+
+.lux-stepper-btn.plus {
+  background: linear-gradient(135deg, rgba(245, 216, 181, 0.25), rgba(216, 208, 248, 0.18)) !important;
+  border-color: rgba(245, 216, 181, 0.5) !important;
+  color: var(--accent-cream) !important;
+}
+
+.lux-stepper-btn.plus-green {
+  background: linear-gradient(135deg, rgba(82, 196, 26, 0.28), rgba(37, 211, 102, 0.18)) !important;
+  border-color: rgba(149, 222, 100, 0.55) !important;
+  color: #95de64 !important;
+}
+
+.lux-stepper-btn.minus {
+  background: rgba(255, 77, 79, 0.12) !important;
+  border-color: rgba(255, 77, 79, 0.32) !important;
+  color: #ffa39e !important;
+}
+
+/* Tıklayınca Başlığın Altında Yumuşakça "Spawn" Olan Lüks Akordiyon Kartlar */
+.luxury-spawn-box {
+  border-radius: 18px;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  background: rgba(18, 20, 30, 0.78);
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.luxury-spawn-box.open {
+  border-color: rgba(245, 216, 181, 0.45);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+}
+
+.luxury-spawn-header {
+  width: 100%;
+  min-height: 56px;
+  padding: 13px 16px;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 900;
+  transition: background 0.18s ease;
+}
+
+.luxury-spawn-header:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.luxury-spawn-chevron {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--accent-cream);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.luxury-spawn-box.open .luxury-spawn-chevron {
+  transform: rotate(180deg);
+  background: var(--accent-cream);
+  color: #121218;
+}
+
+.luxury-spawn-body {
+  display: none;
+  padding: 4px 15px 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  animation: luxurySpawnIn 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.luxury-spawn-box.open .luxury-spawn-body {
+  display: block;
+}
+
+/* ⚡ SAĞ ALTTA TEK BİR "HIZLI EKLE (+)" YÜZEN MENÜSÜ (FLOATING ACTION MENU) */
+.quick-fab-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 7, 12, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 940;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.26s ease;
+}
+
+.quick-fab-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.quick-fab-container {
+  position: fixed;
+  bottom: 84px;
+  right: max(16px, calc(50vw - 350px));
+  z-index: 950;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.quick-fab-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 9px;
+  opacity: 0;
+  transform: translateY(18px) scale(0.9);
+  pointer-events: none;
+  transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.quick-fab-container.open .quick-fab-menu {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.quick-fab-item {
+  min-height: 50px;
+  padding: 10px 18px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(245, 216, 181, 0.45);
+  background: linear-gradient(135deg, rgba(24, 26, 38, 0.97), rgba(14, 15, 24, 0.98));
+  color: var(--text-main);
+  font-size: 13.5px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: transform 0.16s ease, border-color 0.16s ease;
+  white-space: nowrap;
+}
+
+.quick-fab-item:hover,
+.quick-fab-item:active {
+  transform: scale(0.96) translateX(-3px);
+  border-color: #95de64;
+}
+
+.quick-fab-trigger {
+  pointer-events: auto;
+  width: 58px;
+  height: 58px;
+  border-radius: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  background: linear-gradient(135deg, #f5d8b5 0%, #d8d0f8 50%, #95de64 100%);
+  color: #09090d;
+  font-size: 28px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(245, 216, 181, 0.38), inset 0 2px 0 rgba(255, 255, 255, 0.6);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+}
+
+.quick-fab-trigger:active {
+  transform: scale(0.9);
+}
+
+.quick-fab-container.open .quick-fab-trigger {
+  transform: rotate(135deg);
+  background: linear-gradient(135deg, #ff7875, #ffc069);
+}
+
+/* 🧮 MALZEMELERİ SEÇ, TARİFİ KENDİ HESAPLASIN (OTOMATİK TARİF OLUŞTURUCU) */
+.ingredient-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 520px) {
+  .ingredient-picker-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.ingredient-pick-card {
+  padding: 10px;
+  border-radius: 14px;
+  border: 1.5px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 7px;
+  transition: all 0.18s ease;
+}
+
+.ingredient-pick-card.selected {
+  border-color: #95de64;
+  background: rgba(82, 196, 26, 0.13);
+  box-shadow: 0 6px 16px rgba(82, 196, 26, 0.14);
+}
+
+/* 🏆 HAFTALIK LİDERLİK TABLOSU (LEADERBOARD) & ⚔️ 7 GÜNLÜK DÜELLO KARTI */
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1.5px solid var(--border-color);
+  margin-bottom: 7px;
+}
+
+.leaderboard-item.rank-1 {
+  border-color: rgba(255, 215, 0, 0.55);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.14), rgba(245, 216, 181, 0.05));
+}
+
+.leaderboard-item.rank-2 {
+  border-color: rgba(192, 192, 192, 0.45);
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.12), rgba(255, 255, 255, 0.03));
+}
+
+.leaderboard-item.rank-3 {
+  border-color: rgba(205, 127, 50, 0.45);
+  background: linear-gradient(135deg, rgba(205, 127, 50, 0.12), rgba(255, 255, 255, 0.03));
+}
+
+
 
 
 
