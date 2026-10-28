@@ -45,22 +45,31 @@ jobs:
 
     - name: Build Android APK
       run: |
+        set -o pipefail
         cd android
         ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee ../gradle.log
 
-    - name: Commit Log If Failed
-      if: failure()
+    - name: Commit Gradle Log
+      if: always()
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add gradle.log
-        git commit -m "ci: capture gradle failure log [skip ci]"
-        git push
+        git add gradle.log || true
+        if ! git diff --staged --quiet; then
+          git commit -m "ci: save gradle.log [skip ci]"
+          git push || true
+        fi
 
     - name: Prepare APK Outputs
       run: |
         mkdir -p dist-apk
-        APK_PATH=$(find android/app/build/outputs/apk -type f -name "*.apk" | head -n 1)
+        echo "Searching for all APKs..."
+        find android -type f -name "*.apk"
+        APK_PATH=$(find android -type f -name "*.apk" | head -n 1)
+        if [ -z "$APK_PATH" ]; then
+          echo "ERROR: No APK found!"
+          exit 1
+        fi
         echo "Found APK at: $APK_PATH"
         cp "$APK_PATH" dist-apk/TaskFlow_Pro.apk
         cp "$APK_PATH" TaskFlow_Pro.apk
