@@ -1,0 +1,9 @@
+{
+  "appId": "com.alperkoks.taskflowpro",
+  "appName": "TaskFlow Pro+",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}

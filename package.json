@@ -1,0 +1,43 @@
+{
+  "name": "taskflow-pro",
+  "version": "26.0.0",
+  "description": "TaskFlow Pro+ Ultra Native Desktop & Mobile Fitness/Discipline Suite",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.taskflow.pro",
+    "productName": "TaskFlow Pro+",
+    "win": {
+      "target": "portable",
+      "icon": "icon-512.png"
+    },
+    "directories": {
+      "output": "dist"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alperkoks/taskflow-pro.git"
+  },
+  "keywords": [
+    "fitness",
+    "discipline",
+    "health",
+    "calories",
+    "water",
+    "nutrition"
+  ],
+  "author": "TaskFlow Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "electron": "^40.8.0",
+    "electron-builder": "^26.18.0"
+  }
+}

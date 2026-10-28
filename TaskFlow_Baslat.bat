@@ -1,17 +1,27 @@
 @echo off
 chcp 65001 >nul
-title TaskFlow Pro Masaustu Baslatici
-echo TaskFlow Pro baslatiliyor...
+title TaskFlow Pro+ Bagimsiz Masaustu
+echo ===================================================
+echo     TaskFlow Pro+ Bagimsiz Masaustu Baslatiliyor...
+echo     (Google Chrome bagimsiz - Ozgun Native App)
+echo ===================================================
 
-:: Chrome veya Edge ile dogrudan Uygulama (App) modunda (adres cubugu olmadan) acar
-if exist "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" (
-    start "" "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --app="file:///%~dp0index.html" --window-size=1180,820
+cd /d "%~dp0"
+
+:: 1. Eger dist klasorunde .exe derlenmisse dogrudan onu calistir
+if exist "dist\TaskFlow Pro+ 26.0.0.exe" (
+    start "" "dist\TaskFlow Pro+ 26.0.0.exe"
+    exit
+)
+if exist "dist\win-unpacked\TaskFlow Pro+.exe" (
+    start "" "dist\win-unpacked\TaskFlow Pro+.exe"
+    exit
+)
+if exist "dist\TaskFlow Pro+.exe" (
+    start "" "dist\TaskFlow Pro+.exe"
     exit
 )
 
-if exist "C:\Program Files\Google\Chrome\Application\chrome.exe" (
-    start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" --app="file:///%~dp0index.html" --window-size=1180,820
-    exit
-)
-
-start "" "%~dp0index.html"
+:: 2. Node/Electron ile bagimsiz masaustu penceresini baslat
+call npx electron .
+exit

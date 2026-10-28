@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TaskFlow Pro+</string>
+    <string name="title_activity_main">TaskFlow Pro+</string>
+    <string name="package_name">com.alperkoks.taskflowpro</string>
+    <string name="custom_url_scheme">com.alperkoks.taskflowpro</string>
+</resources>

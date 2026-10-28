@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dist-apk/
+android/app/build/
+android/.gradle/
+android/build/
+www/
+*.log
+TaskFlow+.exe
