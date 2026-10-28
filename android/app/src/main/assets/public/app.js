@@ -8861,4 +8861,15 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Bilgisayarda veya yeni cihazda açıldığında doğrudan Kullanıcı Adı & Şifre giriş ekranı gelsin
   switchAuthTab('login');
+
+  // Mobilde klavye açılınca ekranın yarısının grileşmesini/kapanmasını önleyen ve inputu merkeze getiren akıllı scroll
+  document.addEventListener('focusin', (e) => {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
+      setTimeout(() => {
+        try {
+          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch (err) {}
+      }, 250);
+    }
+  });
 });

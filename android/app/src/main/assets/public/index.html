@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#09090d" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -120,16 +120,30 @@
           </div>
           <h1 class="greeting-title">Yaşam & Plan Üssü</h1>
         </div>
-        <!-- Sağ Üstte Sabah Özeti + Story Görseli + PC/Davet + Kişisel Koç + Panik Gizlilik + Ayarlar Rozeti -->
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
-          <button type="button" class="pin-btn" onclick="openPcAndFriendsSyncModal()" style="height:38px;padding:0 11px;font-size:12px;border-color:rgba(96,165,250,0.5);color:#93c5fd;font-weight:800;" title="Bilgisayar Senkronizasyonu & Arkadaş Davet Linki">💻 PC & Davet</button>
-          <button type="button" class="pin-btn" onclick="openMorningFocusModal(true)" style="height:38px;padding:0 11px;font-size:12px;border-color:rgba(255,192,105,0.45);color:#ffc069;font-weight:800;" title="Bugünün 3 Önemli İşi (Sabah Karşılama Ekranı)">🌅 3 Odak</button>
-          <button type="button" class="pin-btn" onclick="openStoryGeneratorModal()" style="height:38px;padding:0 11px;font-size:12px;border-color:rgba(149,222,100,0.45);color:#95de64;font-weight:800;" title="Instagram / WhatsApp Story Görseli Oluştur">📸 Story</button>
-          <button type="button" class="pin-btn" onclick="triggerRandomPersonalInsightPopup()" style="height:38px;padding:0 10px;font-size:12px;border-color:rgba(245,216,181,0.4);color:var(--accent-cream);" title="Kişisel Koç Analizi">🤖 Koç</button>
-          <button type="button" class="pin-btn" id="panicBlurToggleBtn" onclick="togglePanicBlurMode()" style="height:38px;padding:0 10px;font-size:12px;" title="Panik / Gizlilik Modu">🕵️</button>
+        <!-- Sağ Üstte Lüks, Taşmayan Eylem Butonları + PC/Davet + Ayarlar -->
+        <div class="header-actions-wrap">
+          <button type="button" class="pin-btn header-action-btn sync-btn-highlight" onclick="openPcAndFriendsSyncModal()" title="Bilgisayar Senkronizasyonu & Arkadaş Davet Linki">
+            <span class="btn-icon">💻</span>
+            <span class="btn-text">PC & Davet</span>
+          </button>
+          <button type="button" class="pin-btn header-action-btn" onclick="openMorningFocusModal(true)" title="Bugünün 3 Önemli İşi">
+            <span class="btn-icon">🌅</span>
+            <span class="btn-text">3 Odak</span>
+          </button>
+          <button type="button" class="pin-btn header-action-btn" onclick="openStoryGeneratorModal()" title="Story Görseli Oluştur">
+            <span class="btn-icon">📸</span>
+            <span class="btn-text">Story</span>
+          </button>
+          <button type="button" class="pin-btn header-action-btn" onclick="triggerRandomPersonalInsightPopup()" title="Kişisel Koç">
+            <span class="btn-icon">🤖</span>
+            <span class="btn-text">Koç</span>
+          </button>
+          <button type="button" class="pin-btn header-action-btn" id="panicBlurToggleBtn" onclick="togglePanicBlurMode()" title="Panik / Gizlilik Modu">
+            <span class="btn-icon">🕵️</span>
+          </button>
           <div class="user-avatar-pill" onclick="switchView('settings')" title="Ayarlar ve Hesap">
             <div class="user-avatar-circle" id="headerAvatarLetter">U</div>
-            <span style="font-size:11.5px;font-weight:700;color:var(--text-muted);">Ayarlar ⚙️</span>
+            <span class="avatar-pill-text">Ayarlar ⚙️</span>
             <span id="syncStatusDot" class="sync-dot" title="Çevrimdışı / Bulut Hazır"></span>
           </div>
         </div>
@@ -1417,19 +1431,19 @@
     <nav class="bottom-nav">
       <button class="nav-item active" id="navTasks" onclick="switchView('tasks')">
         <span class="nav-icon">🏠</span>
-        <span>Görevler</span>
+        <span>Görev</span>
       </button>
       <button class="nav-item" id="navFriends" onclick="openSocialWithTab('friends')">
         <span class="nav-icon">💬</span>
-        <span>Arkadaşlar</span>
+        <span>Dostlar</span>
       </button>
       <button class="nav-item" id="navSocial" onclick="openSocialWithTab('missions')">
         <span class="nav-icon">🏆</span>
-        <span>Rozetler</span>
+        <span>Rozet</span>
       </button>
       <button class="nav-item" id="navGoals" onclick="switchView('goals')">
         <span class="nav-icon">🎯</span>
-        <span>Hedefler</span>
+        <span>Hedef</span>
       </button>
       <button class="nav-item" id="navArchive" onclick="switchView('archive')">
         <span class="nav-icon">📦</span>
@@ -1921,7 +1935,7 @@
   </div>
 
   <!-- 💻 BİLGİSAYAR ENTEGRASYONU, CANLI EŞİTLEME & ARKADAŞ DAVET MERKEZİ MODALI -->
-  <div id="pcSyncAndInviteModal" class="modal-backdrop hidden" style="align-items:center;padding:16px;z-index:21600;">
+  <div id="pcSyncAndInviteModal" class="modal-backdrop hidden">
     <div class="modal-sheet spawn-anim" style="max-width:460px;border-radius:26px;border:1.5px solid rgba(96,165,250,0.45);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <h3 style="font-size:17.5px;font-weight:900;color:#93c5fd;">💻 Bilgisayar & Arkadaş Entegrasyonu</h3>
