@@ -3064,3 +3064,195 @@ button:active:not(:disabled),
 
 
 
+
+
+/* ==========================================================================
+   📸 STORY MODAL & SOSYAL MEDYA PAYLAŞIM DÜZENİ (ASLA TAŞMAZ)
+   ========================================================================== */
+.story-themes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.story-actions-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.story-action-btn {
+  width: 100%;
+  height: 46px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.story-action-btn.primary-share-btn {
+  background: linear-gradient(135deg, #ec4899, #8b5cf6) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.35);
+}
+
+.story-action-btn.download-btn {
+  background: linear-gradient(135deg, rgba(245, 216, 181, 0.25), rgba(216, 208, 248, 0.18)) !important;
+  color: var(--accent-cream) !important;
+  border: 1.5px solid rgba(245, 216, 181, 0.4) !important;
+}
+
+.story-sub-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.story-action-btn.wp-btn {
+  height: 42px;
+  background: #25D366 !important;
+  color: #ffffff !important;
+  font-size: 12px;
+}
+
+.story-action-btn.copy-btn {
+  height: 42px;
+  font-size: 12px;
+}
+
+/* ==========================================================================
+   📐 TÜM METİN VE KUTULAR İÇİN GENEL TAŞMAYI ENGELLEME KORUMASI
+   ========================================================================== */
+h1, h2, h3, h4, h5, h6, p, span, label, div, button {
+  box-sizing: border-box;
+}
+
+.card, .stat-card, .challenge-item-card, .modern-friend-card,
+.luxury-spawn-box, .equal-cat-btn, .vital-mini-box, .simple-hub-card {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden;
+}
+
+.card-title, .greeting-title, .stat-number, .cat-name {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* ==========================================================================
+   ☀️ AYDINLIK MOD (LIGHT THEME) DERİN KONTRAST & KUSURSUZ OKUNABİLİRLİK
+   ========================================================================== */
+body[data-theme="light"] {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+body[data-theme="light"] .left-panel,
+body[data-theme="light"] .main-content,
+body[data-theme="light"] #leftPanelMainBody {
+  background-color: transparent !important;
+  color: #0f172a !important;
+}
+
+body[data-theme="light"] .card,
+body[data-theme="light"] .stat-card,
+body[data-theme="light"] .daily-progress-card,
+body[data-theme="light"] .luxury-spawn-box,
+body[data-theme="light"] .modern-friend-card,
+body[data-theme="light"] .challenge-item-card,
+body[data-theme="light"] .quick-drilldown-category-banner,
+body[data-theme="light"] .recipe-smart-preset-card,
+body[data-theme="light"] .vital-mini-box,
+body[data-theme="light"] .simple-hub-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05) !important;
+}
+
+body[data-theme="light"] .modal-sheet {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 -12px 48px rgba(15, 23, 42, 0.18) !important;
+}
+
+body[data-theme="light"] .bottom-nav {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.12) !important;
+}
+
+body[data-theme="light"] .nav-item {
+  color: #64748b !important;
+}
+
+body[data-theme="light"] .nav-item.active {
+  background: #eff6ff !important;
+  color: #2563eb !important;
+  border-color: #bfdbfe !important;
+}
+
+body[data-theme="light"] h1,
+body[data-theme="light"] h2,
+body[data-theme="light"] h3,
+body[data-theme="light"] h4,
+body[data-theme="light"] .greeting-title,
+body[data-theme="light"] .stat-number,
+body[data-theme="light"] .card-title,
+body[data-theme="light"] b,
+body[data-theme="light"] strong {
+  color: #0f172a !important;
+}
+
+body[data-theme="light"] p,
+body[data-theme="light"] span:not(.btn-icon):not(.cat-icon):not(.nav-icon),
+body[data-theme="light"] label,
+body[data-theme="light"] .greeting-sub {
+  color: #334155;
+}
+
+body[data-theme="light"] .text-muted,
+body[data-theme="light"] .meta-text {
+  color: #64748b !important;
+}
+
+body[data-theme="light"] .form-input,
+body[data-theme="light"] .form-select,
+body[data-theme="light"] .form-textarea,
+body[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]),
+body[data-theme="light"] select,
+body[data-theme="light"] textarea {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1.5px solid #cbd5e1 !important;
+}
+
+body[data-theme="light"] .form-input::placeholder,
+body[data-theme="light"] input::placeholder,
+body[data-theme="light"] textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+body[data-theme="light"] .pin-btn,
+body[data-theme="light"] .icon-btn,
+body[data-theme="light"] .equal-cat-btn,
+body[data-theme="light"] .lux-stepper-btn {
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body[data-theme="light"] .btn-cream {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #1d4ed8 !important;
+}

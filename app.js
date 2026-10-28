@@ -8861,15 +8861,55 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Bilgisayarda veya yeni cihazda açıldığında doğrudan Kullanıcı Adı & Şifre giriş ekranı gelsin
   switchAuthTab('login');
-
-  // Mobilde klavye açılınca ekranın yarısının grileşmesini/kapanmasını önleyen ve inputu merkeze getiren akıllı scroll
-  document.addEventListener('focusin', (e) => {
-    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
-      setTimeout(() => {
-        try {
-          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } catch (err) {}
-      }, 250);
-    }
-  });
 });
+
+// ============================================================================
+// 📱 ANDROID DONANIM / HAREKET GERİ TUŞU YÖNETİMİ (UYGULAMADAN DİREKT ÇIKMAYI ÖNLER)
+// ============================================================================
+let lastHardwareBackPressTime = 0;
+
+function handleNativeHardwareBackButton() {
+  // 1. Herhangi bir açık modal (pencere) varsa onu kapat
+  const openModals = Array.from(document.querySelectorAll('.modal-backdrop:not(.hidden)'));
+  if (openModals.length > 0) {
+    const topModal = openModals[openModals.length - 1];
+    topModal.classList.add('hidden');
+    return;
+  }
+
+  // 2. Hızlı ekle yüzen menüsü (+) açıksa kapat
+  const fabMenu = document.getElementById('quickFabContainer');
+  if (fabMenu && fabMenu.classList.contains('active')) {
+    toggleQuickFabMenu(false);
+    return;
+  }
+
+  // 3. Kategori / Yemek detay derinlemesine (drilldown) ekranındaysa 4 ana kutuya dön
+  if (typeof drilldownActiveTab !== 'undefined' && drilldownActiveTab !== 'none') {
+    closeSimpleDrilldownBackToHome(true);
+    return;
+  }
+
+  // 4. Alt menüde farklı bir sekmedeyse (Dostlar, Rozet, Hedef, Arşiv, Odak, Ayarlar) doğrudan Ana Ekrana (Görevler) dön
+  if (currentViewName && currentViewName !== 'tasks') {
+    switchView('tasks', true);
+    return;
+  }
+
+  // 5. Zaten Ana Ekrandaysa ve hiçbir şey açık değilse: 2 saniye içinde 2. kez basılırsa çık
+  const now = Date.now();
+  if (now - lastHardwareBackPressTime < 2200) {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+      window.Capacitor.Plugins.App.exitApp();
+    } else {
+      window.close();
+    }
+  } else {
+    lastHardwareBackPressTime = now;
+    if (typeof showToast === 'function') {
+      showToast('🚪 Çıkmak için tekrar dokunun');
+    }
+  }
+}
+
+window.handleNativeHardwareBackButton = handleNativeHardwareBackButton;
