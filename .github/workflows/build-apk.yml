@@ -46,7 +46,16 @@ jobs:
     - name: Build Android APK
       run: |
         cd android
-        ./gradlew assembleDebug --no-daemon --stacktrace
+        ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee ../gradle.log
+
+    - name: Commit Log If Failed
+      if: failure()
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add gradle.log
+        git commit -m "ci: capture gradle failure log [skip ci]"
+        git push
 
     - name: Prepare APK Outputs
       run: |
