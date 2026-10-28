@@ -8210,10 +8210,641 @@ async function shareStoryCardImageOrText() {
   shareFullDailyLifestyleSummary();
 }
 
-window.addEventListener('DOMContentLoaded', async () => {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=24').catch(() => {});
+// =========================================================================
+// ☁️ v25.0 TAM OTOMATİK BİLGİSAYAR & TELEFON BULUT SENKRONİZASYONU,
+// KULLANICI ADI + ŞİFRE İLE HER CİHAZDAN GİRİŞ & CANLI ARKADAŞ AĞI
+// =========================================================================
+
+const TF_CLOUD_RELAY_BASE = 'https://ntfy.sh';
+const TF_DEVICE_ID = 'dev_' + Math.random().toString(36).slice(2, 9);
+let liveAccountEventSource = null;
+let liveInboxEventSource = null;
+let cloudPushDebounceTimer = null;
+
+function normalizeCleanUsername(raw) {
+  return String(raw || '')
+    .trim()
+    .toLowerCase()
+    .replace(/^@/, '')
+    .replace(/[^a-z0-9çğıöşü_.-]/gi, '')
+    .replace(/\s+/g, '');
+}
+
+function getAccountCloudTopic(cleanUser) {
+  const safe = normalizeCleanUsername(cleanUser).replace(/[^a-z0-9_-]/g, '_');
+  return `tfpro_v25_acc_${safe}`;
+}
+
+function getPublicSocialTopic(cleanUser) {
+  const safe = normalizeCleanUsername(cleanUser).replace(/[^a-z0-9_-]/g, '_');
+  return `tfpro_v25_pub_${safe}`;
+}
+
+function getFriendInboxTopic(cleanUser) {
+  const safe = normalizeCleanUsername(cleanUser).replace(/[^a-z0-9_-]/g, '_');
+  return `tfpro_v25_inbox_${safe}`;
+}
+
+// 4KB ntfy.sh limitini aşmayan, tüm temel kullanıcı verilerini taşıyan kompakt bulut paketi
+function buildCompactCloudAccountPayload() {
+  const todayISO = getTodayISO();
+  const cleanUser = normalizeCleanUsername(appData.username || currentProfile.replace(/^user_/, ''));
+  const allTasks = Array.isArray(appData.tasks) ? appData.tasks : [];
+
+  // Önce tamamlanmamışlar ve bugünün görevleri olmak üzere en güncel 22 görev
+  const prioritizedTasks = [
+    ...allTasks.filter((t) => !t.completed || t.date === todayISO),
+    ...allTasks.filter((t) => t.completed && t.date !== todayISO)
+  ].slice(0, 22).map((t) => ({
+    i: t.id,
+    t: String(t.title || '').slice(0, 75),
+    c: t.category || 'İş & Proje',
+    p: t.priority || 'medium',
+    d: t.date || todayISO,
+    tm: t.time || '',
+    ok: !!t.completed
+  }));
+
+  const todayFoods = (appData.dailyFoods && Array.isArray(appData.dailyFoods[todayISO]))
+    ? appData.dailyFoods[todayISO].slice(0, 15).map((f) => ({
+        n: String(f.name || '').slice(0, 45),
+        g: Number(f.grams) || 100,
+        k: Math.round(Number(f.kcal) || 0),
+        p: Number(f.protein) || 0,
+        c: Number(f.carbs) || 0,
+        f: Number(f.fat) || 0,
+        m: f.mealSlot || ''
+      }))
+    : [];
+
+  const customRecipes = Array.isArray(appData.customFoodDB)
+    ? appData.customFoodDB.slice(0, 10).map((r) => ({
+        n: String(r.name || '').slice(0, 45),
+        g: Number(r.defGrams) || 100,
+        k: Number(r.kcal) || 0,
+        p: Number(r.protein) || 0,
+        c: Number(r.carbs) || 0,
+        f: Number(r.fat) || 0
+      }))
+    : [];
+
+  const payload = {
+    v: 25,
+    dev: TF_DEVICE_ID,
+    up: appData.updatedAt || Date.now(),
+    u: cleanUser,
+    e: (appData.email || '').toLowerCase(),
+    pw: appData.password || '',
+    n: appData.profileName || cleanUser,
+    b: (appData.profileBio || '').slice(0, 80),
+    th: appData.theme || 'dark',
+    st: appData.streak || 1,
+    wd: appData.waterDate || todayISO,
+    wc: appData.waterCount || 0,
+    wt: appData.waterTarget || 12,
+    cc: appData.coffeeCount || 0,
+    pg: appData.proteinGrams || 0,
+    pt: appData.proteinTarget || 160,
+    sl: appData.sleepHours ?? 8,
+    en: appData.energyLevel || 'Yüksek',
+    sb: Array.isArray(appData.showcasedBadges) ? appData.showcasedBadges.slice(0, 6) : [],
+    tk: prioritizedTasks,
+    fd: todayFoods,
+    rc: customRecipes
+  };
+
+  let jsonStr = JSON.stringify(payload);
+  if (jsonStr.length > 3600) {
+    payload.tk = payload.tk.slice(0, 10);
+    payload.rc = payload.rc.slice(0, 5);
+    jsonStr = JSON.stringify(payload);
   }
+  return jsonStr;
+}
+
+function applyCompactCloudPayloadToAppData(pkt, existingData = null) {
+  const todayISO = getTodayISO();
+  const base = existingData || createNewUserProfileData(pkt.n || pkt.u, pkt.e || '', pkt.pw || '');
+
+  base.username = pkt.u || base.username;
+  if (pkt.e) base.email = pkt.e;
+  if (pkt.pw) base.password = pkt.pw;
+  if (pkt.n) base.profileName = pkt.n;
+  if (pkt.b !== undefined) base.profileBio = pkt.b;
+  if (pkt.th) base.theme = pkt.th;
+  base.streak = pkt.st || base.streak || 1;
+  base.waterDate = pkt.wd || todayISO;
+  base.waterCount = pkt.wc ?? base.waterCount ?? 0;
+  base.waterTarget = pkt.wt || base.waterTarget || 12;
+  base.coffeeCount = pkt.cc ?? base.coffeeCount ?? 0;
+  base.proteinDate = todayISO;
+  base.proteinGrams = pkt.pg ?? base.proteinGrams ?? 0;
+  base.proteinTarget = pkt.pt || base.proteinTarget || 160;
+  base.sleepHours = pkt.sl ?? base.sleepHours ?? 8;
+  base.energyLevel = pkt.en || base.energyLevel || 'Yüksek';
+  base.updatedAt = pkt.up || Date.now();
+
+  if (Array.isArray(pkt.sb)) {
+    base.showcasedBadges = pkt.sb;
+  }
+
+  if (Array.isArray(pkt.tk)) {
+    const existingTasksMap = {};
+    (base.tasks || []).forEach((t) => {
+      existingTasksMap[t.id] = t;
+    });
+
+    const syncedTasks = pkt.tk.map((ct) => {
+      const old = existingTasksMap[ct.i] || {};
+      return {
+        ...old,
+        id: ct.i || ('t_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5)),
+        title: ct.t,
+        category: ct.c || 'İş & Proje',
+        priority: ct.p || 'medium',
+        date: ct.d || todayISO,
+        time: ct.tm || '',
+        completed: !!ct.ok,
+        subtasks: old.subtasks || [],
+        photos: old.photos || [],
+        audios: old.audios || []
+      };
+    });
+    base.tasks = syncedTasks;
+  }
+
+  if (Array.isArray(pkt.fd)) {
+    if (!base.dailyFoods || typeof base.dailyFoods !== 'object') base.dailyFoods = {};
+    base.dailyFoods[todayISO] = pkt.fd.map((f, idx) => ({
+      id: 'fd_sync_' + idx + '_' + Date.now(),
+      name: f.n,
+      grams: f.g,
+      kcal: f.k,
+      protein: f.p,
+      carbs: f.c,
+      fat: f.f,
+      mealSlot: f.m || ''
+    }));
+  }
+
+  if (Array.isArray(pkt.rc) && pkt.rc.length > 0) {
+    base.customFoodDB = pkt.rc.map((r) => ({
+      name: r.n,
+      cat: 'tarif',
+      defGrams: r.g || 100,
+      kcal: r.k || 0,
+      protein: r.p || 0,
+      carbs: r.c || 0,
+      fat: r.f || 0,
+      hint: `Özel Tarif (${r.g || 100}g)`
+    }));
+  }
+
+  return base;
+}
+
+async function pushAccountToBuiltInCloud(immediate = false) {
+  if (!currentProfile || !appData || !navigator.onLine) return;
+  const doPush = async () => {
+    try {
+      const cleanUser = normalizeCleanUsername(appData.username || currentProfile.replace(/^user_/, ''));
+      if (!cleanUser) return;
+
+      // 1) Kişisel Hesap Kanalına Gönder (PC <-> Telefon Eşitleme İçin)
+      const accTopic = getAccountCloudTopic(cleanUser);
+      const compactJson = buildCompactCloudAccountPayload();
+      await fetch(`${TF_CLOUD_RELAY_BASE}/${accTopic}`, {
+        method: 'POST',
+        body: compactJson
+      });
+
+      // 2) Arkadaşların Seni Bulabilmesi ve Liderlik Tablosu İçin Genel Profil Özeti Gönder
+      const pubTopic = getPublicSocialTopic(cleanUser);
+      const rankEl = document.getElementById('userRankBadgeText');
+      const pubSummary = JSON.stringify({
+        u: cleanUser,
+        n: appData.profileName || cleanUser,
+        r: rankEl ? rankEl.textContent : `🔥 ${appData.streak || 1} Gün Seri`,
+        s: appData.streak || 1,
+        b: (appData.profileBio || 'Hedeflere tam gaz devam! 💪').slice(0, 60),
+        w: appData.waterCount || 0,
+        p: appData.proteinGrams || 0,
+        up: Date.now()
+      });
+      await fetch(`${TF_CLOUD_RELAY_BASE}/${pubTopic}`, {
+        method: 'POST',
+        body: pubSummary
+      });
+
+      const badgeEl = document.getElementById('pcModalSyncTimeBadge');
+      if (badgeEl) {
+        badgeEl.textContent = 'Eşitlendi: ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+      }
+      const statusDot = document.getElementById('syncStatusDot');
+      if (statusDot) statusDot.classList.remove('offline');
+    } catch (e) {
+      console.warn('Built-in cloud push warning:', e);
+    }
+  };
+
+  if (immediate) {
+    if (cloudPushDebounceTimer) clearTimeout(cloudPushDebounceTimer);
+    await doPush();
+  } else {
+    if (cloudPushDebounceTimer) clearTimeout(cloudPushDebounceTimer);
+    cloudPushDebounceTimer = setTimeout(doPush, 1200);
+  }
+}
+
+async function fetchLatestFromNtfyTopic(topic) {
+  try {
+    const res = await fetch(`${TF_CLOUD_RELAY_BASE}/${topic}/json?poll=1&since=72h`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const text = await res.text();
+    const lines = text.trim().split('\n').filter(Boolean);
+    if (lines.length === 0) return null;
+
+    for (let i = lines.length - 1; i >= 0; i--) {
+      try {
+        const envelope = JSON.parse(lines[i]);
+        if (envelope && envelope.event === 'message' && envelope.message) {
+          const parsed = JSON.parse(envelope.message);
+          if (parsed) return parsed;
+        }
+      } catch (err) {}
+    }
+  } catch (e) {}
+  return null;
+}
+
+async function pullAccountFromBuiltInCloud(cleanUser, silent = true) {
+  const normalized = normalizeCleanUsername(cleanUser);
+  if (!normalized || !navigator.onLine) return null;
+  const pkt = await fetchLatestFromNtfyTopic(getAccountCloudTopic(normalized));
+  if (pkt && pkt.u) {
+    return pkt;
+  }
+  return null;
+}
+
+// Canlı SSE Akışı: Telefonda bir şey değiştiğinde Bilgisayar ekranında 1 saniye içinde otomatik güncellenir!
+function startLiveMultiDeviceCloudStream() {
+  if (!currentProfile || !appData || typeof EventSource === 'undefined') return;
+  const cleanUser = normalizeCleanUsername(appData.username || currentProfile.replace(/^user_/, ''));
+  if (!cleanUser) return;
+
+  try {
+    if (liveAccountEventSource) {
+      liveAccountEventSource.close();
+      liveAccountEventSource = null;
+    }
+    const accTopic = getAccountCloudTopic(cleanUser);
+    liveAccountEventSource = new EventSource(`${TF_CLOUD_RELAY_BASE}/${accTopic}/sse`);
+    liveAccountEventSource.onmessage = async (event) => {
+      try {
+        const env = JSON.parse(event.data);
+        if (!env || !env.message) return;
+        const pkt = JSON.parse(env.message);
+        if (!pkt || pkt.dev === TF_DEVICE_ID) return; // Kendi gönderdiğimiz paketse atla
+        if (pkt.up && pkt.up > (appData.updatedAt || 0) - 2000) {
+          appData = applyCompactCloudPayloadToAppData(pkt, appData);
+          await saveProfileData(true);
+          applyUserPreferences();
+          renderAll();
+          spawnFloatingRewardToast('☁️ Diğer Cihazınla Otomatik Eşitlendi!');
+        }
+      } catch (e) {}
+    };
+  } catch (err) {}
+
+  // Canlı Arkadaş Mesaj Kutusu (Inbox) Akışı
+  try {
+    if (liveInboxEventSource) {
+      liveInboxEventSource.close();
+      liveInboxEventSource = null;
+    }
+    const inboxTopic = getFriendInboxTopic(cleanUser);
+    liveInboxEventSource = new EventSource(`${TF_CLOUD_RELAY_BASE}/${inboxTopic}/sse`);
+    liveInboxEventSource.onmessage = async (event) => {
+      try {
+        const env = JSON.parse(event.data);
+        if (!env || !env.message) return;
+        const msgObj = JSON.parse(env.message);
+        if (!msgObj || !msgObj.from || msgObj.from === cleanUser) return;
+
+        ensureDefaultAiCoachFriend();
+        const fromUser = normalizeCleanUsername(msgObj.from);
+        let friend = (appData.socialFriends || []).find((f) => normalizeCleanUsername(f.username) === fromUser);
+        if (!friend) {
+          friend = {
+            username: fromUser,
+            displayName: msgObj.fromName || msgObj.from,
+            phone: '',
+            rank: msgObj.fromRank || '🔥 Canlı Spor Arkadaşı',
+            bio: 'Canlı Bulut Üzerinden Bağlandı',
+            waterCount: msgObj.waterCount || 0,
+            proteinGrams: msgObj.proteinGrams || 0,
+            badges: ['🏅 Canlı Partner'],
+            messages: []
+          };
+          appData.socialFriends.unshift(friend);
+        }
+        if (!Array.isArray(friend.messages)) friend.messages = [];
+        friend.messages.push({
+          sender: fromUser,
+          text: msgObj.text,
+          time: msgObj.time || new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+        });
+        await saveProfileData(true);
+        renderSocialFriendsList();
+        spawnFloatingRewardToast(`💬 ${escapeHtml(friend.displayName)}: "${escapeHtml(String(msgObj.text).slice(0, 28))}..."`);
+      } catch (e) {}
+    };
+  } catch (err) {}
+}
+
+// 🔑 KULLANICI ADI & ŞİFRE İLE BİLGİSAYARDAN / YENİ CİHAZDAN DOĞRUDAN BULUT GİRİŞİ
+handleLogin = async function(e) {
+  e.preventDefault();
+  const rawInput = document.getElementById('loginUsername').value.trim();
+  const identifier = rawInput.toLowerCase();
+  const cleanUser = normalizeCleanUsername(rawInput);
+  const password = document.getElementById('loginPassword').value;
+  const remember = document.getElementById('rememberMeCheck').checked;
+  const errEl = document.getElementById('loginErrorMsg');
+
+  const allRecords = await getAllUsersFromDB();
+  let matched = allRecords.find((r) => {
+    const d = r.data || {};
+    const uMatch = (d.username && normalizeCleanUsername(d.username) === cleanUser) ||
+                   (d.profileName && d.profileName.toLowerCase() === identifier) ||
+                   r.id === 'user_' + cleanUser;
+    const eMatch = d.email && d.email.toLowerCase() === identifier;
+    return uMatch || eMatch;
+  });
+
+  // Eğer bu bilgisayarda hesap henüz yoksa veya bulutta daha güncel hali varsa Buluttan Kontrol Et!
+  errEl.style.color = '#93c5fd';
+  errEl.textContent = '☁️ Hesabın ve verilerin buluttan kontrol ediliyor...';
+
+  const cloudPkt = await pullAccountFromBuiltInCloud(cleanUser);
+  if (cloudPkt && cloudPkt.u) {
+    if (cloudPkt.pw === password) {
+      const profileId = 'user_' + normalizeCleanUsername(cloudPkt.u);
+      const existingData = matched ? matched.data : null;
+      currentProfile = profileId;
+      appData = applyCompactCloudPayloadToAppData(cloudPkt, existingData);
+      await saveProfileData(true);
+      if (remember) {
+        localStorage.setItem('tf_logged_in_user', currentProfile);
+      } else {
+        localStorage.removeItem('tf_logged_in_user');
+      }
+      errEl.textContent = '';
+      unlockApp();
+      spawnFloatingRewardToast(`☁️ Hoş Geldin ${escapeHtml(appData.profileName || appData.username)}! Bilgisayar & Telefon Eşitlendi`);
+      return;
+    } else if (!matched) {
+      errEl.style.color = '#ff4d4f';
+      errEl.textContent = '❌ Buluttaki hesabın için girdiğin şifre hatalı!';
+      return;
+    }
+  }
+
+  if (!matched) {
+    errEl.style.color = '#ff4d4f';
+    errEl.innerHTML = '❌ Bu kullanıcı adı henüz buluta eşitlenmemiş veya bulunamadı! İlk kez kullanacaksan üstten <b>"✨ Kayıt Ol"</b> sekmesine basarak hemen oluşturabilirsin.';
+    return;
+  }
+
+  const userPass = matched.data.password || matched.data.pin || '';
+  if (userPass !== password) {
+    errEl.style.color = '#ff4d4f';
+    errEl.textContent = '❌ Şifre hatalı! Unuttuysan "Şifremi Unuttum?" bağlantısına tıkla.';
+    return;
+  }
+
+  errEl.textContent = '';
+  currentProfile = matched.id;
+  await loadProfileData(currentProfile);
+  if (remember) {
+    localStorage.setItem('tf_logged_in_user', currentProfile);
+  } else {
+    localStorage.removeItem('tf_logged_in_user');
+  }
+
+  unlockApp();
+  pushAccountToBuiltInCloud(true);
+};
+
+// Kayıt olunduğunda anında buluta da gönder
+const _origHandleRegister = handleRegister;
+handleRegister = async function(e) {
+  await _origHandleRegister(e);
+  if (currentProfile) {
+    await pushAccountToBuiltInCloud(true);
+    startLiveMultiDeviceCloudStream();
+    spawnFloatingRewardToast('☁️ Hesabın Oluşturuldu! Bilgisayardan da Aynı Şifreyle Girebilirsin');
+  }
+};
+
+// Her veri kaydında otomatik bulut senkronizasyonunu tetikle
+const _origSaveProfileData = saveProfileData;
+saveProfileData = async function(skipCloud = false) {
+  await _origSaveProfileData(skipCloud);
+  if (!skipCloud) {
+    pushAccountToBuiltInCloud(false);
+  }
+};
+
+// Uygulama kilidi açıldığında canlı bulut akışını başlat ve en güncel veriyi çek
+const _origUnlockApp = unlockApp;
+unlockApp = function() {
+  _origUnlockApp();
+  startLiveMultiDeviceCloudStream();
+  const cleanUser = normalizeCleanUsername(appData.username || currentProfile.replace(/^user_/, ''));
+  if (cleanUser) {
+    pullAccountFromBuiltInCloud(cleanUser).then(async (pkt) => {
+      if (pkt && pkt.up && pkt.up > (appData.updatedAt || 0)) {
+        appData = applyCompactCloudPayloadToAppData(pkt, appData);
+        await saveProfileData(true);
+        applyUserPreferences();
+        renderAll();
+      } else {
+        pushAccountToBuiltInCloud(true);
+      }
+    });
+  }
+};
+
+// Arkadaş eklendiğinde veya yenilendiğinde buluttaki gerçek verilerini çek
+const _origAddFriendByCodeOrUsername = addFriendByCodeOrUsername;
+addFriendByCodeOrUsername = async function() {
+  const inp = document.getElementById('addFriendInput') || document.getElementById('friendAddInput');
+  const rawVal = (inp ? inp.value : '').trim();
+  _origAddFriendByCodeOrUsername();
+
+  if (rawVal && !rawVal.startsWith('TF-')) {
+    const cleanFriend = normalizeCleanUsername(rawVal);
+    const pubData = await fetchLatestFromNtfyTopic(getPublicSocialTopic(cleanFriend));
+    if (pubData && pubData.u) {
+      const fr = (appData.socialFriends || []).find((f) => normalizeCleanUsername(f.username) === cleanFriend);
+      if (fr) {
+        fr.displayName = pubData.n || fr.displayName;
+        fr.rank = pubData.r || fr.rank;
+        fr.bio = pubData.b || fr.bio;
+        fr.waterCount = pubData.w ?? fr.waterCount;
+        fr.proteinGrams = pubData.p ?? fr.proteinGrams;
+        saveProfileData(true);
+        renderSocialFriendsList();
+        spawnFloatingRewardToast(`🎉 ${escapeHtml(fr.displayName)} Canlı Bulut Profiliyle Bağlandı!`);
+      }
+    }
+  }
+};
+
+// Arkadaşa mesaj gönderildiğinde doğrudan onun bilgisayar/telefon ekranına da canlı gönder
+const _origAppendMessageToActiveFriend = appendMessageToActiveFriend;
+appendMessageToActiveFriend = async function(text) {
+  const res = await _origAppendMessageToActiveFriend(text);
+  try {
+    const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+    const friend = friends[activeSelectedFriendIdx];
+    if (friend && friend.username && !friend.isAiCoach) {
+      const targetUser = normalizeCleanUsername(friend.username);
+      const myUser = normalizeCleanUsername(appData.username || currentProfile.replace(/^user_/, ''));
+      const rankEl = document.getElementById('userRankBadgeText');
+      await fetch(`${TF_CLOUD_RELAY_BASE}/${getFriendInboxTopic(targetUser)}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          from: myUser,
+          fromName: appData.profileName || myUser,
+          fromRank: rankEl ? rankEl.textContent : 'Sporcu',
+          waterCount: appData.waterCount || 0,
+          proteinGrams: appData.proteinGrams || 0,
+          text,
+          time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+        })
+      });
+    }
+  } catch (e) {}
+  return res;
+};
+
+// Arkadaş listesini yenilerken tüm arkadaşların canlı bulut puanlarını çek
+const _origSyncSocialFriendsAndMessages = syncSocialFriendsAndMessages;
+syncSocialFriendsAndMessages = async function(silent = false) {
+  for (const fr of (appData.socialFriends || [])) {
+    if (!fr.username || fr.isAiCoach) continue;
+    const cleanFr = normalizeCleanUsername(fr.username);
+    const pubData = await fetchLatestFromNtfyTopic(getPublicSocialTopic(cleanFr));
+    if (pubData && pubData.u) {
+      fr.displayName = pubData.n || fr.displayName;
+      fr.rank = pubData.r || fr.rank;
+      fr.bio = pubData.b || fr.bio;
+      fr.waterCount = pubData.w ?? fr.waterCount;
+      fr.proteinGrams = pubData.p ?? fr.proteinGrams;
+    }
+  }
+  await _origSyncSocialFriendsAndMessages(silent);
+};
+
+// 💻 BİLGİSAYAR & ARKADAŞ BAĞLANTI MODALI FONKSİYONLARI
+function openPcAndFriendsSyncModal() {
+  const modal = document.getElementById('pcSyncAndInviteModal');
+  if (!modal) return;
+  const userEl = document.getElementById('pcModalUsernameText');
+  if (userEl) {
+    userEl.textContent = appData.username || currentProfile.replace(/^user_/, '') || 'kullanici';
+  }
+  modal.classList.remove('hidden');
+  modal.style.display = 'flex';
+  pushAccountToBuiltInCloud(true);
+}
+
+function closePcAndFriendsSyncModal() {
+  const modal = document.getElementById('pcSyncAndInviteModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
+}
+
+async function forceManualCloudSyncNow() {
+  spawnFloatingRewardToast('☁️ Bulutla Eşitleniyor...');
+  await pushAccountToBuiltInCloud(true);
+  await syncSocialFriendsAndMessages(true);
+  spawnFloatingRewardToast('✅ Bilgisayar & Telefon Bulut Eşitlemesi Tamamlandı!');
+}
+
+function copyAppInviteLinkToClipboard() {
+  const url = 'https://alperkoks.github.io/taskflow-pro/';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => {
+      spawnFloatingRewardToast('📋 Giriş Linki Kopyalandı! Bilgisayarda veya WhatsApp\'ta Açabilirsin');
+    });
+  } else {
+    prompt('Uygulama Giriş Linki:', url);
+  }
+}
+
+function shareAppInviteLinkToFriendsWP() {
+  const myUser = appData.username || currentProfile.replace(/^user_/, '') || 'alper';
+  const myName = appData.profileName || myUser;
+  const msg = [
+    `🚀 *TaskFlow+ Yaşam, Beslenme & Antrenman Üssü Daveti!*`,
+    ``,
+    `Selam! Ben günlük su, protein/kalori, antrenman ve hedeflerimi *TaskFlow+* üzerinden takip ediyorum.`,
+    ``,
+    `💻📱 *Bilgisayardan veya Telefondan Hemen Katıl:*`,
+    `👉 https://alperkoks.github.io/taskflow-pro/`,
+    ``,
+    `1️⃣ Linke tıkla ve *✨ Kayıt Ol* sekmesinden kendi kullanıcı adını ve şifreni oluştur.`,
+    `2️⃣ *💬 Arkadaşlar* sekmesine girip benim kullanıcı adımı (*${myUser}*) ekle, haftalık liderlik tablosunda yarışalım ve 7 günlük ortak düello başlatalım! 💪🔥`
+  ].join('\n');
+  openWhatsAppOrShareText(msg);
+}
+
+async function triggerDesktopInstallOrGuide() {
+  if (deferredInstallPrompt) {
+    await installPWA();
+    return;
+  }
+  alert(
+    '💻 Bilgisayara Masaüstü Uygulaması Olarak Kurmak İçin:\n\n' +
+    '1. Bilgisayarında Chrome veya Edge ile https://alperkoks.github.io/taskflow-pro/ adresini aç.\n' +
+    '2. Adres çubuğunun sağ üst köşesindeki "📥 Uygulamayı Yükle" simgesine (veya sağ üst ⋮ menüden "Sayfayı uygulama olarak yükle" seçeneğine) tıkla.\n\n' +
+    'Uygulama masaüstüne kendi ikonuyla kurulur ve otomatik güncellenir!'
+  );
+}
+
+// 🔄 SIFIR DOKUNUŞLA OTOMATİK SÜRÜM GÜNCELLEYİCİ (AUTO-UPDATER)
+function initZeroTouchAutoUpdater() {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('sw.js?v=25').then((reg) => {
+    reg.update();
+    setInterval(() => {
+      reg.update().catch(() => {});
+    }, 45000);
+  }).catch(() => {});
+
+  window.addEventListener('focus', () => {
+    if (currentProfile && appData) {
+      const cleanUser = normalizeCleanUsername(appData.username || currentProfile.replace(/^user_/, ''));
+      pullAccountFromBuiltInCloud(cleanUser).then(async (pkt) => {
+        if (pkt && pkt.up && pkt.up > (appData.updatedAt || 0)) {
+          appData = applyCompactCloudPayloadToAppData(pkt, appData);
+          await saveProfileData(true);
+          applyUserPreferences();
+          renderAll();
+        }
+      });
+    }
+  });
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  initZeroTouchAutoUpdater();
   await initDB();
 
   if (currentProfile) {
@@ -8228,10 +8859,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  const allUsers = await getAllUsersFromDB();
-  if (allUsers.length === 0) {
-    switchAuthTab('register');
-  } else {
-    switchAuthTab('login');
-  }
+  // Bilgisayarda veya yeni cihazda açıldığında doğrudan Kullanıcı Adı & Şifre giriş ekranı gelsin
+  switchAuthTab('login');
 });
