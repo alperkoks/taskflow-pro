@@ -7,8 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>TaskFlow+ — Günlük Görev, Hedefler & Odak</title>
-  <link rel="manifest" href="manifest.json?v=23" />
-  <link rel="stylesheet" href="styles.css?v=23" />
+  <link rel="manifest" href="manifest.json?v=24" />
+  <link rel="stylesheet" href="styles.css?v=24" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -169,6 +169,16 @@
               <span style="color:var(--accent-cream);">Rozetler ➡️</span>
             </div>
           </div>
+
+          <!-- 🏆 GÜNLÜK DİSİPLİN & YAŞAM SKORU (0-100 PUAN) + HIZLI STORY PAYLAŞIM ŞERİDİ -->
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:9px;border-top:1px solid rgba(255,255,255,0.08);flex-wrap:wrap;">
+            <div style="font-size:11.5px;font-weight:800;color:var(--text-main);">
+              ⚡ Günlük Disiplin Skoru: <b id="homeDailyDisciplineScore" style="color:#ffd700;font-size:13px;">85 / 100</b>
+            </div>
+            <button type="button" class="tag-badge" style="border:none;cursor:pointer;background:linear-gradient(135deg,rgba(82,196,26,0.25),rgba(37,211,102,0.18));color:#95de64;font-weight:900;padding:4px 10px;" onclick="openStoryGeneratorModal()">
+              📸 Günümü Story Paylaş
+            </button>
+          </div>
         </div>
 
         <!-- Hidden legacy switcher buttons for compatibility -->
@@ -328,6 +338,31 @@
                 <!-- Gizli Uyumluluk Elemanları -->
                 <span id="proteinCountText" style="display:none;">0 / 160g</span>
               </div>
+
+              <!-- ⏳ 16:8 ARALIKLI ORUÇ (INTERMITTENT FASTING) & YAĞ YAKIM EVRESİ SAYACI -->
+              <div class="luxury-spawn-box open" id="spawnBoxFastingTracker" style="margin-top:10px;">
+                <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxFastingTracker')">
+                  <span style="color:#ffc069;">⏳ 16:8 Aralıklı Oruç & Yağ Yakım Evresi Sayacı</span>
+                  <span class="luxury-spawn-chevron">▾</span>
+                </button>
+                <div class="luxury-spawn-body">
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;">
+                    <div>
+                      <div id="fastingStateTitle" style="font-size:14px;font-weight:900;color:var(--text-main);">🍽️ Yeme Penceresi Aktif</div>
+                      <div id="fastingStageBadge" style="font-size:11.5px;color:#95de64;font-weight:800;margin-top:2px;">🔥 Orucu başlatarak yağ yakım süreni canlı takip et!</div>
+                    </div>
+                    <div id="fastingElapsedBigText" style="font-size:18px;font-weight:900;color:var(--accent-cream);">00s 00dk</div>
+                  </div>
+                  <div class="progress-bar-track" style="height:8px;margin:10px 0;">
+                    <div class="progress-bar-fill" id="fastingProgressBarFill" style="width:0%;background:linear-gradient(90deg,#ffc069,#95de64);"></div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px;">
+                    <button type="button" class="btn-cream" id="fastingToggleMainBtn" style="height:44px;font-size:12.5px;font-weight:900;" onclick="toggleIntermittentFasting()">🔥 16:8 Orucu Başlat</button>
+                    <button type="button" class="lux-stepper-btn plus" style="height:44px !important;font-size:12.5px !important;" onclick="adjustFastingStartHours(1)" title="Başlangıcı 1 Saat Geriye Al">+1 Saat Ekle</button>
+                    <button type="button" class="lux-stepper-btn minus" style="height:44px !important;font-size:12.5px !important;" onclick="resetIntermittentFasting()">🔄 Sıfırla</button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- SU ALT SEKME 2: SADECE GÜNLÜK ALIŞKANLIKLAR & SABAH/AKŞAM RUTİNİ -->
@@ -359,24 +394,36 @@
           <div id="sportSubFood" style="display:none;">
             <div class="scratchpad-card" id="foodMacroTrackerCard" style="border-color:rgba(82,196,26,0.38);padding:15px;">
 
-              <!-- 1. ÜST SATIR: BUGÜNÜN TOPLAM KALORİ, PROTEİN, KARB VE YAĞ ÖZETİ (4 EŞİT KUTU) -->
+              <!-- 1. ÜST SATIR: BUGÜNÜN TOPLAM KALORİ, PROTEİN, KARB VE YAĞ ÖZETİ (4 EŞİT KUTU + CANLI DOLULUK ÇUBUĞU) -->
               <div class="macro-badge-row" style="margin-bottom:12px;">
                 <div class="macro-mini-pill">
                   <div style="color:var(--text-muted);font-size:10.5px;font-weight:800;">🔥 KALORİ</div>
                   <div style="font-weight:900;font-size:14px;color:#ffc069;" id="dailyTotalKcalText">0 kcal</div>
+                  <div class="progress-bar-track" style="height:4px;margin:5px 0 0;"><div class="progress-bar-fill" id="dailyKcalBarFill" style="width:0%;background:#ffc069;"></div></div>
                 </div>
                 <div class="macro-mini-pill">
                   <div style="color:var(--text-muted);font-size:10.5px;font-weight:800;">🥩 PROTEİN</div>
                   <div style="font-weight:900;font-size:14px;color:#ff9c6e;" id="dailyTotalProtText">0g</div>
+                  <div class="progress-bar-track" style="height:4px;margin:5px 0 0;"><div class="progress-bar-fill" id="dailyProtBarFill" style="width:0%;background:#ff9c6e;"></div></div>
                 </div>
                 <div class="macro-mini-pill">
                   <div style="color:var(--text-muted);font-size:10.5px;font-weight:800;">🍞 KARB</div>
                   <div style="font-weight:900;font-size:14px;color:#93c5fd;" id="dailyTotalCarbText">0g</div>
+                  <div class="progress-bar-track" style="height:4px;margin:5px 0 0;"><div class="progress-bar-fill" id="dailyCarbBarFill" style="width:0%;background:#93c5fd;"></div></div>
                 </div>
                 <div class="macro-mini-pill">
                   <div style="color:var(--text-muted);font-size:10.5px;font-weight:800;">🥑 YAĞ</div>
                   <div style="font-weight:900;font-size:14px;color:#95de64;" id="dailyTotalFatText">0g</div>
+                  <div class="progress-bar-track" style="height:4px;margin:5px 0 0;"><div class="progress-bar-fill" id="dailyFatBarFill" style="width:0%;background:#95de64;"></div></div>
                 </div>
+              </div>
+
+              <!-- 🍱 ÖĞÜN ZAMANI SEÇİCİ (KAHVALTI | ÖĞLE | AKŞAM | ARA ÖĞÜN) -->
+              <div class="meal-slot-bar" id="mealSlotSelectorBar">
+                <button type="button" class="meal-slot-btn active" data-slot="☀️ Kahvaltı" onclick="selectActiveMealSlot('☀️ Kahvaltı', this)">☀️ Kahvaltı</button>
+                <button type="button" class="meal-slot-btn" data-slot="🌤️ Öğle" onclick="selectActiveMealSlot('🌤️ Öğle', this)">🌤️ Öğle</button>
+                <button type="button" class="meal-slot-btn" data-slot="🌙 Akşam" onclick="selectActiveMealSlot('🌙 Akşam', this)">🌙 Akşam</button>
+                <button type="button" class="meal-slot-btn" data-slot="⚡ Ara Öğün" onclick="selectActiveMealSlot('⚡ Ara Öğün', this)">⚡ Ara Öğün</button>
               </div>
 
               <!-- 1.5. 🕒 TEK TIKLA "DÜN NE YEDİYSEM AYNISINI BUGÜNE KOPYALA" + 📸 STORY KARTI BARI -->
@@ -594,6 +641,40 @@
                     <button type="button" class="tag-badge" style="border:none;cursor:pointer;background:rgba(96,165,250,0.2);color:#93c5fd;" onclick="startQuickRestTimer(60)">60 sn Başlat</button>
                     <button type="button" class="tag-badge" style="border:none;cursor:pointer;background:rgba(96,165,250,0.2);color:#93c5fd;" onclick="startQuickRestTimer(90)">90 sn Başlat</button>
                   </div>
+                </div>
+              </div>
+
+              <!-- 🏋️ CANLI SET & AĞIRLIK DEFTERİ (QUICK SET LOGGER & TOPLAM TONAJ) -->
+              <div class="luxury-spawn-box open" id="spawnBoxQuickSetLogger" style="margin-bottom:10px;">
+                <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxQuickSetLogger')">
+                  <span style="color:#95de64;">🏋️ Canlı Set & Ağırlık Defteri (Tonaj: <b id="todayTotalVolumeText">0 kg</b>)</span>
+                  <span class="luxury-spawn-chevron">▾</span>
+                </button>
+                <div class="luxury-spawn-body">
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;margin-bottom:8px;">
+                    <select id="quickSetExerciseSelect" class="form-select" style="flex:1.5;min-width:140px;height:46px;font-size:13px;font-weight:800;">
+                      <option value="🏋️ Bench Press">🏋️ Bench Press</option>
+                      <option value="🦵 Squat">🦵 Squat</option>
+                      <option value="💪 Deadlift">💪 Deadlift</option>
+                      <option value="🔥 Shoulder Press">🔥 Shoulder Press</option>
+                      <option value="🦅 Lat Pulldown / Barfiks">🦅 Lat Pulldown / Barfiks</option>
+                      <option value="💪 Biceps Curl">💪 Biceps Curl</option>
+                      <option value="⚡ Triceps Pushdown">⚡ Triceps Pushdown</option>
+                      <option value="🦵 Leg Press">🦵 Leg Press</option>
+                    </select>
+                    <div style="display:flex;align-items:center;gap:4px;">
+                      <button type="button" class="lux-stepper-btn minus" onclick="stepQuickSetInput('quickSetWeightInput', -2.5)">−</button>
+                      <input type="number" id="quickSetWeightInput" class="form-input" style="width:68px;height:46px;text-align:center;font-weight:900;font-size:14px;" value="60" step="2.5" placeholder="Kg" />
+                      <button type="button" class="lux-stepper-btn plus" onclick="stepQuickSetInput('quickSetWeightInput', 2.5)">+</button>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:4px;">
+                      <button type="button" class="lux-stepper-btn minus" onclick="stepQuickSetInput('quickSetRepsInput', -1)">−</button>
+                      <input type="number" id="quickSetRepsInput" class="form-input" style="width:58px;height:46px;text-align:center;font-weight:900;font-size:14px;" value="10" step="1" placeholder="Tekrar" />
+                      <button type="button" class="lux-stepper-btn plus" onclick="stepQuickSetInput('quickSetRepsInput', 1)">+</button>
+                    </div>
+                    <button type="button" class="btn-cream" style="height:46px;padding:0 16px;font-weight:900;background:#95de64;color:#09090d;" onclick="addQuickWorkoutSetLog()">➕ Set Ekle</button>
+                  </div>
+                  <div id="quickWorkoutSetsList" style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;"></div>
                 </div>
               </div>
 
@@ -1801,26 +1882,39 @@
     </div>
   </div>
 
-  <!-- 📸 INSTAGRAM / WHATSAPP HİKAYE (STORY) ÖZETİ GÖRSELİ OLUŞTURUCU MODALI -->
+  <!-- 📸 INSTAGRAM / WHATSAPP HİKAYE (STORY) & SOSYAL MEDYA PAYLAŞIM STÜDYOSU MODALI -->
   <div id="storyGeneratorModal" class="modal-backdrop hidden" style="align-items:center;padding:16px;z-index:21500;">
-    <div class="modal-sheet spawn-anim" style="max-width:440px;border-radius:26px;text-align:center;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <h3 style="font-size:17px;font-weight:900;color:var(--accent-cream);">📸 Instagram / WP Story Özeti</h3>
+    <div class="modal-sheet spawn-anim" style="max-width:450px;border-radius:26px;text-align:center;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <h3 style="font-size:17px;font-weight:900;color:var(--accent-cream);">📸 Sosyal Medya & Story Stüdyosu</h3>
         <button type="button" class="icon-btn" onclick="closeStoryGeneratorModal()">✕</button>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">
-        Bugünkü su, protein, kalori, görev ve rozet başarını içeren HD Story kartın hazır!
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">
+        Temanı seç, HD Story kartını indir veya tek dokunuşla Instagram / WhatsApp'ta paylaş:
       </p>
+
+      <!-- 3 LÜKS STORY TEMASI SEÇİCİ -->
+      <div style="display:flex;gap:6px;margin-bottom:10px;">
+        <button type="button" class="story-theme-pill active" id="storyThemeBtnCyber" onclick="selectStoryTheme('cyber')">🌌 Cyber Neon</button>
+        <button type="button" class="story-theme-pill" id="storyThemeBtnGold" onclick="selectStoryTheme('gold')">👑 Royal Gold</button>
+        <button type="button" class="story-theme-pill" id="storyThemeBtnEmerald" onclick="selectStoryTheme('emerald')">🌿 Emerald Fit</button>
+      </div>
+
       <div style="background:#09090d;border-radius:18px;padding:8px;border:1px solid var(--border-color);margin-bottom:12px;">
-        <canvas id="storyShareCanvas" width="1080" height="1920" style="width:100%;max-height:54vh;object-fit:contain;border-radius:12px;display:block;margin:0 auto;"></canvas>
+        <canvas id="storyShareCanvas" width="1080" height="1920" style="width:100%;max-height:48vh;object-fit:contain;border-radius:12px;display:block;margin:0 auto;"></canvas>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <button type="button" class="btn-cream" style="height:48px;font-size:13px;font-weight:900;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;" onclick="shareStoryCardImageOrText()">📲 Instagram / Story Paylaş</button>
+        <button type="button" class="btn-cream" style="height:48px;font-size:13px;font-weight:900;" onclick="downloadStoryCardImage()">📥 HD Resmi İndir (PNG)</button>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <button type="button" class="btn-cream" style="height:48px;font-size:13.5px;font-weight:900;" onclick="downloadStoryCardImage()">📥 Resmi İndir (PNG)</button>
-        <button type="button" class="btn-cream" style="height:48px;font-size:13.5px;font-weight:900;background:#25D366;color:#fff;" onclick="shareStoryCardImageOrText()">📲 Story Paylaş</button>
+        <button type="button" class="btn-cream" style="height:44px;font-size:12.5px;font-weight:900;background:#25D366;color:#fff;" onclick="shareFullDailyLifestyleSummary()">💬 WhatsApp Rapor Gönder</button>
+        <button type="button" class="pin-btn" style="height:44px;font-size:12.5px;font-weight:900;" onclick="copyDailySummaryTextToClipboard()">📋 Özeti Panoya Kopyala</button>
       </div>
     </div>
   </div>
 
-  <script src="app.js?v=23"></script>
+  <script src="app.js?v=24"></script>
 </body>
 </html>

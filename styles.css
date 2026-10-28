@@ -2497,14 +2497,32 @@ body[data-drilldown-open="true"] #rolloverBanner {
 }
 
 .luxury-spawn-body {
-  display: none;
-  padding: 4px 15px 15px;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  animation: luxurySpawnIn 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0 15px;
+  border-top: 1px solid transparent;
+  transform: translateY(-8px) scale(0.985);
+  filter: blur(4px);
+  pointer-events: none;
+  transition:
+    max-height 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.28s ease,
+    padding 0.36s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease;
 }
 
 .luxury-spawn-box.open .luxury-spawn-body {
-  display: block;
+  max-height: 2200px;
+  opacity: 1;
+  overflow: visible;
+  padding: 10px 15px 16px;
+  border-top-color: rgba(255, 255, 255, 0.08);
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  pointer-events: auto;
 }
 
 /* ⚡ SAĞ ALTTA TEK BİR "HIZLI EKLE (+)" YÜZEN MENÜSÜ (FLOATING ACTION MENU) */
@@ -2619,22 +2637,59 @@ body[data-drilldown-open="true"] #rolloverBanner {
   }
 }
 
-.ingredient-pick-card {
-  padding: 10px;
-  border-radius: 14px;
-  border: 1.5px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.03);
+.ingredient-pick-card,
+.ingredient-chip-card {
+  padding: 12px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 7px;
-  transition: all 0.18s ease;
+  gap: 8px;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
 }
 
-.ingredient-pick-card.selected {
+.ingredient-pick-card:hover,
+.ingredient-chip-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(245, 216, 181, 0.35);
+}
+
+.ingredient-pick-card.selected,
+.ingredient-chip-card.selected {
   border-color: #95de64;
-  background: rgba(82, 196, 26, 0.13);
-  box-shadow: 0 6px 16px rgba(82, 196, 26, 0.14);
+  background: linear-gradient(145deg, rgba(82, 196, 26, 0.18), rgba(37, 211, 102, 0.06));
+  box-shadow: 0 8px 22px rgba(82, 196, 26, 0.18);
+  transform: translateY(-2px);
+}
+
+.ingredient-chip-title {
+  font-size: 13.5px;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.ingredient-chip-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.ingredient-chip-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.ingredient-chip-count {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--accent-cream);
+  min-width: 26px;
+  text-align: center;
 }
 
 /* 🏆 HAFTALIK LİDERLİK TABLOSU (LEADERBOARD) & ⚔️ 7 GÜNLÜK DÜELLO KARTI */
@@ -2643,11 +2698,33 @@ body[data-drilldown-open="true"] #rolloverBanner {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 11px 14px;
-  border-radius: 15px;
+  padding: 12px 14px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.035);
   border: 1.5px solid var(--border-color);
-  margin-bottom: 7px;
+  margin-bottom: 8px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.leaderboard-item:hover {
+  transform: translateX(3px);
+}
+
+.leaderboard-rank {
+  font-size: 20px;
+  font-weight: 900;
+  min-width: 34px;
+  text-align: center;
+}
+
+.leaderboard-score {
+  font-size: 13px;
+  font-weight: 900;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(245, 216, 181, 0.14);
+  color: var(--accent-cream);
+  white-space: nowrap;
 }
 
 .leaderboard-item.rank-1 {
@@ -2664,6 +2741,166 @@ body[data-drilldown-open="true"] #rolloverBanner {
   border-color: rgba(205, 127, 50, 0.45);
   background: linear-gradient(135deg, rgba(205, 127, 50, 0.12), rgba(255, 255, 255, 0.03));
 }
+
+/* ============================================================================
+   v24.0 ULTRA-PREMIUM EFEKTLER: TOUCH RIPPLE, STAGGERED CASCADE, FLOATING XP,
+   KONFETİ, 16:8 ORUÇ SAYACI VE ÖĞÜN ZAMANI SEÇİCİLERİ
+   ============================================================================ */
+
+/* Kademeli (Staggered) Sahne Giriş Efekti */
+@keyframes staggeredCardSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.965);
+    filter: blur(4px);
+  }
+  70% {
+    transform: translateY(-2px) scale(1.005);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.lux-cascade-item {
+  animation: staggeredCardSlideUp 0.44s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Dokunma Işık Dalgası (Touch Ripple) */
+.lux-ripple-host {
+  position: relative;
+  overflow: hidden;
+}
+
+.lux-ripple-wave {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(245, 216, 181, 0.42) 0%, rgba(216, 208, 248, 0.18) 60%, transparent 100%);
+  animation: luxRippleExpand 0.58s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  z-index: 5;
+}
+
+@keyframes luxRippleExpand {
+  to {
+    transform: scale(3.6);
+    opacity: 0;
+  }
+}
+
+/* Yüzen +XP / +Su / +Protein Ödül Baloncukları */
+.floating-reward-pill {
+  position: fixed;
+  z-index: 30000;
+  pointer-events: none;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(20, 22, 34, 0.96), rgba(34, 38, 58, 0.96));
+  border: 1.5px solid rgba(149, 222, 100, 0.65);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 900;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55), 0 0 20px rgba(149, 222, 100, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  animation: floatUpRewardAnim 1.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes floatUpRewardAnim {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 14px) scale(0.82);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -6px) scale(1.05);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -38px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -62px) scale(0.92);
+  }
+}
+
+/* Lüks Konfeti Parçacıkları */
+.lux-confetti-piece {
+  position: fixed;
+  z-index: 29999;
+  pointer-events: none;
+  width: 9px;
+  height: 14px;
+  border-radius: 3px;
+  animation: confettiFallAnim 1.5s cubic-bezier(0.25, 0.8, 0.35, 1) forwards;
+}
+
+@keyframes confettiFallAnim {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx, 40px), var(--ty, 180px)) rotate(var(--rot, 360deg)) scale(0.5);
+  }
+}
+
+/* Story Tema Seçici Hapları */
+.story-theme-pill {
+  flex: 1;
+  min-height: 40px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.story-theme-pill.active {
+  border-color: var(--accent-cream);
+  background: rgba(245, 216, 181, 0.18);
+  color: var(--accent-cream);
+  box-shadow: 0 6px 16px rgba(245, 216, 181, 0.2);
+}
+
+/* Öğün Zamanı Seçici (Kahvaltı / Öğle / Akşam / Ara Öğün) */
+.meal-slot-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.meal-slot-btn {
+  min-height: 38px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.meal-slot-btn.active {
+  border-color: #95de64;
+  background: rgba(82, 196, 26, 0.18);
+  color: #95de64;
+  transform: translateY(-1px);
+}
+
 
 
 
