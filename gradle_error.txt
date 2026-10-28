@@ -41,41 +41,46 @@ WARNING: Using flatDir should be avoided because it doesn't support any meta-dat
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
 > Task :capacitor-android:javaPreCompileDebug
+> Task :app:processDebugManifestForPackage
 > Task :capacitor-android:parseDebugLocalResources
 > Task :app:mergeDebugShaders
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
 > Task :capacitor-android:mergeDebugShaders
-> Task :app:processDebugManifestForPackage
 > Task :capacitor-android:compileDebugShaders NO-SOURCE
 > Task :capacitor-android:generateDebugAssets UP-TO-DATE
-> Task :capacitor-android:generateDebugRFile
 > Task :capacitor-android:packageDebugAssets
+> Task :capacitor-android:generateDebugRFile
+> Task :app:mergeDebugAssets
 > Task :app:processDebugResources
 
 > Task :capacitor-android:compileDebugJavaWithJavac
 Note: Some input files use unchecked or unsafe operations.
 Note: Recompile with -Xlint:unchecked for details.
 
-> Task :capacitor-android:bundleLibCompileToJarDebug
-> Task :app:mergeDebugAssets
-> Task :app:compileDebugJavaWithJavac
-> Task :capacitor-android:bundleLibRuntimeToJarDebug
 > Task :app:compressDebugAssets
 > Task :app:desugarDebugFileDependencies
-> Task :app:dexBuilderDebug
 > Task :app:processDebugJavaRes NO-SOURCE
+> Task :capacitor-android:bundleLibRuntimeToJarDebug
+> Task :capacitor-android:bundleLibCompileToJarDebug
 > Task :capacitor-android:processDebugJavaRes NO-SOURCE
+
+> Task :app:compileDebugJavaWithJavac
+Note: /home/runner/work/taskflow-pro/taskflow-pro/android/app/src/main/java/com/alperkoks/taskflowpro/MainActivity.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:dexBuilderDebug
 > Task :app:checkDebugDuplicateClasses
 > Task :capacitor-android:bundleLibRuntimeToDirDebug
 > Task :app:mergeDebugJavaResource
 > Task :app:mergeDebugGlobalSynthetics
 > Task :app:mergeDebugJniLibFolders
 > Task :capacitor-android:mergeDebugJniLibFolders
+> Task :app:mergeProjectDexDebug
 > Task :capacitor-android:mergeDebugNativeLibs NO-SOURCE
 > Task :app:mergeLibDexDebug
 > Task :capacitor-android:copyDebugJniLibsProjectOnly
-> Task :app:mergeProjectDexDebug
+> Task :app:mergeExtDexDebug
 > Task :app:validateSigningDebug
 > Task :app:mergeDebugNativeLibs NO-SOURCE
 > Task :app:stripDebugDebugSymbols NO-SOURCE
@@ -83,7 +88,6 @@ Note: Recompile with -Xlint:unchecked for details.
 > Task :app:writeDebugSigningConfigVersions
 > Task :capacitor-android:stripDebugDebugSymbols NO-SOURCE
 > Task :capacitor-android:copyDebugJniLibsProjectAndLocalJars
-> Task :app:mergeExtDexDebug
 > Task :capacitor-android:extractDebugAnnotations
 > Task :capacitor-android:extractDeepLinksForAarDebug
 > Task :capacitor-android:mergeDebugGeneratedProguardFiles
@@ -91,12 +95,12 @@ Note: Recompile with -Xlint:unchecked for details.
 > Task :capacitor-android:prepareDebugArtProfile
 > Task :capacitor-android:prepareLintJarForPublish
 > Task :capacitor-android:mergeDebugJavaResource
-> Task :capacitor-android:syncDebugLibJars
-> Task :capacitor-android:bundleDebugAar
-> Task :capacitor-android:assembleDebug
 > Task :app:packageDebug
 > Task :app:createDebugApkListingFileRedirect
 > Task :app:assembleDebug
+> Task :capacitor-android:syncDebugLibJars
+> Task :capacitor-android:bundleDebugAar
+> Task :capacitor-android:assembleDebug
 
-BUILD SUCCESSFUL in 1m 15s
+BUILD SUCCESSFUL in 1m 26s
 60 actionable tasks: 60 executed
