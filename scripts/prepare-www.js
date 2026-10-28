@@ -1,12 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 
-const srcDir = path.resolve(__dirname, '..');
-const destDir = path.resolve(srcDir, 'www');
+const rootDir = path.resolve(__dirname, '..');
+const wwwDir = path.resolve(rootDir, 'www');
+const androidAssetsDir = path.resolve(rootDir, 'android', 'app', 'src', 'main', 'assets', 'public');
 
-if (!fs.existsSync(destDir)) {
-  fs.mkdirSync(destDir, { recursive: true });
-}
+[wwwDir, androidAssetsDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
 
 const filesToCopy = [
   'index.html',
@@ -20,12 +23,12 @@ const filesToCopy = [
 ];
 
 filesToCopy.forEach(file => {
-  const src = path.join(srcDir, file);
-  const dest = path.join(destDir, file);
+  const src = path.join(rootDir, file);
   if (fs.existsSync(src)) {
-    fs.copyFileSync(src, dest);
-    console.log(`Copied ${file} -> www/`);
+    fs.copyFileSync(src, path.join(wwwDir, file));
+    fs.copyFileSync(src, path.join(androidAssetsDir, file));
+    console.log(`Copied ${file} to www/ and android assets/public/`);
   }
 });
 
-console.log('WWW preparation complete!');
+console.log('All web assets prepared and synced successfully!');

@@ -11,9 +11,6 @@ permissions:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-    env:
-      CAPACITOR_TELEMETRY: '0'
-      CI: 'false'
 
     steps:
     - name: Checkout Code
@@ -29,17 +26,14 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 20
-        cache: 'npm'
 
-    - name: Install Dependencies
+    - name: Install Node Dependencies
       run: |
-        npm install --include=dev
+        npm install
 
-    - name: Build Web Bundle & Sync Android
+    - name: Prepare Web Assets for Android
       run: |
         node scripts/prepare-www.js
-        ./node_modules/.bin/cap telemetry off || true
-        ./node_modules/.bin/cap sync android
 
     - name: Grant Execute Permission for Gradle
       run: |
@@ -48,7 +42,7 @@ jobs:
     - name: Build Android APK
       run: |
         cd android
-        ./gradlew assembleDebug --stacktrace
+        ./gradlew assembleDebug --no-daemon --stacktrace
 
     - name: Prepare APK Outputs
       run: |
