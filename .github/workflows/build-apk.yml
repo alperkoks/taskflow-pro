@@ -42,13 +42,15 @@ jobs:
     - name: Build Android APK
       run: |
         cd android
-        ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee ../gradle_output.log
+        ./gradlew assembleDebug --no-daemon --stacktrace
 
     - name: Prepare APK Outputs
       run: |
         mkdir -p dist-apk
-        cp android/app/build/outputs/apk/debug/app-debug.apk dist-apk/TaskFlow_Pro.apk
-        cp android/app/build/outputs/apk/debug/app-debug.apk TaskFlow_Pro.apk
+        APK_PATH=$(find android/app/build/outputs/apk -type f -name "*.apk" | head -n 1)
+        echo "Found APK at: $APK_PATH"
+        cp "$APK_PATH" dist-apk/TaskFlow_Pro.apk
+        cp "$APK_PATH" TaskFlow_Pro.apk
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
