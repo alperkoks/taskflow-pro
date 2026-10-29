@@ -76,10 +76,12 @@ html, body {
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
+  overscroll-behavior-y: none;
   font-family: var(--font-main);
-  background-color: var(--bg-main);
+  background-color: var(--bg-main, #09090d);
   color: var(--text-main);
   min-height: 100vh;
+  min-height: 100dvh;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -99,6 +101,10 @@ input, textarea {
   align-items: center;
   justify-content: center;
   padding: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
 }
 
 .lock-screen.hidden {
@@ -108,12 +114,16 @@ input, textarea {
 .lock-card {
   background: rgba(20, 20, 28, 0.94);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 26px;
   padding: 28px 22px;
   width: 100%;
   max-width: 390px;
   box-shadow: var(--shadow);
+  margin: auto;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .profile-switcher {
@@ -922,11 +932,12 @@ input, textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  padding: 0;
+  justify-content: center;
+  padding: 12px;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
 }
 
 @media (min-width: 640px) {
@@ -944,17 +955,18 @@ input, textarea {
   background: #0f172a;
   background: linear-gradient(180deg, #131c31 0%, #090e1a 100%);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 26px 26px 0 0;
+  border-radius: 26px;
   width: 100%;
   max-width: 520px;
-  max-height: 86dvh;
+  max-height: calc(100dvh - 24px);
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   padding: 22px 18px calc(24px + env(safe-area-inset-bottom, 0px));
-  box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.75);
-  margin-top: auto;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.75);
+  margin: auto;
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 @media (min-width: 640px) {
@@ -3255,4 +3267,17 @@ body[data-theme="light"] .btn-cream {
   background: #2563eb !important;
   color: #ffffff !important;
   border-color: #1d4ed8 !important;
+}
+
+
+/* ==========================================================================
+   📱 MOBIL KLAVYE ACIKKEN ALT MENUYU GIZLEME VE GORUNUM KORUMASI
+   ========================================================================== */
+body.keyboard-open .bottom-nav-wrap,
+@media (max-height: 480px) {
+  .bottom-nav-wrap {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
 }

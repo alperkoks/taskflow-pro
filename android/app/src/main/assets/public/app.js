@@ -8913,3 +8913,48 @@ function handleNativeHardwareBackButton() {
 }
 
 window.handleNativeHardwareBackButton = handleNativeHardwareBackButton;
+
+
+// ============================================================================
+// 📱 MOBIL KLAVYE VE GORSEL ALAN (VIEWPORT) ADAPTASYONU
+// ============================================================================
+function setupMobileKeyboardAdaptation() {
+  const onFocusIn = (e) => {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) {
+      document.body.classList.add('keyboard-open');
+    }
+  };
+  const onFocusOut = () => {
+    setTimeout(() => {
+      const active = document.activeElement;
+      if (!active || (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA' && !active.isContentEditable)) {
+        document.body.classList.remove('keyboard-open');
+      }
+    }, 120);
+  };
+
+  document.addEventListener('focusin', onFocusIn);
+  document.addEventListener('focusout', onFocusOut);
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+      const isShrunk = (window.innerHeight - window.visualViewport.height) > 130;
+      if (isShrunk) {
+        document.body.classList.add('keyboard-open');
+      } else {
+        const active = document.activeElement;
+        if (!active || (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA')) {
+          document.body.classList.remove('keyboard-open');
+        }
+      }
+    });
+  }
+}
+
+if (typeof window !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupMobileKeyboardAdaptation);
+  } else {
+    setupMobileKeyboardAdaptation();
+  }
+}

@@ -5,11 +5,5 @@
   "bundledWebRuntime": false,
   "server": {
     "androidScheme": "https"
-  },
-  "plugins": {
-    "Keyboard": {
-      "resize": "none",
-      "resizeOnFullScreen": false
-    }
   }
 }
