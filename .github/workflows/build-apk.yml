@@ -33,7 +33,7 @@ jobs:
 
     - name: Patch Capacitor AGP Version to Stable
       run: |
-        sed -i 's/8.13.0/8.7.2/g' node_modules/@capacitor/android/capacitor/build.gradle
+        find node_modules/@capacitor -name "build.gradle" -exec sed -i 's/8.13.0/8.7.2/g' {} +
 
     - name: Prepare Web Assets for Android
       run: |
