@@ -24,9 +24,9 @@ WARNING: Using flatDir should be avoided because it doesn't support any meta-dat
 > Task :capacitor-keyboard:preBuild UP-TO-DATE
 > Task :capacitor-keyboard:preDebugBuild UP-TO-DATE
 > Task :capacitor-android:writeDebugAarMetadata
+> Task :capacitor-keyboard:writeDebugAarMetadata
 > Task :app:generateDebugResValues
 > Task :app:javaPreCompileDebug
-> Task :capacitor-keyboard:writeDebugAarMetadata
 > Task :capacitor-android:generateDebugResValues
 > Task :app:checkDebugAarMetadata
 > Task :capacitor-android:generateDebugResources
@@ -49,13 +49,13 @@ WARNING: Using flatDir should be avoided because it doesn't support any meta-dat
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
 > Task :capacitor-keyboard:compileDebugLibraryResources
+> Task :app:processDebugManifestForPackage
 > Task :capacitor-android:parseDebugLocalResources
 > Task :capacitor-keyboard:parseDebugLocalResources
-> Task :app:processDebugManifestForPackage
 > Task :capacitor-android:javaPreCompileDebug
 > Task :capacitor-keyboard:javaPreCompileDebug
-> Task :capacitor-keyboard:generateDebugRFile
 > Task :capacitor-android:generateDebugRFile
+> Task :capacitor-keyboard:generateDebugRFile
 > Task :app:mergeDebugShaders
 > Task :app:processDebugResources
 
@@ -68,50 +68,50 @@ Note: Recompile with -Xlint:unchecked for details.
 > Task :capacitor-android:mergeDebugShaders
 > Task :capacitor-android:compileDebugShaders NO-SOURCE
 > Task :capacitor-android:generateDebugAssets UP-TO-DATE
-> Task :capacitor-android:packageDebugAssets
 > Task :capacitor-android:bundleLibCompileToJarDebug
-> Task :capacitor-keyboard:mergeDebugShaders
+> Task :capacitor-android:packageDebugAssets
 > Task :capacitor-keyboard:compileDebugJavaWithJavac
-> Task :capacitor-keyboard:compileDebugShaders NO-SOURCE
-> Task :capacitor-keyboard:generateDebugAssets UP-TO-DATE
 > Task :capacitor-keyboard:bundleLibCompileToJarDebug
-> Task :capacitor-keyboard:packageDebugAssets
+> Task :capacitor-keyboard:mergeDebugShaders
 
 > Task :app:compileDebugJavaWithJavac
 Note: /home/runner/work/taskflow-pro/taskflow-pro/android/app/src/main/java/com/alperkoks/taskflowpro/MainActivity.java uses or overrides a deprecated API.
 Note: Recompile with -Xlint:deprecation for details.
 
+> Task :capacitor-keyboard:compileDebugShaders NO-SOURCE
+> Task :capacitor-keyboard:generateDebugAssets UP-TO-DATE
+> Task :capacitor-keyboard:packageDebugAssets
 > Task :app:mergeDebugAssets
 > Task :capacitor-keyboard:bundleLibRuntimeToJarDebug
-> Task :app:desugarDebugFileDependencies
-> Task :app:compressDebugAssets
 > Task :capacitor-android:bundleLibRuntimeToJarDebug
+> Task :app:compressDebugAssets
+> Task :app:desugarDebugFileDependencies
 > Task :app:dexBuilderDebug
 > Task :app:processDebugJavaRes NO-SOURCE
 > Task :capacitor-android:processDebugJavaRes NO-SOURCE
 > Task :capacitor-keyboard:processDebugJavaRes NO-SOURCE
-> Task :capacitor-keyboard:bundleLibRuntimeToDirDebug
 > Task :app:checkDebugDuplicateClasses
+> Task :capacitor-keyboard:bundleLibRuntimeToDirDebug
 > Task :app:mergeDebugJavaResource
 > Task :app:mergeDebugGlobalSynthetics
+> Task :capacitor-android:bundleLibRuntimeToDirDebug
 > Task :app:mergeDebugJniLibFolders
 > Task :capacitor-android:mergeDebugJniLibFolders
-> Task :capacitor-android:bundleLibRuntimeToDirDebug
 > Task :capacitor-android:mergeDebugNativeLibs NO-SOURCE
-> Task :app:mergeProjectDexDebug
 > Task :capacitor-android:copyDebugJniLibsProjectOnly
+> Task :app:mergeProjectDexDebug
 > Task :capacitor-keyboard:mergeDebugJniLibFolders
 > Task :capacitor-keyboard:mergeDebugNativeLibs NO-SOURCE
 > Task :capacitor-keyboard:copyDebugJniLibsProjectOnly
+> Task :app:validateSigningDebug
 > Task :app:mergeDebugNativeLibs NO-SOURCE
 > Task :app:stripDebugDebugSymbols NO-SOURCE
-> Task :app:mergeExtDexDebug
-> Task :app:validateSigningDebug
+> Task :app:mergeLibDexDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
 > Task :capacitor-android:stripDebugDebugSymbols NO-SOURCE
 > Task :capacitor-android:copyDebugJniLibsProjectAndLocalJars
-> Task :app:mergeLibDexDebug
+> Task :app:mergeExtDexDebug
 > Task :capacitor-android:extractDebugAnnotations
 > Task :capacitor-android:extractDeepLinksForAarDebug
 > Task :capacitor-android:mergeDebugGeneratedProguardFiles
@@ -119,12 +119,12 @@ Note: Recompile with -Xlint:deprecation for details.
 > Task :capacitor-android:prepareDebugArtProfile
 > Task :capacitor-android:prepareLintJarForPublish
 > Task :capacitor-keyboard:stripDebugDebugSymbols NO-SOURCE
-> Task :capacitor-keyboard:copyDebugJniLibsProjectAndLocalJars
 > Task :capacitor-android:mergeDebugJavaResource
-> Task :capacitor-keyboard:extractDebugAnnotations
+> Task :capacitor-keyboard:copyDebugJniLibsProjectAndLocalJars
 > Task :capacitor-android:syncDebugLibJars
 > Task :capacitor-android:bundleDebugAar
 > Task :capacitor-android:assembleDebug
+> Task :capacitor-keyboard:extractDebugAnnotations
 > Task :capacitor-keyboard:extractDeepLinksForAarDebug
 > Task :capacitor-keyboard:mergeDebugGeneratedProguardFiles
 > Task :capacitor-keyboard:mergeDebugConsumerProguardFiles
@@ -138,5 +138,5 @@ Note: Recompile with -Xlint:deprecation for details.
 > Task :app:createDebugApkListingFileRedirect
 > Task :app:assembleDebug
 
-BUILD SUCCESSFUL in 1m 10s
+BUILD SUCCESSFUL in 1m 7s
 88 actionable tasks: 88 executed
