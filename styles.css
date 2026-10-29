@@ -486,13 +486,111 @@ input, textarea {
 }
 
 .date-strip {
-  display: flex;
-  gap: 8px;
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 6px !important;
+  width: 100% !important;
+  margin-bottom: 14px !important;
   overflow: visible !important;
-  padding-bottom: 6px;
-  margin-bottom: 14px;
-  scrollbar-width: none;
-  width: 100%;
+  padding: 0 !important;
+}
+
+.modern-day-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 62px;
+  position: relative;
+  user-select: none;
+}
+
+.modern-day-card:hover {
+  background: var(--bg-surface);
+  border-color: rgba(245, 216, 181, 0.4);
+  transform: translateY(-1px);
+}
+
+.modern-day-card .day-name {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.modern-day-card .day-num {
+  font-size: 14.5px;
+  font-weight: 900;
+  color: var(--text-main);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.modern-day-card.active {
+  background: linear-gradient(135deg, rgba(245, 216, 181, 0.16), rgba(255, 122, 69, 0.1));
+  border: 1.5px solid var(--accent-cream) !important;
+  box-shadow: 0 4px 16px rgba(245, 216, 181, 0.18);
+}
+
+.modern-day-card.active .day-name {
+  color: var(--accent-cream);
+  font-weight: 900;
+}
+
+.modern-day-card.active .day-num {
+  background: var(--accent-cream);
+  color: #121217;
+  font-weight: 900;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.modern-day-card.today:not(.active) {
+  border-color: rgba(96, 165, 250, 0.5);
+}
+
+.modern-day-card.today:not(.active) .day-num {
+  color: #60a5fa;
+  font-weight: 900;
+}
+
+.modern-day-card .day-indicators {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  height: 6px;
+}
+
+.modern-day-card .task-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ff9c6e;
+}
+
+.modern-day-card .today-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #60a5fa;
+}
+
+.modern-day-card .done-dot {
+  font-size: 9px;
+  font-weight: 900;
+  color: #95de64;
+  line-height: 1;
 }
 
 .date-strip::-webkit-scrollbar {

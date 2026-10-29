@@ -1319,35 +1319,65 @@ async function shareOrCopyGoals() {
 // ----------------------------------------------------------------------------
 // 6. YATAY GÜN ŞERİDİ & 30 GÜNLÜK TAM AYLIK TAKVİM (GRID) MOTORU
 // ----------------------------------------------------------------------------
+function stepWeek(deltaWeeks) {
+  const d = new Date(selectedDate + 'T00:00:00');
+  d.setDate(d.getDate() + (deltaWeeks * 7));
+  const tzOffset = d.getTimezoneOffset() * 60000;
+  selectedDate = new Date(d - tzOffset).toISOString().split('T')[0];
+  showAllDates = false;
+  renderAll();
+}
+window.stepWeek = stepWeek;
+
 function renderDateStrip() {
   const strip = document.getElementById('dateStrip');
+  if (!strip) return;
   strip.innerHTML = '';
 
   const baseDate = new Date(selectedDate + 'T00:00:00');
   const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
   const dayNames = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
 
-  document.getElementById('currentMonthLabel').textContent = `${monthNames[baseDate.getMonth()]} ${baseDate.getFullYear()}`;
+  const monthLabel = document.getElementById('currentMonthLabel');
+  if (monthLabel) {
+    monthLabel.textContent = `${monthNames[baseDate.getMonth()]} ${baseDate.getFullYear()}`;
+  }
 
-  for (let i = -4; i <= 10; i++) {
-    const d = new Date(baseDate);
-    d.setDate(baseDate.getDate() + i);
+  // Hafta başlangıcı Pazartesi (0 = Pzt, 6 = Paz)
+  const dayOfWeek = (baseDate.getDay() + 6) % 7;
+  const monday = new Date(baseDate);
+  monday.setDate(baseDate.getDate() - dayOfWeek);
+
+  const todayIso = getTodayISO();
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
     const tzOffset = d.getTimezoneOffset() * 60000;
     const iso = new Date(d - tzOffset).toISOString().split('T')[0];
 
-    const hasTasks = appData.tasks.some((t) => !t.completed && t.date === iso);
-    const pill = document.createElement('div');
-    pill.className = `day-pill ${!showAllDates && iso === selectedDate ? 'active' : ''} ${hasTasks ? 'has-tasks' : ''}`;
-    pill.onclick = () => {
+    const isToday = (iso === todayIso);
+    const isSelected = (!showAllDates && iso === selectedDate);
+    const dateTasks = (appData.tasks || []).filter((t) => t.date === iso);
+    const hasIncomplete = dateTasks.some((t) => !t.completed);
+    const allDone = dateTasks.length > 0 && dateTasks.every((t) => t.completed);
+
+    const card = document.createElement('div');
+    card.className = `modern-day-card ${isSelected ? 'active' : ''} ${isToday ? 'today' : ''} ${hasIncomplete ? 'has-tasks' : ''}`;
+    card.onclick = () => {
       showAllDates = false;
       selectedDate = iso;
       renderAll();
     };
-    pill.innerHTML = `
+    card.innerHTML = `
       <span class="day-name">${dayNames[d.getDay()]}</span>
       <span class="day-num">${d.getDate()}</span>
+      <div class="day-indicators">
+        ${isToday ? '<span class="today-dot" title="Bugün"></span>' : ''}
+        ${hasIncomplete ? '<span class="task-dot" title="Bekleyen Görev"></span>' : (allDone ? '<span class="done-dot" title="Tümü Tamam">✓</span>' : '')}
+      </div>
     `;
-    strip.appendChild(pill);
+    strip.appendChild(card);
   }
 }
 
@@ -5515,6 +5545,10 @@ function switchFoodInnerTab(tab) {
     if (typeof renderFitPdfRecipes === 'function') {
       renderFitPdfRecipes();
     }
+  } else if (tab === 'combos') {
+    if (typeof renderFavoriteMealCombos === 'function') {
+      renderFavoriteMealCombos();
+    }
   } else if (tab === 'recipe') {
     const recBox = document.getElementById('inlineCustomRecipeBox');
     if (recBox) recBox.style.display = 'block';
@@ -5914,7 +5948,7 @@ function renderSavedCustomRecipesList() {
   sec.style.display = 'block';
   const customList = Array.isArray(appData.customFoodDB) ? appData.customFoodDB : [];
   if (customList.length === 0) {
-    listEl.innerHTML = `<div style="font-size:12px;color:var(--text-muted);padding:8px;text-align:center;">Henüz kayıtlı özel tarifin yok. Yukarıdan tarif adını yazıp <b>Kaydet</b> butonuna bastığında burada listelenir!</div>`;
+    listEl.innerHTML = `<div style="font-size:12px;color:var(--text-muted);padding:8px;text-align:center;">Henüz kayıtlı özel tarifin yok. Yukarıdan tarifini oluşturup <b>Kaydet</b> butonuna bastığında burada listelenir!</div>`;
     return;
   }
 
@@ -5925,16 +5959,62 @@ function renderSavedCustomRecipesList() {
     const prot = ((r.protein || 0) * ratio).toFixed(1);
     const carb = ((r.carbs || 0) * ratio).toFixed(1);
     const fat = ((r.fat || 0) * ratio).toFixed(1);
+
+    const hasIng = Array.isArray(r.ingredients) && r.ingredients.length > 0;
+    const hasSteps = (Array.isArray(r.steps) && r.steps.length > 0) || (r.instructions && r.instructions.trim().length > 0);
+    const stepsList = (Array.isArray(r.steps) && r.steps.length > 0) ? r.steps : (r.instructions ? r.instructions.split('\n').filter(s => s.trim()) : []);
+
     return `
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--bg-surface);padding:10px 12px;border-radius:12px;border:1px solid var(--border-color);flex-wrap:wrap;">
-        <div style="min-width:0;flex:1;">
-          <div style="font-size:13.5px;font-weight:900;color:var(--text-main);">${escapeHtml(r.name)} <span style="color:var(--accent-cream);">(${g}g Porsiyon)</span></div>
-          <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">🔥 ${kcal} kcal • 🥩 <b style="color:#ff9c6e;">${prot}g P</b> • 🍞 ${carb}g K • 🥑 ${fat}g Y</div>
+      <div style="background:var(--bg-surface);border:1px solid var(--border-color);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:14px;font-weight:900;color:var(--text-main);">${escapeHtml(r.name)}</div>
+            <div style="display:flex;gap:6px;align-items:center;margin-top:2px;flex-wrap:wrap;">
+              <span style="font-size:10.5px;font-weight:800;background:rgba(255,192,105,0.16);color:#ffc069;padding:2px 7px;border-radius:6px;">${escapeHtml(r.category || 'Özel Tarif')}</span>
+              <span style="font-size:11px;color:var(--text-muted);">${g}g Porsiyon</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button type="button" class="btn-cream" style="height:36px;padding:0 12px;font-size:12px;background:#95de64;color:#09090d;font-weight:900;border-radius:10px;" onclick="quickAddSavedCustomRecipeToToday(${idx})">+ Bugüne Ekle</button>
+            <button type="button" class="pin-btn" style="height:36px;padding:0 10px;color:#ff7875;border-radius:10px;" onclick="deleteSavedCustomRecipe(${idx})" title="Tarifi Sil">🗑️</button>
+          </div>
         </div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <button type="button" class="btn-cream" style="height:38px;padding:0 12px;font-size:12px;background:#95de64;color:#09090d;font-weight:900;" onclick="quickAddSavedCustomRecipeToToday(${idx})">+ Bugüne Ekle</button>
-          <button type="button" class="pin-btn" style="height:38px;padding:0 10px;color:#ff7875;" onclick="deleteSavedCustomRecipe(${idx})" title="Tarifi Sil">✕</button>
+
+        <!-- Makrolar -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:rgba(0,0,0,0.25);padding:6px 8px;border-radius:10px;text-align:center;font-size:11px;">
+          <div><span style="color:#ffc069;font-weight:900;">🔥 ${kcal}</span> <span style="font-size:9.5px;color:var(--text-muted);">kcal</span></div>
+          <div><span style="color:#ff9c6e;font-weight:900;">🥩 ${prot}g</span> <span style="font-size:9.5px;color:var(--text-muted);">prot</span></div>
+          <div><span style="color:#93c5fd;font-weight:900;">🍞 ${carb}g</span> <span style="font-size:9.5px;color:var(--text-muted);">karb</span></div>
+          <div><span style="color:#95de64;font-weight:900;">🥑 ${fat}g</span> <span style="font-size:9.5px;color:var(--text-muted);">yağ</span></div>
         </div>
+
+        ${(hasIng || hasSteps) ? `
+          <details style="font-size:11.5px;color:var(--text-muted);cursor:pointer;margin-top:2px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:8px 10px;">
+            <summary style="font-weight:800;color:var(--accent-cream);outline:none;display:flex;justify-content:space-between;align-items:center;">
+              <span>📖 Nasıl Yapılır & Malzemeler</span>
+              <span style="font-size:10px;color:var(--text-muted);">${hasIng ? r.ingredients.length : 0} Malzeme • ${stepsList.length} Adım ▾</span>
+            </summary>
+            <div style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(255,255,255,0.08);">
+              ${hasIng ? `
+                <div style="font-weight:900;color:#95de64;margin-bottom:4px;font-size:11.5px;">🥗 Malzemeler:</div>
+                <div style="margin-bottom:8px;line-height:1.45;">
+                  ${r.ingredients.map(ing => `<div style="margin-bottom:2px;">• ${escapeHtml(ing)}</div>`).join('')}
+                </div>
+              ` : ''}
+              ${hasSteps ? `
+                <div style="font-weight:900;color:var(--accent-cream);margin-bottom:4px;font-size:11.5px;">👨‍🍳 Hazırlanış Adımları:</div>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                  ${stepsList.map((step, sIdx) => `
+                    <div style="display:flex;gap:6px;align-items:flex-start;">
+                      <span style="background:rgba(245,216,181,0.2);color:var(--accent-cream);font-size:10px;font-weight:900;padding:1px 5px;border-radius:4px;flex-shrink:0;">${sIdx + 1}</span>
+                      <span style="color:var(--text-main);font-size:11.5px;">${escapeHtml(step.replace(/^[0-9]+\.\s*/, ''))}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+            </div>
+          </details>
+        ` : ''}
       </div>
     `;
   }).join('');
@@ -6639,13 +6719,47 @@ function renderSocialAndMissionsHub() {
 }
 
 function promptEditProfileBio() {
-  const current = appData.profileBio || 'Disiplin, hedefler ve sağlıklı yaşam yolculuğum! 💪';
-  const next = prompt('Profil durum / biyografi yazınızı güncelleyin:', current);
-  if (next === null) return;
-  appData.profileBio = next.trim() || current;
+  openEditBioModal();
+}
+window.promptEditProfileBio = promptEditProfileBio;
+
+function openEditBioModal() {
+  const modal = document.getElementById('editBioModal');
+  const input = document.getElementById('editBioInput');
+  if (!modal) return;
+  if (input) {
+    input.value = appData.profileBio || 'Disiplin, hedefler ve sağlıklı yaşam yolculuğum! 💪';
+  }
+  modal.classList.remove('hidden');
+}
+window.openEditBioModal = openEditBioModal;
+
+function closeEditBioModal() {
+  const modal = document.getElementById('editBioModal');
+  if (modal) modal.classList.add('hidden');
+}
+window.closeEditBioModal = closeEditBioModal;
+
+function setBioQuickPreset(text) {
+  const input = document.getElementById('editBioInput');
+  if (input) input.value = text;
+}
+window.setBioQuickPreset = setBioQuickPreset;
+
+function saveEditBioModal() {
+  const input = document.getElementById('editBioInput');
+  if (input) {
+    const val = input.value.trim();
+    appData.profileBio = val || 'Disiplin, hedefler ve sağlıklı yaşam yolculuğum! 💪';
+  }
+  closeEditBioModal();
   renderSocialAndMissionsHub();
   saveProfileData();
+  if (typeof spawnFloatingRewardToast === 'function') {
+    spawnFloatingRewardToast('✨ Profil biyografiniz güncellendi!');
+  }
 }
+window.saveEditBioModal = saveEditBioModal;
 
 function shareMyProfileAndShowcaseOnWP() {
   const dispName = appData.profileName || appData.username || 'Şampiyon';
@@ -6898,10 +7012,10 @@ function renderSocialFriendsList() {
 
     return `
       <div class="modern-friend-card ${active ? 'active' : ''}" onclick="selectFriendForChat(${idx})">
-        <div class="modern-friend-avatar">${initial}</div>
+        <div class="modern-friend-avatar" onclick="openFriendProfileModalByIdx(${idx}); event.stopPropagation();" title="Profili Gör">${initial}</div>
         <div class="modern-friend-info">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="modern-friend-name">${escapeHtml(dispName)}</span>
+            <span class="modern-friend-name" onclick="openFriendProfileModalByIdx(${idx}); event.stopPropagation();" title="Profili Gör">${escapeHtml(dispName)}</span>
             <span style="font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(255,192,105,0.16);color:#ffc069;">${escapeHtml(f.rank || 'Sporcu')}</span>
             ${phoneBadge}
           </div>
@@ -6910,8 +7024,11 @@ function renderSocialFriendsList() {
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <button type="button" class="mini-action-btn" style="padding:7px 9px;font-size:11.5px;font-weight:900;background:rgba(255,255,255,0.06);color:var(--text-main);border-color:var(--border-color);" onclick="openFriendProfileModalByIdx(${idx}); event.stopPropagation();" title="Arkadaş Profilini Gör">
+            👁️ Profil
+          </button>
           <button type="button" class="mini-action-btn" style="padding:7px 11px;font-size:11.5px;font-weight:900;background:${active ? 'var(--accent-cream)' : 'rgba(59,130,246,0.2)'};color:${active ? '#121218' : '#93c5fd'};border-color:${active ? 'var(--accent-cream)' : 'rgba(59,130,246,0.4)'};" onclick="selectFriendForChat(${idx}, true); event.stopPropagation();">
-            ${active ? '💬 Açık' : '💬 Mesaj At'}
+            ${active ? '💬 Açık' : '💬 Mesaj'}
           </button>
           ${!f.isAiCoach ? `<button type="button" class="mini-action-btn" style="padding:7px 9px;font-size:11.5px;background:rgba(239,68,68,0.16);color:#fca5a5;border-color:rgba(239,68,68,0.35);" onclick="deleteSocialFriend(${idx}, event)" title="Arkadaşı Sil">🗑️</button>` : ''}
         </div>
@@ -9210,40 +9327,90 @@ function openFriendProfileModal(friend) {
   const streakEl = document.getElementById('friendModalStreak');
   const xpEl = document.getElementById('friendModalXp');
   const badgesEl = document.getElementById('friendModalBadgesCount');
+  const waterEl = document.getElementById('friendModalWater');
+  const protEl = document.getElementById('friendModalProtein');
   const stripEl = document.getElementById('friendModalShowcaseStrip');
 
-  const name = typeof friend === 'string' ? friend : (friend.name || friend.username || 'Arkadaş');
-  const initial = name.charAt(0).toUpperCase();
+  const name = typeof friend === 'string' ? friend : (friend.displayName || friend.name || friend.username || 'Arkadaş');
+  const initial = name.replace(/^[^\p{L}\p{N}]+/u, '').charAt(0).toUpperCase() || '👤';
 
   if (nameEl) nameEl.textContent = name;
   if (avEl) {
     if (friend.photo) {
-      avEl.innerHTML = `<img src="${friend.photo}" style="width:100%;height:100%;object-fit:cover;" />`;
+      avEl.innerHTML = `<img src="${friend.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
     } else {
-      avEl.textContent = initial;
+      avEl.innerHTML = `<span style="font-size:32px;font-weight:900;">${initial}</span>`;
     }
   }
   if (rankEl) rankEl.textContent = friend.rank || '🌱 Seviye 3 Disiplin Ustası';
   if (bioEl) bioEl.textContent = `"${friend.bio || 'Hedeflerime odaklandım, her gün bir adım daha ileri! 💪'}"`;
-  if (streakEl) streakEl.textContent = `🔥 ${friend.streak || 4} Gün`;
+  const streakVal = friend.streak ?? (friend.isAiCoach ? 14 : 4);
+  if (streakEl) streakEl.textContent = `🔥 ${streakVal} Gün`;
   if (xpEl) xpEl.textContent = `⚡ ${friend.xp || 1850} XP`;
-  if (badgesEl) badgesEl.textContent = `🏆 ${friend.badgesCount || 14} Adet`;
+  if (badgesEl) badgesEl.textContent = `🏆 ${friend.badgesCount || 12} Adet`;
+
+  const waterVal = friend.waterL ?? (((friend.waterCount || (friend.isAiCoach ? 10 : 6)) * 250) / 1000).toFixed(2);
+  const protVal = friend.proteinG ?? Math.round(friend.proteinGrams || (friend.isAiCoach ? 150 : 90));
+  if (waterEl) waterEl.textContent = `${waterVal} L`;
+  if (protEl) protEl.textContent = `${protVal}g P`;
 
   if (stripEl) {
-    stripEl.innerHTML = `
-      <span class="tag-badge" style="background:#ffd700;color:#09090d;font-weight:900;">👑 Erken Kalkan</span>
-      <span class="tag-badge" style="background:#60a5fa;color:#09090d;font-weight:900;">💧 Su Şampiyonu</span>
-      <span class="tag-badge" style="background:#a7f3d0;color:#09090d;font-weight:900;">🔥 7 Gün Serisi</span>
-    `;
+    if (Array.isArray(friend.showcaseBadges) && friend.showcaseBadges.length > 0) {
+      stripEl.innerHTML = friend.showcaseBadges.map((b) => `
+        <span class="tag-badge" style="background:rgba(255,255,255,0.08);color:var(--text-main);font-weight:800;border:1px solid rgba(255,255,255,0.12);">
+          ${b.icon || '🏅'} ${escapeHtml(b.title || b.name || 'Rozet')}
+        </span>
+      `).join('');
+    } else {
+      stripEl.innerHTML = `
+        <span class="tag-badge" style="background:#ffd700;color:#09090d;font-weight:900;">👑 Disiplin Lideri</span>
+        <span class="tag-badge" style="background:#60a5fa;color:#09090d;font-weight:900;">💧 Su Şampiyonu</span>
+        <span class="tag-badge" style="background:#a7f3d0;color:#09090d;font-weight:900;">🔥 7 Gün Serisi</span>
+      `;
+    }
   }
 
   modal.classList.remove('hidden');
 }
+window.openFriendProfileModal = openFriendProfileModal;
+
+function openFriendProfileModalByIdx(idx) {
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+  const friend = friends[idx];
+  if (!friend) return;
+  openFriendProfileModal(friend);
+}
+window.openFriendProfileModalByIdx = openFriendProfileModalByIdx;
+
+function previewMyOwnProfileAsFriend() {
+  const dispName = appData.profileName || appData.username || 'Şampiyon';
+  const myPhoto = appData.profilePhotoDataUrl || localStorage.getItem('taskflow_avatar_' + (currentProfile || 'guest'));
+  const showcased = getShowcasedBadgeObjects();
+  const unlocked = computeAllMissions().filter((m) => m.unlocked);
+  const rankBadge = document.getElementById('userRankBadgeText');
+
+  const mySelfFriend = {
+    displayName: `${dispName} (Profil Önizlemeniz)`,
+    photo: myPhoto,
+    rank: rankBadge ? rankBadge.textContent : '⚡ Seviye 6 Sporcu',
+    bio: appData.profileBio || 'Disiplin, hedefler ve sağlıklı yaşam yolculuğum! 💪',
+    streak: appData.streak || 1,
+    xp: appData.xp || 750,
+    badgesCount: unlocked.length,
+    waterL: (((appData.waterCount || 0) * 250) / 1000).toFixed(2),
+    proteinG: Math.round(appData.proteinGrams || 0),
+    showcaseBadges: showcased
+  };
+
+  openFriendProfileModal(mySelfFriend);
+}
+window.previewMyOwnProfileAsFriend = previewMyOwnProfileAsFriend;
 
 function closeFriendProfileModal() {
   const modal = document.getElementById('friendProfileModal');
   if (modal) modal.classList.add('hidden');
 }
+window.closeFriendProfileModal = closeFriendProfileModal;
 
 function sendQuickFriendEncouragement() {
   if (typeof showToast === 'function') {
@@ -9251,6 +9418,7 @@ function sendQuickFriendEncouragement() {
   }
   closeFriendProfileModal();
 }
+window.sendQuickFriendEncouragement = sendQuickFriendEncouragement;
 
 
 
@@ -9335,11 +9503,34 @@ function renderFitPdfRecipes(searchQuery = '') {
           <div><span style="color:#95de64;font-weight:900;">🥑 ${r.fat}g</span> <span style="font-size:9.5px;color:var(--text-muted);">yağ</span></div>
         </div>
 
-        <!-- Malzemeler Özeti (Açılabilir / Kapanabilir) -->
-        <details style="font-size:11px;color:var(--text-muted);cursor:pointer;">
-          <summary style="font-weight:700;color:var(--accent-cream);outline:none;">📝 Malzemeleri ve Detayları Gör (${ingCount} Adet)</summary>
-          <div style="margin-top:6px;padding-top:6px;border-top:1px dashed rgba(255,255,255,0.06);line-height:1.45;">
-            ${(r.ingredients || []).map((ing) => `<div style="margin-bottom:2px;">• ${escapeHtml(ing)}</div>`).join('')}
+        <!-- Malzemeler ve Nasıl Yapılır? (Açılabilir / Kapanabilir) -->
+        <details style="font-size:11.5px;color:var(--text-muted);cursor:pointer;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:8px 10px;">
+          <summary style="font-weight:800;color:var(--accent-cream);outline:none;display:flex;justify-content:space-between;align-items:center;">
+            <span>📝 Malzemeler & 👨‍🍳 Nasıl Yapılır?</span>
+            <span style="font-size:10px;color:var(--text-muted);">${ingCount} Malzeme • ${(r.steps || []).length} Adım ▾</span>
+          </summary>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(255,255,255,0.08);line-height:1.5;">
+            <!-- Malzemeler -->
+            <div style="font-weight:900;color:#95de64;font-size:12px;margin-bottom:4px;">🥗 Malzemeler:</div>
+            <div style="margin-bottom:10px;padding-left:4px;">
+              ${(r.ingredients || []).map((ing) => `<div style="margin-bottom:2px;">• ${escapeHtml(ing)}</div>`).join('')}
+            </div>
+
+            <!-- Adım Adım Nasıl Yapılır? -->
+            <div style="font-weight:900;color:var(--accent-cream);font-size:12px;margin-bottom:6px;">👨‍🍳 Nasıl Yapılır? (Adım Adım Hazırlanış):</div>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px;">
+              ${(r.steps && r.steps.length > 0) ? r.steps.map((step, sIdx) => `
+                <div style="display:flex;gap:7px;align-items:flex-start;">
+                  <span style="background:var(--accent-cream);color:#121217;font-size:10px;font-weight:900;padding:1px 6px;border-radius:4px;flex-shrink:0;">${sIdx + 1}</span>
+                  <span style="color:var(--text-main);font-size:11.5px;">${escapeHtml(step.replace(/^[0-9]+\.\s*/, ''))}</span>
+                </div>
+              `).join('') : '<div style="font-size:11px;color:var(--text-muted);">Hazırlanış adımı belirtilmedi.</div>'}
+            </div>
+
+            <!-- Sayfa Bilgisi -->
+            <div style="font-size:10.5px;color:var(--text-muted);border-top:1px solid rgba(255,255,255,0.05);padding-top:4px;margin-top:6px;">
+              📖 Emre Gökgöz Fit Yemek Kitabı • Sayfa ${r.page || '-'} • Süre: ${r.prepTime || '15 dk'} • Porsiyon: ${r.portions || '1'}
+            </div>
           </div>
         </details>
       </div>
@@ -9806,11 +9997,22 @@ function selectPickerMonth(mIndex) {
   pickerSelectedMonth = mIndex;
   currentArchiveMonthIndex = mIndex;
   currentArchiveYear = pickerSelectedYear;
-  
+
+  // Ana görevler takvimini ve selectedDate'i de anında güncelle
+  const d = new Date(selectedDate + 'T00:00:00');
+  const maxDays = new Date(pickerSelectedYear, mIndex + 1, 0).getDate();
+  const day = Math.min(d.getDate(), maxDays);
+  const newDate = new Date(pickerSelectedYear, mIndex, day);
+  const tzOffset = newDate.getTimezoneOffset() * 60000;
+  selectedDate = new Date(newDate - tzOffset).toISOString().split('T')[0];
+  currentCalendarMonth = new Date(pickerSelectedYear, mIndex, 1);
+  showAllDates = false;
+
   if (typeof renderArchiveCalendar === 'function') {
     renderArchiveCalendar();
   }
   closeMonthYearPickerModal();
+  renderAll();
   if (typeof spawnFloatingRewardToast === 'function') {
     spawnFloatingRewardToast(`📅 ${MONTH_NAMES_TR[mIndex]} ${pickerSelectedYear} takvimine geçildi!`);
   }
