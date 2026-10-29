@@ -19,7 +19,19 @@
     },
     "directories": {
       "output": "dist"
-    }
+    },
+    "files": [
+      "electron-main.js",
+      "index.html",
+      "styles.css",
+      "app.js",
+      "fit_recipes_data.js",
+      "assets/**/*",
+      "icon*.png",
+      "favicon.ico",
+      "icon.ico",
+      "package.json"
+    ]
   },
   "repository": {
     "type": "git",
