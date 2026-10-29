@@ -9519,9 +9519,7 @@ function openBadgeDetailPopup(badgeId) {
 • Kazanılan: +${b.xp} XP
 • Durum: ${b.unlocked ? '✅ Kazanıldı ve Vitrinde' : '⏳ Devam Ediyor (%' + b.pct + ')'}`;
   
-  if (confirm(info + '
-
-Bu başarımı WhatsApp durumunda paylaşmak ister misin?')) {
+  if (confirm(info + '\n\nBu başarımı WhatsApp durumunda paylaşmak ister misin?')) {
     shareSingleBadgeOnWP(badgeId);
   }
 }
