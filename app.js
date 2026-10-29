@@ -6999,6 +6999,12 @@ function renderSocialFriendsList() {
     countBadgeEl.textContent = `${friends.length} Arkadaş`;
   }
 
+  // Update my code input if visible
+  const myCodeEl = document.getElementById('myShareableCodeDisplayInput');
+  if (myCodeEl) {
+    myCodeEl.value = generateMyShareableFriendCode();
+  }
+
   if (activeSelectedFriendIdx < 0 || activeSelectedFriendIdx >= friends.length) {
     activeSelectedFriendIdx = 0;
   }
@@ -7008,29 +7014,36 @@ function renderSocialFriendsList() {
     const dispName = f.displayName || f.username || 'Arkadaş';
     const initial = f.isAiCoach ? '🤖' : dispName.replace(/^[^\p{L}\p{N}]+/u, '').charAt(0).toUpperCase() || '👤';
     const msgCount = Array.isArray(f.messages) ? f.messages.length : 0;
-    const phoneBadge = f.phone ? `<span style="font-size:10.5px;color:#86efac;font-weight:800;">📱 ${escapeHtml(f.phone)}</span>` : '';
+    const rankTitle = f.rank || (f.isAiCoach ? 'AI Koç' : 'Sporcu');
 
     return `
       <div class="modern-friend-card ${active ? 'active' : ''}" onclick="selectFriendForChat(${idx})">
-        <div class="modern-friend-avatar" onclick="openFriendProfileModalByIdx(${idx}); event.stopPropagation();" title="Profili Gör">${initial}</div>
+        <!-- Sol: Avatar + Online Dot -->
+        <div class="modern-friend-avatar-wrap" onclick="openFriendProfileModalByIdx(${idx}); event.stopPropagation();" title="Profili Gör">
+          <div class="modern-friend-avatar">${initial}</div>
+          <span class="friend-online-dot"></span>
+        </div>
+
+        <!-- Orta: İsim + Seviye + Günlük Veriler -->
         <div class="modern-friend-info">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="modern-friend-name" onclick="openFriendProfileModalByIdx(${idx}); event.stopPropagation();" title="Profili Gör">${escapeHtml(dispName)}</span>
-            <span style="font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(255,192,105,0.16);color:#ffc069;">${escapeHtml(f.rank || 'Sporcu')}</span>
-            ${phoneBadge}
+          <div class="modern-friend-name-row">
+            <span class="modern-friend-name" title="${escapeHtml(dispName)}">${escapeHtml(dispName)}</span>
+            <span class="friend-rank-pill">${escapeHtml(rankTitle)}</span>
           </div>
           <div class="modern-friend-sub">
-            💧 ${(f.waterCount || 0)} bardak • 🥩 ${(f.proteinGrams || 0)}g P • 💬 ${msgCount} mesaj
+            💧 ${(f.waterCount || 0)} bardak • 🥩 ${(f.proteinGrams || 0)}g P • 💬 ${msgCount}
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-          <button type="button" class="mini-action-btn" style="padding:7px 9px;font-size:11.5px;font-weight:900;background:rgba(255,255,255,0.06);color:var(--text-main);border-color:var(--border-color);" onclick="openFriendProfileModalByIdx(${idx}); event.stopPropagation();" title="Arkadaş Profilini Gör">
+
+        <!-- Sağ: Net, Ferah İki Buton -->
+        <div class="modern-friend-actions" onclick="event.stopPropagation()">
+          <button type="button" class="friend-card-action-btn profile" onclick="openFriendProfileModalByIdx(${idx})" title="Arkadaş Profilini Gör">
             👁️ Profil
           </button>
-          <button type="button" class="mini-action-btn" style="padding:7px 11px;font-size:11.5px;font-weight:900;background:${active ? 'var(--accent-cream)' : 'rgba(59,130,246,0.2)'};color:${active ? '#121218' : '#93c5fd'};border-color:${active ? 'var(--accent-cream)' : 'rgba(59,130,246,0.4)'};" onclick="selectFriendForChat(${idx}, true); event.stopPropagation();">
+          <button type="button" class="friend-card-action-btn ${active ? 'active-chat' : 'start-chat'}" onclick="selectFriendForChat(${idx}, true)" title="Sohbeti Aç">
             ${active ? '💬 Açık' : '💬 Mesaj'}
           </button>
-          ${!f.isAiCoach ? `<button type="button" class="mini-action-btn" style="padding:7px 9px;font-size:11.5px;background:rgba(239,68,68,0.16);color:#fca5a5;border-color:rgba(239,68,68,0.35);" onclick="deleteSocialFriend(${idx}, event)" title="Arkadaşı Sil">🗑️</button>` : ''}
+          ${!f.isAiCoach ? `<button type="button" class="friend-card-delete-btn" onclick="deleteSocialFriend(${idx}, event)" title="Arkadaşı Sil">✕</button>` : ''}
         </div>
       </div>
     `;
@@ -7231,8 +7244,9 @@ async function appendMessageToActiveFriend(text) {
   saveProfileData();
   syncSocialFriendsAndMessages(true);
 
-  // Eğer AI Koç ise veya cihaz dışı eklenen arkadaşsa anında motive edici etkileşimli yanıt gelsin
-  if (friend.isAiCoach || !deliveredToLocalDbUser) {
+  // Otomatik yaşam koçu yanıtı SADECE VE SADECE "🤖 TaskFlow Koç & Asistan" (isAiCoach=true) ile konuşurken çalışır!
+  // Gerçek arkadaşlar (Ahmet, Berk, davet koduyla eklenenler vb.) için ASLA robotik yaşam koçu cevabı verilmez!
+  if (friend.isAiCoach) {
     setTimeout(() => {
       const replyTime = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
       friend.messages.push({
@@ -10034,3 +10048,102 @@ function renderPickerMonthGrid() {
   }).join('');
 }
 window.renderPickerMonthGrid = renderPickerMonthGrid;
+
+
+// ============================================================================
+// 🔑 DAVET KODU İLE ARKADAŞ EKLEME VE DOĞRULAMA
+// ============================================================================
+function addFriendByPastedInviteCode() {
+  const inp = document.getElementById('addFriendInviteCodeInput');
+  const code = (inp ? inp.value : '').trim();
+  if (!code) {
+    if (typeof showToast === 'function') showToast('⚠️ Lütfen arkadaşınızın TF-... kodunu yapıştırın!');
+    else alert('Lütfen arkadaşınızın TF-... kodunu yapıştırın!');
+    if (inp) inp.focus();
+    return;
+  }
+
+  ensureDefaultAiCoachFriend();
+
+  try {
+    let rawB64 = code;
+    if (code.startsWith('TF-')) rawB64 = code.slice(3).trim();
+    const json = decodeURIComponent(escape(atob(rawB64)));
+    const parsed = JSON.parse(json);
+
+    const timeNow = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    const newFriend = {
+      username: parsed.u || ('arkadas_' + Date.now().toString().slice(-4)),
+      displayName: parsed.n || parsed.u || 'Sporcu Arkadaş',
+      phone: '',
+      rank: parsed.r || `🔥 ${parsed.s || 1} Gün Seri`,
+      bio: parsed.b || 'TaskFlow+ Sporcusu 💪',
+      streak: parsed.s || 1,
+      waterCount: parsed.w || 0,
+      proteinGrams: parsed.p || 0,
+      badges: Array.isArray(parsed.v) && parsed.v.length > 0 ? parsed.v : ['🏅 Disiplin Savaşçısı'],
+      isAiCoach: false,
+      messages: [
+        { sender: 'them', text: `Selam! 👑 Davet kodumla beni arkadaş ekledin. Antrenmanlarımızı ve hedeflerimizi buradan paylaşabiliriz! 💪`, time: timeNow }
+      ]
+    };
+
+    if (!Array.isArray(appData.socialFriends)) appData.socialFriends = [];
+    const existingIdx = appData.socialFriends.findIndex((f) => f.username === newFriend.username);
+    if (existingIdx >= 0) {
+      appData.socialFriends[existingIdx] = {
+        ...appData.socialFriends[existingIdx],
+        ...newFriend,
+        messages: appData.socialFriends[existingIdx].messages || newFriend.messages
+      };
+      activeSelectedFriendIdx = existingIdx;
+    } else {
+      appData.socialFriends.unshift(newFriend);
+      activeSelectedFriendIdx = 0;
+    }
+
+    if (inp) inp.value = '';
+    renderSocialFriendsList();
+    renderSelectedFriendChat();
+    saveProfileData();
+
+    if (typeof spawnFloatingRewardToast === 'function') {
+      spawnFloatingRewardToast(`🤝 ${newFriend.displayName} arkadaş listenize eklendi!`);
+    } else if (typeof showToast === 'function') {
+      showToast(`🤝 ${newFriend.displayName} arkadaş listenize eklendi!`);
+    }
+  } catch (err) {
+    if (typeof showToast === 'function') showToast('❌ Geçersiz davet kodu! Lütfen arkadaşınızdan kodu tekrar kopyalamasını isteyin.');
+    else alert('Geçersiz davet kodu! Lütfen arkadaşınızdan kodu tekrar kopyalamasını isteyin.');
+  }
+}
+window.addFriendByPastedInviteCode = addFriendByPastedInviteCode;
+
+async function pasteInviteCodeFromClipboard() {
+  const inp = document.getElementById('addFriendInviteCodeInput');
+  if (!inp) return;
+  try {
+    if (navigator.clipboard && navigator.clipboard.readText) {
+      const text = await navigator.clipboard.readText();
+      if (text && text.trim().startsWith('TF-')) {
+        inp.value = text.trim();
+        addFriendByPastedInviteCode();
+        return;
+      } else if (text) {
+        inp.value = text.trim();
+      }
+    }
+  } catch (e) {
+    console.log('Clipboard read note:', e);
+  }
+  inp.focus();
+}
+window.pasteInviteCodeFromClipboard = pasteInviteCodeFromClipboard;
+
+function shareMyCodeOnWhatsAppDirect() {
+  const code = generateMyShareableFriendCode();
+  const name = appData.profileName || appData.username || 'Arkadaşın';
+  const msg = `👑 Selam! TaskFlow+'ta benimle arkadaş olup antrenmanlarımızı ve hedeflerimizi takip etmek için davet kodum:\n\n*${code}*\n\nUygulamayı açıp "Arkadaş Ekle" kutusuna bu kodu yapıştırabilirsin! 🚀 https://alperkoks.github.io/taskflow-pro/`;
+  openWhatsAppOrShareText(msg);
+}
+window.shareMyCodeOnWhatsAppDirect = shareMyCodeOnWhatsAppDirect;

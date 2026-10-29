@@ -1530,24 +1530,51 @@
             </div>
           </div>
 
-          <!-- BAŞLIK 3: ➕ YENİ ARKADAŞ EKLE (BAŞLIĞA TIKLAYINCA SPAWNLANIR) -->
-          <div class="luxury-spawn-box" id="spawnBoxAddFriend">
+          <!-- BAŞLIK 3: 🤝 YENİ ARKADAŞ EKLE & DAVET KODU -->
+          <div class="luxury-spawn-box open" id="spawnBoxAddFriend">
             <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxAddFriend')">
-              <span style="color:#95de64;">➕ Yeni Arkadaş Ekle (İsim veya WhatsApp No ile)</span>
+              <span style="color:#95de64;font-weight:900;">🤝 Arkadaş Ekle & Davet Kodu</span>
               <span class="luxury-spawn-chevron">▾</span>
             </button>
             <div class="luxury-spawn-body">
-              <p style="font-size:12.5px;color:var(--text-muted);margin:6px 0 10px;">
-                Arkadaşının adını yazıp hemen listene ekle ve mesajlaşmaya başla! (İstersen WhatsApp numarasını da yazabilirsin):
-              </p>
-              <div class="form-row stack-mobile" style="margin-bottom:8px;">
-                <input type="text" id="addFriendInput" class="form-input" style="height:46px;font-size:13.5px;" placeholder="👤 Arkadaşının Adı (Örn: Ahmet, Berk, Ayşe)..." onkeydown="if(event.key==='Enter'){event.preventDefault();addFriendByCodeOrUsername();}" />
-                <input type="tel" id="addFriendPhoneInput" class="form-input" style="height:46px;font-size:13.5px;" placeholder="📱 WhatsApp No (Opsiyonel: 05...)" onkeydown="if(event.key==='Enter'){event.preventDefault();addFriendByCodeOrUsername();}" />
+              <!-- BÖLÜM 1: 🔑 ARKADAŞININ DAVET KODUNU YAPIŞTIRIP EKLEME -->
+              <div style="background:linear-gradient(135deg,rgba(149,222,100,0.1),rgba(96,165,250,0.06));border:1.5px solid rgba(149,222,100,0.35);border-radius:16px;padding:14px;margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:4px;">
+                  <span style="font-size:13px;font-weight:900;color:#95de64;">🔑 1. Arkadaşının Davet Kodu ile Ekle (Önerilen)</span>
+                  <span style="font-size:10.5px;color:var(--text-muted);">TF-... Kodu</span>
+                </div>
+                <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+                  <input type="text" id="addFriendInviteCodeInput" class="form-input" style="height:44px;font-size:13px;flex:1;" placeholder="Arkadaşının TF-... kodunu buraya yapıştır..." onkeydown="if(event.key==='Enter'){event.preventDefault();addFriendByPastedInviteCode();}" />
+                  <button type="button" class="pin-btn" style="height:44px;padding:0 14px;font-size:12px;font-weight:800;flex-shrink:0;" onclick="pasteInviteCodeFromClipboard()" title="Panodaki Kodu Yapıştır">📋 Yapıştır</button>
+                </div>
+                <button type="button" class="btn-cream" style="width:100%;height:44px;font-size:13.5px;font-weight:900;background:linear-gradient(135deg,#95de64,#52c41a);color:#09090d;" onclick="addFriendByPastedInviteCode()">
+                  🤝 Kodu Doğrula ve Arkadaş Ekle
+                </button>
               </div>
-              <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;">
-                <button type="button" class="btn-cream" style="height:46px;font-size:14px;font-weight:900;background:#95de64;color:#09090d;" onclick="addFriendByCodeOrUsername()">➕ Arkadaş Olarak Ekle</button>
-                <button type="button" class="pin-btn" style="height:46px;font-size:12.5px;font-weight:800;" onclick="copyMyFriendInviteCode()">🔗 Davet Kodum</button>
+
+              <!-- BÖLÜM 2: 👑 SENİN DAVET KODUN (ARKADAŞINA GÖNDER) -->
+              <div style="background:rgba(245,216,181,0.06);border:1px solid rgba(245,216,181,0.25);border-radius:14px;padding:12px;margin-bottom:12px;">
+                <div style="font-size:12px;font-weight:900;color:var(--accent-cream);margin-bottom:6px;">👑 Senin Davet Kodun (Arkadaşına Gönder):</div>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <input type="text" id="myShareableCodeDisplayInput" readonly class="form-input" style="height:40px;font-size:11.5px;color:var(--text-muted);background:rgba(0,0,0,0.3);flex:1;" value="" placeholder="Kodunuz üretiliyor..." />
+                  <button type="button" class="btn-cream" style="height:40px;padding:0 12px;font-size:12px;font-weight:900;" onclick="copyMyFriendInviteCode()">📋 Kopyala</button>
+                  <button type="button" class="tag-badge" style="height:40px;padding:0 12px;font-size:12px;font-weight:900;background:#25D366;color:#fff;border:none;cursor:pointer;border-radius:10px;" onclick="shareMyCodeOnWhatsAppDirect()">📲 WP At</button>
+                </div>
               </div>
+
+              <!-- BÖLÜM 3: ✍️ İSİM & WHATSAPP İLE MANUEL EKLE -->
+              <details style="font-size:12px;color:var(--text-muted);cursor:pointer;">
+                <summary style="font-weight:800;color:var(--text-main);outline:none;padding:4px 0;">✍️ Veya İsim / WhatsApp No Yazarak Hızlı Ekle ▾</summary>
+                <div style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(255,255,255,0.08);">
+                  <div class="form-row stack-mobile" style="margin-bottom:8px;">
+                    <input type="text" id="addFriendInput" class="form-input" style="height:42px;font-size:13px;" placeholder="👤 Arkadaşının Adı (Örn: Ahmet, Berk)..." />
+                    <input type="tel" id="addFriendPhoneInput" class="form-input" style="height:42px;font-size:13px;" placeholder="📱 WhatsApp No (Opsiyonel: 05...)" />
+                  </div>
+                  <button type="button" class="pin-btn" style="width:100%;height:40px;font-size:12.5px;font-weight:800;" onclick="addFriendByCodeOrUsername()">
+                    ➕ İsimle Listeye Ekle
+                  </button>
+                </div>
+              </details>
             </div>
           </div>
 
