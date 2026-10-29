@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
+import androidx.activity.OnBackPressedCallback;
 import androidx.core.view.WindowCompat;
 import com.getcapacitor.BridgeActivity;
 
@@ -19,11 +20,9 @@ public class MainActivity extends BridgeActivity {
             }
             getWindow().setStatusBarColor(Color.parseColor("#070b14"));
             getWindow().setNavigationBarColor(Color.parseColor("#070b14"));
-            // Pencereyi sistem pencerelerine tam oturtarak klavye açılışında dış taşmayı önle
-            WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         }
 
-        // 2. WebView zeminini obsidian siyaha sabitle ve overscroll zıplamasını kapat
+        // 2. WebView zeminini obsidian siyaha sabitle ve overscroll sıçramasını önle
         if (getBridge() != null && getBridge().getWebView() != null) {
             WebView webView = getBridge().getWebView();
             webView.setBackgroundColor(Color.parseColor("#070b14"));
@@ -35,9 +34,22 @@ public class MainActivity extends BridgeActivity {
                 }
             });
         }
+
+        // 3. Android 13/14/15+ Yeni Donanım & Jest / Kenardan Kaydırma Geri Tuşu Yönetimi
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (getBridge() != null && getBridge().getWebView() != null) {
+                    getBridge().getWebView().evaluateJavascript(
+                        "if (typeof handleNativeHardwareBackButton === 'function') { handleNativeHardwareBackButton(); } else { window.history.back(); }",
+                        null
+                    );
+                }
+            }
+        });
     }
 
-    // 3. Android Donanım / Hareket Geri Tuşu (Uygulamadan çat diye çıkmayı önler, ana ekrana veya açık modala döner)
+    // Eski Android sürümleri için yedek onBackPressed
     @Override
     public void onBackPressed() {
         if (getBridge() != null && getBridge().getWebView() != null) {

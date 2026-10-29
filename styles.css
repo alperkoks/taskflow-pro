@@ -3273,11 +3273,131 @@ body[data-theme="light"] .btn-cream {
 /* ==========================================================================
    📱 MOBIL KLAVYE ACIKKEN ALT MENUYU GIZLEME VE GORUNUM KORUMASI
    ========================================================================== */
-body.keyboard-open .bottom-nav-wrap,
+body.keyboard-open .bottom-nav-wrap {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 @media (max-height: 480px) {
   .bottom-nav-wrap {
     display: none !important;
     opacity: 0 !important;
     pointer-events: none !important;
   }
+}
+}
+
+
+/* ==========================================================================
+   💎 LÜKS ÜST MENÜ, PROFİL FOTOĞRAFI & REHBER MODAL STİLLERİ
+   ========================================================================== */
+.header-quick-menu {
+  position: absolute;
+  top: 60px;
+  right: 14px;
+  background: rgba(18, 22, 34, 0.98);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 20px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 230px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85);
+  z-index: 25000;
+}
+
+.header-quick-menu.hidden {
+  display: none !important;
+}
+
+.header-quick-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.header-quick-item:hover, .header-quick-item:active {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(4px);
+}
+
+.header-profile-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.social-profile-avatar-box {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+  background: var(--accent-cream);
+  color: #121218;
+  font-size: 28px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  overflow: hidden;
+  border: 2px solid rgba(245, 216, 181, 0.6);
+  flex-shrink: 0;
+}
+
+.social-profile-avatar-box .avatar-edit-badge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  text-align: center;
+  padding: 2px 0;
+  line-height: 1.2;
+}
+
+/* Rehber Kılavuz Kartları */
+.help-guide-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+}
+
+.help-guide-card h4 {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--accent-cream);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.help-guide-card p {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
 }

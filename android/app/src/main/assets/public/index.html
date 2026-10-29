@@ -121,30 +121,48 @@
           <h1 class="greeting-title">Yaşam & Plan Üssü</h1>
         </div>
         <!-- Sağ Üstte Lüks, Taşmayan Eylem Butonları + PC/Davet + Ayarlar -->
-        <div class="header-actions-wrap">
-          <button type="button" class="pin-btn header-action-btn sync-btn-highlight" onclick="openPcAndFriendsSyncModal()" title="Bilgisayar Senkronizasyonu & Arkadaş Davet Linki">
-            <span class="btn-icon">💻</span>
-            <span class="btn-text">PC & Davet</span>
+        <div class="header-actions-wrap" style="position:relative;">
+          <!-- ❓ KULLANIM KILAVUZU & YARDIM (1 TIKLA AÇILIR) -->
+          <button type="button" class="pin-btn header-action-btn" onclick="openAppHelpGuideModal()" title="Kullanım Kılavuzu & Yardım">
+            <span class="btn-icon">❓</span>
+            <span class="btn-text">Rehber</span>
           </button>
-          <button type="button" class="pin-btn header-action-btn" onclick="openMorningFocusModal(true)" title="Bugünün 3 Önemli İşi">
-            <span class="btn-icon">🌅</span>
-            <span class="btn-text">3 Odak</span>
+
+          <!-- ⚡ TÜM ARAÇLARI TOPLAYAN MODERN MENÜ (PC, 3 Odak, Story, Koç, Dedektif) -->
+          <button type="button" class="pin-btn header-action-btn" onclick="toggleHeaderQuickToolsMenu()" title="Hızlı Araçlar Menüsü">
+            <span class="btn-icon">⚡</span>
+            <span class="btn-text">Araçlar ▾</span>
           </button>
-          <button type="button" class="pin-btn header-action-btn" onclick="openStoryGeneratorModal()" title="Story Görseli Oluştur">
-            <span class="btn-icon">📸</span>
-            <span class="btn-text">Story</span>
-          </button>
-          <button type="button" class="pin-btn header-action-btn" onclick="triggerRandomPersonalInsightPopup()" title="Kişisel Koç">
-            <span class="btn-icon">🤖</span>
-            <span class="btn-text">Koç</span>
-          </button>
-          <button type="button" class="pin-btn header-action-btn" id="panicBlurToggleBtn" onclick="togglePanicBlurMode()" title="Panik / Gizlilik Modu">
-            <span class="btn-icon">🕵️</span>
-          </button>
-          <div class="user-avatar-pill" onclick="switchView('settings')" title="Ayarlar ve Hesap">
-            <div class="user-avatar-circle" id="headerAvatarLetter">U</div>
-            <span class="avatar-pill-text">Ayarlar ⚙️</span>
+
+          <!-- 👤 KULLANICI PROFİLİ VE AYARLAR -->
+          <div class="user-avatar-pill" onclick="switchView('settings')" title="Ayarlar ve Profil">
+            <div class="user-avatar-circle" id="headerAvatarLetter" style="overflow:hidden;padding:0;">U</div>
+            <span class="avatar-pill-text">Profil & Ayar</span>
             <span id="syncStatusDot" class="sync-dot" title="Çevrimdışı / Bulut Hazır"></span>
+          </div>
+
+          <!-- ⚡ HIZLI ARAÇLAR AÇILIR AÇILIR MENÜ (GİZLİ BAŞLAR) -->
+          <div id="headerQuickToolsDropdown" class="header-quick-menu hidden">
+            <button type="button" class="header-quick-item" onclick="toggleHeaderQuickToolsMenu(false);openMorningFocusModal(true);">
+              <span>🌅</span>
+              <span>Bugünün 3 Odak İşi</span>
+            </button>
+            <button type="button" class="header-quick-item" onclick="toggleHeaderQuickToolsMenu(false);openStoryGeneratorModal();">
+              <span>📸</span>
+              <span>Story & Görsel Stüdyosu</span>
+            </button>
+            <button type="button" class="header-quick-item" onclick="toggleHeaderQuickToolsMenu(false);openPcAndFriendsSyncModal();">
+              <span>💻</span>
+              <span>PC & Bulut Senkronizasyonu</span>
+            </button>
+            <button type="button" class="header-quick-item" onclick="toggleHeaderQuickToolsMenu(false);triggerRandomPersonalInsightPopup();">
+              <span>🤖</span>
+              <span>Kişisel Koç & Tavsiye</span>
+            </button>
+            <button type="button" class="header-quick-item" onclick="toggleHeaderQuickToolsMenu(false);togglePanicBlurMode();">
+              <span>🕵️</span>
+              <span>Gizlilik / Panik Modu</span>
+            </button>
           </div>
         </div>
       </header>
@@ -446,12 +464,12 @@
               </div>
 
               <!-- 1.5. 🕒 TEK TIKLA "DÜN NE YEDİYSEM AYNISINI BUGÜNE KOPYALA" + 📸 STORY KARTI BARI -->
-              <div style="display:grid;grid-template-columns:1.35fr 1fr;gap:8px;margin-bottom:12px;">
-                <button type="button" class="btn-cream" style="min-height:46px;font-size:12.5px;font-weight:900;background:linear-gradient(135deg,rgba(245,216,181,0.22),rgba(216,208,248,0.16));color:var(--accent-cream);border:1.5px solid rgba(245,216,181,0.45);" onclick="copyYesterdayFoodsToToday()">
-                  🕒 Dün Ne Yediysem Bugüne Kopyala
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+                <button type="button" class="btn-cream" style="min-height:44px;font-size:12px;font-weight:900;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(135deg,rgba(245,216,181,0.22),rgba(216,208,248,0.16));color:var(--accent-cream);border:1.5px solid rgba(245,216,181,0.45);" onclick="copyYesterdayFoodsToToday()">
+                  🕒 Dünü Kopyala
                 </button>
-                <button type="button" class="btn-cream" style="min-height:46px;font-size:12.5px;font-weight:900;background:linear-gradient(135deg,rgba(82,196,26,0.22),rgba(37,211,102,0.14));color:#95de64;border:1.5px solid rgba(149,222,100,0.45);" onclick="openStoryGeneratorModal()">
-                  📸 Story Görseli Oluştur
+                <button type="button" class="btn-cream" style="min-height:44px;font-size:12px;font-weight:900;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(135deg,rgba(82,196,26,0.22),rgba(37,211,102,0.14));color:#95de64;border:1.5px solid rgba(149,222,100,0.45);" onclick="openStoryGeneratorModal()">
+                  📸 Story Paylaş
                 </button>
               </div>
 
@@ -467,7 +485,7 @@
               <!-- ======================================================== -->
               <div id="foodInnerTabAdd">
                 <!-- BAŞLIK 1: ⚡ TEK DOKUNUŞLA EN SIK YENİLEN 8 BESİN (BAŞLIĞA TIKLAYINCA SPAWNLANIR) -->
-                <div class="luxury-spawn-box open" id="spawnBoxQuickFoods">
+                <div class="luxury-spawn-box" id="spawnBoxQuickFoods">
                   <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxQuickFoods')">
                     <span>⚡ Tek Dokunuşla Hızlı Yemek Ekle (8 Popüler Besin)</span>
                     <span class="luxury-spawn-chevron">▾</span>
@@ -1268,7 +1286,10 @@
         <div class="social-profile-banner">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
             <div style="display:flex;align-items:center;gap:12px;">
-              <div id="socialProfileAvatar" style="width:52px;height:52px;border-radius:16px;background:var(--accent-cream);color:#121218;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,0,0,0.35);">A</div>
+              <div id="socialProfileAvatar" class="social-profile-avatar-box" onclick="triggerProfilePhotoPicker()" title="Profil Fotoğrafı Değiştir">
+                <span id="socialProfileAvatarText">A</span>
+                <div class="avatar-edit-badge">📷 Değiştir</div>
+              </div>
               <div>
                 <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
                   <h2 id="socialProfileName" style="font-size:18px;font-weight:900;">Kullanıcı</h2>
@@ -1981,5 +2002,93 @@
   </div>
 
   <script src="app.js?v=25"></script>
+
+  <!-- GİZLİ PROFİL FOTOĞRAFI YÜKLEYİCİ -->
+  <input type="file" id="userProfilePhotoInput" accept="image/*" style="display:none;" onchange="handleUserProfilePhotoUpload(event)" />
+
+  <!-- ❓ PROFESYONEL TASKFLOW+ KULLANIM KILAVUZU & YARDIM MERKEZİ -->
+  <div id="helpGuideModal" class="modal-backdrop hidden">
+    <div class="modal-sheet spawn-anim" style="max-width:520px;border-radius:26px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3 style="font-size:18px;font-weight:900;color:var(--accent-cream);">📚 TaskFlow+ Kullanım Kılavuzu</h3>
+        <button type="button" class="icon-btn" onclick="closeAppHelpGuideModal()">✕</button>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">
+        Uygulamanın tüm özelliklerini nasıl verimli kullanabileceğiniz aşağıda özetlenmiştir:
+      </p>
+
+      <div class="help-guide-card">
+        <h4>📋 1. Görevler & Odak Sistemi</h4>
+        <p>• <b>＋ Butonu:</b> İstediğiniz an yeni görev veya alışkanlık ekleyin.<br>• <b>🌅 3 Odak:</b> Sabahları günün en kritik 3 işini belirleyin, dağınıklıktan kurtulun.<br>• <b>🍅 Odak:</b> Görevleri Pomodoro zamanlayıcı ile parçalara bölerek tamamlayın.</p>
+      </div>
+
+      <div class="help-guide-card">
+        <h4>🍽️ 2. Beslenme & Kalori Takibi</h4>
+        <p>• <b>⚡ 8 Popüler Besin:</b> Yumurta, tavuk, pilav gibi sık yenenleri tek tıkla ekleyin.<br>• <b>🔍 188+ Yemek Arama:</b> Gramajını seçerek kalori ve protein değerlerini canlı hesaplayın.<br>• <b>🕒 Dünü Kopyala:</b> Her gün aynı şeyleri yiyorsanız dünün menüsünü 1 saniyede bugüne aktarın.<br>• <b>📸 Story Paylaş:</b> Beslenme ve disiplin skorunuzu Instagram Story formatında indirin veya paylaşın.</p>
+      </div>
+
+      <div class="help-guide-card">
+        <h4>💧 3. Su & Aralıklı Oruç (Intermittent Fasting)</h4>
+        <p>• <b>+1 Bardak:</b> Günlük su ihtiyacınızı 250ml adımlarla takip edin.<br>• <b>🔥 Canlı Oruç Sayacı:</b> Yeme pencerenizi kapatıp açın; yağ yakım ve otofaji evrelerini anlık görün.</p>
+      </div>
+
+      <div class="help-guide-card">
+        <h4>🏆 4. Rozetler, Seviye & Sosyal Profil</h4>
+        <p>• <b>120 Başarım:</b> Görev bitirdikçe, su içtikçe ve seri yaptıkça XP kazanın ve rozet açın.<br>• <b>📌 Vitrin Rozetleri:</b> Profilinizde en gurur duyduğunuz 6 rozeti arkadaşlarınız için vitrine koyun.<br>• <b>📷 Profil Fotoğrafı:</b> Profil resminize dokunarak galerinizden dilediğiniz fotoğrafı yükleyin!</p>
+      </div>
+
+      <div class="help-guide-card">
+        <h4>📱 5. Android Geri Tuşu & Gezinme</h4>
+        <p>• Telefonun geri tuşuna (veya kenardan kaydırmaya) bastığınızda açık pencereler kapanır veya ana ekrana dönersiniz. Uygulamadan çıkmak için ana ekranda 2 kez dokunmanız yeterlidir.</p>
+      </div>
+
+      <button type="button" class="btn-cream" style="width:100%;height:46px;font-weight:900;margin-top:10px;" onclick="closeAppHelpGuideModal()">
+        Anladım, Harika! 👍
+      </button>
+    </div>
+  </div>
+
+  <!-- 👥 ARKADAŞ / SOSYAL MEDYA DETAY PROFİL VİTRİNİ -->
+  <div id="friendProfileModal" class="modal-backdrop hidden">
+    <div class="modal-sheet spawn-anim" style="max-width:440px;border-radius:26px;text-align:center;">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:4px;">
+        <button type="button" class="icon-btn" onclick="closeFriendProfileModal()">✕</button>
+      </div>
+      <div id="friendModalAvatar" style="width:78px;height:78px;border-radius:50%;margin:0 auto 10px;background:var(--accent-cream);color:#09090d;font-size:32px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,0.5);border:3px solid var(--accent-cream);overflow:hidden;"></div>
+      <h3 id="friendModalName" style="font-size:20px;font-weight:900;color:var(--text-main);">Arkadaş Adı</h3>
+      <div id="friendModalRank" class="tag-badge" style="display:inline-block;margin-top:4px;background:rgba(245,216,181,0.2);color:var(--accent-cream);font-weight:800;">🌱 Seviye 1</div>
+      <p id="friendModalBio" style="font-size:12.5px;color:var(--text-muted);margin:8px 0 14px;font-style:italic;">"Disiplin yolculuğundayım..."</p>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;background:rgba(255,255,255,0.04);border-radius:18px;margin-bottom:14px;">
+        <div>
+          <div style="font-size:10px;color:var(--text-muted);font-weight:700;">GÜNLÜK SERİ</div>
+          <div id="friendModalStreak" style="font-size:15px;font-weight:900;color:#ff7a45;margin-top:2px;">🔥 1 Gün</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text-muted);font-weight:700;">TOPLAM XP</div>
+          <div id="friendModalXp" style="font-size:15px;font-weight:900;color:#93c5fd;margin-top:2px;">⚡ 0 XP</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text-muted);font-weight:700;">ROZETLER</div>
+          <div id="friendModalBadgesCount" style="font-size:15px;font-weight:900;color:#ffd700;margin-top:2px;">🏆 0 Adet</div>
+        </div>
+      </div>
+
+      <div style="text-align:left;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:900;color:var(--accent-cream);margin-bottom:8px;">🏅 Vitrin Rozetleri:</div>
+        <div id="friendModalShowcaseStrip" style="display:flex;gap:6px;flex-wrap:wrap;min-height:40px;"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button type="button" class="btn-cream" style="height:44px;font-size:12.5px;font-weight:900;" onclick="sendQuickFriendEncouragement()">
+          👏 Tebrik Et
+        </button>
+        <button type="button" class="pin-btn" style="height:44px;font-size:12.5px;font-weight:900;" onclick="closeFriendProfileModal()">
+          Kapat
+        </button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

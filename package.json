@@ -38,7 +38,8 @@
   "dependencies": {
     "@capacitor/android": "^8.5.3",
     "@capacitor/cli": "^8.5.3",
-    "@capacitor/core": "^8.5.3"
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/keyboard": "^8.0.6"
   },
   "devDependencies": {
     "electron": "^40.8.0",

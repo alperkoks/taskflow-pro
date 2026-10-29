@@ -8885,8 +8885,13 @@ function handleNativeHardwareBackButton() {
   }
 
   // 3. Kategori / Yemek detay derinlemesine (drilldown) ekranındaysa 4 ana kutuya dön
-  if (typeof drilldownActiveTab !== 'undefined' && drilldownActiveTab !== 'none') {
-    closeSimpleDrilldownBackToHome(true);
+  const drilldownBtn = document.getElementById('drilldownBackBtn');
+  const isDrilldownOpen = document.body.getAttribute('data-drilldown-open') === 'true' || 
+                          (drilldownBtn && drilldownBtn.style.display !== 'none');
+  if (isDrilldownOpen) {
+    if (typeof closeSimpleDrilldownBackToHome === 'function') {
+      closeSimpleDrilldownBackToHome(false);
+    }
     return;
   }
 
@@ -8957,4 +8962,162 @@ if (typeof window !== 'undefined') {
   } else {
     setupMobileKeyboardAdaptation();
   }
+}
+
+
+// ============================================================================
+// 📷 KULLANICI PROFİL FOTOĞRAFI YÖNETİMİ & SIKIŞTIRMA
+// ============================================================================
+function triggerProfilePhotoPicker() {
+  const inp = document.getElementById('userProfilePhotoInput');
+  if (inp) inp.click();
+}
+
+function handleUserProfilePhotoUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      // 256x256 Süper Hafif Canvas Sıkıştırma (Bellek dostu ve buluta hızlı sync)
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const maxDim = 256;
+      let w = img.width;
+      let h = img.height;
+      if (w > h) {
+        if (w > maxDim) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+      } else {
+        if (h > maxDim) { w = Math.round(w * (maxDim / h)); h = maxDim; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+      appData.profilePhoto = dataUrl;
+      saveProfileData(true);
+      applyUserPreferences();
+      if (typeof showToast === 'function') {
+        showToast('📷 Profil fotoğrafınız başarıyla güncellendi!');
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// applyUserPreferences içine fotoğraf render desteği bağla
+const _origApplyUserPreferences = typeof applyUserPreferences === 'function' ? applyUserPreferences : null;
+if (_origApplyUserPreferences) {
+  applyUserPreferences = function() {
+    _origApplyUserPreferences();
+    renderProfilePhotosEverywhere();
+  };
+}
+
+function renderProfilePhotosEverywhere() {
+  const headAv = document.getElementById('headerAvatarLetter');
+  const socAvText = document.getElementById('socialProfileAvatarText');
+  const socAvBox = document.getElementById('socialProfileAvatar');
+  const dispName = appData.profileName || appData.username || 'Kullanıcı';
+  const initial = dispName.charAt(0).toUpperCase();
+
+  if (appData && appData.profilePhoto) {
+    if (headAv) headAv.innerHTML = `<img src="${appData.profilePhoto}" class="header-profile-img" alt="${dispName}" />`;
+    if (socAvText) socAvText.innerHTML = `<img src="${appData.profilePhoto}" style="width:100%;height:100%;border-radius:20px;object-fit:cover;" alt="${dispName}" />`;
+  } else {
+    if (headAv) headAv.textContent = initial;
+    if (socAvText) socAvText.textContent = initial;
+  }
+}
+
+// ============================================================================
+// ⚡ ÜST MENÜ HIZLI ARAÇLAR VE REHBER MERKEZİ
+// ============================================================================
+function toggleHeaderQuickToolsMenu(force) {
+  const menu = document.getElementById('headerQuickToolsDropdown');
+  if (!menu) return;
+  if (typeof force === 'boolean') {
+    menu.classList.toggle('hidden', !force);
+  } else {
+    menu.classList.toggle('hidden');
+  }
+}
+
+// Menü dışına tıklanınca kapat
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('headerQuickToolsDropdown');
+  if (menu && !menu.classList.contains('hidden')) {
+    if (!e.target.closest('.header-actions-wrap')) {
+      menu.classList.add('hidden');
+    }
+  }
+});
+
+function openAppHelpGuideModal() {
+  const modal = document.getElementById('helpGuideModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeAppHelpGuideModal() {
+  const modal = document.getElementById('helpGuideModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+// ============================================================================
+// 👥 SOSYAL MEDYA TARZI ARKADAŞ PROFİLİ GÖRÜNTÜLEME
+// ============================================================================
+function openFriendProfileModal(friend) {
+  const modal = document.getElementById('friendProfileModal');
+  if (!modal) return;
+  const nameEl = document.getElementById('friendModalName');
+  const avEl = document.getElementById('friendModalAvatar');
+  const rankEl = document.getElementById('friendModalRank');
+  const bioEl = document.getElementById('friendModalBio');
+  const streakEl = document.getElementById('friendModalStreak');
+  const xpEl = document.getElementById('friendModalXp');
+  const badgesEl = document.getElementById('friendModalBadgesCount');
+  const stripEl = document.getElementById('friendModalShowcaseStrip');
+
+  const name = typeof friend === 'string' ? friend : (friend.name || friend.username || 'Arkadaş');
+  const initial = name.charAt(0).toUpperCase();
+
+  if (nameEl) nameEl.textContent = name;
+  if (avEl) {
+    if (friend.photo) {
+      avEl.innerHTML = `<img src="${friend.photo}" style="width:100%;height:100%;object-fit:cover;" />`;
+    } else {
+      avEl.textContent = initial;
+    }
+  }
+  if (rankEl) rankEl.textContent = friend.rank || '🌱 Seviye 3 Disiplin Ustası';
+  if (bioEl) bioEl.textContent = `"${friend.bio || 'Hedeflerime odaklandım, her gün bir adım daha ileri! 💪'}"`;
+  if (streakEl) streakEl.textContent = `🔥 ${friend.streak || 4} Gün`;
+  if (xpEl) xpEl.textContent = `⚡ ${friend.xp || 1850} XP`;
+  if (badgesEl) badgesEl.textContent = `🏆 ${friend.badgesCount || 14} Adet`;
+
+  if (stripEl) {
+    stripEl.innerHTML = `
+      <span class="tag-badge" style="background:#ffd700;color:#09090d;font-weight:900;">👑 Erken Kalkan</span>
+      <span class="tag-badge" style="background:#60a5fa;color:#09090d;font-weight:900;">💧 Su Şampiyonu</span>
+      <span class="tag-badge" style="background:#a7f3d0;color:#09090d;font-weight:900;">🔥 7 Gün Serisi</span>
+    `;
+  }
+
+  modal.classList.remove('hidden');
+}
+
+function closeFriendProfileModal() {
+  const modal = document.getElementById('friendProfileModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function sendQuickFriendEncouragement() {
+  if (typeof showToast === 'function') {
+    showToast('👏 Arkadaşınıza başarı tebriki ve alkış gönderildi!');
+  }
+  closeFriendProfileModal();
 }
