@@ -1,0 +1,1872 @@
+[
+  {
+    "id": "fit_pdf_9",
+    "name": "Kahveli Yulaf Lapası",
+    "category": "Kahvaltı",
+    "kcal": 476,
+    "carb": 77.0,
+    "protein": 19.5,
+    "fat": 12.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "1 su bardağı yulaf ezmesi",
+      "1 su bardağı süt",
+      "1 çk tarçın",
+      "1 tk türk kahvesi (farklı bir kahve",
+      "de kullanabilirsiniz.)",
+      "Üzerine tercihen meyve, kuruyemiş ekleyebilirsiniz."
+    ],
+    "steps": [
+      "1. Küçük bir tencereye yulaf ezmesini ve sütü ekliyoruz.",
+      "2. Altını açarak kaynayana kadar ara ara karıştırarak pişiriyoruz.",
+      "3. Kaynadıktan sonra altını kapatarak üzerine kahve ve tarçını ekliyoruz.",
+      "4. Kahve eriyip yulaf lapasına iyice karışana kadar karıştırıyoruz.",
+      "5. Üzerine muz dilimleri veya kuruyemiş ekleyebilirsiniz. (Bu eklemeler kalori değerini arttıracaktır!)"
+    ],
+    "page": 9,
+    "photo": "assets/recipes/recipe_p9.jpg"
+  },
+  {
+    "id": "fit_pdf_10",
+    "name": "Unsuz Muzlu Pankek",
+    "category": "Kahvaltı",
+    "kcal": 303,
+    "carb": 39.5,
+    "protein": 14.4,
+    "fat": 12.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "1 adet muz",
+      "2 adet yumurta",
+      "1 çk hindistan cevizi yağı",
+      "(opsiyonel)"
+    ],
+    "steps": [
+      "1. Muzu çatal yardımıyla ezerek püre kıvamına getiriyoruz.",
+      "2. Yumurtaları muz püresinin üzerine kırarak iyice çırpıyoruz.",
+      "3. Tavayı yağladıktan sonra harcımızdan her seferinde birer yemek kaşığı alarak tavaya ekliyoruz.",
+      "4. Üst kısmında kabarcıklar oluştuğunda çevirip diğer yüzünü de pişiriyoruz."
+    ],
+    "page": 10,
+    "photo": "assets/recipes/recipe_p10.jpg"
+  },
+  {
+    "id": "fit_pdf_11",
+    "name": "Kahveli Pankek",
+    "category": "Kahvaltı",
+    "kcal": 374,
+    "carb": 30.3,
+    "protein": 22.0,
+    "fat": 18.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "1 çay bardağı yulaf ezmesi",
+      "2 yk yoğurt",
+      "1 tk türk kahvesi",
+      "Yarım paket kabartma tozu",
+      "2 adet yumurta",
+      "1 tk rende hindistan cevizi"
+    ],
+    "steps": [
+      "1. Yulaf ezmesini blender yardımıyla un haline getiriyoruz. kıvama getiriyoruz.",
+      "3. Yapışmaz yüzeyli tavayı ısıttıktan sonra harcımızı birer kaşık birer kaşık olarak tavaya ekliyoruz.",
+      "4. Üst kısmında kabarcıklar çıktığında pankekleri çevirerek diğer yüzlerini de pişiriyoruz."
+    ],
+    "page": 11,
+    "photo": "assets/recipes/recipe_p11.jpg"
+  },
+  {
+    "id": "fit_pdf_12",
+    "name": "Lor Tava",
+    "category": "Kahvaltı",
+    "kcal": 224,
+    "carb": 4.5,
+    "protein": 18.0,
+    "fat": 15.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "200 g lor peyniri",
+      "1 yk tereyağı",
+      "2 yk domates püresi",
+      "(1 domatesi blenderdan geçirerek de kullanabilirsiniz)",
+      "Kekik, istenilen diğer baharatlar"
+    ],
+    "steps": [
+      "1. Tavada tereyağını eritiyoruz.",
+      "2. Üzerine lor peynirini ekleyip 1 dakika kadar pişiriyoruz.",
+      "3. Domates püresini ekleyip birkaç dakika karıştırarak pişiriyoruz.",
+      "4. Son olarak üzerine istediğimiz baharatları ekleyerek lezzetlendiriyoruz."
+    ],
+    "page": 12,
+    "photo": "assets/recipes/recipe_p12.jpg"
+  },
+  {
+    "id": "fit_pdf_13",
+    "name": "Ev Yapımı Notella",
+    "category": "Kahvaltı",
+    "kcal": 50,
+    "carb": 3.5,
+    "protein": 1.0,
+    "fat": 3.5,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(1 kavanoz hazırlamak için)",
+      "1 su bardağı fındık",
+      "1 yk kakao",
+      "12 adet orta boy hurma",
+      "1 tk bal",
+      "Dilerseniz 1 tatlı kaşığı hindistan",
+      "cevizi yağı da ekleyebilirsiniz."
+    ],
+    "steps": [
+      "1. Fındıkları bir tavaya alarak birkaç dakika kavuruyoruz.",
+      "2. Hurmaları 15 dakika kadar sıcak suda bekletip çekirdeklerini ayırıyoruz.",
+      "3. Fındıkların üzerine 1 yemek kaşığı kadar hurma suyundan ekleyip blenderdan geçiriyoruz.",
+      "4. Hurmaları, balı ve kakaoyu da blender kabına ekleyip tekrar blenderdan geçiriyoruz. Bu aşamada hurma suyundan ekleyerek fındık kremanızı istediğiniz kıvama getirebilirsiniz."
+    ],
+    "page": 13,
+    "photo": "assets/recipes/recipe_p13.jpg"
+  },
+  {
+    "id": "fit_pdf_14",
+    "name": "Mantarlı Fit Omlet",
+    "category": "Kahvaltı",
+    "kcal": 304,
+    "carb": 10.5,
+    "protein": 26.7,
+    "fat": 15.8,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "60 g lor peyniri",
+      "2 adet yumurta",
+      "1 kase kültür mantarı",
+      "1 çk pul biber",
+      "1 çk zeytinyağı"
+    ],
+    "steps": [
+      "1. Mantarların zarlarını soyup dilimliyoruz.",
+      "2. Tavanın altını ısıtıp zeytinyağını da koyduktan sonra mantarları bir kaşık yardımıyla çevirerek birkaç dakika pişiriyoruz.",
+      "3. Yumurtaları çırpıp mantarların üzerine döküyoruz ve tavanın üzerini kapatıyoruz.",
+      "4. Tavadaki karışımın alt tabanı piştikten sonra üzerine lor peynirlerini de ekleyip kapağını tekrar kapatıyoruz ve üst kısmının da pişmesini sağlıyoruz.",
+      "5. Son olarak üzerine pul biber veya istediğiniz farklı baharatları ekleyerek servis edebilirsiniz."
+    ],
+    "page": 14,
+    "photo": "assets/recipes/recipe_p14.jpg"
+  },
+  {
+    "id": "fit_pdf_15",
+    "name": "Ispanaklı ve Peynirli Omlet",
+    "category": "Kahvaltı",
+    "kcal": 306,
+    "carb": 3.0,
+    "protein": 23.6,
+    "fat": 21.8,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "1 kase doğranmış ıspanak",
+      "50 g beyaz peynir",
+      "2 adet yumurta",
+      "1 tk tereyağı (opsiyonel)"
+    ],
+    "steps": [
+      "1. Ispanakları iyice yıkayıp ince ince doğruyoruz.",
+      "2. Beyaz peyniri de küçük parçalar halinde doğrayıp ıspanakla karıştırıyoruz.",
+      "3. Yapışmak yüzeyli tavayı ısıttıktan sonra ıspanak ve peynir karışımını peynirler yumuşayana kadar pişiriyoruz. (Tereyağı kullanacaksanız bu aşamada ekleyebilirsiniz.)",
+      "4. Üzerine yumurtaları da ekleyip karıştırarak pişiriyoruz."
+    ],
+    "page": 15,
+    "photo": "assets/recipes/recipe_p15.jpg"
+  },
+  {
+    "id": "fit_pdf_16",
+    "name": "Muzlu Yulaf Lapası",
+    "category": "Kahvaltı",
+    "kcal": 304,
+    "carb": 68.5,
+    "protein": 8.0,
+    "fat": 3.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "Yarım su bardağı yulaf ezmesi",
+      "1 adet muz",
+      "1 çk tarçın",
+      "1 tk keçiboynuzu unu veya",
+      "1 çk süzme bal"
+    ],
+    "steps": [
+      "1. Yulaf ezmesini bir kaseye alıp üzerine yulafları kaplayacak kadar sıcak su ekliyoruz. 5 dakika kadar yulafın yumuşamasını bekliyoruz. (Süreci hızlandırmak için kasenin üzerini bir tabak yardımıyla kapatabilirsiniz.)",
+      "2. Yulaflar yumuşadıktan sonra üzerine tarçın ve keçiboynuzu unu (veya bal) ekliyoruz. İyice karıştırıyoruz.",
+      "3. Muzları dilimleyerek kaseye alıyoruz."
+    ],
+    "page": 16,
+    "photo": "assets/recipes/recipe_p16.jpg"
+  },
+  {
+    "id": "fit_pdf_17",
+    "name": "Fıstık Ezmesi",
+    "category": "Kahvaltı",
+    "kcal": 101,
+    "carb": 3.0,
+    "protein": 4.1,
+    "fat": 8.9,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "1 7",
+      "160 g tuzsuz fıstık",
+      "(1 orta boy kase)",
+      "1 yk hindistan cevizi yağı",
+      "veya zeytinyağı (isteğe bağlı)",
+      "1 tk bal"
+    ],
+    "steps": [
+      "1. Fıstıkların kabukları soyulur ve tavada 5 dakika kadar kavrulur.",
+      "2. Rondo veya blender yardımıyla iyice parçalanır.",
+      "3. İsteğe göre bal ekleyerek tatlandırılır ve yağ ekleyerek akışkan kıvama getirilir.",
+      "4. İyice karıştırılır, afiyet olsun!"
+    ],
+    "page": 17,
+    "photo": "assets/recipes/recipe_p17.jpg"
+  },
+  {
+    "id": "fit_pdf_18",
+    "name": "Tahinli Unsuz Pankek",
+    "category": "Kahvaltı",
+    "kcal": 227,
+    "carb": 24.0,
+    "protein": 9.2,
+    "fat": 11.4,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "1 tk susam",
+      "1 adet muz",
+      "2 adet yumurta",
+      "1 çk tarçın",
+      "1 yk tahin",
+      "1 çk hindistan cevizi yağı",
+      "veya zeytinyağı",
+      "1 çk bal"
+    ],
+    "steps": [
+      "1. Susamları tavada birkaç dakika ısıtıyoruz, rengi biraz karardıktan sonra ateşten alıp kenara koyuyoruz.",
+      "2. Muzu çatal yardımıyla ezerek püre haline getiriyoruz.",
+      "3. Muz püresinin üzerine yumurtaları kırıyoruz ve iyice çırpıyoruz. İyice çırptıktan sonra tarçın ve tahini de karışımın üzerine ekliyoruz.",
+      "4. Tavayı yağlayıp biraz ısıtıyoruz. Daha sonra harcımızı tavaya alarak pişiriyoruz. (Tüm harcı tek pankek olarak pişirmeye çalışmayın, çevirmesi zor olacaktır. Bir yemek kaşıklık boyutlarda alarak pişirebilirsiniz.)",
+      "5. Pişirirken pankeklerin üst kısmında kabarcıklar oluştuğunda çevirebilirsiniz.",
+      "6. Pişen pankekleri tabağımıza aldıktan sonra üzerine bal ve kavurduğumuz susamları da ekliyoruz."
+    ],
+    "page": 18,
+    "photo": "assets/recipes/recipe_p18.jpg"
+  },
+  {
+    "id": "fit_pdf_19",
+    "name": "Protein Bohçası",
+    "category": "Kahvaltı",
+    "kcal": 297,
+    "carb": 11.1,
+    "protein": 21.9,
+    "fat": 14.3,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "2 adet yumurta",
+      "50 g lor peyniri",
+      "Yarım yk tereyağı",
+      "veya zeytinyağı",
+      "Domates püresi",
+      "Kekik"
+    ],
+    "steps": [
+      "1. Lor peynirini ufalıyoruz ve üzerine domates püresini de ekleyip karıştırıyoruz.",
+      "2. Yumurtaları başka bir kabın içine kırarak iyice çırpıyoruz.",
+      "3. Tavamızı ısıttıktan sonra yağı ekliyoruz ve çırptığımız yumurtaları tavaya döküyoruz.",
+      "4. Yumurtaların altı piştikten sonra üzerinin orta kısmına lor karışımını ekliyoruz.",
+      "5. Ardından yumurtanın sağ ve sol kısmını içe doğru, yani lor karışımının üzerine doğru katlıyoruz.",
+      "6. İç kısmı da piştikten sonra tabağımıza alıp üzerine kekik serpiyoruz."
+    ],
+    "page": 19,
+    "photo": "assets/recipes/recipe_p19.jpg"
+  },
+  {
+    "id": "fit_pdf_20",
+    "name": "Tok Tutan Protein Tostu",
+    "category": "Kahvaltı",
+    "kcal": 368,
+    "carb": 24.0,
+    "protein": 33.0,
+    "fat": 15.4,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "100 g lor peyniri",
+      "2 dilim kaşar",
+      "Tam tahıllı veya kepekli ekmek",
+      "Domates suyu",
+      "(domates püresi veya salçayı",
+      "sulandırarak da kullanabilirsiniz)"
+    ],
+    "steps": [
+      "1. Kaşarları küçük küçük doğruyoruz.",
+      "2. Lor peynirini domates suyuyla veya domates püresiyle biraz sulandırarak karıştırıyoruz.",
+      "3. Ekmeği kestikten sonra alt ve üst katmana kaşarları, aralarına da lor peynirini koyuyoruz.",
+      "4. Tost makinesinde pişirdikten sonra dilimliyoruz."
+    ],
+    "page": 20,
+    "photo": "assets/recipes/recipe_p20.jpg"
+  },
+  {
+    "id": "fit_pdf_21",
+    "name": "Akşamdan Hazırlamalık Kahvaltı",
+    "category": "Kahvaltı",
+    "kcal": 213,
+    "carb": 32.0,
+    "protein": 8.4,
+    "fat": 5.8,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "60 g yulaf ezmesi",
+      "200 ml süt",
+      "Yarım muz",
+      "(veya farklı bir meyve)",
+      "Fıstık ezmesi",
+      "Hindistan cevizi",
+      "Tarçın",
+      "(isteğe bağlı eklenebilir)"
+    ],
+    "steps": [
+      "1. Yulaf ve sütü bir kaba ekleyerek 15 dakika kadar buzdolabında bekletiyoruz. karışımına ekliyoruz.",
+      "3. Üzerini kapatarak akşamdan buzdolabına atıyoruz. Sabah dolaptan çıkarıp karıştırıyoruz."
+    ],
+    "page": 21,
+    "photo": "assets/recipes/recipe_p21.jpg"
+  },
+  {
+    "id": "fit_pdf_22",
+    "name": "Fit Fransız Tostu",
+    "category": "Kahvaltı",
+    "kcal": 264,
+    "carb": 23.6,
+    "protein": 19.4,
+    "fat": 10.2,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "1 adet yumurta",
+      "Yarım bardak süt",
+      "4 dilim tam tahıllı tost ekmeği",
+      "1 yk hindistan cevizi yağı",
+      "veya tereyağı",
+      "1 ölçek whey protein"
+    ],
+    "steps": [
+      "1. Yumurtaları geniş bir kabın içine kırarak çırpıyoruz.",
+      "2. Whey proteini sütle beraber iyice karıştırıyoruz.",
+      "4. Tavayı ısıtıp yağlıyoruz.",
+      "5. Tost ekmeklerini az önce hazırladığımız karışımın içine atarak ıslatıp iyice emdiriyoruz.",
+      "6. Daha sonra tavaya alıyoruz ve çevirerek iki tarafını da kızartıyoruz."
+    ],
+    "page": 22,
+    "photo": "assets/recipes/recipe_p22.jpg"
+  },
+  {
+    "id": "fit_pdf_23",
+    "name": "Sarımsaklı Tavuk",
+    "category": "Kahvaltı",
+    "kcal": 331,
+    "carb": 7.0,
+    "protein": 50.0,
+    "fat": 10.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "1 kg tavuk göğsü",
+      "50 g yulaf ezmesi",
+      "50 g az yağlı kaşar peyniri",
+      "veya parmesan peyniri",
+      "6 diş sarımsak",
+      "1 yk zeytinyağı"
+    ],
+    "steps": [
+      "1. Bir tabakta rendelenmiş kaşar peynirinin üzerine un haline getirilmiş yulaf ezmesi eklenir, karıştırılır.",
+      "2. Sarımsaklar dövülür veya rendelenir.",
+      "3. Bir tavaya bir kaşık zeytinyağı dökülür, üzerine sarımsaklar eklenir, birkaç dakika ısıtılır.",
+      "4. Yağ biraz kızınca ocağın altı kapatılır.",
+      "5. Tavuk göğüsleri önce yağa bandırılır, sonra kaşar ve yulaflı karışıma sürülür, fırın kabına koyulur.",
+      "6. 220 derecede 30-35 dakika pişirilir."
+    ],
+    "page": 23,
+    "photo": "assets/recipes/recipe_p23.jpg"
+  },
+  {
+    "id": "fit_pdf_24",
+    "name": "Ton Balıklı Burger",
+    "category": "Kahvaltı",
+    "kcal": 375,
+    "carb": 38.0,
+    "protein": 28.0,
+    "fat": 12.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "1 kutu ton balığı",
+      "(süzme ağırlık 52 gram)",
+      "Makarna sosu",
+      "4 adet ince-küçük dilim",
+      "yarım yağlı kaşar peyniri",
+      "1 adet kepekli veya tam tahıllı",
+      "tost ekmeği",
+      "(veya hamburger ekmeği)"
+    ],
+    "steps": [
+      "1. Hamburger veya tost ekmeğine ton balığı koyulur.",
+      "2. Üzerine makarna sosu sürülür.",
+      "3. Kaşarlar küçük dilimler halinde üstüne koyulur, ekmek kapatılır.",
+      "4. Tost makinesinde kaşarlar eriyene kadar ısıtılır."
+    ],
+    "page": 24,
+    "photo": "assets/recipes/recipe_p24.jpg"
+  },
+  {
+    "id": "fit_pdf_25",
+    "name": "Fit Tavuk Burger",
+    "category": "Ana Yemek",
+    "kcal": 485,
+    "carb": 47.0,
+    "protein": 47.0,
+    "fat": 12.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(2 adet tavukburger için)",
+      "300 g tavuk göğsü",
+      "1 diş sarımsak",
+      "1 küçük soğan",
+      "2 yk galeta unu",
+      "2 adet yumurta",
+      "1 tk karabiber",
+      "1 tk kimyon",
+      "hamburger ekmeği",
+      "(tam tahıllı olursa daha iyi olur)",
+      "domates, marul",
+      "(miktar isteğe bağlı)"
+    ],
+    "steps": [
+      "1. Tavuk göğsü blender ile kıyma haline getirilir.",
+      "3. Tavada iki tarafı da pişirilip burger ekmeği arasına koyulur."
+    ],
+    "page": 25,
+    "photo": "assets/recipes/recipe_p25.jpg"
+  },
+  {
+    "id": "fit_pdf_26",
+    "name": "Diyet Pizza",
+    "category": "Ana Yemek",
+    "kcal": 425,
+    "carb": 38.0,
+    "protein": 38.0,
+    "fat": 13.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "1 adet tortilla ekmeği veya tam",
+      "tahıllı lavaş",
+      "70 g haşlanmış tavuk göğüs",
+      "30 g rendelenmiş kaşar",
+      "1 yk domates püresi veya salça",
+      "istenilen baharatlar",
+      "(kekik, sarımsak tozu, pul biber",
+      "önerilir)"
+    ],
+    "steps": [
+      "1. Tavanın altı yakılır ve üzerine tortilla ekmeği koyulur.",
+      "2. Üzerine sırayla salça, tavuk ve kaşar peyniri koyulur.",
+      "3. Üzerine istenilen baharatlar eklenir.",
+      "4. Tavanın üstü kapanır ve pişmesi beklenir."
+    ],
+    "page": 26,
+    "photo": "assets/recipes/recipe_p26.jpg"
+  },
+  {
+    "id": "fit_pdf_27",
+    "name": "Hindi Füme Dürüm",
+    "category": "Ana Yemek",
+    "kcal": 400,
+    "carb": 34.0,
+    "protein": 36.0,
+    "fat": 12.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "1 adet tortilla ekmeği veya tam",
+      "tahıllı lavaş",
+      "100 g hindi füme",
+      "Domatesli makarna sosu veya",
+      "domates salçası",
+      "1 yk hardal",
+      "Sarımsak tozu"
+    ],
+    "steps": [
+      "1. Tortilla ekmeğine makarna sosu veya salça sürülür.",
+      "2. Hindi füme üzerine eklenir.",
+      "3. Üzerine hardal ve sarımsak tozu eklenir.",
+      "4. Dürüm haline getirilip afiyetle yenir!"
+    ],
+    "page": 27,
+    "photo": "assets/recipes/recipe_p27.jpg"
+  },
+  {
+    "id": "fit_pdf_28",
+    "name": "Fırında Alabalık",
+    "category": "Ana Yemek",
+    "kcal": 442,
+    "carb": 5.8,
+    "protein": 21.0,
+    "fat": 38.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "1 adet yerli somon balığı",
+      "(Karadeniz alası)",
+      "Yarım çay bardağı zeytinyağı",
+      "1 çk tuz",
+      "2 çk kekik",
+      "1 çk karabiber"
+    ],
+    "steps": [
+      "1. Bir çay bardağında zeytinyağı, tuz, kekik, karabiber karıştırılır.",
+      "2. Kapaklı bir kaba somon balığı fileto halinde koyulur.",
+      "3. Üzerine çay bardağındaki karışım dökülür, kapağı kapatılıp buzdolabında 2 saat bekletilir.",
+      "4. Önceden 180 dereceye ısıtılmış fırında 30 dakika pişirilir."
+    ],
+    "page": 28,
+    "photo": "assets/recipes/recipe_p28.jpg"
+  },
+  {
+    "id": "fit_pdf_29",
+    "name": "Yeşil Mercimek Yemeği",
+    "category": "Ana Yemek",
+    "kcal": 264,
+    "carb": 30.4,
+    "protein": 18.0,
+    "fat": 3.6,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(4 porsiyon)",
+      "300 g yeşil mercimek",
+      "(2 su bardağı)",
+      "1 adet küçük soğan",
+      "yeşil biber",
+      "(miktar isteğe bağlı)",
+      "1 yk domates salçası",
+      "1 yk tereyağ",
+      "1 yk nane"
+    ],
+    "steps": [
+      "1. Mercimeklerimizi süzgeç yardımıyla yıkıyoruz. Yıkadığımız mercimekleri bir tencereye boşaltıp üzerine mercimekleri 2 parmak geçene kadar su dolduruyoruz.",
+      "2. Mercimeklerimiz kaynarken soğan ve biberlerimizi küçük küçük doğruyoruz. (Domates de doğrayabilirsiniz.)",
+      "3. 15 dakika kadar kaynattıktan sonra mercimeklerimizi süzüyoruz.",
+      "4. Tenceremizi sudan geçiriyoruz veya yeni bir tencere alıyoruz. 1 yemek kaşığı tereyağ ekleyerek eritiyoruz.",
+      "5. Bu arada 1 litre su kaynatıyoruz.",
+      "6. Erittiğimiz tereyağının üzerine doğradığımız biber ve soğanı atıp, birkaç dakika kavuruyoruz. Daha sonra üzerine mercimeklerimizi de ekleyip karıştırıyoruz.",
+      "7. Önceden kaynattığımız sıcak suyu tencereye döküyoruz, biraz karıştırıp 10 dakika kadar pişmeye bırakıyoruz.",
+      "8. Son olarak ocağımızın altını kapatıp 1 yemek kaşığı nanemizi tencereye ekleyip karıştırıyoruz."
+    ],
+    "page": 29,
+    "photo": "assets/recipes/recipe_p29.jpg"
+  },
+  {
+    "id": "fit_pdf_30",
+    "name": "Mercimek Salatası",
+    "category": "Ana Yemek",
+    "kcal": 277,
+    "carb": 25.0,
+    "protein": 14.0,
+    "fat": 10.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(4 porsiyon)",
+      "220 g yeşil mercimek",
+      "(1 buçuk su bardağı)",
+      "Bir tutam tuz",
+      "1 adet domates",
+      "1 adet salatalık",
+      "1 adet biber",
+      "İsterseniz turşu ve mısır da",
+      "ekleyebilirsiniz.",
+      "3 yk zeytinyağı",
+      "Yarım adet limon",
+      "1 yk nane",
+      "(naneyi çok sevmiyorsanız yarım",
+      "kaşık da koyabilirsiniz)"
+    ],
+    "steps": [
+      "1. Yeşil mercimeğimizi bir gece öncesinden suya koyarak bekletiyoruz.",
+      "2. Suyunu süzdükten sonra mercimeklerimizi bir tencereye koyup, üzerine mercimekleri bir parmak geçecek kadar kaynar su ekliyoruz. Bir tutam da tuz atıp altını yakıyoruz.",
+      "3. İstediğimiz kıvama geldikten sonra altını kapatıp suyunu süzüyoruz.",
+      "4. Domates, salatalık ve biberimizi doğruyoruz ve büyük bir kaseye alıyoruz. İsterseniz turşu ve mısır da ekleyebilirsiniz.",
+      "5. Bunun üzerine mercimeğimizi de ekliyoruz.",
+      "6. Üzerine nane ekleyip bir limon sıkıyoruz.",
+      "7. Zeytinyağımızı ekleyip iyice karıştırıyoruz."
+    ],
+    "page": 30,
+    "photo": "assets/recipes/recipe_p30.jpg"
+  },
+  {
+    "id": "fit_pdf_31",
+    "name": "Domatesli Tavuk Sote",
+    "category": "Ana Yemek",
+    "kcal": 380,
+    "carb": 4.0,
+    "protein": 46.0,
+    "fat": 19.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "200 g tavuk göğsü",
+      "1 adet domates",
+      "1 yk zeytinyağı"
+    ],
+    "steps": [
+      "1. Tavuklar kuşbaşı, domatesler de küp küp doğranır.",
+      "2. Yapışmaz yüzeyli tavaya zeytinyağı dökülür, ısıtılır.",
+      "3. Isındıktan sonra domatesler tavaya eklenir ve pembeleşene kadar pişirilir.",
+      "4. Son olarak da tavuklar eklenir ve karıştırarak pişirilir."
+    ],
+    "page": 31,
+    "photo": "assets/recipes/recipe_p31.jpg"
+  },
+  {
+    "id": "fit_pdf_32",
+    "name": "Brokolili Tavuk Yemeği",
+    "category": "Ana Yemek",
+    "kcal": 217,
+    "carb": 2.5,
+    "protein": 30.0,
+    "fat": 8.7,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(5 porsiyon)",
+      "600 g tavuk göğsü",
+      "500 g brokoli",
+      "2 yk zeytinyağı",
+      "2 çk tuz",
+      "isteğe bağlı baharatlar"
+    ],
+    "steps": [
+      "1. Tavuk göğsü kuşbaşı dilimlenir.",
+      "2. Brokolilerin sapları kesilip parça parça ayrılır.",
+      "3. Brokoliler iyice yıkanır, hatta bir süre sirkeli suda bekletilebilir.",
+      "4. Tavuklar tencereye koyulur, üzerine 2-3 parmak geçecek kadar su eklenir.",
+      "5. 2 yemek kaşığı kadar zeytinyağı ve 1 çay kaşığı tuz eklenip karıştırılır. Tencerenin altı yakılır.",
+      "6. Suyun üzerine brokoliler koyulur ve tencerenin kapağı yarım kapatılır.",
+      "7. 20 dakika sonra kapağı tam kapatılarak 5-10 dakika kadar daha pişirilir.",
+      "8. Brokolilere limon, sirke eklenebilir. Tavuklara da karabiber, kekik, pul biber gibi baharatlar eklenebilir."
+    ],
+    "page": 32,
+    "photo": "assets/recipes/recipe_p32.jpg"
+  },
+  {
+    "id": "fit_pdf_33",
+    "name": "Lor Köftesi",
+    "category": "Ana Yemek",
+    "kcal": 247,
+    "carb": 17.0,
+    "protein": 16.0,
+    "fat": 12.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(4 porsiyon)",
+      "200 g lor peyniri",
+      "100 g yulaf ezmesi",
+      "Sarımsak veya sarımsak granül",
+      "kekik, toz biber",
+      "2 adet yumurta",
+      "1 yk zeytinyağı"
+    ],
+    "steps": [
+      "1. Lor peyniri, yulaf ezmesi, baharatlar ve yumurtalar bir kapta iyice yoğurulur.",
+      "2. Tavanın altı ısıtılır, 1 yemek kaşığı zeytinyağı dökülür.",
+      "3. Karışım köfte şekline getirilerek tavaya dizilir. Arkalı önlü pişirilir."
+    ],
+    "page": 33,
+    "photo": "assets/recipes/recipe_p33.jpg"
+  },
+  {
+    "id": "fit_pdf_34",
+    "name": "Bulgur Pilavı",
+    "category": "Ana Yemek",
+    "kcal": 325,
+    "carb": 64.0,
+    "protein": 10.3,
+    "fat": 5.7,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(3 porsiyon)",
+      "225 g bulgur",
+      "(1 buçuk su bardağı)",
+      "Bulgur miktarının 2 katı",
+      "kadar su",
+      "1 yk zeytinyağı",
+      "3 yk domates salçası",
+      "1 orta boy soğan",
+      "isteğe bağlı sebzeler"
+    ],
+    "steps": [
+      "1. Bulgur iyice yıkanır ve suyu süzülür.",
+      "2. Tencereye zeytinyağı eklenip orta ateşte ısıtılır.",
+      "3. Yağ ısındıktan sonra doğranmış soğanlar tencereye eklenir ve pembeleşene kadar kavrulur.",
+      "4. Domates püresi (veya salça) de tencereye eklenip soğanlarla iyice karıştırılır.",
+      "5. Bulgur tencereye eklenip üzerine bulgurun 2 katı kadar su eklenir. (örnek: 1 bardak bulgur için 2 bardak su) kaynayana kadar pişirilir.",
+      "7. Su kaynadıktan sonra ocak kısık ateşe getirilir ve 10 dakika daha pişirilir.",
+      "8. Tencerenin altı kapatıldıktan sonra havlu veya kağıt havlu tencerenin üstüne örtülerek kapağı kapatılır. 15-20 dakika kadar demlenmeye bırakılır."
+    ],
+    "page": 34,
+    "photo": "assets/recipes/recipe_p34.jpg"
+  },
+  {
+    "id": "fit_pdf_35",
+    "name": "Fırında Hindi Göğüs",
+    "category": "Ana Yemek",
+    "kcal": 273,
+    "carb": 4.5,
+    "protein": 38.0,
+    "fat": 12.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(4 porsiyon)",
+      "600 g hindi göğsü",
+      "3 yk zeytinyağı",
+      "3 tk kekik",
+      "2 diş sarımsak veya",
+      "1 tk sarımsak granül",
+      "1 tk kimyon, pul biber",
+      "1 çk karabiber ve tuz"
+    ],
+    "steps": [
+      "1. Hindi göğsü baharatlar ve zeytinyağı ile iyice karıştırıyoruz.",
+      "2. Karıştırdıktan sonra buzdolabında 2-3 saat kadar bekletirseniz çok daha lezzetli olacaktır, zamanınız yoksa bekletmeden de yapabilirsiniz.",
+      "3. Tavanın altını ısıtıp etin iki yüzünü de biraz pişiriyoruz, buradaki amacımız eti mühürleyerek su kaybetmesini önlemek.",
+      "4. Fırın kabına alüminyum folyo serip üzerine eti koyuyoruz ve üzerine yarım çay bardağı kadar su ekliyoruz.",
+      "5. Isıtılmış 180 derece fırına koyarak 1 saat pişiriyoruz. Fırından çıkarınca 10-15 dakika bekletip sonrasında keserek yiyebilirsiniz."
+    ],
+    "page": 35,
+    "photo": "assets/recipes/recipe_p35.jpg"
+  },
+  {
+    "id": "fit_pdf_36",
+    "name": "Lor Peynirli Salata",
+    "category": "Ana Yemek",
+    "kcal": 233,
+    "carb": 18.0,
+    "protein": 15.0,
+    "fat": 7.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(2 porsiyon)",
+      "150 g lor peyniri",
+      "2 adet yeşil biber",
+      "2 adet domates",
+      "Marul",
+      "Yarım limon",
+      "2 tk zeytinyağı"
+    ],
+    "steps": [
+      "1. Lor peyniri parçalanarak bir kaseye koyulur.",
+      "2. Sebzeler yıkanır veya tercihen sirkeli suda bekletilebilir. Kurutulduktan sonra doğranarak salata kabına eklenir.",
+      "3. Üzerine limon ve zeytinyağı da eklenerek salata iyice karıştırılır. İstenilen baharatlar eklenir."
+    ],
+    "page": 36,
+    "photo": "assets/recipes/recipe_p36.jpg"
+  },
+  {
+    "id": "fit_pdf_37",
+    "name": "Sebzeli Hindi Yemeği",
+    "category": "Ana Yemek",
+    "kcal": 300,
+    "carb": 30.0,
+    "protein": 42.0,
+    "fat": 1.7,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(4 porsiyon)",
+      "600 g Hindi Göğüs",
+      "3 orta boy patates",
+      "2 büyük boy kırmızı biber",
+      "100 g mantar",
+      "İstenen farklı sebzeler de",
+      "eklenebilir.*"
+    ],
+    "steps": [
+      "1. Hindi eti tencereye konulur.",
+      "2. Sebzeler iyice yıkandıktan sonra (tercihen sirkeli suda bekletildikten sonra), büyük parçalar halinde doğranır.",
+      "3. Et suyunu saldıktan sonra üzerine sebzeler eklenir.",
+      "4. Tencerenin kapağı kapatılır, altı kısılır ve patatesler pişene kadar pişirilir."
+    ],
+    "page": 37,
+    "photo": "assets/recipes/recipe_p37.jpg"
+  },
+  {
+    "id": "fit_pdf_38",
+    "name": "Fırında Tavuk Patates",
+    "category": "Ana Yemek",
+    "kcal": 377,
+    "carb": 15.0,
+    "protein": 47.0,
+    "fat": 13.4,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(5 porsiyon)",
+      "1 kg tavuk göğsü",
+      "2 orta boy patates",
+      "3 yk zeytinyağı",
+      "Tuz ve istenilen baharatlar"
+    ],
+    "steps": [
+      "1. Tavuk eti tepsiye kolay sığacak şekilde doğranıp geniş bir kabın içine alınır. Üzerine zeytinyağı, tuz ve istenilen baharatlar eklenerek iyice karıştırılır.",
+      "2. Patatesler yuvarlak yuvarlak dilimlenir. Bir kabın içinde zeytinyağı ile karıştırılır.",
+      "3. Pişirme kağıdı serilmiş tepsiye patates ve tavuklar güzelce dizilir. Patateslerin üzerine dizdikten sonra baharat serpebilirsiniz.",
+      "4. Önceden ısıtılmış 200 derecelik fırında, 25 dakika kadar pişirmeniz yeterlidir."
+    ],
+    "page": 38,
+    "photo": "assets/recipes/recipe_p38.jpg"
+  },
+  {
+    "id": "fit_pdf_39",
+    "name": "Zerdeçallı Pilav",
+    "category": "Ana Yemek",
+    "kcal": 284,
+    "carb": 55.0,
+    "protein": 4.8,
+    "fat": 4.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(3 porsiyon)",
+      "200 g pirinç",
+      "(1 su bardağı)",
+      "1 yk tereyağı",
+      "1 yk zerdeçal",
+      "Tuz"
+    ],
+    "steps": [
+      "1. Pirinç iyice yıkanır, vakit varsa ılık suda bekletilir.",
+      "2. Tencerede tereyağı eritilir, üzerine pirinçler eklenerek 2-3 dakika yağda kavrulur.",
+      "3. Önceden ısıtılmış su tencereye eklenir, tuz da eklendikten sonra biraz karıştırılıp tencerenin kapağı kapatılır.",
+      "4. Kısık ateşte 15 dakika pişirilir.",
+      "5. Ocağın altı kapatılır, havlu peçete koyulup pilav 10-20 dakika demlenmeye bırakılır.",
+      "6. Pilav sıcakken zerdeçal eklenip karıştırılır."
+    ],
+    "page": 39,
+    "photo": "assets/recipes/recipe_p39.jpg"
+  },
+  {
+    "id": "fit_pdf_40",
+    "name": "Ispanaklı Makarna",
+    "category": "Ana Yemek",
+    "kcal": 445,
+    "carb": 79.0,
+    "protein": 17.5,
+    "fat": 7.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(5 porsiyon)",
+      "1 paket makarna",
+      "(500 gram)",
+      "180 g yoğurt",
+      "(4 yk)",
+      "150 g lor peyniri",
+      "2 diş sarımsak",
+      "1 yk zeytinyağı",
+      "2 kase ıspanak"
+    ],
+    "steps": [
+      "1. Makarnamızı kaynar suyun içine atarak 10 dakika haşlıyoruz. Daha sonra süzerek porsiyonumuzu tabağımıza alıyoruz.",
+      "2. Ispanak, sarımsak, yoğurt, lor peyniri ve zeytinyağını blender kabımıza koyarak blenderdan geçiriyoruz.",
+      "3. Makarnamızın üzerine enfes sosumuzu dökerek afiyetle yiyoruz!"
+    ],
+    "page": 40,
+    "photo": "assets/recipes/recipe_p40.jpg"
+  },
+  {
+    "id": "fit_pdf_41",
+    "name": "Diyet Pizza (Ton Balıklı)",
+    "category": "Ana Yemek",
+    "kcal": 356,
+    "carb": 6.8,
+    "protein": 38.7,
+    "fat": 19.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "Pizza tabanı için:",
+      "1 kutu ton balığı (büyük)",
+      "1 adet yumurta",
+      "kekik, karabiber",
+      "Üzeri için:",
+      "1 yk domates püresi",
+      "1 dilim hindi füme",
+      "1 dilim kadar rendelenmiş kaşar",
+      "(Bunlar benim kullandıklarım,",
+      "siz kendi damak zevkinize göre",
+      "pizzanızı süsleyebilirsiniz.)"
+    ],
+    "steps": [
+      "1. Ton balığının yağı süzülerek geniş bir kabın içine alınır.",
+      "2. Üzerine yumurta kırılır; tuz, karabiber ve kekik de eklenip iyice yoğurulur.",
+      "3. Yağlı kağıt serilen fırın tepsisine, karışım pizza tabanı şekli verilerek koyulur.",
+      "4. Önceden ısıtılmış 220 derece fırında 15-20 dakika pişirilir.",
+      "5. Fırından çıkarılan pizza tabanlarının üzerine domates üste rendelenmiş kaşarlar koyulur.",
+      "6. Fırın henüz sıcakken kaşarlar eriyene kadar tekrar fırına atılıp birkaç dakika ısıtılır."
+    ],
+    "page": 41,
+    "photo": "assets/recipes/recipe_p41.jpg"
+  },
+  {
+    "id": "fit_pdf_42",
+    "name": "Fırında Kırmızı Et",
+    "category": "Ana Yemek",
+    "kcal": 251,
+    "carb": 0.6,
+    "protein": 13.8,
+    "fat": 21.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(2 porsiyon)",
+      "150 g kırmızı et",
+      "1 yk zeytinyağı",
+      "kekik",
+      "tuz",
+      "istenilen diğer baharatlar"
+    ],
+    "steps": [
+      "1. Parça etimizi, 1-2 parmak kalınlığında olacak şekilde kesiyoruz.",
+      "2. Kestiğimiz eti bir kabın içine alıyoruz. Üzerine zeytinyağı, tuz ve istediğimiz diğer baharatları ekliyoruz. Etin iki yüzüne de zeytinyağını ve baharatları iyice yediriyoruz. Bunu yaptıktan sonra eti, yağ ve baharat karışımının içinde buzdolabında bekletebilirsiniz. Daha lezzetli olacaktır.",
+      "3. Döküm veya teflon tavanın altını açıp iyice ısınmasını bekliyoruz. Aynı zamanda fırını da 200 dereceye ayarlayıp açıyoruz, biz etimizi mühürlerken fırın da ısınadursun.",
+      "4. Tava iyice ısındığında, üzerine eti koyuyoruz. Etin iki yüzünü de birkaç dakika tavada tutarak mühürlüyoruz. Bunu yapmaktaki amacımız, eti fırına attığımızda suyunu kaybetmemesi için mühürlemek. Aynı zamanda eti mühürlerken kesinlikle üzerine bastırmıyoruz! İçindeki suyu ne kadar korursak o kadar lezzetli olacaktır. İki yüzünü de mühürledikten sonra yanlarını da biraz mühürledikten sonra eti tavadan alıyoruz.",
+      "5. Yağlı kağıt serili tepsiye etleri koyup, ısınmış durumdaki fırına gönderiyoruz. 200 derecede pişiriyoruz. Az pişmiş seviyorsanız 5 dakika, orta pişmiş seviyorsanız 7 dakika, iyi pişmiş istiyorsanız da 10 dakika fırında pişirebilirsiniz."
+    ],
+    "page": 42,
+    "photo": "assets/recipes/recipe_p42.jpg"
+  },
+  {
+    "id": "fit_pdf_43",
+    "name": "Tavuk Köftesi",
+    "category": "Ana Yemek",
+    "kcal": 213,
+    "carb": 4.3,
+    "protein": 29.7,
+    "fat": 7.5,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(2 porsiyon)",
+      "200 g tavuk",
+      "2 adet yumurta",
+      "1 adet küçük soğan",
+      "2 avuç maydanoz",
+      "Tuz ve istenen baharatlar",
+      "Sarımsak da eklenebilir*"
+    ],
+    "steps": [
+      "1. Tavuğun yağlı kısımları ayıklanır ve blender ile kıyma haline getirilir. küçük küçük doğranıp eklenerek iyice yoğurulur.",
+      "3. Tava iyice ısıtılır.",
+      "4. Başka bir kasenin içine 1 yumurta kırılıp çırpılır.",
+      "5. Karışım köfte şekline getirilirip kasedeki yumurtaya bandırıldıktan sonra tavaya atılır.",
+      "6. İki tarafını da pişirdikten sonra tavuk köfteniz hazır."
+    ],
+    "page": 43,
+    "photo": "assets/recipes/recipe_p43.jpg"
+  },
+  {
+    "id": "fit_pdf_44",
+    "name": "Humus",
+    "category": "Ana Yemek",
+    "kcal": 260,
+    "carb": 36.7,
+    "protein": 10.4,
+    "fat": 6.4,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(2 porsiyon)",
+      "200 g haşlanmış nohut",
+      "(haşlanmış ağırlık ile)",
+      "1 tk zeytinyağı",
+      "1 yk tahin",
+      "1 adet limon",
+      "(suyu kullanılacak)",
+      "Tuz ve istenen baharatlar",
+      "Sarımsak da eklenebilir*"
+    ],
+    "steps": [
+      "1. Nohutlar haşlanır veya haşlanmış nohut konservesi kullanılabilir.",
+      "2. Çatal veya blender yardımıyla nohutlar püre kıvamına getirilir.",
+      "4. Son olarak üzerine zeytinyağı ve baharat eklenir."
+    ],
+    "page": 44,
+    "photo": "assets/recipes/recipe_p44.jpg"
+  },
+  {
+    "id": "fit_pdf_45",
+    "name": "Tavuk Sarma",
+    "category": "Ana Yemek",
+    "kcal": 256,
+    "carb": 4.5,
+    "protein": 32.0,
+    "fat": 9.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(5 porsiyon)",
+      "600 g tavuk göğüs",
+      "6 dilim cheddar peyniri",
+      "(farklı bir peynir de kullanabilirsiniz)",
+      "ıspanak ve kırmızı biber",
+      "(içini doldurmak için kullanacağız, farklı sebzelerden de",
+      "yararlanabilirsiniz*)",
+      "Sos için:",
+      "3 tk zeytinyağı",
+      "Bir tutam tuz",
+      "istenilen baharatlar"
+    ],
+    "steps": [
+      "1. Fırın 200 dereceye ayarlanarak açılır, ısınmaya bırakılır.",
+      "2. Bu sırada bir tabağın içine zeytinyağı ve baharatlar eklenerek karıştırılır.",
+      "3. Tavuk göğsü 1 cm civarı bir kalınlıkta yatay olarak kesilir.",
+      "5. Kürdan yardımıyla tutturulan tavuk sarmalar, zeytinyağlı baharat karışımına sürülerek fırın kabına dizilir.",
+      "6. 200 derecede 20-25 dakika pişirdikten sonra, bol proteinli tavuk sarmalarınız hazır."
+    ],
+    "page": 45,
+    "photo": "assets/recipes/recipe_p45.jpg"
+  },
+  {
+    "id": "fit_pdf_46",
+    "name": "Pesto Soslu Tavuk",
+    "category": "Ana Yemek",
+    "kcal": 304,
+    "carb": 3.3,
+    "protein": 34.0,
+    "fat": 17.5,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(3 porsiyon)",
+      "700 g tavuk göğüs",
+      "4 yk zeytinyağı",
+      "2 adet orta boy domates",
+      "2 adet yeşil biber",
+      "3 yk pesto sos",
+      "Karabiber, tuz ve istenen",
+      "baharatlar"
+    ],
+    "steps": [
+      "1. Tavuklar kuşbaşı doğranır.",
+      "2. Tencereye 3 yemek kaşığı zeytinyağı eklenip, ısınınca üzerine tavuklar eklenir.",
+      "3. Üzerine tuz ve karabiber serptikten sonra kaşıkla karıştırarak tavuklar yarı pişmiş kıvama getirilir.",
+      "4. Tavuklar tencereden başka bir kaba alınır, tavukların suyu tencerede bırakılır ve üzerine 1 yemek kaşığı kadar zeytinyağı eklenir. Ardından küp küp doğranan domates ve biberler tencereye koyularak pişirilir.",
+      "5. Domatesler suyunu saldıktan sonra yarı pişmiş tavuklar ve pesto sos da tencereye eklenip karıştırarak pişirilir."
+    ],
+    "page": 46,
+    "photo": "assets/recipes/recipe_p46.jpg"
+  },
+  {
+    "id": "fit_pdf_47",
+    "name": "Fit Soslar",
+    "category": "Ana Yemek",
+    "kcal": 38,
+    "carb": 0.4,
+    "protein": 1.1,
+    "fat": 3.7,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "PESTO SOS",
+      "1 su bardağı kadar taze",
+      "fesleğen",
+      "1 kibrit kutusu kadar eski kaşar",
+      "peyniri veya parmesan",
+      "(rendelenir)",
+      "2 yk zeytinyağı",
+      "3 diş sarımsak veya",
+      "sarımsak granül",
+      "CACIKÖTESİ SOS",
+      "1 su bardağı süzme yoğurt",
+      "1 adet orta boy salatalık",
+      "(küp küp doğranır)",
+      "yarım limonun suyu",
+      "3-4 yaprak taze nane",
+      "(ince ince doğranır)",
+      "bir tutam dereotu",
+      "(ince ince doğranır)",
+      "bir diş sarımsak",
+      "KCAL",
+      "KARB",
+      "PRO",
+      "YAĞ",
+      "LİF",
+      "0.4g",
+      "1.1g",
+      "3.7g",
+      "0.1g"
+    ],
+    "steps": [
+      "CACIKÖTESİ SOS 1 su bardağı süzme yoğurt 1 adet orta boy salatalık (küp küp doğranır) yarım limonun suyu",
+      "3. 4 yaprak taze nane (ince ince doğranır) bir tutam dereotu (ince ince doğranır) bir diş sarımsak ZEYTO SOS yarım su bardağı çekirdeği çıkartılmış zeytin bir avuç kadar maydanoz 5 yaprak fesleğen 1 yk zeytinyağı Karabiber KCAL KARB PRO YAĞ LİF 35",
+      "1. 7g 2g",
+      "2. 2g",
+      "0. 2g KCAL KARB PRO YAĞ LİF 29",
+      "0. 5g",
+      "0. 3g",
+      "2. 8g",
+      "0. 2g"
+    ],
+    "page": 47,
+    "photo": "assets/recipes/recipe_p47.jpg"
+  },
+  {
+    "id": "fit_pdf_48",
+    "name": "Bağışıklık Çorbası",
+    "category": "Ana Yemek",
+    "kcal": 217,
+    "carb": 13.0,
+    "protein": 30.6,
+    "fat": 4.6,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(4 porsiyon)",
+      "2 parça tavuk göğsü",
+      "(yaklaşık 500 gram kadar)",
+      "1 çay bardağı yulaf ezmesi",
+      "1 adet orta boy soğan",
+      "(arttırabilirsiniz.)",
+      "1 adet havuç",
+      "2’şer tk karabiber, kekik, kırmızı",
+      "toz biber (İstediğiniz baharatları",
+      "tercih edebilirsiniz.)",
+      "bir tutam tuz",
+      "(Ekstra sebze ekleyebilirsiniz.",
+      "Üzerine limon sıkarak servis",
+      "etmenizi tavsiye ederim*)"
+    ],
+    "steps": [
+      "1. Tavuklar tencereye alınır, üzerine 5 su bardağı kadar su eklendikten sonra orta ateşte haşlanmaya bırakılır.",
+      "2. Soğan ve havuçlar doğranıp, tencereye eklenir.",
+      "3. Tavuklar haşlandıktan sonra çıkarılır ve ince ince doğranır. Tavuklar çıkarıldıktan sonra yulaf ezmesi de tencereye eklenir.",
+      "4. Doğranılan tavuklar tekrar tencereye atılır. Bu aşamada istenilen sebze ve baharatlar da tencereye eklenir. birbirine karışması için pişirilir."
+    ],
+    "page": 48,
+    "photo": "assets/recipes/recipe_p48.jpg"
+  },
+  {
+    "id": "fit_pdf_49",
+    "name": "Diyet Cips",
+    "category": "Ana Yemek",
+    "kcal": 116,
+    "carb": 16.0,
+    "protein": 3.0,
+    "fat": 4.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(6 porsiyon)",
+      "3 adet tam tahıllı lavaş",
+      "5 yk domates püresi",
+      "2 tk zeytinyağı",
+      "bir tutam tuz",
+      "istenilen baharatlar"
+    ],
+    "steps": [
+      "1. Domates püresinin üzerine zeytinyağı, bir tutam tuz ve istediğimiz baharatları ekleyip iyice karıştırıyoruz.",
+      "2. Lavaşların iki yüzüne de olacak şekilde, hazırladığımız bu karışımı sürüyoruz ve iyice dağıtıyoruz.",
+      "3. Sosladığımız lavaşları cips şeklinde keserek parçalara ayırıyoruz ve yağlı kağıt koyduğumuz fırın tepsisine alıyoruz.",
+      "4. Önceden ısıtılmış 200 derece fırına atıp 6 dakika pişiriyoruz.",
+      "5. Tepsiyi fırından çıkardıktan sonra oda sıcaklığına gelmesini bekliyoruz. Cipslerimiz soğudukça çıtır çıtır olmaya başlayacaktır. Hepsi bu kadar!"
+    ],
+    "page": 49,
+    "photo": "assets/recipes/recipe_p49.jpg"
+  },
+  {
+    "id": "fit_pdf_50",
+    "name": "Mozaik Pasta",
+    "category": "Ana Yemek",
+    "kcal": 115,
+    "carb": 14.6,
+    "protein": 8.2,
+    "fat": 2.8,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(5 porsiyon için)",
+      "100 g yulaf ezmesi",
+      "1 bardak sıcak su",
+      "1 yk kakao",
+      "1 yk bal (ezilmiş hurma, keçi boynuzu unu veya pekmez alternatif",
+      "olarak eklenebilir.)",
+      "1 ölçek çikolatalı protein tozu",
+      "(şart değildir, eklenmezse bal",
+      "miktarı arttırılabilir.)",
+      "İstenilen miktarda ceviz (ben 4",
+      "küçük ceviz ekledim.)"
+    ],
+    "steps": [
+      "1. Geniş bir kaba yulaflar konulur, üzerine sıcak su eklenerek",
+      "15. 20 dakika oda sıcaklığında soğumaya bırakılır.",
+      "2. Soğuduktan sonra üzerine kakao ve varsa protein tozu eklenip iyice karıştırılır.",
+      "3. Muz ezilerek eklendikten sonra üzerine bal eklenir. Çatal yardımıyla muz iyice parçalanarak karıştırılır.",
+      "4. Cevizler eklenir.",
+      "5. Karışım yağlı kağıda dökülerek sarılır ve derin dondurucuda 2 saat kadar beklenir.",
+      "6. Mozaik pastamız dilimleyip yemek için hazır, afiyet olsun!"
+    ],
+    "page": 50,
+    "photo": "assets/recipes/recipe_p50.jpg"
+  },
+  {
+    "id": "fit_pdf_51",
+    "name": "Fit Waffle",
+    "category": "Ana Yemek",
+    "kcal": 212,
+    "carb": 28.0,
+    "protein": 11.0,
+    "fat": 6.4,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(2 porsiyon için)",
+      "1 bardak yulaf ezmesi",
+      "1 adet yumurta",
+      "100 ml süt",
+      "yarım paket kabartma tozu",
+      "yarım paket vanilya"
+    ],
+    "steps": [
+      "1. Vanilya, kabartma tozu ve yumurta bir kapta karıştırılır.",
+      "2. Sütün bir kısmı ilave edilip tekrar karıştırılır.",
+      "3. Yulaf unu (veya yulaf kepeği) ilave edilir, tekrar süt eklenip karıştırılır.",
+      "4. Karışım tost makinesine dökülür, katılaşana kadar birkaç dakika pişirilir. (Makinenizin yüzeyi teflon değilse biraz sıvı yağ damlatıp peçete ile yayabilirsiniz.)",
+      "5. Pişen hamur 3 parçaya bölünüp tabağa alınır.",
+      "6. Protein tozu ile çok az süt karıştırılır, böylece bol proteinli ve düşük kalorili çikolata kreması elde ederiz. Hazırlanan"
+    ],
+    "page": 51,
+    "photo": "assets/recipes/recipe_p51.jpg"
+  },
+  {
+    "id": "fit_pdf_52",
+    "name": "Protein Dondurması",
+    "category": "Ana Yemek",
+    "kcal": 122,
+    "carb": 11.0,
+    "protein": 14.5,
+    "fat": 2.8,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(6 porsiyon için)",
+      "400 g yoğurt",
+      "3 ölçek whey protein",
+      "1 adet muz"
+    ],
+    "steps": [
+      "1. Muz blenderdan geçirilerek veya çatalla ezilerek püre kıvamına getirilir.",
+      "2. Muz püresinin üzerine yoğurt ve protein tozu da eklenip iyice karıştırılır.",
+      "3. Dondurucuya atılır, 2 saat sonra çıkartılıp çatal ile karıştırılır.",
+      "4. İstenilen kıvama gelene kadar yarım saatte bir çıkarıp karıştırabilirsiniz. Afiyet olsun."
+    ],
+    "page": 52,
+    "photo": "assets/recipes/recipe_p52.jpg"
+  },
+  {
+    "id": "fit_pdf_53",
+    "name": "Fit Dondurmalar",
+    "category": "Ana Yemek",
+    "kcal": 122,
+    "carb": 22.5,
+    "protein": 2.5,
+    "fat": 3.4,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(4 porsiyon için)",
+      "ÇİKOLATA & FISTIK",
+      "2 adet muz",
+      "1 yk fıstık ezmesi",
+      "2 yk kakao",
+      "1 tk hindistan cevizi yağı",
+      "(opsiyonel)",
+      "1.  Muzlar dilimlenerek bir gece önceden buzluğa atılır.",
+      "3.  Tamamı blenderdan geçirilir, gerekirse bir tatlı kaşığı kadar süt eklenebilir. Afiyet olsun.",
+      "KCAL",
+      "KARB",
+      "PRO",
+      "YAĞ",
+      "LİF",
+      "122",
+      "22.5g",
+      "2.5g",
+      "3.4g",
+      "2.3g"
+    ],
+    "steps": [
+      "(4 porsiyon için) ÇİLEK 2 adet muz 1 kase dondurulmuş çilek 1 tk hindistan cevizi yağı (opsiyonel) (4 porsiyon için) NANE & DAMLA ÇİKOLATA 2 adet muz",
+      "3. 4 adet taze nane yaprağı 1 yk bitter damla çikolata 1 tk hindistan cevizi yağı (opsiyonel) KCAL KARB PRO YAĞ LİF 107 23g",
+      "1. 3g",
+      "1. 7g",
+      "3. 2g KCAL KARB PRO YAĞ LİF 100 21g 1g",
+      "2. 2g",
+      "2. 3g"
+    ],
+    "page": 53,
+    "photo": "assets/recipes/recipe_p53.jpg"
+  },
+  {
+    "id": "fit_pdf_54",
+    "name": "Proteinli Kek",
+    "category": "Ana Yemek",
+    "kcal": 94,
+    "carb": 9.8,
+    "protein": 12.0,
+    "fat": 1.6,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(4 porsiyon için)",
+      "1.5 ölçek whey protein",
+      "1 çk tarçın",
+      "1 yk kakao",
+      "yarım bardak yulaf ezmesi",
+      "(un haline getirilmiş)",
+      "1 adet yumurta beyazı",
+      "1/3 çay bardağı yarım yağlı süt",
+      "yarım paket kabartma tozu",
+      "100 ml su"
+    ],
+    "steps": [
+      "1. Protein tozu, tarçın ve kakao bir kapta karıştırılır.",
+      "2. Yulaf ezmesi blender yardımıyla un haline getirilip karışıma eklenir. (Yulaf ezmesi yerine yulaf kepeği de kullanılabilir.)",
+      "3. Yumurta beyazı, süt ve kabartma tozu da eklenerek karıştırılır. Üzerine su eklenir.",
+      "4. Pişirilecek kaba çok az sıvı yağ damlatılır ve peçete yardımıyla iyice yayılır.",
+      "5. Karışım yağlanılan kaba dökülür ve mikrodalga fırının en yüksek ayarında 2 dakika pişirilir.",
+      "6. İsteğe bağlı olarak üzerine fıstık ezmesi de sürülebilir."
+    ],
+    "page": 54,
+    "photo": "assets/recipes/recipe_p54.jpg"
+  },
+  {
+    "id": "fit_pdf_55",
+    "name": "Yulaf Topları",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 69,
+    "carb": 10.8,
+    "protein": 2.1,
+    "fat": 1.6,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(10 porsiyon için)",
+      "100 g yulaf ezmesi",
+      "3/4 su bardağı süt",
+      "1 bardak kuru üzüm/erik",
+      "bir tutam rende hindistan cevizi",
+      "bir tutam tarçın"
+    ],
+    "steps": [
+      "1. Yulaf ezmesi, süt ve kuru üzümler bir kaba konulur.",
+      "2. Blender ile iyice parçalanır.",
+      "3. Karışım 5-10 dakika bekletilir, sonrasında el ile topçuk haline getirilip tabağa konulur.",
+      "4. Üzerine tarçın veya hindistan cevizi serpiştirilir.",
+      "5. Buzdolabında soğutulduktan sonra yemeye hazırdır. Afiyet olsun."
+    ],
+    "page": 55,
+    "photo": "assets/recipes/recipe_p55.jpg"
+  },
+  {
+    "id": "fit_pdf_56",
+    "name": "Yulaflı Kurabiye",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 53,
+    "carb": 7.1,
+    "protein": 2.5,
+    "fat": 1.5,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(20 porsiyon için)",
+      "4 adet yumurta (artırılabilir)",
+      "150g yulaf ezmesi",
+      "1 adet muz",
+      "yarım avuç kuru üzüm",
+      "bir tutam tarçın",
+      "yarım paket kabartma tozu"
+    ],
+    "steps": [
+      "1. Yumurtaların sarıları bir kaseye ayrılır. Yumurta beyazları beyazlaşana kadar çırpılır.",
+      "2. Yumurta beyazı geniş bir kaba alınır, üzerine 1 adet muz ezilerek eklenir. Muz çatal yardımıyla iyice parçalanır.",
+      "3. Ayrılan yumurta sarılarının yarısı bu kaba eklenir.",
+      "4. 150 gram yulaf ezmesi, 1 paket kabartma tozu, yarım avuç kuru üzüm ve tarçın kaba eklenir. İyice karıştırılır.",
+      "5. Fırın tepsisine pişirme kağıdır serildikten sonra, üzerine istenilen boyutlarda karışımdan dökülür.",
+      "6. 180 derece önceden ısıtılmış fırında, 20 dakika kadar pişirilir. Afiyet olsun."
+    ],
+    "page": 56,
+    "photo": "assets/recipes/recipe_p56.jpg"
+  },
+  {
+    "id": "fit_pdf_57",
+    "name": "Meyve Pastası",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 130,
+    "carb": 20.3,
+    "protein": 5.2,
+    "fat": 3.8,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(6 porsiyon için)",
+      "3 adet muz",
+      "4 adet yumurta",
+      "1 çk kadar sıvı yağ",
+      "10 adet donmuş vişne, ahududu, böğürtlen, çilek veya farklı",
+      "bir meyve"
+    ],
+    "steps": [
+      "1. Muzlar iyice ezilir, püre haline getirilir.",
+      "2. Üzerine yumurtalar kırılıp karıştırılır.",
+      "3. Fırın kabına çok az yağ damlatılıp peçete ile yayılır.",
+      "4. Kabın en altına vişne veya yerine tercih edilen meyve konulup üzerine karışım dökülür.",
+      "5. Önceden ısıtılmış 200 derece fırında, 12 dakika pişirilir. Afiyet olsun."
+    ],
+    "page": 57,
+    "photo": "assets/recipes/recipe_p57.jpg"
+  },
+  {
+    "id": "fit_pdf_58",
+    "name": "Çikolata Topları",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 89,
+    "carb": 8.5,
+    "protein": 2.6,
+    "fat": 5.6,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(8 porsiyon için)",
+      "150 g hurma",
+      "75 g çiğ kaju",
+      "50 g bitter çikolata",
+      "(kakao oranı yüksek)",
+      "1 yk kakao"
+    ],
+    "steps": [
+      "1. Sıcak suda bekletilmiş hurmalar, hindistan cevizi ve çiğ kaju ile blenderdan geçirilir. (Hurmanın suyundan 2 kaşık kadar ekleyin karışıma.)",
+      "2. Çikolata benmari usulü eritilir.",
+      "3. Karışım top haline getirilip erimiş çikolata veya kakao ile kaplanır.",
+      "4. Oda sıcaklığına geldikten sonra 20 dakika kadar buzdolabında bekletilir. Afiyet olsun."
+    ],
+    "page": 58,
+    "photo": "assets/recipes/recipe_p58.jpg"
+  },
+  {
+    "id": "fit_pdf_59",
+    "name": "Chia Puding",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 323,
+    "carb": 38.8,
+    "protein": 10.5,
+    "fat": 16.2,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(1 porsiyon için)",
+      "3 yk chia tohumu",
+      "1 adet şeftali",
+      "(farklı bir meyve de kullanılabilir)",
+      "1 tk rende hindistan cevizi",
+      "1 çay bardağı süt"
+    ],
+    "steps": [
+      "1. 3 yemek kaşığı chia tohumu bir kaba koyulur, üzerine 1 çay bardağı süt eklenir. (Daha yoğun olmasını isterseniz süt miktarını azaltabilir veya tohum miktarını arttırabilirsiniz.)",
+      "2. Biraz karıştırdıktan sonra tohumların sütü çekmesi için hazırlanan karışım en az yarım saat buzdolabında bekletilir. (Akşamdan hazırlayıp buzdolabında bekletilmesi tavsiye edilir.)",
+      "3. Dolaptan alınan karışımın üzerine bir miktar rendelenmiş hindistan cevizi ve aroma vermesi için çok az tarçın eklenir.",
+      "4. Son olarak dilimlenen şeftaliler karışımın üzerine eklenir. Afiyet olsun."
+    ],
+    "page": 59,
+    "photo": "assets/recipes/recipe_p59.jpg"
+  },
+  {
+    "id": "fit_pdf_60",
+    "name": "Havuçlu Kek",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 100,
+    "carb": 12.5,
+    "protein": 4.1,
+    "fat": 4.3,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(6 porsiyon için)",
+      "1 adet yumurta",
+      "1/2 çay bardağı süt",
+      "2 çay bardağı yulaf ezmesi",
+      "2 adet havuç",
+      "2 tk keçiboynuzu unu",
+      "(alternatif olarak bal, pekmez",
+      "veya protein tozu kullanılabilir.)",
+      "1 tk tarçın",
+      "1 avuç fındık"
+    ],
+    "steps": [
+      "1. Büyükçe bir kasenin içine 1 yumurta kırılır.",
+      "2. Tatlandırmak için tercih ettiğiniz besinlerden biri (keçiboynuzu unu, bal, pekmez, protein tozu) yumurtanın üzerine eklenir.",
+      "4. Çırpılan karışımın üzerine yarım çay bardağı süt eklenir.",
+      "5. Başka bir kapta iki çay bardağı kadar yulaf ezmesi blenderdan geçirilerek un kıvamına getirilir.",
+      "6. Un kıvamına getirilen yulaf ezmesinin üzerine yarım paket kabartma tozu ve 1 tatlı kaşığı kadar tarçın eklenir. Daha sonra hazırlanan diğer karışımın üzerine eklenir.",
+      "7. Havanda dövülmüş bir avuç fındık ve rendelenmiş 2 adet havuç karışımın üzerine eklenir.",
+      "8. Kek kalıbı hindistan cevizi yağı veya tereyağı ile yağlandıktan sonra hazırlanan harç kek kalıbına dökülür.",
+      "9. Önceden ısıtılmış 180 derecelik fırında 20-25 dakika kadar pişirilir. Afiyet olsun!"
+    ],
+    "page": 60,
+    "photo": "assets/recipes/recipe_p60.jpg"
+  },
+  {
+    "id": "fit_pdf_61",
+    "name": "Diyet Güllaç",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 220,
+    "carb": 29.0,
+    "protein": 8.0,
+    "fat": 4.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(1 porsiyon için)",
+      "1 adet yumurta",
+      "1/2 çay bardağı süt",
+      "2 çay bardağı yulaf ezmesi",
+      "2 adet havuç",
+      "2 tk keçiboynuzu unu",
+      "(alternatif olarak bal, pekmez",
+      "veya protein tozu kullanılabilir.)",
+      "1 tk tarçın",
+      "1 avuç fındık"
+    ],
+    "steps": [
+      "1. Sütü, protein sütünü ve vanilyayı bir tencerede ısıtıyoruz. Kaynatmamıza gerek yok, ısınması yeterli olacaktır.",
+      "2. Tepsiye 1 kepçe süt karışımından ekledikten sonra 1 yaprak güllaç yufkası koyuyoruz.",
+      "3. Güllaç yufkalarının yarısını, her katmanın arasına süt ekleyerek tepsiye üst üste ekliyoruz.",
+      "4. Cevizleri küçük küçük parçaladıktan sonra güllaç yufkasının üzerine serpiştirip, kalan katmanları da aralarına süt dökerek teker teker ekliyoruz.",
+      "5. Güllaç yufkalarının tamamını ekledikten sonra, kalan süt karışımını da üzerine döküyoruz. Son olarak da en üste doğranmış çilek veya nar taneleri ekleyip, 2 saat kadar buzdolabında bekletiyoruz. Afiyet olsun."
+    ],
+    "page": 61,
+    "photo": "assets/recipes/recipe_p61.jpg"
+  },
+  {
+    "id": "fit_pdf_62",
+    "name": "Muz Ekmeği",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 216,
+    "carb": 37.0,
+    "protein": 7.0,
+    "fat": 4.5,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "3 adet muz",
+      "200 g yulaf ezmesi",
+      "2 adet yumurta",
+      "1 paket kabartma tozu",
+      "20 g bitter damla çikolata",
+      "yarım avuç kuru üzüm",
+      "1 tk kakao",
+      "1 tk keçiboynuzu unu"
+    ],
+    "steps": [
+      "1. 200 gram yulaf ezmesi blenderdan geçirilirek un kıvamına getirilir. (Uğraşmak istemezseniz direkt yulaf kepeği de kullanabilirsiniz.)",
+      "2. 3 adet muz ezilerek püre kıvamına getirilir.",
+      "3. 2 adet yumurta çırpılarak hazırlanan harcın üzerine eklenir.",
+      "4. Daha sonra tatlandırmak için bir miktar keçiboynuzu unu ilave edilir. (Keçiboynuzu unu yerine hurma veya kuru meyvelerden de yararlanabilirsiniz.)",
+      "5. Ekmek kıvamına gelmesi için yarım paket kabartma tozu hazırlanan harcın üzerine eklenir.",
+      "6. Son olarak bir avuç bitter damla çikolata ve yarım avuç karıştırılır.",
+      "7. Kek kalıbı hindistan cevizi yağı veya tereyağı ile yağlandıktan sonra kalıbın içi kakao ile kaplanır.",
+      "8. Hazırlanan harç kek kalıbına alınır ve önceden ısıtılmış 200 derecelik fırında 40 dakika kadar pişirilir. Afiyet olsun."
+    ],
+    "page": 62,
+    "photo": "assets/recipes/recipe_p62.jpg"
+  },
+  {
+    "id": "fit_pdf_63",
+    "name": "Muzlu Mug Cake",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 247,
+    "carb": 28.0,
+    "protein": 19.7,
+    "fat": 8.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "Yarım adet muz",
+      "Yarım paket kabartma tozu",
+      "1 adet yumurta",
+      "1 yk süt",
+      "1 tk keçiboynuzu unu",
+      "Yarım ölçek protein tozu",
+      "(tercihe bağlı)",
+      "1 çk hindistan cevizi yağı",
+      "(tercihe bağlı)"
+    ],
+    "steps": [
+      "güzelce karıştırıyoruz.",
+      "3. Kupayı mikrodalgada yüksek ayarda 1 dakika kadar tutuyoruz.",
+      "4. Daha sonra çıkarıp tekrar karıştırıp, mikrodalgaya tekrar koyuyoruz.",
+      "5. Yine yüksek derecede, 3 dakika kadar pişirdikten sonra tatlımız hazır! Muz ve tarçınla süsleyip yiyebilirsiniz."
+    ],
+    "page": 63,
+    "photo": "assets/recipes/recipe_p63.jpg"
+  },
+  {
+    "id": "fit_pdf_64",
+    "name": "Diyet Çikolata",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 125,
+    "carb": 18.0,
+    "protein": 4.5,
+    "fat": 6.5,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "10 adet hurma",
+      "3-4 yk kakao",
+      "1 tk hindistan cevizi yağı",
+      "(veya tuzsuz tereyağı)"
+    ],
+    "steps": [
+      "1. Hurmalar sıcak suda biraz bekletildikten sonra çekirdekleri çıkarılır.",
+      "2. Blender kabına ayıklanan hurmalar, kakao ve yağ eklendikten sonra blenderdan geçirilir.",
+      "3. Yağlı kağıt üzerine çıkarılarak çikolata şekli verildikten sonra buzdolabında 30 dakika bekletilir.",
+      "4. İsterseniz fındık, fıstık ile farklı tatlar katabilirsiniz."
+    ],
+    "page": 64,
+    "photo": "assets/recipes/recipe_p64.jpg"
+  },
+  {
+    "id": "fit_pdf_65",
+    "name": "Yulaflı Tart",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 135,
+    "carb": 26.0,
+    "protein": 4.5,
+    "fat": 2.0,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "(8 adet tart için)",
+      "2 su bardağı yulaf ezmesi",
+      "2 adet muz",
+      "1 tk tarçın",
+      "2 tk bal",
+      "1 kase yoğurt",
+      "istenen bir meyve",
+      "(üzerine eklemek için)"
+    ],
+    "steps": [
+      "1. Muzlar çatal yardımıyla iyice ezilip, geniş bir kaba alınır.",
+      "2. Üzerine yulaf ezmesi, tarçın ve bal eklenip iyice karıştırılır, iyice yoğurulur.",
+      "3. Pişirme kapları yağlandıktan sonra karışım bu kaplara eklenir.",
+      "4. Önceden 200 dereceye ısıtılmış fırında 15 dakika pişirilir.",
+      "5. Kaplardan çıkarılan tartların üzerine yoğurt ve meyve dilimleri eklenir, tartlarınız hazır."
+    ],
+    "page": 65,
+    "photo": "assets/recipes/recipe_p65.jpg"
+  },
+  {
+    "id": "fit_pdf_66",
+    "name": "Fit Magnolia",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 210,
+    "carb": 30.8,
+    "protein": 8.0,
+    "fat": 6.5,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "50 g yulaf ezmesi",
+      "Yarım muz",
+      "1 tk bal",
+      "100g süzme yoğurt",
+      "1 tk keçiboynuzu unu (veya 1",
+      "çay kaşığı tarçın)",
+      "1 çk vanilya",
+      "(veya vanilin)"
+    ],
+    "steps": [
+      "1. Süzme yoğurda bal ve vanilyayı ekleyip iyice karıştırıyoruz.",
+      "2. Yulafı blenderdan geçirerek un haline getiriyoruz. Üzerine keçiboynuzu unu veya tarçın ekleyip karıştırıyoruz.",
+      "3. Meyveleri dilimliyoruz.",
+      "4. Kavanoz veya kasenin en altına yoğurt karışımını, üzerine yulaf karışımını, en üste de meyve dilimlerini koyuyoruz.",
+      "5. Aynı sıralamayla bir kat daha ekliyoruz ve fit magnolia tatlımız hazır."
+    ],
+    "page": 66,
+    "photo": "assets/recipes/recipe_p66.jpg"
+  },
+  {
+    "id": "fit_pdf_67",
+    "name": "Protein İçecekleri",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 527,
+    "carb": 26.5,
+    "protein": 26.4,
+    "fat": 37.5,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "İÇECEK #1",
+      "200 g süzme yoğurt",
+      "1 avuç yer fıstığı",
+      "1 adet elma",
+      "geçirilir.",
+      "KCAL",
+      "KARB",
+      "PRO",
+      "YAĞ",
+      "LİF",
+      "527",
+      "26.5g",
+      "26.4g",
+      "37.5g",
+      "5.8g"
+    ],
+    "steps": [
+      "İÇECEK #2 5 yk yoğurt (ortalama 200g) 100 g lor peyniri Çeyrek şişe maden suyu Buz (isteğe bağlı) İÇECEK #3 200 g lor peyniri 1 adet domates 1 avuç ıspanak KCAL KARB PRO YAĞ LİF 302",
+      "13. 5g",
+      "25. 8g",
+      "16. 5g 0g KCAL KARB PRO YAĞ LİF 361",
+      "11. 3g",
+      "37. 8g",
+      "18. 7g 2g Bir kaba yoğurt, lor peyniri ve istenirse buz koyulur. Blender ile iyice parçalanır. Üzerine çeyrek şişe maden suyu eklenip karıştırılır. geçirilir."
+    ],
+    "page": 67,
+    "photo": "assets/recipes/recipe_p67.jpg"
+  },
+  {
+    "id": "fit_pdf_68",
+    "name": "Detoks İçecekleri",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 61,
+    "carb": 13.0,
+    "protein": 1.5,
+    "fat": 0.5,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "İÇECEK #1",
+      "1 adet salatalık",
+      "1 adet limon",
+      "10 yaprak taze nane",
+      "Salatalık ve limon dilimlenip,",
+      "şişeye veya sürahiye eklenir.",
+      "Akşamdan hazırlayıp, sonraki",
+      "gün içebilirsiniz.",
+      "KCAL",
+      "KARB",
+      "PRO",
+      "YAĞ",
+      "LİF",
+      "13g",
+      "1.5g",
+      "0.5g",
+      "2.7g"
+    ],
+    "steps": [
+      "İÇECEK #2 1 adet çubuk tarçın 1 adet limon",
+      "4. 5 adet karanfil 1 avuç maydanoz 5 yaprak taze nane 1 litre su İÇECEK #3 1 avuç ıspanak 1 avuç maydanoz 2 adet küçük boy salatalık Yarım adet limon birkaç yaprak nane KCAL KARB PRO YAĞ LİF 57 11g 1g",
+      "0. 5g",
+      "2. 4g KCAL KARB PRO YAĞ LİF 52 10g",
+      "2. 5g",
+      "0. 5g",
+      "2. 8g sürahiye eklenir. Akşamdan hazırlayıp, sonraki gün içebilirsiniz. blenderdan geçirilir. Üzerine limon sıkılır."
+    ],
+    "page": 68,
+    "photo": "assets/recipes/recipe_p68.jpg"
+  },
+  {
+    "id": "fit_pdf_69",
+    "name": "Kahvaltı İçecekleri",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 225,
+    "carb": 33.0,
+    "protein": 10.0,
+    "fat": 5.7,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "İÇECEK #1",
+      "1 buçuk avuç kadar dondurulmuş çilek (farklı bir meyve de",
+      "tercih edilebilir)",
+      "1 su bardağı yoğurt",
+      "1 çay bardağı yulaf ezmesi",
+      "İsteyenler 1 tk bal da ekleyebilirler.",
+      "Kullanmak istediğimiz meyveyi dilimleyip, en az bir gece",
+      "önceden buzluğa atarak donduruyoruz.",
+      "geçiriyoruz.",
+      "KCAL",
+      "KARB",
+      "PRO",
+      "YAĞ",
+      "LİF",
+      "225",
+      "33g",
+      "10g",
+      "5.7g",
+      "5.8g"
+    ],
+    "steps": [
+      "İÇECEK #2 1 bardak süt (200 ml) 1 kase yoğurt (200 g) 1 çay bardağı yulaf ezmesi veya yulaf kepeği 1 adet şeftali (veya farklı bir meyve) İÇECEK #3 2 yk yoğurt 1 adet elma 1 avuç maydanoz 10 adet çiğ badem KCAL KARB PRO YAĞ LİF 446 60g 21g 15g",
+      "6. 7g KCAL KARB PRO YAĞ LİF 180 24g 5g",
+      "8. 4g",
+      "4. 7g geçirilir. Elmanın çekirdekleri çıkartılıp doğranır. geçirilir."
+    ],
+    "page": 69,
+    "photo": "assets/recipes/recipe_p69.jpg"
+  },
+  {
+    "id": "fit_pdf_70",
+    "name": "Ödem Atan İçecek",
+    "category": "Tatlı / Atıştırmalık",
+    "kcal": 97,
+    "carb": 23.0,
+    "protein": 1.8,
+    "fat": 0.5,
+    "portions": "1 porsiyon",
+    "prepTime": "15 dakika",
+    "ingredients": [
+      "1 avuç maydanoz",
+      "1 adet elma",
+      "Yarım adet limon",
+      "salatalık"
+    ],
+    "steps": [
+      "2. Üzerine biraz su eklenerek blenderdan geçirilir."
+    ],
+    "page": 70,
+    "photo": "assets/recipes/recipe_p70.jpg"
+  }
+]

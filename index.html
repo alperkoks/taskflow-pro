@@ -12,6 +12,53 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script>
+    function switchAuthTab(tab) {
+      var loginForm = document.getElementById('loginForm');
+      var regForm = document.getElementById('registerForm');
+      var forgotForm = document.getElementById('forgotForm');
+      var tabsBar = document.getElementById('authTabsBar');
+      var subtitle = document.getElementById('authSubtitle');
+      if (!loginForm || !regForm || !forgotForm) return;
+
+      var loginErr = document.getElementById('loginErrorMsg');
+      var regErr = document.getElementById('regErrorMsg');
+      var forgotStatus = document.getElementById('forgotStatusMsg');
+      if (loginErr) loginErr.textContent = '';
+      if (regErr) regErr.textContent = '';
+      if (forgotStatus) forgotStatus.innerHTML = '';
+
+      if (tab === 'login') {
+        loginForm.style.display = 'block';
+        regForm.style.display = 'none';
+        forgotForm.style.display = 'none';
+        if (tabsBar) tabsBar.style.display = 'flex';
+        var tL = document.getElementById('tabLoginBtn');
+        var tR = document.getElementById('tabRegisterBtn');
+        if (tL) tL.classList.add('active');
+        if (tR) tR.classList.remove('active');
+        if (subtitle) subtitle.textContent = 'Kullanıcı adın ve şifrenle hesabına giriş yap';
+      } else if (tab === 'register') {
+        loginForm.style.display = 'none';
+        regForm.style.display = 'block';
+        forgotForm.style.display = 'none';
+        if (tabsBar) tabsBar.style.display = 'flex';
+        var tL = document.getElementById('tabLoginBtn');
+        var tR = document.getElementById('tabRegisterBtn');
+        if (tL) tL.classList.remove('active');
+        if (tR) tR.classList.add('active');
+        if (subtitle) subtitle.textContent = 'Yeni kişisel görev hesabını saniyeler içinde oluştur';
+      } else if (tab === 'forgot') {
+        loginForm.style.display = 'none';
+        regForm.style.display = 'none';
+        forgotForm.style.display = 'block';
+        if (tabsBar) tabsBar.style.display = 'none';
+        if (subtitle) subtitle.textContent = 'Kayıtlı e-posta adresinle şifreni anında kurtar veya yenile';
+      }
+    }
+    window.switchAuthTab = switchAuthTab;
+  </script>
 </head>
 <body data-theme="dark" data-active-view="tasks">
 
@@ -45,7 +92,7 @@
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-muted);">
             <input type="checkbox" id="rememberMeCheck" checked /> Oturumu açık tut
           </label>
-          <a href="javascript:void(0)" onclick="switchAuthTab('forgot')" style="color:var(--accent-cream);text-decoration:none;font-weight:700;">Şifremi Unuttum?</a>
+          <button type="button" onclick="switchAuthTab('forgot')" class="auth-forgot-link" style="background:none;border:none;color:var(--accent-cream);cursor:pointer;font-weight:700;font-size:12px;padding:0;">Şifremi Unuttum?</button>
         </div>
         <p id="loginErrorMsg" style="font-size:12px;color:#ff4d4f;min-height:18px;margin-bottom:8px;text-align:center;"></p>
         <button type="submit" class="btn-cream" style="width:100%;height:45px;font-size:14px;">Giriş Yap →</button>
@@ -566,28 +613,10 @@
               <!-- ======================================================== -->
               <div id="foodInnerTabRecipe" style="display:none;">
                 <div id="inlineCustomRecipeBox">
-                  <!-- BAŞLIK 1: 🧮 MALZEMELERİ SEÇ, TARİFİ KENDİ HESAPLASIN (OTOMATİK TARİF OLUŞTURUCU) -->
-                  <div class="luxury-spawn-box open" id="spawnBoxAutoRecipeBuilder">
-                    <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxAutoRecipeBuilder')">
-                      <span style="color:#95de64;">🧮 Malzemeleri Seç, Tarifi Kendi Hesaplasın!</span>
-                      <span class="luxury-spawn-chevron">▾</span>
-                    </button>
-                    <div class="luxury-spawn-body">
-                      <p style="font-size:12px;color:var(--text-muted);margin:6px 0 10px;">
-                        Kalori veya protein bilmene gerek yok! Yemeğinin içindeki malzemelerin <b>➕</b> ve <b>➖</b> tuşlarına bas; toplam gramaj, kalori ve protein <b>otomatik hesaplansın</b>:
-                      </p>
-                      <div id="autoRecipeIngredientsGrid" class="ingredient-picker-grid"></div>
-                      <div id="autoRecipeSummaryBanner" style="padding:11px 13px;border-radius:14px;background:linear-gradient(135deg,rgba(82,196,26,0.16),rgba(96,165,250,0.12));border:1.5px solid rgba(149,222,100,0.45);font-size:12.5px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-                        <span>🥣 <b>Seçilen Malzemeler:</b> Henüz malzeme seçilmedi (Yukarıdan ➕ tuşuna bas)</span>
-                        <button type="button" class="pin-btn" style="height:34px;padding:0 10px;font-size:11.5px;" onclick="resetAutoRecipeBuilder()">🔄 Sıfırla</button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- BAŞLIK 2: 🍲 TARİFİN ADI, DEĞERLERİ VE KAYDET BUTONU -->
+                  <!-- BAŞLIK 1: 🍲 TARİF ÜRET -->
                   <div class="luxury-spawn-box open" id="spawnBoxManualRecipeForm">
                     <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxManualRecipeForm')">
-                      <span style="color:var(--accent-cream);">🍲 Tarif Adı & Besin Değerleri (Otomatik Dolar / Düzenlenebilir)</span>
+                      <span style="color:var(--accent-cream);">🍲 Tarif Üret</span>
                       <span class="luxury-spawn-chevron">▾</span>
                     </button>
                     <div class="luxury-spawn-body">
@@ -611,38 +640,27 @@
                         </div>
                       </div>
 
-                      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;">
-                        <div class="form-group" style="margin:0;">
-                          <label>🔥 Kalori (kcal)</label>
-                          <input type="number" id="inlineRecipeKcal" class="form-input" style="height:46px;font-weight:800;" placeholder="Örn: 280" />
-                        </div>
-                        <div class="form-group" style="margin:0;">
-                          <label>🥩 Protein (g)</label>
-                          <input type="number" id="inlineRecipeProt" class="form-input" style="height:46px;font-weight:800;" placeholder="Örn: 25" step="0.1" />
-                        </div>
-                        <div class="form-group" style="margin:0;">
-                          <label>🍞 Karbonhidrat (g)</label>
-                          <input type="number" id="inlineRecipeCarb" class="form-input" style="height:46px;font-weight:800;" placeholder="Örn: 18" step="0.1" />
-                        </div>
-                        <div class="form-group" style="margin:0;">
-                          <label>🥑 Yağ (g)</label>
-                          <input type="number" id="inlineRecipeFat" class="form-input" style="height:46px;font-weight:800;" placeholder="Örn: 10" step="0.1" />
-                        </div>
+                  <!-- BAŞLIK 2: 🧮 MALZEMELERİ SEÇ -->
+                  <div class="luxury-spawn-box open" id="spawnBoxAutoRecipeBuilder">
+                    <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxAutoRecipeBuilder')">
+                      <span style="color:#95de64;">🧮 Malzemeleri Seç</span>
+                      <span class="luxury-spawn-chevron">▾</span>
+                    </button>
+                    <div class="luxury-spawn-body">
+                      <p style="font-size:12px;color:var(--text-muted);margin:6px 0 10px;">
+                        Kalori veya protein bilmene gerek yok! Yemeğinin içindeki malzemelerin <b>➕</b> ve <b>➖</b> tuşlarına bas; toplam gramaj, kalori ve protein <b>otomatik hesaplansın</b>:
+                      </p>
+                      <div id="autoRecipeIngredientsGrid" class="ingredient-picker-grid"></div>
+                      <div id="autoRecipeSummaryBanner" style="padding:11px 13px;border-radius:14px;background:linear-gradient(135deg,rgba(82,196,26,0.16),rgba(96,165,250,0.12));border:1.5px solid rgba(149,222,100,0.45);font-size:12.5px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                        <span>🥣 <b>Seçilen Malzemeler:</b> Henüz malzeme seçilmedi (Yukarıdan ➕ tuşuna bas)</span>
+                        <button type="button" class="pin-btn" style="height:34px;padding:0 10px;font-size:11.5px;" onclick="resetAutoRecipeBuilder()">🔄 Sıfırla</button>
                       </div>
-
-                      <input type="hidden" id="inlineRecipeFiber" value="" />
-                      <input type="hidden" id="inlineRecipeMicro" value="" />
-
-                      <button type="button" class="btn-cream" style="width:100%;min-height:50px;font-size:14.5px;font-weight:900;background:#95de64;color:#09090d;" onclick="saveInlineCustomRecipe()">
-                        💾 Tarifimi Kaydet ve Bugün Yediklerime Ekle ✓
-                      </button>
                     </div>
-                  </div>
                 </div>
 
                 <!-- 📚 KAYITLI ÖZEL TARİFLERİM LİSTESİ -->
                 <div id="savedCustomRecipesSection" style="background:rgba(255,192,105,0.08);border:1px solid rgba(255,192,105,0.35);border-radius:16px;padding:13px;">
-                  <div style="font-size:13.5px;font-weight:900;color:#ffc069;margin-bottom:8px;">👨‍🍳 Kayıtlı Özel Tariflerim (Tek Tıkla Bugüne Ekle):</div>
+                  <div style="font-size:13.5px;font-weight:900;color:#ffc069;margin-bottom:8px;">👨‍🍳 Kayıtlı Özel Tariflerim</div>
                   <div id="savedCustomRecipesList" style="display:flex;flex-direction:column;gap:8px;"></div>
                 </div>
               </div>
@@ -1114,7 +1132,7 @@
             <!-- Ortalanmış Ay Başlığı & Gezinme Butonları -->
             <div style="display:flex;align-items:center;gap:10px;">
               <button type="button" class="pin-btn" style="height:34px;width:34px;padding:0;border-radius:10px;font-size:12px;display:flex;align-items:center;justify-content:center;" onclick="changeArchiveCalendarMonth(-1)" title="Önceki Ay">◀</button>
-              <span id="archiveCalendarMonthTitle" style="font-weight:900;font-size:15px;color:var(--text-main);cursor:pointer;padding:5px 12px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);" onclick="promptPickCalendarMonthYear()" title="Dokunarak Ay / Yıl Seç">Ekim 2026 ▾</span>
+              <span id="archiveCalendarMonthTitle" style="font-weight:900;font-size:15px;color:var(--text-main);cursor:pointer;padding:5px 12px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);" onclick="openMonthYearPickerModal()" title="Dokunarak Ay / Yıl Seç">Ekim 2026 ▾</span>
               <button type="button" class="pin-btn" style="height:34px;width:34px;padding:0;border-radius:10px;font-size:12px;display:flex;align-items:center;justify-content:center;" onclick="changeArchiveCalendarMonth(1)" title="Sonraki Ay">▶</button>
             </div>
             <!-- Sağ Üstte Kompakt Bugün Butonu (Yerden Tasarruf Sağlar) -->
@@ -2207,5 +2225,29 @@
     </div>
   </div>
 
+
+  <!-- 📅 LÜKS AY VE YIL SEÇİCİ MODALI -->
+  <div id="monthYearPickerModal" class="modal-backdrop hidden" style="z-index:26000;">
+    <div class="modal-sheet spawn-anim" style="max-width:380px;border-radius:24px;text-align:center;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3 style="font-size:17px;font-weight:900;color:var(--accent-cream);">🗓️ Tarih Seçici</h3>
+        <button type="button" class="icon-btn" onclick="closeMonthYearPickerModal()">✕</button>
+      </div>
+
+      <!-- Yıl Stepper -->
+      <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.06);border-radius:14px;padding:6px 12px;margin-bottom:14px;">
+        <button type="button" class="pin-btn" style="height:36px;width:36px;font-size:14px;" onclick="stepPickerYear(-1)">◀</button>
+        <span id="pickerYearDisplay" style="font-size:18px;font-weight:900;color:var(--text-main);">2026</span>
+        <button type="button" class="pin-btn" style="height:36px;width:36px;font-size:14px;" onclick="stepPickerYear(1)">▶</button>
+      </div>
+
+      <!-- 12 Ay Grid (3 sütun x 4 satır) -->
+      <div id="pickerMonthsGrid" style="display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;margin-bottom:14px;"></div>
+
+      <button type="button" class="btn-cream" style="width:100%;height:44px;font-size:13.5px;font-weight:900;" onclick="closeMonthYearPickerModal()">
+        Tamam
+      </button>
+    </div>
+  </div>
 </body>
 </html>

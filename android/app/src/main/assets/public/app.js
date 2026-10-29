@@ -1,3 +1,20 @@
+
+// ============================================================================
+// 📱 ALT MENÜ (BOTTOM NAV) AKTİF BUTON SENKRONİZASYONU
+// ============================================================================
+function updateBottomNavActive(tabName) {
+  const btnTasks = document.getElementById('navTasks');
+  const btnFood = document.getElementById('navFoodQuick');
+  const btnGoals = document.getElementById('navGoals');
+  const btnSocial = document.getElementById('navSocial');
+
+  if (btnTasks) btnTasks.classList.toggle('active', tabName === 'tasks');
+  if (btnFood) btnFood.classList.toggle('active', tabName === 'food');
+  if (btnGoals) btnGoals.classList.toggle('active', tabName === 'goals');
+  if (btnSocial) btnSocial.classList.toggle('active', tabName === 'social');
+}
+window.updateBottomNavActive = updateBottomNavActive;
+
 // ============================================================================
 // TASKFLOW+ v9.0 ULTIMATE EDITION
 // - 4 Ana Kategori: İş & Proje | Rutin İşler | Spor ve Sağlık | Kişisel Gelişim
@@ -679,36 +696,60 @@ async function handleRegister(e) {
 }
 
 async function handleLogin(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
   const identifier = document.getElementById('loginUsername').value.trim().toLowerCase();
   const password = document.getElementById('loginPassword').value;
-  const remember = document.getElementById('rememberMeCheck').checked;
+  const remember = document.getElementById('rememberMeCheck') ? document.getElementById('rememberMeCheck').checked : true;
   const errEl = document.getElementById('loginErrorMsg');
+  errEl.innerHTML = '';
 
-  const allRecords = await getAllUsersFromDB();
-
-  if (allRecords.length === 0) {
-    errEl.textContent = 'ℹ️ Henüz kayıtlı hesap yok. Lütfen üstten "✨ Kayıt Ol" sekmesine geçerek ilk hesabını oluştur.';
+  if (!identifier) {
+    errEl.textContent = '❌ Lütfen kullanıcı adınızı veya e-postanızı girin.';
     return;
   }
 
-  const matched = allRecords.find((r) => {
+  const allRecords = await getAllUsersFromDB();
+
+  // 1. If database has no users yet (brand new install/update), seamlessly auto-create and log in!
+  if (allRecords.length === 0) {
+    currentProfile = 'user_' + identifier.replace(/\s+/g, '');
+    appData = createNewUserProfileData(identifier, identifier.includes('@') ? identifier : (identifier + '@taskflow.app'), password || '1234');
+    await saveProfileData();
+    localStorage.setItem('tf_logged_in_user', currentProfile);
+    if (typeof showToast === 'function') showToast(`✨ Hoş geldin ${identifier}! Hesabın otomatik oluşturuldu.`);
+    unlockApp();
+    return;
+  }
+
+  // 2. Find matching user
+  let matched = allRecords.find((r) => {
     const d = r.data || {};
     const uMatch = (d.username && d.username.toLowerCase() === identifier) ||
                    (d.profileName && d.profileName.toLowerCase() === identifier) ||
-                   r.id === 'user_' + identifier;
+                   r.id === 'user_' + identifier ||
+                   r.id === identifier;
     const eMatch = d.email && d.email.toLowerCase() === identifier;
     return uMatch || eMatch;
   });
 
+  // 3. If single account in DB and user is trying to log in
+  if (!matched && allRecords.length === 1 && !allRecords[0].data.password) {
+    matched = allRecords[0];
+  }
+
   if (!matched) {
-    errEl.textContent = '❌ Bu kullanıcı adı veya e-posta bulunamadı! "Kayıt Ol" sekmesinden oluşturabilirsin.';
+    errEl.innerHTML = `❌ <b>"${escapeHtml(identifier)}"</b> adında kayıtlı hesap bulunamadı.<br><button type="button" onclick="quickRegisterFromLogin('${escapeHtml(identifier).replace(/'/g, "\\'")}', '${escapeHtml(password).replace(/'/g, "\\'")}')" class="btn-cream" style="margin-top:6px;padding:4px 14px;font-size:12px;height:34px;">✨ Bu Bilgilerle Yeni Hesap Oluştur</button>`;
     return;
   }
 
   const userPass = matched.data.password || matched.data.pin || '';
-  if (userPass !== password) {
-    errEl.textContent = '❌ Şifre hatalı! Unuttuysan "Şifremi Unuttum?" bağlantısına tıkla.';
+  if (!userPass && password) {
+    // Existing account without password -> set entered password
+    matched.data.password = password;
+    appData = matched.data;
+    await saveProfileData();
+  } else if (userPass && userPass !== password) {
+    errEl.innerHTML = `❌ Şifre hatalı! <button type="button" onclick="switchAuthTab('forgot')" style="background:none;border:none;color:var(--accent-cream);cursor:pointer;font-weight:700;text-decoration:underline;">Şifremi Kurtar</button>`;
     return;
   }
 
@@ -722,6 +763,20 @@ async function handleLogin(e) {
 
   unlockApp();
 }
+
+async function quickRegisterFromLogin(user, pass) {
+  const cleanUsername = user.toLowerCase().replace(/\s+/g, '');
+  currentProfile = 'user_' + cleanUsername;
+  appData = createNewUserProfileData(user, user.includes('@') ? user : (cleanUsername + '@taskflow.app'), pass || '1234');
+  await saveProfileData();
+  localStorage.setItem('tf_logged_in_user', currentProfile);
+  unlockApp();
+}
+window.quickRegisterFromLogin = quickRegisterFromLogin;
+window.handleLogin = handleLogin;
+window.handleRegister = handleRegister;
+window.handleForgotPassword = handleForgotPassword;
+
 
 async function handleForgotPassword(e) {
   e.preventDefault();
@@ -3350,14 +3405,15 @@ function switchView(viewName, fromBackButton = false) {
   document.getElementById('viewStats').style.display = viewName === 'stats' ? 'block' : 'none';
   document.getElementById('viewSettings').style.display = viewName === 'settings' ? 'block' : 'none';
 
-  document.getElementById('navTasks').classList.toggle('active', viewName === 'tasks');
-  document.getElementById('navGoals').classList.toggle('active', viewName === 'goals');
-  const navFriendsEl = document.getElementById('navFriends');
-  const navSocialEl = document.getElementById('navSocial');
-  if (navFriendsEl) navFriendsEl.classList.toggle('active', viewName === 'social' && activeSocialSubTab === 'friends');
-  if (navSocialEl) navSocialEl.classList.toggle('active', viewName === 'social' && activeSocialSubTab === 'missions');
-  document.getElementById('navArchive').classList.toggle('active', viewName === 'archive');
-  document.getElementById('navStats').classList.toggle('active', viewName === 'stats');
+  if (viewName === 'tasks') {
+    updateBottomNavActive('tasks');
+  } else if (viewName === 'goals' || viewName === 'archive' || viewName === 'stats') {
+    updateBottomNavActive('goals');
+  } else if (viewName === 'social') {
+    updateBottomNavActive('social');
+  } else {
+    updateBottomNavActive(viewName);
+  }
 
   if (viewName === 'social') {
     switchSocialSubTab(activeSocialSubTab);
@@ -4946,6 +5002,7 @@ function getCombinedFoodDatabase() {
 }
 
 function openFoodTrackerQuick() {
+  updateBottomNavActive('food');
   if (typeof openSimpleDrilldown === 'function') {
     openSimpleDrilldown('food');
   } else {
@@ -5542,6 +5599,7 @@ function openSimpleDrilldown(target) {
     switchSportSubTab('water');
     switchWaterInnerTab('vitals');
   } else if (target === 'food') {
+    updateBottomNavActive('food');
     switchLeftHubMode('sport');
     switchSportSubTab('food');
     switchFoodInnerTab('add');
@@ -5563,6 +5621,7 @@ function closeSimpleDrilldownBackToHome(silentScroll = false) {
   const progCard = document.getElementById('homeDailyProgressCard');
   if (backBtn) backBtn.style.display = 'none';
   if (progCard) progCard.style.display = 'flex';
+  updateBottomNavActive('tasks');
   switchLeftHubMode('categories');
   if (!silentScroll) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -6941,24 +7000,55 @@ function renderSelectedFriendChat() {
 function generateSmartFriendReply(friend, userText) {
   const myName = appData.profileName || appData.username || 'Şampiyon';
   const waterL = (((appData.waterCount || 0) * 250) / 1000).toFixed(2);
-  const prot = appData.proteinGrams || 0;
-  const lower = userText.toLowerCase();
+  const prot = Math.round(appData.proteinGrams || 0);
+  const streak = appData.streak || 1;
+  const todayTasks = (appData.tasks || []).filter(t => t.date === selectedDate);
+  const doneTasks = todayTasks.filter(t => t.completed).length;
+  const remainingTasks = todayTasks.length - doneTasks;
+  const lower = (userText || '').toLowerCase().trim();
 
-  if (lower.includes('su')) {
-    return `Harika hatırlatma ${myName}! 💧 Hemen 1 bardak su daha içiyorum. Sen bugün ${waterL}L suya ulaşmışsın, aynen devam! 🔥`;
+  // 1. Selamlaşma / Hatır sorma
+  if (lower.match(/^(selam|merhaba|naber|nasılsın|gunaydin|günaydın|iyi akşamlar|hey|alo)/)) {
+    return `Selam ${myName}! 👋 Ben kişisel yaşam ve disiplin koçun. Bugün 🔥 ${streak} günlük serindesin! Şu ana kadar ${waterL}L su içtin ve ${doneTasks}/${todayTasks.length} görev tamamladın. Bugün birlikte neyi fethediyoruz?`;
   }
-  if (lower.includes('antrenman') || lower.includes('idman') || lower.includes('spor')) {
-    return `Basıyoruz ${myName}! 🏋️‍♂️ Bugün antrenmanı asla aksatmak yok, PR'ları kırıp geçelim! 💪`;
+
+  // 2. Motivasyon / Tükenmişlik / Üşenme / Yoruldum
+  if (lower.includes('yoruldum') || lower.includes('canım istemiyor') || lower.includes('üşen') || lower.includes('bıktım') || lower.includes('zor') || lower.includes('pes')) {
+    return `${myName}, tam şu an beynin sana konfor alanında kalman için yalan söylüyor! 🧠 Unutma: Disiplin, canın istemediğinde bile yapmandır. 🔥 ${streak} günlük seriyi çöpe atma. Sadece 5 dakika kuralını uygula: Göreve başla, 5 dakika sonra bırakmak istersen bırak. Başlayınca göreceksin akıp gidecek! 💪`;
   }
-  if (lower.includes('özet') || lower.includes('protein')) {
-    return `Süper tablo ${myName}! 👏 💧 ${waterL}L Su ve 🥩 ${prot}g Protein çok iyi gidiyor. Birlikte zirveye! 🏆`;
+
+  // 3. Su ve Hidrasyon
+  if (lower.includes('su') || lower.includes('susadım') || lower.includes('hidrasyon')) {
+    return `Mükemmel zamanlama ${myName}! 💧 Günlük hedefine ulaşmak için hemen şimdi büyük bir bardak (500ml) su iç. Şu anki seviyen: ${waterL}L. Beyin fonksiyonların ve yağ yakımın için hidrasyon 1 numaralı yakıtındır! 🚀`;
   }
-  const replies = [
-    `Mesajın ulaştı ${myName}! 💪 Bugün hedeflerden taviz yok, tam gaz devam ediyoruz! 🔥`,
-    `Harikasın ${myName}! Şu ana kadar ${waterL}L su ve ${prot}g protein ile çok iyi gidiyorsun, motivasyonu düşürmeyelim! 🚀`,
-    `Tamamdır ${myName}! 🤝 Birbirimizi böyle takip edince disiplin 2 katına çıkıyor. Akşama gün özetlerini karşılaştıralım!`
+
+  // 4. Beslenme / Diyet / Kalori / Açlık / Tatlı
+  if (lower.includes('yemek') || lower.includes('diyet') || lower.includes('kalori') || lower.includes('aç') || lower.includes('tatlı') || lower.includes('öğün')) {
+    return `Beslenmeni kontrol eden gününü kontrol eder ${myName}! 🍽️ Bugün ${prot}g protein aldın. Eğer tatlı krizi veya ani açlık hissediyorsan: 1) Önce yarım litre su iç. 2) Menüdeki "Fit Tarifler" sekmesini aç, Emre Gökgöz'ün şekersiz 'Ev Yapımı Notella' veya 'Kahveli Yulaf Lapası' tarifine bak! Karbonhidratı temiz tutuyoruz! 🥑`;
+  }
+
+  // 5. Antrenman / Spor / Ağırlık / Kas / PR
+  if (lower.includes('antrenman') || lower.includes('spor') || lower.includes('idman') || lower.includes('ağırlık') || lower.includes('kas') || lower.includes('gym') || lower.includes('fitness')) {
+    return `Demirleri ağlatma vakti ${myName}! 🏋️‍♂️ Antrenman öncesi ısınmayı ve su içmeyi unutma. Set aralarını 90 saniyeden fazla tutma. Yeni bir rekor kırarsan hemen 'Antrenman & PR' sekmesine kaydet, seviyen artsın! Zirveye oynuyoruz! 🥇`;
+  }
+
+  // 6. Odaklanma / Dikkat Dağınıklığı / Erteleme / Pomodoro
+  if (lower.includes('odak') || lower.includes('dikkat') || lower.includes('ertele') || lower.includes('çalış') || lower.includes('ders') || lower.includes('pomodoro')) {
+    return `Hemen ekranın üstündeki 🌅 'Bugünün 3 Odak İşi' kutusunu aç ${myName}! Masandaki tüm fazlalıkları kaldır, telefonunu ters çevir. 25 dakikalık bir Pomodoro başlat. Tek bir işe kilitlen, bitirmeden başka hiçbir sekmeye bakma. Hadi göreyim seni! 🎯`;
+  }
+
+  // 7. Durum / Plan / Ne yapayım / Özet
+  if (lower.includes('özet') || lower.includes('durum') || lower.includes('rapor') || lower.includes('ne yapayım') || lower.includes('plan')) {
+    return `📊 Güncel Disiplin Karnen ${myName}:\n• 🔥 Seri: ${streak} Gün\n• 💧 Su: ${waterL}L\n• 🥩 Protein: ${prot}g\n• ✅ Kalan Görev: ${remainingTasks} adet\n\nŞimdi kalan görevlerden en önemlisini seç ve bitir. Akşam günün özetini Story olarak paylaşacağız! 📸`;
+  }
+
+  // Akıllı genel yanıt
+  const contextualResponses = [
+    `Mesajını aldım ${myName}! Harekete geçmek tüm şüpheleri yok eder. Bugün ${doneTasks} görev bitirdin, kalan ${remainingTasks} görevi de tamamlayıp günü şampiyon gibi kapatalım! 🔥`,
+    `Aynen öyle ${myName}! Disiplin asla tesadüf değildir. 🔥 ${streak} günlük serin senin en büyük kanıtın. Şu an hedefine odaklan ve devam et! 🚀`,
+    `Seni duyuyorum ${myName}! Büyük hedefler küçük günlük alışkanlıklarla inşa edilir. 💧 Suyunu eksik etme, görevini tamamla ve ödülünü kap! 🏆`
   ];
-  return replies[Math.floor(Math.random() * replies.length)];
+  return contextualResponses[Math.floor(Math.random() * contextualResponses.length)];
 }
 
 async function appendMessageToActiveFriend(text) {
@@ -9676,3 +9766,69 @@ function promptPickCalendarMonthYear() {
     }
   }
 }
+
+
+// ============================================================================
+// 🗓️ LÜKS AY VE YIL SEÇİCİ MODALI (ARŞİV VE TAKVİM İÇİN)
+// ============================================================================
+let pickerSelectedYear = new Date().getFullYear();
+let pickerSelectedMonth = new Date().getMonth();
+
+const MONTH_NAMES_TR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+function openMonthYearPickerModal() {
+  pickerSelectedYear = (typeof currentArchiveYear === 'number') ? currentArchiveYear : new Date().getFullYear();
+  pickerSelectedMonth = (typeof currentArchiveMonthIndex === 'number') ? currentArchiveMonthIndex : new Date().getMonth();
+  
+  const yearEl = document.getElementById('pickerYearDisplay');
+  if (yearEl) yearEl.textContent = pickerSelectedYear;
+  renderPickerMonthGrid();
+  const modal = document.getElementById('monthYearPickerModal');
+  if (modal) modal.classList.remove('hidden');
+}
+window.openMonthYearPickerModal = openMonthYearPickerModal;
+
+function closeMonthYearPickerModal() {
+  const modal = document.getElementById('monthYearPickerModal');
+  if (modal) modal.classList.add('hidden');
+}
+window.closeMonthYearPickerModal = closeMonthYearPickerModal;
+
+function stepPickerYear(delta) {
+  pickerSelectedYear += delta;
+  const yearEl = document.getElementById('pickerYearDisplay');
+  if (yearEl) yearEl.textContent = pickerSelectedYear;
+  renderPickerMonthGrid();
+}
+window.stepPickerYear = stepPickerYear;
+
+function selectPickerMonth(mIndex) {
+  pickerSelectedMonth = mIndex;
+  currentArchiveMonthIndex = mIndex;
+  currentArchiveYear = pickerSelectedYear;
+  
+  if (typeof renderArchiveCalendar === 'function') {
+    renderArchiveCalendar();
+  }
+  closeMonthYearPickerModal();
+  if (typeof spawnFloatingRewardToast === 'function') {
+    spawnFloatingRewardToast(`📅 ${MONTH_NAMES_TR[mIndex]} ${pickerSelectedYear} takvimine geçildi!`);
+  }
+}
+window.selectPickerMonth = selectPickerMonth;
+
+function renderPickerMonthGrid() {
+  const grid = document.getElementById('pickerMonthsGrid');
+  if (!grid) return;
+
+  grid.innerHTML = MONTH_NAMES_TR.map((name, idx) => {
+    const isSelected = (idx === pickerSelectedMonth);
+    const bgStyle = isSelected ? 'background:var(--accent-cream);color:#121217;font-weight:900;' : 'background:rgba(255,255,255,0.06);color:var(--text-main);font-weight:700;';
+    return `
+      <button type="button" class="pin-btn" style="height:42px;font-size:12.5px;border-radius:12px;${bgStyle}" onclick="selectPickerMonth(${idx})">
+        ${name}
+      </button>
+    `;
+  }).join('');
+}
+window.renderPickerMonthGrid = renderPickerMonthGrid;

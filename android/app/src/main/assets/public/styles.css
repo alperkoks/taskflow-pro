@@ -488,7 +488,7 @@ input, textarea {
 .date-strip {
   display: flex;
   gap: 8px;
-  overflow-x: auto;
+  overflow: visible !important;
   padding-bottom: 6px;
   margin-bottom: 14px;
   scrollbar-width: none;
@@ -1354,7 +1354,7 @@ body.panic-blur-mode #countdownStripContainer {
 .countdown-strip {
   display: flex;
   gap: 8px;
-  overflow-x: auto;
+  overflow: visible !important;
   padding-bottom: 6px;
   margin-bottom: 10px;
   scrollbar-width: none;
@@ -2186,11 +2186,13 @@ body:not([data-active-view="tasks"]) #rolloverBanner {
 
 /* ÜST HEADER LÜKS & TAŞMAYAN RESPONSIVE EYLEM BUTONLARI */
 .header-actions-wrap {
-  display: flex;
+  position: relative !important;
+  display: inline-flex !important;
   align-items: center;
   gap: 6px;
   flex-wrap: nowrap;
   justify-content: flex-end;
+  overflow: visible !important;
 }
 
 .header-action-btn {
@@ -2223,7 +2225,7 @@ body:not([data-active-view="tasks"]) #rolloverBanner {
     flex-wrap: nowrap;
     justify-content: flex-end;
     max-width: 100%;
-    overflow-x: auto;
+    overflow: visible !important;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }
@@ -3322,22 +3324,24 @@ body.keyboard-open .bottom-nav-wrap {
    💎 LÜKS ÜST MENÜ, PROFİL FOTOĞRAFI & REHBER MODAL STİLLERİ
    ========================================================================== */
 .header-quick-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  left: auto;
-  background: rgba(18, 22, 34, 0.98);
+  position: absolute !important;
+  top: calc(100% + 8px) !important;
+  right: 0 !important;
+  left: auto !important;
+  background: #141724 !important;
+  background: linear-gradient(180deg, #181d2e 0%, #10131f 100%) !important;
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 20px;
-  padding: 8px;
+  border: 1.5px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 20px !important;
+  padding: 8px !important;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 230px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85);
-  z-index: 25000;
+  width: 250px !important;
+  max-width: 90vw !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.9) !important;
+  z-index: 99999 !important;
 }
 
 .header-quick-menu.hidden {

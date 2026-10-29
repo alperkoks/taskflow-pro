@@ -16,11 +16,14 @@ const filesToCopy = [
   'styles.css',
   'app.js',
   'fit_recipes_data.js',
+  'fit_recipes.json',
   'sw.js',
   'manifest.json',
   'icon-192.png',
   'icon-512.png',
-  'icon-1024.png'
+  'icon-1024.png',
+  'favicon.ico',
+  'icon.ico'
 ];
 
 filesToCopy.forEach(file => {
@@ -31,5 +34,25 @@ filesToCopy.forEach(file => {
     console.log(`Copied ${file} to www/ and android assets/public/`);
   }
 });
+
+// Recursively copy assets/ folder
+function copyDirRecursive(srcDir, destDir) {
+  if (!fs.existsSync(srcDir)) return;
+  if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = path.join(srcDir, entry.name);
+    const destPath = path.join(destDir, entry.name);
+    if (entry.isDirectory()) {
+      copyDirRecursive(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
+copyDirRecursive(path.join(rootDir, 'assets'), path.join(wwwDir, 'assets'));
+copyDirRecursive(path.join(rootDir, 'assets'), path.join(androidAssetsDir, 'assets'));
+console.log('Copied assets/ to www/assets and android assets/public/assets');
 
 console.log('All web assets prepared and synced successfully!');
