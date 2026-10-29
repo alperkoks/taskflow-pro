@@ -1,4 +1,4 @@
-// Emre Gökgöz Fit Yemek & Tarifler Kitabı (62 Efsane Tarif)
+// Emre Gökgöz Fit Yemek & Tarifler Kitabı (62 Efsane Tarif - HD Görseller Entegre)
 window.FIT_RECIPES_PDF = [
   {
     "id": "fit_pdf_9",
@@ -16,7 +16,8 @@ window.FIT_RECIPES_PDF = [
       "1 tk türk kahvesi (farklı bir kahve",
       "de kullanabilirsiniz.)"
     ],
-    "page": 9
+    "page": 9,
+    "photo": "https://images.unsplash.com/photo-1584776296944-ab6fb57b0bdd?w=350&q=80"
   },
   {
     "id": "fit_pdf_10",
@@ -33,7 +34,8 @@ window.FIT_RECIPES_PDF = [
       "1 çk hindistan cevizi yağı",
       "(opsiyonel)"
     ],
-    "page": 10
+    "page": 10,
+    "photo": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=350&q=80"
   },
   {
     "id": "fit_pdf_11",
@@ -51,7 +53,8 @@ window.FIT_RECIPES_PDF = [
       "Yarım paket kabartma tozu",
       "2 adet yumurta"
     ],
-    "page": 11
+    "page": 11,
+    "photo": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=350&q=80"
   },
   {
     "id": "fit_pdf_12",
@@ -69,7 +72,8 @@ window.FIT_RECIPES_PDF = [
       "(1 domatesi blenderdan geçire-",
       "rek de kullanabilirsiniz)"
     ],
-    "page": 12
+    "page": 12,
+    "photo": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=350&q=80"
   },
   {
     "id": "fit_pdf_13",
@@ -87,7 +91,8 @@ window.FIT_RECIPES_PDF = [
       "12 adet orta boy hurma",
       "1 tk bal"
     ],
-    "page": 13
+    "page": 13,
+    "photo": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=350&q=80"
   },
   {
     "id": "fit_pdf_14",
@@ -105,7 +110,8 @@ window.FIT_RECIPES_PDF = [
       "1 çk pul biber",
       "1 çk zeytinyağı"
     ],
-    "page": 14
+    "page": 14,
+    "photo": "https://images.unsplash.com/photo-1544025162-d76694265947?w=350&q=80"
   },
   {
     "id": "fit_pdf_15",
@@ -122,7 +128,8 @@ window.FIT_RECIPES_PDF = [
       "2 adet yumurta",
       "1 tk tereyağı (opsiyonel)"
     ],
-    "page": 15
+    "page": 15,
+    "photo": "https://images.unsplash.com/photo-1544025162-d76694265947?w=350&q=80"
   },
   {
     "id": "fit_pdf_16",
@@ -140,7 +147,8 @@ window.FIT_RECIPES_PDF = [
       "1 tk keçiboynuzu unu veya",
       "1 çk süzme bal"
     ],
-    "page": 16
+    "page": 16,
+    "photo": "https://images.unsplash.com/photo-1584776296944-ab6fb57b0bdd?w=350&q=80"
   },
   {
     "id": "fit_pdf_17",
@@ -158,7 +166,8 @@ window.FIT_RECIPES_PDF = [
       "veya zeytinyağı (isteğe bağlı)",
       "1 tk bal"
     ],
-    "page": 17
+    "page": 17,
+    "photo": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=350&q=80"
   },
   {
     "id": "fit_pdf_18",
@@ -176,7 +185,8 @@ window.FIT_RECIPES_PDF = [
       "1 çk tarçın",
       "1 yk tahin"
     ],
-    "page": 18
+    "page": 18,
+    "photo": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=350&q=80"
   },
   {
     "id": "fit_pdf_19",
@@ -194,7 +204,8 @@ window.FIT_RECIPES_PDF = [
       "veya zeytinyağı",
       "Domates püresi"
     ],
-    "page": 19
+    "page": 19,
+    "photo": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=350&q=80"
   },
   {
     "id": "fit_pdf_20",
@@ -212,7 +223,8 @@ window.FIT_RECIPES_PDF = [
       "Domates suyu",
       "(domates püresi veya salçayı"
     ],
-    "page": 20
+    "page": 20,
+    "photo": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=350&q=80"
   },
   {
     "id": "fit_pdf_21",
@@ -230,7 +242,8 @@ window.FIT_RECIPES_PDF = [
       "(veya farklı bir meyve)",
       "Fıstık ezmesi"
     ],
-    "page": 21
+    "page": 21,
+    "photo": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=350&q=80"
   },
   {
     "id": "fit_pdf_22",
@@ -248,7 +261,8 @@ window.FIT_RECIPES_PDF = [
       "1 yk hindistan cevizi yağı",
       "veya tereyağı"
     ],
-    "page": 22
+    "page": 22,
+    "photo": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=350&q=80"
   },
   {
     "id": "fit_pdf_23",
@@ -266,7 +280,8 @@ window.FIT_RECIPES_PDF = [
       "veya parmesan peyniri",
       "6 diş sarımsak"
     ],
-    "page": 23
+    "page": 23,
+    "photo": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=350&q=80"
   },
   {
     "id": "fit_pdf_24",
@@ -284,7 +299,8 @@ window.FIT_RECIPES_PDF = [
       "4 adet ince-küçük dilim",
       "yarım yağlı kaşar peyniri"
     ],
-    "page": 24
+    "page": 24,
+    "photo": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=350&q=80"
   },
   {
     "id": "fit_pdf_25",
@@ -302,7 +318,8 @@ window.FIT_RECIPES_PDF = [
       "1 küçük soğan",
       "2 yk galeta unu"
     ],
-    "page": 25
+    "page": 25,
+    "photo": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=350&q=80"
   },
   {
     "id": "fit_pdf_26",
@@ -320,7 +337,8 @@ window.FIT_RECIPES_PDF = [
       "30 g rendelenmiş kaşar",
       "1 yk domates püresi veya salça"
     ],
-    "page": 26
+    "page": 26,
+    "photo": "https://images.unsplash.com/photo-1544025162-d76694265947?w=350&q=80"
   },
   {
     "id": "fit_pdf_27",
@@ -338,7 +356,8 @@ window.FIT_RECIPES_PDF = [
       "Domatesli makarna sosu veya",
       "domates salçası"
     ],
-    "page": 27
+    "page": 27,
+    "photo": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=350&q=80"
   },
   {
     "id": "fit_pdf_28",
@@ -356,7 +375,8 @@ window.FIT_RECIPES_PDF = [
       "1 çk tuz",
       "2 çk kekik"
     ],
-    "page": 28
+    "page": 28,
+    "photo": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=350&q=80"
   },
   {
     "id": "fit_pdf_29",
@@ -374,7 +394,8 @@ window.FIT_RECIPES_PDF = [
       "yeşil biber",
       "(miktar isteğe bağlı)"
     ],
-    "page": 29
+    "page": 29,
+    "photo": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=350&q=80"
   },
   {
     "id": "fit_pdf_30",
@@ -392,7 +413,8 @@ window.FIT_RECIPES_PDF = [
       "1 adet domates",
       "1 adet salatalık"
     ],
-    "page": 30
+    "page": 30,
+    "photo": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=350&q=80"
   },
   {
     "id": "fit_pdf_31",
@@ -408,7 +430,8 @@ window.FIT_RECIPES_PDF = [
       "1 adet domates",
       "1 yk zeytinyağı"
     ],
-    "page": 31
+    "page": 31,
+    "photo": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=350&q=80"
   },
   {
     "id": "fit_pdf_32",
@@ -426,7 +449,8 @@ window.FIT_RECIPES_PDF = [
       "2 çk tuz",
       "isteğe bağlı baharatlar"
     ],
-    "page": 32
+    "page": 32,
+    "photo": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=350&q=80"
   },
   {
     "id": "fit_pdf_33",
@@ -444,7 +468,8 @@ window.FIT_RECIPES_PDF = [
       "kekik, toz biber",
       "2 adet yumurta"
     ],
-    "page": 33
+    "page": 33,
+    "photo": "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=350&q=80"
   },
   {
     "id": "fit_pdf_34",
@@ -462,7 +487,8 @@ window.FIT_RECIPES_PDF = [
       "kadar su",
       "1 yk zeytinyağı"
     ],
-    "page": 34
+    "page": 34,
+    "photo": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=350&q=80"
   },
   {
     "id": "fit_pdf_35",
@@ -480,7 +506,8 @@ window.FIT_RECIPES_PDF = [
       "2 diş sarımsak veya",
       "1 tk sarımsak granül"
     ],
-    "page": 35
+    "page": 35,
+    "photo": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=350&q=80"
   },
   {
     "id": "fit_pdf_36",
@@ -498,7 +525,8 @@ window.FIT_RECIPES_PDF = [
       "Marul",
       "Yarım limon"
     ],
-    "page": 36
+    "page": 36,
+    "photo": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=350&q=80"
   },
   {
     "id": "fit_pdf_37",
@@ -516,7 +544,8 @@ window.FIT_RECIPES_PDF = [
       "100 g mantar",
       "İstenen farklı sebzeler de"
     ],
-    "page": 37
+    "page": 37,
+    "photo": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=350&q=80"
   },
   {
     "id": "fit_pdf_38",
@@ -533,7 +562,8 @@ window.FIT_RECIPES_PDF = [
       "3 yk zeytinyağı",
       "Tuz ve istenilen baharatlar"
     ],
-    "page": 38
+    "page": 38,
+    "photo": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=350&q=80"
   },
   {
     "id": "fit_pdf_39",
@@ -551,7 +581,8 @@ window.FIT_RECIPES_PDF = [
       "1 yk zerdeçal",
       "Tuz"
     ],
-    "page": 39
+    "page": 39,
+    "photo": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=350&q=80"
   },
   {
     "id": "fit_pdf_40",
@@ -569,7 +600,8 @@ window.FIT_RECIPES_PDF = [
       "(4 yk)",
       "150 g lor peyniri"
     ],
-    "page": 40
+    "page": 40,
+    "photo": "https://images.unsplash.com/photo-1621996346565-e3d5d6281146?w=350&q=80"
   },
   {
     "id": "fit_pdf_41",
@@ -587,7 +619,8 @@ window.FIT_RECIPES_PDF = [
       "1 adet yumurta",
       "kekik, karabiber"
     ],
-    "page": 41
+    "page": 41,
+    "photo": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=350&q=80"
   },
   {
     "id": "fit_pdf_42",
@@ -605,7 +638,8 @@ window.FIT_RECIPES_PDF = [
       "tuz",
       "istenilen diğer baharatlar"
     ],
-    "page": 42
+    "page": 42,
+    "photo": "https://images.unsplash.com/photo-1544025162-d76694265947?w=350&q=80"
   },
   {
     "id": "fit_pdf_43",
@@ -623,7 +657,8 @@ window.FIT_RECIPES_PDF = [
       "2 avuç maydanoz",
       "Tuz ve istenen baharatlar"
     ],
-    "page": 43
+    "page": 43,
+    "photo": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=350&q=80"
   },
   {
     "id": "fit_pdf_44",
@@ -641,7 +676,8 @@ window.FIT_RECIPES_PDF = [
       "1 yk tahin",
       "1 adet limon"
     ],
-    "page": 44
+    "page": 44,
+    "photo": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=350&q=80"
   },
   {
     "id": "fit_pdf_45",
@@ -659,7 +695,8 @@ window.FIT_RECIPES_PDF = [
       "siniz)",
       "ıspanak ve kırmızı biber"
     ],
-    "page": 45
+    "page": 45,
+    "photo": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=350&q=80"
   },
   {
     "id": "fit_pdf_46",
@@ -677,7 +714,8 @@ window.FIT_RECIPES_PDF = [
       "2 adet yeşil biber",
       "3 yk pesto sos"
     ],
-    "page": 46
+    "page": 46,
+    "photo": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=350&q=80"
   },
   {
     "id": "fit_pdf_47",
@@ -695,7 +733,8 @@ window.FIT_RECIPES_PDF = [
       "fesleğen",
       "1 kibrit kutusu kadar eski kaşar"
     ],
-    "page": 47
+    "page": 47,
+    "photo": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=350&q=80"
   },
   {
     "id": "fit_pdf_48",
@@ -713,7 +752,8 @@ window.FIT_RECIPES_PDF = [
       "1 adet orta boy soğan",
       "(arttırabilirsiniz.)"
     ],
-    "page": 48
+    "page": 48,
+    "photo": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=350&q=80"
   },
   {
     "id": "fit_pdf_49",
@@ -731,7 +771,8 @@ window.FIT_RECIPES_PDF = [
       "bir tutam tuz",
       "istenilen baharatlar"
     ],
-    "page": 49
+    "page": 49,
+    "photo": "https://images.unsplash.com/photo-1544025162-d76694265947?w=350&q=80"
   },
   {
     "id": "fit_pdf_50",
@@ -749,7 +790,8 @@ window.FIT_RECIPES_PDF = [
       "1 yk bal (ezilmiş hurma, keçi boy-",
       "nuzu unu veya pekmez alternatif"
     ],
-    "page": 50
+    "page": 50,
+    "photo": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=350&q=80"
   },
   {
     "id": "fit_pdf_51",
@@ -767,7 +809,8 @@ window.FIT_RECIPES_PDF = [
       "yarım paket kabartma tozu",
       "yarım paket vanilya"
     ],
-    "page": 51
+    "page": 51,
+    "photo": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=350&q=80"
   },
   {
     "id": "fit_pdf_52",
@@ -783,7 +826,8 @@ window.FIT_RECIPES_PDF = [
       "3 ölçek whey protein",
       "1 adet muz"
     ],
-    "page": 52
+    "page": 52,
+    "photo": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=350&q=80"
   },
   {
     "id": "fit_pdf_53",
@@ -801,7 +845,8 @@ window.FIT_RECIPES_PDF = [
       "1 yk fıstık ezmesi",
       "2 yk kakao"
     ],
-    "page": 53
+    "page": 53,
+    "photo": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=350&q=80"
   },
   {
     "id": "fit_pdf_54",
@@ -814,7 +859,8 @@ window.FIT_RECIPES_PDF = [
     "ingredients": [
       "TARİFTARİF"
     ],
-    "page": 54
+    "page": 54,
+    "photo": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=350&q=80"
   },
   {
     "id": "fit_pdf_55",
@@ -832,7 +878,8 @@ window.FIT_RECIPES_PDF = [
       "bir tutam rende hindistan cevizi",
       "bir tutam tarçın"
     ],
-    "page": 55
+    "page": 55,
+    "photo": "https://images.unsplash.com/photo-1584776296944-ab6fb57b0bdd?w=350&q=80"
   },
   {
     "id": "fit_pdf_56",
@@ -850,7 +897,8 @@ window.FIT_RECIPES_PDF = [
       "yarım avuç kuru üzüm",
       "bir tutam tarçın"
     ],
-    "page": 56
+    "page": 56,
+    "photo": "https://images.unsplash.com/photo-1584776296944-ab6fb57b0bdd?w=350&q=80"
   },
   {
     "id": "fit_pdf_57",
@@ -868,7 +916,8 @@ window.FIT_RECIPES_PDF = [
       "10 adet donmuş vişne, ahudu-",
       "du, böğürtlen, çilek veya farklı"
     ],
-    "page": 57
+    "page": 57,
+    "photo": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=350&q=80"
   },
   {
     "id": "fit_pdf_58",
@@ -886,7 +935,8 @@ window.FIT_RECIPES_PDF = [
       "(kakao oranı yüksek)",
       "1 yk kakao"
     ],
-    "page": 58
+    "page": 58,
+    "photo": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=350&q=80"
   },
   {
     "id": "fit_pdf_59",
@@ -904,7 +954,8 @@ window.FIT_RECIPES_PDF = [
       "1 tk rende hindistan cevizi",
       "1 çay bardağı süt"
     ],
-    "page": 59
+    "page": 59,
+    "photo": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=350&q=80"
   },
   {
     "id": "fit_pdf_60",
@@ -922,7 +973,8 @@ window.FIT_RECIPES_PDF = [
       "2 adet havuç",
       "2 tk keçiboynuzu unu"
     ],
-    "page": 60
+    "page": 60,
+    "photo": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=350&q=80"
   },
   {
     "id": "fit_pdf_61",
@@ -940,7 +992,8 @@ window.FIT_RECIPES_PDF = [
       "2 adet havuç",
       "2 tk keçiboynuzu unu"
     ],
-    "page": 61
+    "page": 61,
+    "photo": "https://images.unsplash.com/photo-1544025162-d76694265947?w=350&q=80"
   },
   {
     "id": "fit_pdf_62",
@@ -958,7 +1011,8 @@ window.FIT_RECIPES_PDF = [
       "1 paket kabartma tozu",
       "20 g bitter damla çikolata"
     ],
-    "page": 62
+    "page": 62,
+    "photo": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=350&q=80"
   },
   {
     "id": "fit_pdf_63",
@@ -976,7 +1030,8 @@ window.FIT_RECIPES_PDF = [
       "1 yk süt",
       "1 tk keçiboynuzu unu"
     ],
-    "page": 63
+    "page": 63,
+    "photo": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=350&q=80"
   },
   {
     "id": "fit_pdf_64",
@@ -993,7 +1048,8 @@ window.FIT_RECIPES_PDF = [
       "1 tk hindistan cevizi yağı",
       "(veya tuzsuz tereyağı)"
     ],
-    "page": 64
+    "page": 64,
+    "photo": "https://images.unsplash.com/photo-1544025162-d76694265947?w=350&q=80"
   },
   {
     "id": "fit_pdf_65",
@@ -1011,7 +1067,8 @@ window.FIT_RECIPES_PDF = [
       "1 tk tarçın",
       "2 tk bal"
     ],
-    "page": 65
+    "page": 65,
+    "photo": "https://images.unsplash.com/photo-1584776296944-ab6fb57b0bdd?w=350&q=80"
   },
   {
     "id": "fit_pdf_66",
@@ -1029,7 +1086,8 @@ window.FIT_RECIPES_PDF = [
       "100g süzme yoğurt",
       "1 tk keçiboynuzu unu (veya 1"
     ],
-    "page": 66
+    "page": 66,
+    "photo": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=350&q=80"
   },
   {
     "id": "fit_pdf_67",
@@ -1040,7 +1098,8 @@ window.FIT_RECIPES_PDF = [
     "protein": 26.4,
     "fat": 37.5,
     "ingredients": [],
-    "page": 67
+    "page": 67,
+    "photo": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=350&q=80"
   },
   {
     "id": "fit_pdf_68",
@@ -1051,7 +1110,8 @@ window.FIT_RECIPES_PDF = [
     "protein": 1.5,
     "fat": 0.5,
     "ingredients": [],
-    "page": 68
+    "page": 68,
+    "photo": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=350&q=80"
   },
   {
     "id": "fit_pdf_69",
@@ -1062,7 +1122,8 @@ window.FIT_RECIPES_PDF = [
     "protein": 10.0,
     "fat": 5.7,
     "ingredients": [],
-    "page": 69
+    "page": 69,
+    "photo": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=350&q=80"
   },
   {
     "id": "fit_pdf_70",
@@ -1079,6 +1140,7 @@ window.FIT_RECIPES_PDF = [
       "Yarım adet limon",
       "salatalık"
     ],
-    "page": 70
+    "page": 70,
+    "photo": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=350&q=80"
   }
 ];

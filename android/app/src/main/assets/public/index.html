@@ -115,56 +115,55 @@
       <header class="top-header">
         <div>
           <div class="greeting-sub">
-            <span id="welcomeUserText">Merhaba 👋</span>
-            <span class="streak-badge" id="streakBadge">🔥 1 Gün Seri</span>
+            <span id="welcomeUserText">Merhaba, alperkoksal 👋</span>
+            <span class="streak-badge" id="streakBadge">🔥 4 Gün Seri</span>
           </div>
-          <h1 class="greeting-title">Yaşam & Plan Üssü</h1>
+          <!-- Sade ve Modern Tarih Başlığı (Yaşam & Plan Üssü kaldırıldı!) -->
+          <div id="headerDateFormatted" style="font-size:16px;font-weight:900;color:var(--text-main);margin-top:3px;letter-spacing:-0.3px;">29 Ekim 2026, Perşembe</div>
         </div>
-        <!-- Sağ Üstte Lüks, Taşmayan Eylem Butonları + PC/Davet + Ayarlar -->
+
+        <!-- Sağ Üst: Sadece Tek, Lüks Profil Avatarı Butonu (Tıklayınca Şık Menü Açar) -->
         <div class="header-actions-wrap" style="position:relative;">
-          <!-- ❓ KULLANIM KILAVUZU & YARDIM (1 TIKLA AÇILIR) -->
-          <button type="button" class="pin-btn header-action-btn" onclick="openAppHelpGuideModal()" title="Kullanım Kılavuzu & Yardım">
-            <span class="btn-icon">❓</span>
-            <span class="btn-text">Rehber</span>
-          </button>
-
-          <!-- ⚡ TÜM ARAÇLARI TOPLAYAN MODERN MENÜ (PC, 3 Odak, Story, Koç, Dedektif) -->
-          <div class="quick-tools-wrapper" style="position:relative;display:inline-block;">
-            <button type="button" class="pin-btn header-action-btn" onclick="toggleHeaderQuickToolsMenu()" title="Hızlı Araçlar Menüsü">
-              <span class="btn-icon">⚡</span>
-              <span class="btn-text">Araçlar ▾</span>
-            </button>
-
-            <!-- ⚡ HIZLI ARAÇLAR AÇILIR MENÜ (TAM BU BUTONUN ALTINDA AÇILIR, ASLA SAĞA UÇMAZ!) -->
-            <div id="headerQuickToolsDropdown" class="header-quick-menu hidden">
-              <button type="button" class="header-quick-item" onclick="toggleHeaderQuickToolsMenu(false);openMorningFocusModal(true);">
-                <span>🌅</span>
-                <span>Bugünün 3 Odak İşi</span>
-              </button>
-              <button type="button" class="header-quick-item" onclick="toggleHeaderQuickToolsMenu(false);openStoryGeneratorModal();">
-                <span>📸</span>
-                <span>Story & Görsel Stüdyosu</span>
-              </button>
-              <button type="button" class="header-quick-item" onclick="toggleHeaderQuickToolsMenu(false);openPcAndFriendsSyncModal();">
-                <span>💻</span>
-                <span>PC & Bulut Senkronizasyonu</span>
-              </button>
-              <button type="button" class="header-quick-item" onclick="toggleHeaderQuickToolsMenu(false);triggerRandomPersonalInsightPopup();">
-                <span>🤖</span>
-                <span>Kişisel Koç & Tavsiye</span>
-              </button>
-              <button type="button" class="header-quick-item" onclick="toggleHeaderQuickToolsMenu(false);togglePanicBlurMode();">
-                <span>🕵️</span>
-                <span>Gizlilik / Panik Modu</span>
-              </button>
-            </div>
+          <div class="user-avatar-pill" onclick="toggleHeaderProfileDropdown()" title="Profil & Menü">
+            <div class="user-avatar-circle" id="headerAvatarLetter" style="overflow:hidden;padding:0;">A</div>
+            <span class="avatar-pill-text">Menü</span>
+            <span id="syncStatusDot" class="sync-dot" title="Çevrimdışı / Bulut Hazır"></span>
           </div>
 
-          <!-- 👤 KULLANICI PROFİLİ VE AYARLAR -->
-          <div class="user-avatar-pill" onclick="switchView('settings')" title="Ayarlar ve Profil">
-            <div class="user-avatar-circle" id="headerAvatarLetter" style="overflow:hidden;padding:0;">U</div>
-            <span class="avatar-pill-text">Profil & Ayar</span>
-            <span id="syncStatusDot" class="sync-dot" title="Çevrimdışı / Bulut Hazır"></span>
+          <!-- PROFİL BUTONUNA TIKLAYINCA AÇILAN LÜKS MENÜ -->
+          <div id="headerProfileDropdown" class="header-quick-menu hidden" style="min-width:240px;top:calc(100% + 8px);right:0;left:auto;">
+            <div style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:4px;">
+              <div id="dropdownHeaderUserName" style="font-size:13.5px;font-weight:900;color:var(--text-main);">alperkoksal</div>
+              <div style="font-size:11px;color:#95de64;font-weight:800;">⚡ Seviye 6 Odaklı Planlayıcı</div>
+            </div>
+            <button type="button" class="header-quick-item" onclick="toggleHeaderProfileDropdown(false);openSocialWithTab('friends');">
+              <span>👤</span>
+              <span>Sosyal Profilim</span>
+            </button>
+            <button type="button" class="header-quick-item" onclick="toggleHeaderProfileDropdown(false);switchView('settings');">
+              <span>⚙️</span>
+              <span>Hesap Bilgileri & Ayarlar</span>
+            </button>
+            <button type="button" class="header-quick-item" onclick="toggleHeaderProfileDropdown(false);openStoryGeneratorModal();">
+              <span>📸</span>
+              <span>Story & Görsel Stüdyosu</span>
+            </button>
+            <button type="button" class="header-quick-item" onclick="toggleHeaderProfileDropdown(false);openMorningFocusModal(true);">
+              <span>🌅</span>
+              <span>Bugünün 3 Odak İşi</span>
+            </button>
+            <button type="button" class="header-quick-item" onclick="toggleHeaderProfileDropdown(false);openPcAndFriendsSyncModal();">
+              <span>💻</span>
+              <span>PC & Bulut Senkronizasyonu</span>
+            </button>
+            <button type="button" class="header-quick-item" onclick="toggleHeaderProfileDropdown(false);openAppHelpGuideModal();">
+              <span>❓</span>
+              <span>Kullanım Rehberi & Yardım</span>
+            </button>
+            <button type="button" class="header-quick-item" onclick="toggleHeaderProfileDropdown(false);togglePanicBlurMode();">
+              <span>🕵️</span>
+              <span>Gizlilik Modu</span>
+            </button>
           </div>
         </div>
       </header>
@@ -178,45 +177,55 @@
           <span style="font-size:12px;background:rgba(0,0,0,0.28);padding:4px 10px;border-radius:99px;">Kapat ✕</span>
         </button>
 
-        <!-- 🏆 SEVİYE, RÜTBE & GÜNLÜK İLERLEME (TEK BİRLEŞİK MODERN ÖZET KARTI) -->
-        <div id="homeDailyProgressCard" class="daily-progress-card" style="flex-direction:column;align-items:stretch;gap:10px;padding:13px 15px;">
-          <div style="display:flex;align-items:center;gap:12px;">
-            <div class="ring-circle" id="dailyRingCircle">
-              <div class="ring-inner" id="dailyProgressPct">%0</div>
+        <!-- 📊 GÜNLÜK İLERLEME & PERFORMANS BUTONU (KOMPAKT - TIKLAYINCA DETAYI AÇAR) -->
+        <div style="margin-bottom:10px;">
+          <button type="button" class="progress-collapsible-btn" onclick="toggleDailyProgressDetails()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:16px;background:rgba(20,20,28,0.9);border:1px solid rgba(255,255,255,0.1);color:var(--text-main);cursor:pointer;box-sizing:border-box;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span id="dailyProgressMiniBadge" style="font-weight:900;color:#09090d;background:var(--accent-cream);padding:3px 8px;border-radius:8px;font-size:12px;">%0</span>
+              <span style="font-size:13px;font-weight:800;" id="dailyProgressMiniLabel">Günlük İlerleme & Seviye 5</span>
             </div>
-            <div style="flex:1;min-width:0;">
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;">
-                <span style="font-size:14px;font-weight:900;" id="dailyProgressLabel">Bugün %0 Tamamlandı</span>
-                <span style="font-size:11.5px;font-weight:800;color:var(--text-muted);" id="dailyProgressSub">0/0 Görev</span>
-              </div>
-              <div class="progress-bar-track" style="margin-top:6px;margin-bottom:0;height:6px;">
-                <div class="progress-bar-fill" id="dailyProgressFill" style="width:0%"></div>
-              </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span id="homeDailyDisciplineScoreMini" style="font-size:12px;font-weight:900;color:#ffd700;">15/100 🏆</span>
+              <span id="progressCollapsibleChevron" style="font-size:12px;color:var(--text-muted);transition:transform 0.2s;">▾</span>
             </div>
-          </div>
+          </button>
 
-          <div id="homeXpRankCard" onclick="openSocialWithTab('missions')" style="cursor:pointer;padding-top:9px;border-top:1px solid rgba(255,255,255,0.08);" title="Tüm 120 Rozet ve Görevi Görmek İçin Dokun">
-            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:900;gap:6px;">
-              <span id="userRankBadgeText" style="color:var(--accent-cream);">🌱 Seviye 1 — Başlangıç</span>
-              <span id="userXpPointsText" style="color:var(--pastel-purple);font-size:11.5px;">0 XP</span>
+          <!-- TIKLANDIĞINDA AÇILAN DETAY KARTI (VARSAYILAN KAPALIDIR, GÖREVLERİN ÜSTÜNÜ KAPLAMAZ!) -->
+          <div id="homeDailyProgressCard" class="daily-progress-card" style="display:none;flex-direction:column;align-items:stretch;gap:10px;padding:13px 15px;margin-top:8px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div class="ring-circle" id="dailyRingCircle">
+                <div class="ring-inner" id="dailyProgressPct">%0</div>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <span style="font-size:14px;font-weight:900;" id="dailyProgressLabel">Bugün %0 Tamamlandı</span>
+                  <span style="font-size:11.5px;font-weight:800;color:var(--text-muted);" id="dailyProgressSub">0/0 Görev</span>
+                </div>
+                <div class="progress-bar-track" style="margin-top:6px;margin-bottom:0;height:6px;">
+                  <div class="progress-bar-fill" id="dailyProgressFill" style="width:0%"></div>
+                </div>
+              </div>
             </div>
-            <div class="xp-progress-mini" style="height:5px;margin-top:4px;display:none;">
-              <div class="xp-progress-mini-fill" id="userXpBarFill" style="width:0%;"></div>
-            </div>
-            <div id="homeNextBadgeGuideText" style="margin-top:4px;font-size:11px;color:#95de64;font-weight:800;display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;">
-              <span>🏅 Sıradaki Rozet: Yükleniyor...</span>
-              <span style="color:var(--accent-cream);">Rozetler ➡️</span>
-            </div>
-          </div>
 
-          <!-- 🏆 GÜNLÜK DİSİPLİN & YAŞAM SKORU (0-100 PUAN) + HIZLI STORY PAYLAŞIM ŞERİDİ -->
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:9px;border-top:1px solid rgba(255,255,255,0.08);flex-wrap:wrap;">
-            <div style="font-size:11.5px;font-weight:800;color:var(--text-main);">
-              ⚡ Günlük Disiplin Skoru: <b id="homeDailyDisciplineScore" style="color:#ffd700;font-size:13px;">85 / 100</b>
+            <div id="homeXpRankCard" onclick="openSocialWithTab('missions')" style="cursor:pointer;padding-top:9px;border-top:1px solid rgba(255,255,255,0.08);" title="Tüm 120 Rozet ve Görevi Görmek İçin Dokun">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:900;gap:6px;">
+                <span id="userRankBadgeText" style="color:var(--accent-cream);">🌱 Seviye 1 — Başlangıç</span>
+                <span id="userXpPointsText" style="color:var(--pastel-purple);font-size:11.5px;">0 XP</span>
+              </div>
+              <div id="homeNextBadgeGuideText" style="margin-top:4px;font-size:11px;color:#95de64;font-weight:800;display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span>🏅 Sıradaki Rozet: Yükleniyor...</span>
+                <span style="color:var(--accent-cream);">Rozetler ➡️</span>
+              </div>
             </div>
-            <button type="button" class="tag-badge" style="border:none;cursor:pointer;background:linear-gradient(135deg,rgba(82,196,26,0.25),rgba(37,211,102,0.18));color:#95de64;font-weight:900;padding:4px 10px;" onclick="openStoryGeneratorModal()">
-              📸 Günümü Story Paylaş
-            </button>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:9px;border-top:1px solid rgba(255,255,255,0.08);flex-wrap:wrap;">
+              <div style="font-size:11.5px;font-weight:800;color:var(--text-main);">
+                ⚡ Günlük Disiplin Skoru: <b id="homeDailyDisciplineScore" style="color:#ffd700;font-size:13px;">85 / 100</b>
+              </div>
+              <button type="button" class="tag-badge" style="border:none;cursor:pointer;background:linear-gradient(135deg,rgba(82,196,26,0.25),rgba(37,211,102,0.18));color:#95de64;font-weight:900;padding:4px 10px;" onclick="openStoryGeneratorModal()">
+                📸 Günümü Story Paylaş
+              </button>
+            </div>
           </div>
         </div>
 
@@ -228,40 +237,48 @@
         </div>
 
         <!-- ============================================================== -->
-        <!-- ANA EKRAN: 4 BÜYÜK FERAH KUTU (TIKLAYINCA TAM EKRAN AÇILIR, GERİ TUŞUYLA DÖNÜLÜR) -->
+        <!-- SADELEŞTİRİLMİŞ 2 ANA MERKEZ: 📅 GÜNLÜKLERİM | 🧰 ARAÇLARIM -->
         <!-- ============================================================== -->
         <div id="hubTabCategories">
-          <!-- 4 BİREBİR EŞİT BOYUTLU MODERN ANA KUTU (2x2 SİMETRİK GRİD) -->
-          <div class="simple-main-hub-grid">
-            <button type="button" class="simple-hub-card" style="border-color:rgba(96,165,250,0.4);background:linear-gradient(135deg,rgba(96,165,250,0.15),rgba(15,16,24,0.75));" onclick="openSimpleDrilldown('water')">
-              <div style="font-size:22px;line-height:1;">💧</div>
-              <div class="simple-hub-card-title">Su & Rutin</div>
-              <div class="simple-hub-card-sub" style="color:#93c5fd;">Su: <span id="miniWaterQuickText">0.00L</span> ➡️</div>
-            </button>
+          <!-- 2 BÜYÜK SADE KART (GÖREVLERİN ÜSTE GELMESİ İÇİN ALAN TASARRUFU) -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+            <!-- KART 1: 📅 GÜNLÜKLER (Su, Yemek, Antrenman) -->
+            <div style="background:linear-gradient(145deg,rgba(26,29,42,0.9),rgba(14,16,24,0.95));border:1px solid rgba(96,165,250,0.3);border-radius:18px;padding:12px 10px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <span style="font-size:13px;font-weight:900;color:var(--accent-cream);">📅 Günlükler</span>
+                <span style="font-size:10px;font-weight:800;color:#93c5fd;background:rgba(96,165,250,0.15);padding:2px 6px;border-radius:6px;">3 Modül</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <button type="button" class="quick-submodule-btn" onclick="openSimpleDrilldown('water')" style="display:flex;align-items:center;justify-content:space-between;padding:7px 8px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:var(--text-main);font-size:12px;font-weight:800;cursor:pointer;">
+                  <span>💧 Su & Rutin</span>
+                  <span style="color:#93c5fd;font-size:11px;" id="miniWaterQuickText">0.00L</span>
+                </button>
+                <button type="button" class="quick-submodule-btn" onclick="openSimpleDrilldown('food')" style="display:flex;align-items:center;justify-content:space-between;padding:7px 8px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:var(--text-main);font-size:12px;font-weight:800;cursor:pointer;">
+                  <span>🍽️ Yemek & Tarif</span>
+                  <span style="color:#95de64;font-size:11px;" id="miniFoodQuickSubText">Besin ➡️</span>
+                </button>
+                <button type="button" class="quick-submodule-btn" onclick="openSimpleDrilldown('workout')" style="display:flex;align-items:center;justify-content:space-between;padding:7px 8px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:var(--text-main);font-size:12px;font-weight:800;cursor:pointer;">
+                  <span>🏋️ Antrenman & PR</span>
+                  <span style="color:#ffc069;font-size:11px;">Rekorlar ➡️</span>
+                </button>
+              </div>
+            </div>
 
-            <button type="button" class="simple-hub-card" style="border-color:rgba(82,196,26,0.45);background:linear-gradient(135deg,rgba(82,196,26,0.15),rgba(15,16,24,0.75));" onclick="openSimpleDrilldown('food')">
-              <div style="font-size:22px;line-height:1;">🍽️</div>
-              <div class="simple-hub-card-title">Yemek & Tarifim</div>
-              <div class="simple-hub-card-sub" style="color:#95de64;" id="miniFoodQuickSubText">Besin & Tarif Ekle ➡️</div>
-            </button>
-
-            <button type="button" class="simple-hub-card" style="border-color:rgba(255,156,110,0.4);background:linear-gradient(135deg,rgba(255,156,110,0.15),rgba(15,16,24,0.75));" onclick="openSimpleDrilldown('workout')">
-              <div style="font-size:22px;line-height:1;">🏋️</div>
-              <div class="simple-hub-card-title">Antrenman & PR</div>
-              <div class="simple-hub-card-sub" style="color:#ffc069;">Spor & Rekorlar ➡️</div>
-            </button>
-
-            <button type="button" class="simple-hub-card" style="border-color:rgba(216,208,248,0.4);background:linear-gradient(135deg,rgba(216,208,248,0.15),rgba(15,16,24,0.75));" onclick="openSimpleDrilldown('tools')">
-              <div style="font-size:22px;line-height:1;">🧰</div>
-              <div class="simple-hub-card-title">Araçlar & Kasa</div>
-              <div class="simple-hub-card-sub" style="color:var(--pastel-purple);">Market, Bütçe, Not ➡️</div>
-            </button>
-          </div>
-
-          <!-- 2 EŞİT BÜYÜK HIZLI AKSİYON BUTONU (+ YENİ GÖREV EKLE & +1 BARDAK SU) -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-            <button type="button" class="btn-cream" style="height:46px;font-size:13.5px;font-weight:900;" onclick="openTaskModal()">➕ Yeni Görev Ekle</button>
-            <button type="button" class="btn-cream" style="height:46px;font-size:13.5px;background:#60a5fa;color:#09090d;font-weight:900;" onclick="changeWaterCount(1)">💧 +1 Bardak Su İç</button>
+            <!-- KART 2: 🧰 ARAÇLAR & KASA (Market, Bütçe, Gizli Notlar) -->
+            <div style="background:linear-gradient(145deg,rgba(26,29,42,0.9),rgba(14,16,24,0.95));border:1px solid rgba(216,208,248,0.3);border-radius:18px;padding:12px 10px;display:flex;flex-direction:column;justify-content:space-between;">
+              <div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:13px;font-weight:900;color:var(--pastel-purple);">🧰 Araçlar</span>
+                  <span style="font-size:10px;font-weight:800;color:#d8d0f8;background:rgba(216,208,248,0.15);padding:2px 6px;border-radius:6px;">Kasa & Not</span>
+                </div>
+                <div style="font-size:11px;color:var(--text-muted);line-height:1.4;margin-bottom:10px;">
+                  Alışveriş listesi, bütçe tablosu, şifreli gizli kasa ve hızlı notlar tek tıkla elinin altında.
+                </div>
+              </div>
+              <button type="button" class="btn-cream" onclick="openSimpleDrilldown('tools')" style="width:100%;height:38px;font-size:12px;font-weight:900;background:linear-gradient(135deg,rgba(216,208,248,0.3),rgba(216,208,248,0.15));color:var(--text-main);border-radius:12px;border:1px solid rgba(216,208,248,0.35);">
+                🧰 Araçlar & Kasayı Aç ➡️
+              </button>
+            </div>
           </div>
 
           <!-- Hidden legacy IDs so JS never errors -->
@@ -653,7 +670,7 @@
                       <h4 style="font-size:14px;font-weight:900;color:var(--accent-cream);margin:0;">📖 Emre Gökgöz Fit Tarifler (62)</h4>
                       <p style="font-size:11px;color:var(--text-muted);margin:2px 0 0;">Kitaptaki orijinal tarifler • Makroları hazır • Tek tıkla gününe ekle</p>
                     </div>
-                    <span style="font-size:11px;font-weight:800;color:#95de64;background:rgba(82,196,26,0.14);padding:4px 8px;border-radius:8px;">PDF Entegre</span>
+                    
                   </div>
 
                   <!-- Arama Çubuğu -->
@@ -1092,15 +1109,17 @@
         </div>
         <!-- ARŞİV AYLIK TAKVİMİ (GÜN GÜN TİKLERİ VE SU/ALIŞKANLIK İZLERİNİ GÖR) -->
         <div class="month-grid-box" style="margin-bottom:14px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-            <div style="display:flex;align-items:center;gap:6px;">
-              <button class="pin-btn" style="height:32px;padding:0 10px;font-size:12px;" onclick="changeArchiveCalendarMonth(-1)">◀ Önceki</button>
-              <span id="archiveCalendarMonthTitle" style="font-weight:900;font-size:14.5px;min-width:110px;text-align:center;">Ekim 2026</span>
-              <button class="pin-btn" style="height:32px;padding:0 10px;font-size:12px;" onclick="changeArchiveCalendarMonth(1)">Sonraki ▶</button>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:6px;">
+            <div style="width:75px;"></div>
+            <!-- Ortalanmış Ay Başlığı & Gezinme Butonları -->
+            <div style="display:flex;align-items:center;gap:10px;">
+              <button type="button" class="pin-btn" style="height:34px;width:34px;padding:0;border-radius:10px;font-size:12px;display:flex;align-items:center;justify-content:center;" onclick="changeArchiveCalendarMonth(-1)" title="Önceki Ay">◀</button>
+              <span id="archiveCalendarMonthTitle" style="font-weight:900;font-size:15px;color:var(--text-main);cursor:pointer;padding:5px 12px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);" onclick="promptPickCalendarMonthYear()" title="Dokunarak Ay / Yıl Seç">Ekim 2026 ▾</span>
+              <button type="button" class="pin-btn" style="height:34px;width:34px;padding:0;border-radius:10px;font-size:12px;display:flex;align-items:center;justify-content:center;" onclick="changeArchiveCalendarMonth(1)" title="Sonraki Ay">▶</button>
             </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button class="pin-btn" style="height:32px;padding:0 10px;font-size:11.5px;" onclick="jumpArchiveToToday()">📅 Bugün</button>
-              <button class="btn-cream" id="archiveToggleAllDaysBtn" style="padding:6px 11px;font-size:11.5px;" onclick="toggleArchiveAllDays()">Tüm Günleri Listele</button>
+            <!-- Sağ Üstte Kompakt Bugün Butonu (Yerden Tasarruf Sağlar) -->
+            <div style="width:75px;text-align:right;">
+              <button type="button" class="btn-cream" style="height:34px;padding:0 12px;font-size:12px;font-weight:900;border-radius:10px;" onclick="jumpArchiveToToday()">📅 Bugün</button>
             </div>
           </div>
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">
@@ -1242,46 +1261,68 @@
           </div>
         </div>
 
-        <div class="task-card" style="margin-bottom:14px;">
-          <h3 style="font-size:16px;font-weight:800;margin-bottom:12px;">👤 Hesap Bilgilerim, Şifre & Gizli Kasa</h3>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Renk Teması</label>
-              <select id="themeSelect" class="form-select" onchange="changeTheme(this.value)">
-                <option value="dark">🌙 Orijinal Koyu (Lüks Siyah)</option>
-                <option value="midnight">🌌 Gece Mavisi (Midnight)</option>
-                <option value="emerald">🌲 Zümrüt Yeşili (Emerald)</option>
-                <option value="light">☀️ Açık & Ferah Mod</option>
-              </select>
+        <div class="task-card" style="margin-bottom:14px;border-radius:22px;padding:20px 18px;">
+          <h3 style="font-size:17px;font-weight:900;margin-bottom:14px;color:var(--text-main);display:flex;align-items:center;gap:8px;">
+            <span>👤</span>
+            <span>Hesap Bilgilerim, Görünüm & Gizlilik</span>
+          </h3>
+
+          <!-- Form Alanı (Mobilde Asla Taşmaz, Eşit Boyutlu ve Düzenli) -->
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+              <div class="form-group" style="margin:0;">
+                <label style="font-size:11.5px;font-weight:800;color:var(--text-muted);display:block;margin-bottom:6px;text-transform:uppercase;">🎨 Renk Teması</label>
+                <select id="themeSelect" class="form-select" style="height:46px;border-radius:14px;font-size:13.5px;font-weight:700;width:100%;box-sizing:border-box;" onchange="changeTheme(this.value)">
+                  <option value="dark">🌙 Orijinal Koyu (Lüks Siyah)</option>
+                  <option value="midnight">🌌 Gece Mavisi (Midnight)</option>
+                  <option value="emerald">🌲 Zümrüt Yeşili (Emerald)</option>
+                  <option value="light">☀️ Açık & Ferah Mod (Apple Stil)</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label style="font-size:11.5px;font-weight:800;color:var(--text-muted);display:block;margin-bottom:6px;text-transform:uppercase;">💡 Göz Dinlendirme</label>
+                <button type="button" class="btn-cream" style="width:100%;height:46px;border-radius:14px;font-size:13px;font-weight:800;" onclick="toggleNightLight()">Gece Işığını Aç / Kapat</button>
+              </div>
             </div>
-            <div class="form-group">
-              <label>Gece Işığı (Mavi Işık Filtresi)</label>
-              <button class="btn-cream" style="width:100%;height:42px;" onclick="toggleNightLight()">💡 Gece Işığını Aç / Kapat</button>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+              <div class="form-group" style="margin:0;">
+                <label style="font-size:11.5px;font-weight:800;color:var(--text-muted);display:block;margin-bottom:6px;text-transform:uppercase;">👤 Kullanıcı Adı / Hitap İsmi</label>
+                <input type="text" id="settingUserName" class="form-input" style="height:46px;border-radius:14px;font-size:13.5px;font-weight:700;width:100%;box-sizing:border-box;" placeholder="Adınız" />
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label style="font-size:11.5px;font-weight:800;color:var(--text-muted);display:block;margin-bottom:6px;text-transform:uppercase;">📧 Kurtarma E-Posta Adresi</label>
+                <input type="email" id="settingUserEmail" class="form-input" style="height:46px;border-radius:14px;font-size:13.5px;font-weight:700;width:100%;box-sizing:border-box;" placeholder="eposta@gmail.com" />
+              </div>
             </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Hitap İsmi / Kullanıcı Adı</label>
-              <input type="text" id="settingUserName" class="form-input" placeholder="Adın" />
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+              <div class="form-group" style="margin:0;">
+                <label style="font-size:11.5px;font-weight:800;color:var(--text-muted);display:block;margin-bottom:6px;text-transform:uppercase;">🔑 Giriş Şifresini Değiştir</label>
+                <input type="password" id="settingUserPassword" class="form-input" style="height:46px;border-radius:14px;font-size:13.5px;width:100%;box-sizing:border-box;" placeholder="Değiştirmek istemiyorsan boş bırak" />
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label style="font-size:11.5px;font-weight:800;color:var(--text-muted);display:block;margin-bottom:6px;text-transform:uppercase;">🔐 Gizli Kasa Özel PIN / Şifresi</label>
+                <input type="password" id="settingVaultPassword" class="form-input" style="height:46px;border-radius:14px;font-size:13.5px;width:100%;box-sizing:border-box;" placeholder="Gizli kasa için özel şifre" />
+              </div>
             </div>
-            <div class="form-group">
-              <label>Kurtarma E-Posta Adresin</label>
-              <input type="email" id="settingUserEmail" class="form-input" placeholder="ornek@gmail.com" />
+
+            <!-- Çevrimiçi & Son Görülme Gizlilik Ayarı -->
+            <div style="padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <div>
+                <div style="font-size:13px;font-weight:800;color:var(--text-main);">👁️ Çevrimiçi & Son Görülme Durumu</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Arkadaşların senin ne zaman aktif olduğunu görebilsin mi?</div>
+              </div>
+              <label class="switch-toggle" style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;">
+                <input type="checkbox" id="settingPrivacyOnlineStatus" onchange="toggleOnlinePrivacySetting(this.checked)" checked style="display:none;" />
+                <span class="slider-toggle" style="position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,0.15);border-radius:24px;transition:0.3s;"></span>
+              </label>
             </div>
-          </div>
-          <div class="form-row stack-mobile">
-            <div class="form-group">
-              <label>🔑 Hesap Giriş Şifresini Değiştir</label>
-              <input type="password" id="settingUserPassword" class="form-input" placeholder="Değiştirmek istemiyorsan boş bırak" />
+
+            <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:6px;">
+              <button type="button" class="btn-cream" style="height:46px;padding:0 20px;font-size:13.5px;font-weight:900;" onclick="saveUserSettings()">💾 Bilgilerimi Kaydet</button>
+              <button type="button" class="pin-btn" style="height:46px;padding:0 18px;font-size:13px;color:#ff7875;border-color:rgba(255,77,79,0.35);font-weight:800;" onclick="logoutUser()">🚪 Hesaptan Çıkış Yap</button>
             </div>
-            <div class="form-group">
-              <label>🔐 Gizli Kasa Özel Şifresi Belirle</label>
-              <input type="password" id="settingVaultPassword" class="form-input" placeholder="Gizli Kasa için ayrı şifre / PIN belirle" />
-            </div>
-          </div>
-          <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:6px;">
-            <button class="btn-cream" onclick="saveUserSettings()">💾 Bilgilerimi & Kasa Şifresini Kaydet</button>
-            <button class="pin-btn" style="height:40px;padding:0 16px;font-size:13px;color:#ff7875;border-color:rgba(255,77,79,0.35);" onclick="logoutUser()">🚪 Hesaptan Çıkış Yap</button>
           </div>
         </div>
 
@@ -1469,10 +1510,12 @@
               <button type="button" class="quick-chat-btn" onclick="sendQuickDailyReportToFriendChat()">📊 Günlük Özetimi At</button>
             </div>
 
-            <!-- Büyük Mesaj Yazma ve Gönderme Alanı -->
-            <div style="display:flex;gap:8px;margin-top:6px;">
+            <!-- Büyük Mesaj Yazma ve Gönderme Alanı (Fotoğraf Gönderme Özellikli) -->
+            <div style="display:flex;gap:6px;margin-top:6px;align-items:center;">
+              <input type="file" id="chatPhotoFileInput" accept="image/*" style="display:none;" onchange="handleChatPhotoUpload(event)" />
+              <button type="button" class="icon-btn" style="height:48px;width:48px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);font-size:20px;flex-shrink:0;cursor:pointer;" onclick="document.getElementById('chatPhotoFileInput').click()" title="Fotoğraf Gönder">📷</button>
               <input type="text" id="chatMessageInput" class="form-input" style="flex:1;height:48px;font-size:14px;" placeholder="💬 Mesajını buraya yaz..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendSocialChatMessage();}" />
-              <button type="button" class="btn-cream" style="height:48px;padding:0 20px;font-size:14px;font-weight:900;" onclick="sendSocialChatMessage()">Gönder ➤</button>
+              <button type="button" class="btn-cream" style="height:48px;padding:0 18px;font-size:14px;font-weight:900;border-radius:14px;" onclick="sendSocialChatMessage()">Gönder ➤</button>
             </div>
           </div>
         </div>
@@ -1897,6 +1940,15 @@
         <input type="text" id="recipeNotesInput" class="form-input" placeholder="Örn: 2 yumurta, 50g yulaf, 1 ölçek whey, tarçın..." />
       </div>
 
+      <div class="form-group">
+        <label>📷 Yemek Fotoğrafı (Opsiyonel)</label>
+        <input type="file" id="customRecipePhotoFileInput" accept="image/*" style="display:none;" onchange="handleCustomRecipePhotoSelected(event)" />
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button type="button" class="pin-btn" style="height:38px;padding:0 12px;font-size:12px;font-weight:800;" onclick="document.getElementById('customRecipePhotoFileInput').click()">📷 Galeriden Fotoğraf Seç</button>
+          <span id="customRecipePhotoStatusBadge" style="font-size:12px;color:#95de64;font-weight:800;"></span>
+        </div>
+      </div>
+
       <div style="display:flex;gap:10px;margin-top:14px;">
         <button type="button" class="pin-btn" style="flex:1;height:44px;" onclick="closeCustomRecipeModal()">Vazgeç</button>
         <button type="button" class="btn-cream" style="flex:2;height:44px;font-size:13.5px;" onclick="saveCustomRecipeToDB()">👨‍🍳 Tarifi Kaydet & Bugüne Ekle ✓</button>
@@ -2142,6 +2194,16 @@
           Kapat
         </button>
       </div>
+    </div>
+  </div>
+
+
+  <!-- 🔍 FOTOĞRAF BÜYÜTÜCÜ (LIGHTBOX) MODALI -->
+  <div id="imageLightboxModal" class="modal-backdrop hidden" onclick="closeImageLightboxModal()" style="background:rgba(0,0,0,0.92);z-index:30000;display:flex;align-items:center;justify-content:center;padding:16px;">
+    <div style="position:relative;max-width:92vw;max-height:85vh;text-align:center;" onclick="event.stopPropagation()">
+      <button type="button" class="icon-btn" onclick="closeImageLightboxModal()" style="position:absolute;top:-12px;right:-12px;background:#ff4d4f;color:#fff;border-radius:50%;width:34px;height:34px;font-size:16px;font-weight:900;border:2px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;z-index:10;">✕</button>
+      <img id="lightboxImageEl" src="" style="width:auto;height:auto;max-width:100%;max-height:80vh;border-radius:18px;border:1.5px solid rgba(255,255,255,0.2);box-shadow:0 16px 48px rgba(0,0,0,0.85);display:block;margin:0 auto;" />
+      <div id="lightboxCaptionEl" style="margin-top:10px;font-size:14px;font-weight:900;color:var(--accent-cream);"></div>
     </div>
   </div>
 

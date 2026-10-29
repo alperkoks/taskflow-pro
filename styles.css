@@ -3180,6 +3180,10 @@ body[data-theme="light"] #leftPanelMainBody {
 
 body[data-theme="light"] .card,
 body[data-theme="light"] .stat-card,
+body[data-theme="light"] .task-card,
+body[data-theme="light"] .scratchpad-card,
+body[data-theme="light"] .social-profile-banner,
+body[data-theme="light"] .big-back-nav-btn,
 body[data-theme="light"] .daily-progress-card,
 body[data-theme="light"] .luxury-spawn-box,
 body[data-theme="light"] .modern-friend-card,
@@ -3187,11 +3191,32 @@ body[data-theme="light"] .challenge-item-card,
 body[data-theme="light"] .quick-drilldown-category-banner,
 body[data-theme="light"] .recipe-smart-preset-card,
 body[data-theme="light"] .vital-mini-box,
+body[data-theme="light"] .month-grid-box,
 body[data-theme="light"] .simple-hub-card {
   background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
+  border: 1.5px solid #e2e8f0 !important;
   color: #0f172a !important;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05) !important;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06) !important;
+}
+
+body[data-theme="light"] .big-back-nav-btn {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body[data-theme="light"] .form-group label,
+body[data-theme="light"] label {
+  color: #334155 !important;
+  font-weight: 800 !important;
+}
+
+body[data-theme="light"] .form-input,
+body[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]),
+body[data-theme="light"] select {
+  background: #f8fafc !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
 }
 
 body[data-theme="light"] .modal-sheet {

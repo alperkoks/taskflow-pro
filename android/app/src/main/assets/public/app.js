@@ -4952,13 +4952,6 @@ function openFoodTrackerQuick() {
     switchLeftHubMode('sport');
     if (typeof switchSportSubTab === 'function') switchSportSubTab('food');
   }
-  setTimeout(() => {
-    const inp = document.getElementById('foodSearchInput');
-    if (inp) {
-      inp.focus();
-      onFoodSearchInput();
-    }
-  }, 80);
 }
 
 function setFoodCategoryFilter(cat, btnEl) {
@@ -5791,6 +5784,7 @@ function saveInlineCustomRecipe() {
   const microNote = (microEl ? microEl.value : '').trim();
 
   const newRecipe = {
+    photo: tempSelectedCustomRecipePhoto || null,
     name: rawName.startsWith('👨‍🍳') ? rawName : `👨‍🍳 ${rawName}`,
     cat: 'tarif',
     kcal: Math.round(rawKcal * ratioTo100),
@@ -6479,7 +6473,7 @@ function renderSocialAndMissionsHub() {
   const gridEl = document.getElementById('missionsCardsContainer') || document.getElementById('missionsCatalogGrid');
 
   const dispName = appData.profileName || appData.username || 'Şampiyon';
-  if (avEl) avEl.textContent = dispName.charAt(0).toUpperCase();
+  renderProfilePhotosEverywhere();
   if (nameEl) nameEl.textContent = dispName;
 
   const badgeTextEl = document.getElementById('userRankBadgeText');
@@ -6911,11 +6905,33 @@ function renderSelectedFriendChat() {
   boxEl.innerHTML = msgs.map((m) => {
     const isMe = m.sender === 'me' || m.sender === currentProfile;
     const senderLabel = isMe ? 'Sen' : (friend.displayName || friend.username);
+
+    let tickHtml = '';
+    if (isMe) {
+      if (m.status === 'read') {
+        tickHtml = '<span style="color:#38bdf8;font-weight:900;margin-left:4px;font-size:11px;" title="Okundu (Çift Mavi Tik)">✓✓</span>';
+      } else if (m.status === 'delivered') {
+        tickHtml = '<span style="color:var(--text-muted);font-weight:900;margin-left:4px;font-size:11px;" title="İletildi (Çift Gri Tik)">✓✓</span>';
+      } else {
+        tickHtml = '<span style="color:var(--text-muted);font-weight:900;margin-left:4px;font-size:11px;" title="Gönderildi">✓</span>';
+      }
+    }
+
+    const photoHtml = m.photo ? `
+      <div style="margin:4px 0;border-radius:12px;overflow:hidden;cursor:pointer;" onclick="openImageLightbox('${m.photo}', 'Sohbet Fotoğrafı')">
+        <img src="${m.photo}" style="max-width:240px;max-height:220px;border-radius:12px;display:block;object-fit:cover;" />
+      </div>
+    ` : '';
+
     return `
       <div class="chat-bubble ${isMe ? 'me' : 'them'}">
         <div style="font-size:10px;font-weight:900;opacity:0.75;margin-bottom:2px;">${escapeHtml(senderLabel)}</div>
-        <div style="font-size:13px;line-height:1.4;">${escapeHtml(m.text)}</div>
-        <div style="font-size:9.5px;opacity:0.7;text-align:right;margin-top:3px;">${escapeHtml(m.time || '')}</div>
+        ${photoHtml}
+        ${m.text ? `<div style="font-size:13px;line-height:1.4;">${escapeHtml(m.text)}</div>` : ''}
+        <div style="font-size:9.5px;opacity:0.75;display:flex;align-items:center;justify-content:flex-end;margin-top:3px;">
+          <span>${escapeHtml(m.time || '')}</span>
+          ${tickHtml}
+        </div>
       </div>
     `;
   }).join('');
@@ -6957,11 +6973,16 @@ async function appendMessageToActiveFriend(text) {
   if (!Array.isArray(friend.messages)) friend.messages = [];
   const timeStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
-  friend.messages.push({
+  const newMsgObj = {
+    id: 'msg_' + Date.now(),
     sender: 'me',
     text,
-    time: timeStr
-  });
+    time: timeStr,
+    status: 'sent'
+  };
+  friend.messages.push(newMsgObj);
+  setTimeout(() => { newMsgObj.status = 'delivered'; renderSelectedFriendChat(); }, 900);
+  setTimeout(() => { newMsgObj.status = 'read'; renderSelectedFriendChat(); }, 2200);
 
   let deliveredToLocalDbUser = false;
   if (friend.username && friend.username !== currentProfile && !friend.isAiCoach) {
@@ -9200,15 +9221,18 @@ function renderFitPdfRecipes(searchQuery = '') {
     const catBadge = r.category || 'Fit Tarif';
     return `
       <div style="background:rgba(20,20,28,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.25);">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-          <div>
-            <div style="font-size:14px;font-weight:900;color:var(--text-main);">${escapeHtml(r.name)}</div>
-            <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap;">
-              <span style="font-size:10px;font-weight:800;background:rgba(245,216,181,0.14);color:var(--accent-cream);padding:2px 6px;border-radius:6px;">${escapeHtml(catBadge)}</span>
-              <span style="font-size:10.5px;color:var(--text-muted);">Sayfa ${r.page || 1} • ${ingCount} Malzeme</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            ${r.photo ? `<img src="${r.photo}" onclick="openImageLightbox('${r.photo}', '${escapeHtml(r.name).replace(/'/g, "\\'")}')" style="width:48px;height:48px;border-radius:10px;object-fit:cover;cursor:pointer;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.4);" title="Büyütmek için dokun" alt="Yemek" />` : `<div style="width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">👨‍🍳</div>`}
+            <div>
+              <div style="font-size:14px;font-weight:900;color:var(--text-main);">${escapeHtml(r.name)}</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap;">
+                <span style="font-size:10px;font-weight:800;background:rgba(245,216,181,0.14);color:var(--accent-cream);padding:2px 6px;border-radius:6px;">${escapeHtml(catBadge)}</span>
+                <span style="font-size:10.5px;color:var(--text-muted);">${ingCount} Malzeme</span>
+              </div>
             </div>
           </div>
-          <button type="button" class="btn-cream" style="height:32px;font-size:11.5px;font-weight:900;padding:0 10px;background:linear-gradient(135deg,#95de64,#4ade80);color:#09090d;border-radius:10px;flex-shrink:0;" onclick="addFitPdfRecipeToToday(${origIdx})">
+          <button type="button" class="btn-cream" style="height:34px;font-size:11.5px;font-weight:900;padding:0 10px;background:linear-gradient(135deg,#95de64,#4ade80);color:#09090d;border-radius:10px;flex-shrink:0;" onclick="addFitPdfRecipeToToday(${origIdx})">
             ➕ Günüme Ekle
           </button>
         </div>
@@ -9238,30 +9262,43 @@ function addFitPdfRecipeToToday(recipeIndex) {
   const rec = recipes[recipeIndex];
   if (!rec) return;
 
-  const todayISO = getTodayISO();
-  if (!appData.dailyFoods) appData.dailyFoods = {};
-  if (!Array.isArray(appData.dailyFoods[todayISO])) appData.dailyFoods[todayISO] = [];
+  const targetDate = selectedDate || getTodayISO();
+  if (!appData.dailyFoods || typeof appData.dailyFoods !== 'object') {
+    appData.dailyFoods = {};
+  }
+  if (!Array.isArray(appData.dailyFoods[targetDate])) {
+    appData.dailyFoods[targetDate] = [];
+  }
 
+  const mealSlotLabel = typeof getCurrentMealSlotLabel === 'function' ? getCurrentMealSlotLabel() : '🍽️ Fit Öğün';
   const foodItem = {
     id: 'fit_pdf_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
     name: rec.name + ' (Fit Tarif)',
-    mealType: currentMealType || 'Kahvaltı',
-    grams: 1, // 1 Porsiyon
-    portionUnit: '1 Porsiyon',
-    kcal: Number(rec.kcal) || 0,
-    protein: Number(rec.protein) || 0,
-    carbs: Number(rec.carb) || 0,
-    fat: Number(rec.fat) || 0,
-    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    grams: 100,
+    kcal: Math.round(Number(rec.kcal) || 0),
+    protein: Number(Number(rec.protein || 0).toFixed(1)),
+    carbs: Number(Number(rec.carb || 0).toFixed(1)),
+    fat: Number(Number(rec.fat || 0).toFixed(1)),
+    mealSlot: mealSlotLabel
   };
 
-  appData.dailyFoods[todayISO].push(foodItem);
-  saveData();
-  renderDailyFoodTotals();
-  renderDailyEatenFoodsList();
+  appData.dailyFoods[targetDate].unshift(foodItem);
+
+  if (targetDate === getTodayISO()) {
+    appData.proteinDate = targetDate;
+    appData.proteinGrams = Math.round((appData.proteinGrams || 0) + foodItem.protein);
+  }
+
+  playAlertTone('success');
+  syncTodayDailyLog(targetDate);
+  renderProteinTracker();
+  renderFoodMacroTracker();
+  renderSelectedDayDailyValuesBar();
+  if (typeof renderDailyDisciplineScore === 'function') renderDailyDisciplineScore();
+  saveProfileData();
 
   if (typeof spawnFloatingRewardToast === 'function') {
-    spawnFloatingRewardToast(`🍽️ "${rec.name}" ${foodItem.mealType} öğününe eklendi! (+${rec.kcal} kcal, +${rec.protein}g Protein)`);
+    spawnFloatingRewardToast(`🍽️ "${rec.name}" gününe başarıyla eklendi! (+${rec.kcal} kcal, +${rec.protein}g Protein)`);
   } else if (typeof showToast === 'function') {
     showToast(`🍽️ "${rec.name}" eklendi!`);
   }
@@ -9345,4 +9382,299 @@ function previewMyOwnProfileAsFriend() {
   }
 
   modal.classList.remove('hidden');
+}
+
+
+
+// ============================================================================
+// 💎 YENİ NESİL KULLANICI DENEYİMİ, FOTOĞRAF, WHATSAPP TİKLERİ VE SADELEŞTİRME
+// ============================================================================
+
+// 1. Günlük İlerleme & Seviye Detayını Aç / Kapat
+function toggleDailyProgressDetails() {
+  const card = document.getElementById('homeDailyProgressCard');
+  const chev = document.getElementById('progressCollapsibleChevron');
+  if (!card) return;
+  const isHidden = card.style.display === 'none' || card.classList.contains('hidden');
+  if (isHidden) {
+    card.style.display = 'flex';
+    card.classList.remove('hidden');
+    if (chev) chev.style.transform = 'rotate(180deg)';
+  } else {
+    card.style.display = 'none';
+    card.classList.add('hidden');
+    if (chev) chev.style.transform = 'rotate(0deg)';
+  }
+}
+
+// 2. Sağ Üst Profil Menüsü Aç / Kapat
+function toggleHeaderProfileDropdown(force) {
+  const drop = document.getElementById('headerProfileDropdown');
+  if (!drop) return;
+  if (force === false) {
+    drop.classList.add('hidden');
+    return;
+  }
+  const isHidden = drop.classList.contains('hidden');
+  if (isHidden) {
+    drop.classList.remove('hidden');
+    // Dışarı tıklandığında menüyü kapat dinleyicisi
+    setTimeout(() => {
+      const closeHandler = (e) => {
+        if (!drop.contains(e.target)) {
+          drop.classList.add('hidden');
+          document.removeEventListener('click', closeHandler);
+        }
+      };
+      document.addEventListener('click', closeHandler);
+    }, 50);
+  } else {
+    drop.classList.add('hidden');
+  }
+}
+
+// 3. Profil Fotoğrafını Her Yerde Canlı Göster
+function renderProfilePhotosEverywhere() {
+  const headAv = document.getElementById('headerAvatarLetter');
+  const socAvBox = document.getElementById('socialProfileAvatar');
+  const dispName = appData.profileName || appData.username || 'alperkoksal';
+  const initial = dispName.charAt(0).toUpperCase();
+
+  const photo = appData.profilePhoto || localStorage.getItem('taskflow_avatar_' + (currentProfile || 'guest'));
+  if (photo) {
+    if (headAv) headAv.innerHTML = `<img src="${photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;" alt="${dispName}" />`;
+    if (socAvBox) {
+      socAvBox.innerHTML = `
+        <img src="${photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;" alt="${dispName}" />
+        <div class="avatar-edit-badge" style="position:absolute;bottom:-4px;right:-4px;background:#60a5fa;color:#09090d;font-size:9.5px;font-weight:900;padding:2px 6px;border-radius:99px;box-shadow:0 2px 6px rgba(0,0,0,0.5);">📷 Fotoğraf</div>
+      `;
+    }
+  } else {
+    if (headAv) headAv.innerHTML = initial;
+    if (socAvBox) {
+      socAvBox.innerHTML = `
+        <span id="socialProfileAvatarText" style="font-size:26px;font-weight:900;color:var(--accent-cream);">${initial}</span>
+        <div class="avatar-edit-badge" style="position:absolute;bottom:-4px;right:-4px;background:#60a5fa;color:#09090d;font-size:9.5px;font-weight:900;padding:2px 6px;border-radius:99px;">📷 Fotoğraf</div>
+      `;
+    }
+  }
+}
+
+// 4. Havalı Tek Kelimelik Rozet İsimleri Sözlüğü & Vitrin Render'ı
+const BADGE_NICKNAMES = {
+  'streak_3': '🔥 Asker',
+  'streak_7': '⚡ Gladyatör',
+  'streak_14': '🛡️ Muhafız',
+  'streak_30': '👑 Titan',
+  'water_10': '🥤 Hidratör',
+  'friend_1': '🤝 Yoldaş',
+  'goal_1': '🎯 Avcı',
+  'tasks_5': '⚡ Çalışkan',
+  'tasks_20': '🏆 Şampiyon',
+  'protein_100': '🥩 Kas Adam',
+  'early_bird': '🌅 Kartal',
+  'night_owl': '🦉 Gece Kuşu'
+};
+
+function getBadgeNickname(b) {
+  if (BADGE_NICKNAMES[b.id]) return BADGE_NICKNAMES[b.id];
+  // Başlıktan ilk iki kelimeyi temizle
+  const cleanTitle = (b.title || 'Rozet').split('(')[0].trim();
+  const words = cleanTitle.split(' ');
+  return (b.icon || '🏅') + ' ' + (words[words.length - 1] || 'Savaşçı');
+}
+
+// Vitrin Rozetlerini Kompakt Hap Şeklinde Render Et
+function renderShowcaseBadgesCompact() {
+  const stripEl = document.getElementById('socialShowcaseBadgesGrid') || document.getElementById('profileShowcaseBadgesStrip');
+  if (!stripEl) return;
+
+  const showcased = getShowcasedBadgeObjects();
+  if (showcased.length === 0) {
+    stripEl.innerHTML = '<div style="font-size:11.5px;color:var(--text-muted);padding:4px 0;">Henüz vitrine rozet eklenmedi. Misyonlardan <b>"📌 Vitrine Koy"</b> ile ekle!</div>';
+    return;
+  }
+
+  stripEl.innerHTML = showcased.map((b) => {
+    const nickname = getBadgeNickname(b);
+    return `
+      <button type="button" class="tag-badge" onclick="openBadgeDetailPopup('${b.id}')" style="cursor:pointer;border:1.5px solid rgba(245,216,181,0.35);background:linear-gradient(135deg,rgba(245,216,181,0.18),rgba(20,20,28,0.95));color:var(--accent-cream);font-weight:900;font-size:12px;padding:6px 12px;border-radius:12px;flex-shrink:0;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+        <span>${escapeHtml(nickname)}</span>
+        <span style="font-size:10px;color:#95de64;">+${b.xp}XP</span>
+      </button>
+    `;
+  }).join('');
+}
+
+function openBadgeDetailPopup(badgeId) {
+  const all = computeAllMissions();
+  const b = all.find((m) => m.id === badgeId);
+  if (!b) return;
+
+  const nickname = getBadgeNickname(b);
+  const info = `🏆 ${nickname}
+
+• Görev: ${b.title}
+• Açıklama: ${b.desc}
+• Kazanılan: +${b.xp} XP
+• Durum: ${b.unlocked ? '✅ Kazanıldı ve Vitrinde' : '⏳ Devam Ediyor (%' + b.pct + ')'}`;
+  
+  if (confirm(info + '
+
+Bu başarımı WhatsApp durumunda paylaşmak ister misin?')) {
+    shareSingleBadgeOnWP(badgeId);
+  }
+}
+
+// 5. Lightbox Fotoğraf Büyütme
+function openImageLightbox(src, caption) {
+  const modal = document.getElementById('imageLightboxModal');
+  const imgEl = document.getElementById('lightboxImageEl');
+  const capEl = document.getElementById('lightboxCaptionEl');
+  if (!modal || !imgEl) return;
+
+  imgEl.src = src;
+  if (capEl) capEl.textContent = caption || '';
+  modal.classList.remove('hidden');
+}
+
+function closeImageLightboxModal() {
+  const modal = document.getElementById('imageLightboxModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+// 6. Mesajlaşmada Fotoğraf Gönderme (WhatsApp Tarzı)
+function handleChatPhotoUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const maxDim = 480;
+      let w = img.width;
+      let h = img.height;
+      if (w > h) {
+        if (w > maxDim) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+      } else {
+        if (h > maxDim) { w = Math.round(w * (maxDim / h)); h = maxDim; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(img, 0, 0, w, h);
+      const photoDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+      sendSocialPhotoMessage(photoDataUrl);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function sendSocialPhotoMessage(photoDataUrl) {
+  ensureDefaultAiCoachFriend();
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+  const friend = friends[activeSelectedFriendIdx] || friends[0];
+  if (!friend) return;
+  if (!Array.isArray(friend.messages)) friend.messages = [];
+
+  const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const msgObj = {
+    id: 'msg_photo_' + Date.now(),
+    sender: 'me',
+    text: '',
+    photo: photoDataUrl,
+    time: timeStr,
+    status: 'sent' // sent (✓) -> delivered (✓✓ gri) -> read (✓✓ mavi)
+  };
+
+  friend.messages.push(msgObj);
+  saveProfileData();
+  renderSelectedFriendChat();
+
+  // 1 saniye sonra çift gri tik, 2 saniye sonra çift mavi tik ve cevap simülasyonu
+  setTimeout(() => {
+    msgObj.status = 'delivered';
+    renderSelectedFriendChat();
+  }, 900);
+
+  setTimeout(() => {
+    msgObj.status = 'read';
+    renderSelectedFriendChat();
+    // Bot veya arkadaş reaksiyonu
+    if (friend.isAiCoach) {
+      triggerAiCoachAutoReply(friend, 'Fotoğraf harika görünüyor! Disiplinine devam et 💪');
+    }
+  }, 2200);
+}
+
+// 7. Kendi Tarifine Fotoğraf Ekleme
+let tempSelectedCustomRecipePhoto = null;
+function handleCustomRecipePhotoSelected(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const maxDim = 360;
+      let w = img.width;
+      let h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+        else { w = Math.round(w * (maxDim / h)); h = maxDim; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(img, 0, 0, w, h);
+      tempSelectedCustomRecipePhoto = canvas.toDataURL('image/jpeg', 0.82);
+
+      const badge = document.getElementById('customRecipePhotoStatusBadge');
+      if (badge) badge.textContent = '✓ Fotoğraf Hazır!';
+      if (typeof showToast === 'function') showToast('📷 Yemek fotoğrafı seçildi!');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// 8. Çevrimiçi Durumu Gizleme Ayarı
+function toggleOnlinePrivacySetting(isChecked) {
+  appData.hideOnlineStatus = !isChecked;
+  saveProfileData();
+  if (typeof showToast === 'function') {
+    showToast(isChecked ? '🟢 Çevrimiçi durumunuz görünür yapıldı' : '🔒 Çevrimiçi ve son görülmeniz gizlendi');
+  }
+}
+
+
+
+// Ay ve Yıl Seçici (Takvim Başlığına Dokunulduğunda)
+function promptPickCalendarMonthYear() {
+  const currentMonthIdx = (typeof currentArchiveMonthIndex === 'number') ? currentArchiveMonthIndex : new Date().getMonth();
+  const currentYear = (typeof currentArchiveYear === 'number') ? currentArchiveYear : new Date().getFullYear();
+  
+  const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  const monthListStr = monthNames.map((m, i) => `${i + 1}-${m}`).join(', ');
+  
+  const choice = prompt(`Gitmek istediğiniz ayı seçin (1-12) veya Yıl belirtin:
+(${monthListStr})
+
+Şu an: ${monthNames[currentMonthIdx]} ${currentYear}`, (currentMonthIdx + 1).toString());
+  if (!choice) return;
+
+  const parsed = parseInt(choice.trim(), 10);
+  if (!isNaN(parsed) && parsed >= 1 && parsed <= 12) {
+    if (typeof currentArchiveMonthIndex !== 'undefined') {
+      currentArchiveMonthIndex = parsed - 1;
+      if (typeof renderArchiveCalendar === 'function') renderArchiveCalendar();
+      if (typeof spawnFloatingRewardToast === 'function') spawnFloatingRewardToast(`📅 ${monthNames[parsed - 1]} takvimine geçildi`);
+    }
+  }
 }
