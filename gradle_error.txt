@@ -21,9 +21,9 @@ WARNING: Using flatDir should be avoided because it doesn't support any meta-dat
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
 > Task :capacitor-android:preBuild UP-TO-DATE
 > Task :capacitor-android:preDebugBuild UP-TO-DATE
-> Task :app:generateDebugResValues
 > Task :capacitor-android:writeDebugAarMetadata
 > Task :app:javaPreCompileDebug
+> Task :app:generateDebugResValues
 > Task :capacitor-android:generateDebugResValues
 > Task :capacitor-android:generateDebugResources
 > Task :app:checkDebugAarMetadata
@@ -49,8 +49,8 @@ WARNING: Using flatDir should be avoided because it doesn't support any meta-dat
 > Task :capacitor-android:mergeDebugShaders
 > Task :capacitor-android:compileDebugShaders NO-SOURCE
 > Task :capacitor-android:generateDebugAssets UP-TO-DATE
-> Task :capacitor-android:generateDebugRFile
 > Task :capacitor-android:packageDebugAssets
+> Task :capacitor-android:generateDebugRFile
 > Task :app:processDebugResources
 
 > Task :capacitor-android:compileDebugJavaWithJavac
@@ -64,9 +64,9 @@ Note: Recompile with -Xlint:unchecked for details.
 Note: /home/runner/work/taskflow-pro/taskflow-pro/android/app/src/main/java/com/alperkoks/taskflowpro/MainActivity.java uses or overrides a deprecated API.
 Note: Recompile with -Xlint:deprecation for details.
 
+> Task :app:compressDebugAssets
 > Task :app:desugarDebugFileDependencies
 > Task :capacitor-android:bundleLibRuntimeToJarDebug
-> Task :app:compressDebugAssets
 > Task :app:dexBuilderDebug
 > Task :app:processDebugJavaRes NO-SOURCE
 > Task :capacitor-android:processDebugJavaRes NO-SOURCE
@@ -78,9 +78,9 @@ Note: Recompile with -Xlint:deprecation for details.
 > Task :app:mergeProjectDexDebug
 > Task :capacitor-android:mergeDebugJniLibFolders
 > Task :capacitor-android:mergeDebugNativeLibs NO-SOURCE
-> Task :app:mergeLibDexDebug
 > Task :capacitor-android:copyDebugJniLibsProjectOnly
 > Task :app:validateSigningDebug
+> Task :app:mergeLibDexDebug
 > Task :app:mergeDebugNativeLibs NO-SOURCE
 > Task :app:stripDebugDebugSymbols NO-SOURCE
 > Task :app:writeDebugAppMetadata
@@ -102,5 +102,5 @@ Note: Recompile with -Xlint:deprecation for details.
 > Task :app:createDebugApkListingFileRedirect
 > Task :app:assembleDebug
 
-BUILD SUCCESSFUL in 1m 25s
+BUILD SUCCESSFUL in 58s
 60 actionable tasks: 60 executed
