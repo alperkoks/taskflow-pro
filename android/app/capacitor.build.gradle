@@ -7,14 +7,12 @@ android {
   }
 }
 
-def cordovaVariables = new File(project.projectDir, "../capacitor-cordova-android-plugins/cordova.variables.gradle")
-if (cordovaVariables.exists()) {
-    apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
-}
-
+apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
     implementation project(':capacitor-keyboard')
+
 }
+
 
 if (hasProperty('postBuildExtras')) {
   postBuildExtras()

@@ -15,6 +15,7 @@ const filesToCopy = [
   'index.html',
   'styles.css',
   'app.js',
+  'fit_recipes_data.js',
   'sw.js',
   'manifest.json',
   'icon-192.png',

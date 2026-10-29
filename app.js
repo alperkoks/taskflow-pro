@@ -4715,7 +4715,7 @@ function completeWeeklyReviewWizard() {
 // Tüm değerler 100 GRAM (100g) besin içindir: kcal, protein (g), carbs (g), fat (g), defGrams (varsayılan porsiyon gramajı)
 const FOOD_DATABASE_TR = [
   // 🥚 KAHVALTILIKLAR, YUMURTA & PEYNİR (28 Besin)
-  { name: 'Haşlanmış Yumurta (Tam)', cat: 'kahvalti', kcal: 155, protein: 12.6, carbs: 1.1, fat: 10.6, defGrams: 100, hint: '2 Adet ≈ 100g' },
+  { name: 'Haşlanmış Yumurta (Tam)', cat: 'kahvalti', kcal: 155, protein: 12.6, carbs: 1.1, fat: 10.6, defGrams: 50, hint: '1 Adet ≈ 50g (2 Adet ≈ 100g)' },
   { name: 'Yumurta (1 Adet Orta Boy)', cat: 'kahvalti', kcal: 155, protein: 12.6, carbs: 1.1, fat: 10.6, defGrams: 50, hint: '1 Adet ≈ 50g' },
   { name: 'Yumurta Beyazı (Haşlanmış/Çiğ)', cat: 'kahvalti', kcal: 52, protein: 10.9, carbs: 0.7, fat: 0.2, defGrams: 100, hint: '3 Adet Beyaz ≈ 100g' },
   { name: 'Yumurta Sarısı', cat: 'kahvalti', kcal: 322, protein: 15.9, carbs: 3.6, fat: 26.5, defGrams: 35, hint: '2 Adet Sarı ≈ 35g' },
@@ -5018,7 +5018,10 @@ function selectFoodFromDropdown(foodName) {
   const drop = document.getElementById('foodSearchDropdown');
 
   if (inp) inp.value = found.name;
-  if (gInp && found.defGrams) gInp.value = found.defGrams;
+  // Otomatik gerçekçi porsiyon gramajı ata (örn: 1 Yumurta -> 50g, 1 Muz -> 120g)
+  if (gInp) {
+    gInp.value = found.defGrams || 100;
+  }
   if (drop) drop.classList.remove('open');
 
   updateFoodLiveMacroPreview();
@@ -5440,21 +5443,29 @@ function switchWaterInnerTab(tab) {
 
 function switchFoodInnerTab(tab) {
   const aBox = document.getElementById('foodInnerTabAdd');
+  const fBox = document.getElementById('foodInnerTabFitPdf');
   const rBox = document.getElementById('foodInnerTabRecipe');
   const cBox = document.getElementById('foodInnerTabCombos');
   const bA = document.getElementById('foodTabBtnAdd');
+  const bF = document.getElementById('foodTabBtnFitPdf');
   const bR = document.getElementById('foodTabBtnRecipe');
   const bC = document.getElementById('foodTabBtnCombos');
 
   if (aBox) aBox.style.display = tab === 'add' ? 'block' : 'none';
+  if (fBox) fBox.style.display = tab === 'fitPdf' ? 'block' : 'none';
   if (rBox) rBox.style.display = tab === 'recipe' ? 'block' : 'none';
   if (cBox) cBox.style.display = tab === 'combos' ? 'block' : 'none';
 
   if (bA) bA.classList.toggle('active', tab === 'add');
+  if (bF) bF.classList.toggle('active', tab === 'fitPdf');
   if (bR) bR.classList.toggle('active', tab === 'recipe');
   if (bC) bC.classList.toggle('active', tab === 'combos');
 
-  if (tab === 'recipe') {
+  if (tab === 'fitPdf') {
+    if (typeof renderFitPdfRecipes === 'function') {
+      renderFitPdfRecipes();
+    }
+  } else if (tab === 'recipe') {
     const recBox = document.getElementById('inlineCustomRecipeBox');
     if (recBox) recBox.style.display = 'block';
     if (typeof renderAutoRecipeIngredientsBuilder === 'function') {
@@ -6482,6 +6493,14 @@ function renderSocialAndMissionsHub() {
   if (statsLineEl) {
     statsLineEl.textContent = `${xpTextEl ? xpTextEl.textContent : '0 XP'} • 🔥 ${appData.streak || 1} Gün Seri • 🏅 ${unlockedList.length}/${all.length} Rozet Kazanıldı`;
   }
+
+  // 3'lü Lüks Sayaç Kutularını Doldur
+  const statStreakEl = document.getElementById('socialStatStreak');
+  const statXpEl = document.getElementById('socialStatXp');
+  const statBadgesEl = document.getElementById('socialStatBadges');
+  if (statStreakEl) statStreakEl.textContent = `🔥 ${appData.streak || 1} Gün`;
+  if (statXpEl) statXpEl.textContent = `⚡ ${xpTextEl ? xpTextEl.textContent : '0 XP'}`;
+  if (statBadgesEl) statBadgesEl.textContent = `🏆 ${unlockedList.length}/${all.length}`;
   if (sumBadgeEl) {
     sumBadgeEl.textContent = `${unlockedList.length} / ${all.length} Rozet Kazanıldı`;
   }
@@ -8067,7 +8086,7 @@ function drawLuxuryStoryCanvas() {
 
   // Üst Rozet
   ctx.fillStyle = pal.accent;
-  ctx.font = '900 34px Inter, sans-serif';
+  ctx.font = '900 29px Inter, sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('⚡ TASKFLOW+ GÜNLÜK PERFORMANS', W / 2, 130);
 
@@ -8086,12 +8105,12 @@ function drawLuxuryStoryCanvas() {
   ctx.fillStyle = pal.scoreBg;
   ctx.strokeStyle = pal.accent;
   ctx.lineWidth = 3;
-  drawSafeRoundRect(ctx, W / 2 - 260, 310, 520, 78, 39);
+  drawSafeRoundRect(ctx, W / 2 - 320, 310, 640, 78, 39);
   ctx.fill();
   ctx.stroke();
 
   ctx.fillStyle = '#ffffff';
-  ctx.font = '900 34px Inter, sans-serif';
+  ctx.font = '900 29px Inter, sans-serif';
   ctx.fillText(`🏆 GÜNÜN DİSİPLİN SKORU: ${score}/100`, W / 2, 360);
 
   // Verileri hesapla (appData.dailyFoods ile %100 uyumlu!)
@@ -9120,4 +9139,210 @@ function sendQuickFriendEncouragement() {
     showToast('👏 Arkadaşınıza başarı tebriki ve alkış gönderildi!');
   }
   closeFriendProfileModal();
+}
+
+
+
+
+// ============================================================================
+// 📖 EMRE GÖKGÖZ 62 FİT YEMEK & TARİF ENTEGRASYONU VE YÖNETİMİ
+// ============================================================================
+let currentFitPdfCategory = 'all';
+
+function setFitPdfCatFilter(cat, btnEl) {
+  currentFitPdfCategory = cat;
+  const chips = document.querySelectorAll('#fitPdfCategoryChips .tag-badge');
+  chips.forEach((c) => {
+    c.style.background = 'var(--bg-surface)';
+    c.style.color = 'var(--text-main)';
+  });
+  if (btnEl) {
+    btnEl.style.background = 'var(--accent-cream)';
+    btnEl.style.color = '#09090d';
+  }
+  filterFitPdfRecipes();
+}
+
+function filterFitPdfRecipes() {
+  const inp = document.getElementById('fitPdfSearchInput');
+  const q = inp ? inp.value.toLowerCase().trim() : '';
+  renderFitPdfRecipes(q);
+}
+
+function renderFitPdfRecipes(searchQuery = '') {
+  const container = document.getElementById('fitPdfRecipesListContainer');
+  if (!container) return;
+
+  const recipes = Array.isArray(window.FIT_RECIPES_PDF) ? window.FIT_RECIPES_PDF : [];
+  if (recipes.length === 0) {
+    container.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:16px;">Fit tarifler yükleniyor...</div>';
+    return;
+  }
+
+  const filtered = recipes.filter((r) => {
+    if (currentFitPdfCategory !== 'all' && r.category !== currentFitPdfCategory) return false;
+    if (searchQuery) {
+      const matchName = (r.name || '').toLowerCase().includes(searchQuery);
+      const matchIng = Array.isArray(r.ingredients) && r.ingredients.some((ing) => ing.toLowerCase().includes(searchQuery));
+      return matchName || matchIng;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:16px;">Aradığınız kriterde tarif bulunamadı.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map((r) => {
+    const origIdx = recipes.findIndex((orig) => orig.name === r.name);
+    const ingCount = Array.isArray(r.ingredients) ? r.ingredients.length : 0;
+    const catBadge = r.category || 'Fit Tarif';
+    return `
+      <div style="background:rgba(20,20,28,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.25);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div>
+            <div style="font-size:14px;font-weight:900;color:var(--text-main);">${escapeHtml(r.name)}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap;">
+              <span style="font-size:10px;font-weight:800;background:rgba(245,216,181,0.14);color:var(--accent-cream);padding:2px 6px;border-radius:6px;">${escapeHtml(catBadge)}</span>
+              <span style="font-size:10.5px;color:var(--text-muted);">Sayfa ${r.page || 1} • ${ingCount} Malzeme</span>
+            </div>
+          </div>
+          <button type="button" class="btn-cream" style="height:32px;font-size:11.5px;font-weight:900;padding:0 10px;background:linear-gradient(135deg,#95de64,#4ade80);color:#09090d;border-radius:10px;flex-shrink:0;" onclick="addFitPdfRecipeToToday(${origIdx})">
+            ➕ Günüme Ekle
+          </button>
+        </div>
+
+        <!-- Makro Çubuğu -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:rgba(0,0,0,0.3);padding:6px 8px;border-radius:10px;text-align:center;font-size:11px;">
+          <div><span style="color:#ffc069;font-weight:900;">🔥 ${r.kcal}</span> <span style="font-size:9.5px;color:var(--text-muted);">kcal</span></div>
+          <div><span style="color:#ff9c6e;font-weight:900;">🥩 ${r.protein}g</span> <span style="font-size:9.5px;color:var(--text-muted);">prot</span></div>
+          <div><span style="color:#93c5fd;font-weight:900;">🍞 ${r.carb}g</span> <span style="font-size:9.5px;color:var(--text-muted);">karb</span></div>
+          <div><span style="color:#95de64;font-weight:900;">🥑 ${r.fat}g</span> <span style="font-size:9.5px;color:var(--text-muted);">yağ</span></div>
+        </div>
+
+        <!-- Malzemeler Özeti (Açılabilir / Kapanabilir) -->
+        <details style="font-size:11px;color:var(--text-muted);cursor:pointer;">
+          <summary style="font-weight:700;color:var(--accent-cream);outline:none;">📝 Malzemeleri ve Detayları Gör (${ingCount} Adet)</summary>
+          <div style="margin-top:6px;padding-top:6px;border-top:1px dashed rgba(255,255,255,0.06);line-height:1.45;">
+            ${(r.ingredients || []).map((ing) => `<div style="margin-bottom:2px;">• ${escapeHtml(ing)}</div>`).join('')}
+          </div>
+        </details>
+      </div>
+    `;
+  }).join('');
+}
+
+function addFitPdfRecipeToToday(recipeIndex) {
+  const recipes = Array.isArray(window.FIT_RECIPES_PDF) ? window.FIT_RECIPES_PDF : [];
+  const rec = recipes[recipeIndex];
+  if (!rec) return;
+
+  const todayISO = getTodayISO();
+  if (!appData.dailyFoods) appData.dailyFoods = {};
+  if (!Array.isArray(appData.dailyFoods[todayISO])) appData.dailyFoods[todayISO] = [];
+
+  const foodItem = {
+    id: 'fit_pdf_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+    name: rec.name + ' (Fit Tarif)',
+    mealType: currentMealType || 'Kahvaltı',
+    grams: 1, // 1 Porsiyon
+    portionUnit: '1 Porsiyon',
+    kcal: Number(rec.kcal) || 0,
+    protein: Number(rec.protein) || 0,
+    carbs: Number(rec.carb) || 0,
+    fat: Number(rec.fat) || 0,
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  };
+
+  appData.dailyFoods[todayISO].push(foodItem);
+  saveData();
+  renderDailyFoodTotals();
+  renderDailyEatenFoodsList();
+
+  if (typeof spawnFloatingRewardToast === 'function') {
+    spawnFloatingRewardToast(`🍽️ "${rec.name}" ${foodItem.mealType} öğününe eklendi! (+${rec.kcal} kcal, +${rec.protein}g Protein)`);
+  } else if (typeof showToast === 'function') {
+    showToast(`🍽️ "${rec.name}" eklendi!`);
+  }
+}
+
+// Akıllı Porsiyon Stepper (+1 Adet / Porsiyon, -1 Adet / Porsiyon)
+function stepFoodPortion(multiplier) {
+  const gInp = document.getElementById('foodGramsInput');
+  if (!gInp || !selectedFoodObj) return;
+
+  const step = Number(selectedFoodObj.defGrams) || 50;
+  let currentVal = parseFloat(gInp.value) || step;
+  let newVal = currentVal + (multiplier * step);
+  if (newVal < step) newVal = step;
+  gInp.value = Math.round(newVal);
+  updateFoodLiveMacroPreview();
+}
+
+
+
+function previewMyOwnProfileAsFriend() {
+  const dispName = appData.profileName || appData.username || 'Şampiyon';
+  const myPhoto = appData.profilePhotoDataUrl || localStorage.getItem('taskflow_avatar_' + (currentProfile || 'guest'));
+  const showcased = getShowcasedBadgeObjects();
+  const unlocked = computeAllMissions().filter((m) => m.unlocked);
+
+  const mockFriendObj = {
+    name: dispName,
+    bio: appData.profileBio || 'Disiplin, hedefler ve sağlıklı yaşam yolculuğum! 💪',
+    avatarLetter: dispName.charAt(0).toUpperCase(),
+    avatarPhoto: myPhoto || null,
+    streak: appData.streak || 1,
+    waterL: (((appData.waterCount || 0) * 250) / 1000).toFixed(2),
+    proteinG: Math.round(appData.proteinGrams || 0),
+    tasksDone: (appData.tasks || []).filter((t) => t.date === getTodayISO() && t.completed).length,
+    badgesCount: unlocked.length,
+    showcaseBadges: showcased
+  };
+
+  const modal = document.getElementById('friendProfileModal');
+  if (!modal) return;
+
+  const mName = document.getElementById('friendModalName');
+  const mBio = document.getElementById('friendModalBio');
+  const mAvatarBox = document.getElementById('friendModalAvatarBox');
+  const mAvatarLetter = document.getElementById('friendModalAvatarLetter');
+  const mStreak = document.getElementById('friendModalStreak');
+  const mWater = document.getElementById('friendModalWater');
+  const mProtein = document.getElementById('friendModalProtein');
+  const mTasks = document.getElementById('friendModalTasks');
+  const mBadgesCount = document.getElementById('friendModalBadgesCount');
+  const mStrip = document.getElementById('friendModalShowcaseStrip');
+
+  if (mName) mName.textContent = mockFriendObj.name + ' (Kendi Profil Önizlemeniz)';
+  if (mBio) mBio.textContent = `"${mockFriendObj.bio}"`;
+  if (mStreak) mStreak.textContent = `🔥 ${mockFriendObj.streak} Gün Seri`;
+  if (mWater) mWater.textContent = `💧 ${mockFriendObj.waterL} L`;
+  if (mProtein) mProtein.textContent = `🥩 ${mockFriendObj.proteinG}g`;
+  if (mTasks) mTasks.textContent = `✅ ${mockFriendObj.tasksDone} Görev`;
+  if (mBadgesCount) mBadgesCount.textContent = `🏆 ${mockFriendObj.badgesCount} Adet`;
+
+  if (mAvatarBox) {
+    if (mockFriendObj.avatarPhoto) {
+      mAvatarBox.innerHTML = `<img src="${mockFriendObj.avatarPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+    } else {
+      mAvatarBox.innerHTML = `<span style="font-size:24px;font-weight:900;color:var(--accent-cream);">${mockFriendObj.avatarLetter}</span>`;
+    }
+  }
+
+  if (mStrip) {
+    if (mockFriendObj.showcaseBadges.length === 0) {
+      mStrip.innerHTML = '<div style="font-size:11.5px;color:var(--text-muted);">Henüz vitrine rozet eklemediniz.</div>';
+    } else {
+      mStrip.innerHTML = mockFriendObj.showcaseBadges.map((b) => `
+        <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(245,216,181,0.3);border-radius:12px;padding:6px 10px;text-align:center;">
+          <div style="font-size:18px;">${b.icon}</div>
+          <div style="font-size:10px;font-weight:800;color:var(--text-main);">${escapeHtml(b.title)}</div>
+        </div>
+      `).join('');
+    }
+  }
+
+  modal.classList.remove('hidden');
 }

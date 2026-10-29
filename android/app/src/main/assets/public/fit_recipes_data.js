@@ -1,0 +1,1084 @@
+// Emre Gökgöz Fit Yemek & Tarifler Kitabı (62 Efsane Tarif)
+window.FIT_RECIPES_PDF = [
+  {
+    "id": "fit_pdf_9",
+    "name": "Kahveli̇ Yulaf Lapasi",
+    "category": "Kahvaltı",
+    "kcal": 476,
+    "carb": 77.0,
+    "protein": 19.5,
+    "fat": 12.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 su bardağı yulaf ezmesi",
+      "1 su bardağı süt",
+      "1 çk tarçın",
+      "1 tk türk kahvesi (farklı bir kahve",
+      "de kullanabilirsiniz.)"
+    ],
+    "page": 9
+  },
+  {
+    "id": "fit_pdf_10",
+    "name": "Unsuz Muzlu Pankek",
+    "category": "Kahvaltı",
+    "kcal": 303,
+    "carb": 39.5,
+    "protein": 14.4,
+    "fat": 12.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 adet muz",
+      "2 adet yumurta",
+      "1 çk hindistan cevizi yağı",
+      "(opsiyonel)"
+    ],
+    "page": 10
+  },
+  {
+    "id": "fit_pdf_11",
+    "name": "Kahveli̇ Pankek",
+    "category": "Kahvaltı",
+    "kcal": 374,
+    "carb": 30.3,
+    "protein": 22.0,
+    "fat": 18.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 çay bardağı yulaf ezmesi",
+      "2 yk yoğurt",
+      "1 tk türk kahvesi",
+      "Yarım paket kabartma tozu",
+      "2 adet yumurta"
+    ],
+    "page": 11
+  },
+  {
+    "id": "fit_pdf_12",
+    "name": "Lor Tava",
+    "category": "Kahvaltı",
+    "kcal": 224,
+    "carb": 4.5,
+    "protein": 18.0,
+    "fat": 15.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "200 g lor peyniri",
+      "1 yk tereyağı",
+      "2 yk domates püresi",
+      "(1 domatesi blenderdan geçire-",
+      "rek de kullanabilirsiniz)"
+    ],
+    "page": 12
+  },
+  {
+    "id": "fit_pdf_13",
+    "name": "Ev Yapimi Notella",
+    "category": "Kahvaltı",
+    "kcal": 50,
+    "carb": 3.5,
+    "protein": 1.0,
+    "fat": 3.5,
+    "ingredients": [
+      "TARİFTARİF",
+      "(1 kavanoz hazırlamak için)",
+      "1 su bardağı fındık",
+      "1 yk kakao",
+      "12 adet orta boy hurma",
+      "1 tk bal"
+    ],
+    "page": 13
+  },
+  {
+    "id": "fit_pdf_14",
+    "name": "Mantarli Fi̇t Omlet",
+    "category": "Kahvaltı",
+    "kcal": 304,
+    "carb": 10.5,
+    "protein": 26.7,
+    "fat": 15.8,
+    "ingredients": [
+      "TARİFTARİF",
+      "60 g lor peyniri",
+      "2 adet yumurta",
+      "1 kase kültür mantarı",
+      "1 çk pul biber",
+      "1 çk zeytinyağı"
+    ],
+    "page": 14
+  },
+  {
+    "id": "fit_pdf_15",
+    "name": "Ispanakli Ve Peyni̇rli̇ Omlet",
+    "category": "Kahvaltı",
+    "kcal": 306,
+    "carb": 3.0,
+    "protein": 23.6,
+    "fat": 21.8,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 kase doğranmış ıspanak",
+      "50 g beyaz peynir",
+      "2 adet yumurta",
+      "1 tk tereyağı (opsiyonel)"
+    ],
+    "page": 15
+  },
+  {
+    "id": "fit_pdf_16",
+    "name": "Muzlu Yulaf Lapasi",
+    "category": "Kahvaltı",
+    "kcal": 304,
+    "carb": 68.5,
+    "protein": 8.0,
+    "fat": 3.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "Yarım su bardağı yulaf ezmesi",
+      "1 adet muz",
+      "1 çk tarçın",
+      "1 tk keçiboynuzu unu veya",
+      "1 çk süzme bal"
+    ],
+    "page": 16
+  },
+  {
+    "id": "fit_pdf_17",
+    "name": "Fistik Ezmesi̇",
+    "category": "Kahvaltı",
+    "kcal": 101,
+    "carb": 3.0,
+    "protein": 4.1,
+    "fat": 8.9,
+    "ingredients": [
+      "TARİFTARİF",
+      "160 g tuzsuz fıstık",
+      "(1 orta boy kase)",
+      "1 yk hindistan cevizi yağı",
+      "veya zeytinyağı (isteğe bağlı)",
+      "1 tk bal"
+    ],
+    "page": 17
+  },
+  {
+    "id": "fit_pdf_18",
+    "name": "Tahi̇nli̇ Unsuz Pankek",
+    "category": "Kahvaltı",
+    "kcal": 227,
+    "carb": 24.0,
+    "protein": 9.2,
+    "fat": 11.4,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 tk susam",
+      "1 adet muz",
+      "2 adet yumurta",
+      "1 çk tarçın",
+      "1 yk tahin"
+    ],
+    "page": 18
+  },
+  {
+    "id": "fit_pdf_19",
+    "name": "Protei̇n Bohçasi",
+    "category": "Kahvaltı",
+    "kcal": 297,
+    "carb": 11.1,
+    "protein": 21.9,
+    "fat": 14.3,
+    "ingredients": [
+      "TARİFTARİF",
+      "2 adet yumurta",
+      "50 g lor peyniri",
+      "Yarım yk tereyağı",
+      "veya zeytinyağı",
+      "Domates püresi"
+    ],
+    "page": 19
+  },
+  {
+    "id": "fit_pdf_20",
+    "name": "Tok Tutan Protei̇n Tostu",
+    "category": "Kahvaltı",
+    "kcal": 368,
+    "carb": 24.0,
+    "protein": 33.0,
+    "fat": 15.4,
+    "ingredients": [
+      "TARİFTARİF",
+      "100 g lor peyniri",
+      "2 dilim kaşar",
+      "Tam tahıllı veya kepekli ekmek",
+      "Domates suyu",
+      "(domates püresi veya salçayı"
+    ],
+    "page": 20
+  },
+  {
+    "id": "fit_pdf_21",
+    "name": "Akşamdan Hazirlamalik Kahvalti",
+    "category": "Kahvaltı",
+    "kcal": 213,
+    "carb": 32.0,
+    "protein": 8.4,
+    "fat": 5.8,
+    "ingredients": [
+      "TARİFTARİF",
+      "60 g yulaf ezmesi",
+      "200 ml süt",
+      "Yarım muz",
+      "(veya farklı bir meyve)",
+      "Fıstık ezmesi"
+    ],
+    "page": 21
+  },
+  {
+    "id": "fit_pdf_22",
+    "name": "Fi̇t Fransiz Tostu",
+    "category": "Kahvaltı",
+    "kcal": 264,
+    "carb": 23.6,
+    "protein": 19.4,
+    "fat": 10.2,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 adet yumurta",
+      "Yarım bardak süt",
+      "4 dilim tam tahıllı tost ekmeği",
+      "1 yk hindistan cevizi yağı",
+      "veya tereyağı"
+    ],
+    "page": 22
+  },
+  {
+    "id": "fit_pdf_23",
+    "name": "Sarimsakli Tavuk",
+    "category": "Ana Yemek",
+    "kcal": 331,
+    "carb": 7.0,
+    "protein": 50.0,
+    "fat": 10.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 kg tavuk göğsü",
+      "50 g yulaf ezmesi",
+      "50 g az yağlı kaşar peyniri",
+      "veya parmesan peyniri",
+      "6 diş sarımsak"
+    ],
+    "page": 23
+  },
+  {
+    "id": "fit_pdf_24",
+    "name": "Ton Balikli Burger",
+    "category": "Ana Yemek",
+    "kcal": 375,
+    "carb": 38.0,
+    "protein": 28.0,
+    "fat": 12.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 kutu ton balığı",
+      "(süzme ağırlık 52 gram)",
+      "Makarna sosu",
+      "4 adet ince-küçük dilim",
+      "yarım yağlı kaşar peyniri"
+    ],
+    "page": 24
+  },
+  {
+    "id": "fit_pdf_25",
+    "name": "Fi̇t Tavuk Burger",
+    "category": "Ana Yemek",
+    "kcal": 485,
+    "carb": 47.0,
+    "protein": 47.0,
+    "fat": 12.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "(2 adet tavukburger için)",
+      "300 g tavuk göğsü",
+      "1 diş sarımsak",
+      "1 küçük soğan",
+      "2 yk galeta unu"
+    ],
+    "page": 25
+  },
+  {
+    "id": "fit_pdf_26",
+    "name": "Di̇yet Pi̇zza",
+    "category": "Ana Yemek",
+    "kcal": 425,
+    "carb": 38.0,
+    "protein": 38.0,
+    "fat": 13.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 adet tortilla ekmeği veya tam",
+      "tahıllı lavaş",
+      "70 g haşlanmış tavuk göğüs",
+      "30 g rendelenmiş kaşar",
+      "1 yk domates püresi veya salça"
+    ],
+    "page": 26
+  },
+  {
+    "id": "fit_pdf_27",
+    "name": "Hi̇ndi̇ Füme Dürüm",
+    "category": "Ana Yemek",
+    "kcal": 400,
+    "carb": 34.0,
+    "protein": 36.0,
+    "fat": 12.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 adet tortilla ekmeği veya tam",
+      "tahıllı lavaş",
+      "100 g hindi füme",
+      "Domatesli makarna sosu veya",
+      "domates salçası"
+    ],
+    "page": 27
+  },
+  {
+    "id": "fit_pdf_28",
+    "name": "Firinda Alabalik",
+    "category": "Ana Yemek",
+    "kcal": 442,
+    "carb": 5.8,
+    "protein": 21.0,
+    "fat": 38.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 adet yerli somon balığı",
+      "(Karadeniz alası)",
+      "Yarım çay bardağı zeytinyağı",
+      "1 çk tuz",
+      "2 çk kekik"
+    ],
+    "page": 28
+  },
+  {
+    "id": "fit_pdf_29",
+    "name": "Yeşi̇l Merci̇mek Yemeği̇",
+    "category": "Ana Yemek",
+    "kcal": 264,
+    "carb": 30.4,
+    "protein": 18.0,
+    "fat": 3.6,
+    "ingredients": [
+      "TARİFTARİF",
+      "300 g yeşil mercimek",
+      "(2 su bardağı)",
+      "1 adet küçük soğan",
+      "yeşil biber",
+      "(miktar isteğe bağlı)"
+    ],
+    "page": 29
+  },
+  {
+    "id": "fit_pdf_30",
+    "name": "Merci̇mek Salatasi",
+    "category": "Ana Yemek",
+    "kcal": 277,
+    "carb": 25.0,
+    "protein": 14.0,
+    "fat": 10.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "220 g yeşil mercimek",
+      "(1 buçuk su bardağı)",
+      "Bir tutam tuz",
+      "1 adet domates",
+      "1 adet salatalık"
+    ],
+    "page": 30
+  },
+  {
+    "id": "fit_pdf_31",
+    "name": "Domatesli̇ Tavuk Sote",
+    "category": "Ana Yemek",
+    "kcal": 380,
+    "carb": 4.0,
+    "protein": 46.0,
+    "fat": 19.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "200 g tavuk göğsü",
+      "1 adet domates",
+      "1 yk zeytinyağı"
+    ],
+    "page": 31
+  },
+  {
+    "id": "fit_pdf_32",
+    "name": "Brokoli̇li̇ Tavuk Yemeği̇",
+    "category": "Ana Yemek",
+    "kcal": 217,
+    "carb": 2.5,
+    "protein": 30.0,
+    "fat": 8.7,
+    "ingredients": [
+      "TARİFTARİF",
+      "600 g tavuk göğsü",
+      "500 g brokoli",
+      "2 yk zeytinyağı",
+      "2 çk tuz",
+      "isteğe bağlı baharatlar"
+    ],
+    "page": 32
+  },
+  {
+    "id": "fit_pdf_33",
+    "name": "Lor Köftesi̇",
+    "category": "Ana Yemek",
+    "kcal": 247,
+    "carb": 17.0,
+    "protein": 16.0,
+    "fat": 12.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "200 g lor peyniri",
+      "100 g yulaf ezmesi",
+      "Sarımsak veya sarımsak granül",
+      "kekik, toz biber",
+      "2 adet yumurta"
+    ],
+    "page": 33
+  },
+  {
+    "id": "fit_pdf_34",
+    "name": "Bulgur Pi̇lavi",
+    "category": "Ana Yemek",
+    "kcal": 325,
+    "carb": 64.0,
+    "protein": 10.3,
+    "fat": 5.7,
+    "ingredients": [
+      "TARİFTARİF",
+      "225 g bulgur",
+      "(1 buçuk su bardağı)",
+      "Bulgur miktarının 2 katı",
+      "kadar su",
+      "1 yk zeytinyağı"
+    ],
+    "page": 34
+  },
+  {
+    "id": "fit_pdf_35",
+    "name": "Firinda Hi̇ndi̇ Göğüs",
+    "category": "Ana Yemek",
+    "kcal": 273,
+    "carb": 4.5,
+    "protein": 38.0,
+    "fat": 12.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "600 g hindi göğsü",
+      "3 yk zeytinyağı",
+      "3 tk kekik",
+      "2 diş sarımsak veya",
+      "1 tk sarımsak granül"
+    ],
+    "page": 35
+  },
+  {
+    "id": "fit_pdf_36",
+    "name": "Lor Peyni̇rli̇ Salata",
+    "category": "Ana Yemek",
+    "kcal": 233,
+    "carb": 18.0,
+    "protein": 15.0,
+    "fat": 7.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "150 g lor peyniri",
+      "2 adet yeşil biber",
+      "2 adet domates",
+      "Marul",
+      "Yarım limon"
+    ],
+    "page": 36
+  },
+  {
+    "id": "fit_pdf_37",
+    "name": "Sebzeli̇ Hi̇ndi̇ Yemeği̇",
+    "category": "Ana Yemek",
+    "kcal": 300,
+    "carb": 30.0,
+    "protein": 42.0,
+    "fat": 1.7,
+    "ingredients": [
+      "TARİFTARİF",
+      "600 g Hindi Göğüs",
+      "3 orta boy patates",
+      "2 büyük boy kırmızı biber",
+      "100 g mantar",
+      "İstenen farklı sebzeler de"
+    ],
+    "page": 37
+  },
+  {
+    "id": "fit_pdf_38",
+    "name": "Firinda Tavuk Patates",
+    "category": "Ana Yemek",
+    "kcal": 377,
+    "carb": 15.0,
+    "protein": 47.0,
+    "fat": 13.4,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 kg tavuk göğsü",
+      "2 orta boy patates",
+      "3 yk zeytinyağı",
+      "Tuz ve istenilen baharatlar"
+    ],
+    "page": 38
+  },
+  {
+    "id": "fit_pdf_39",
+    "name": "Zerdeçalli Pi̇lav",
+    "category": "Ana Yemek",
+    "kcal": 284,
+    "carb": 55.0,
+    "protein": 4.8,
+    "fat": 4.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "200 g pirinç",
+      "(1 su bardağı)",
+      "1 yk tereyağı",
+      "1 yk zerdeçal",
+      "Tuz"
+    ],
+    "page": 39
+  },
+  {
+    "id": "fit_pdf_40",
+    "name": "Ispanakli Makarna",
+    "category": "Ana Yemek",
+    "kcal": 445,
+    "carb": 79.0,
+    "protein": 17.5,
+    "fat": 7.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 paket makarna",
+      "(500 gram)",
+      "180 g yoğurt",
+      "(4 yk)",
+      "150 g lor peyniri"
+    ],
+    "page": 40
+  },
+  {
+    "id": "fit_pdf_41",
+    "name": "Fit Tarif Sayfa 41",
+    "category": "Ana Yemek",
+    "kcal": 356,
+    "carb": 6.8,
+    "protein": 38.7,
+    "fat": 19.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "DİYET PİZZA (TON)",
+      "Pizza tabanı için:",
+      "1 kutu ton balığı (büyük)",
+      "1 adet yumurta",
+      "kekik, karabiber"
+    ],
+    "page": 41
+  },
+  {
+    "id": "fit_pdf_42",
+    "name": "Firinda Kirmizi Et",
+    "category": "Ana Yemek",
+    "kcal": 251,
+    "carb": 0.6,
+    "protein": 13.8,
+    "fat": 21.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "150 g kırmızı et",
+      "1 yk zeytinyağı",
+      "kekik",
+      "tuz",
+      "istenilen diğer baharatlar"
+    ],
+    "page": 42
+  },
+  {
+    "id": "fit_pdf_43",
+    "name": "Tavuk Köftesi̇",
+    "category": "Ana Yemek",
+    "kcal": 213,
+    "carb": 4.3,
+    "protein": 29.7,
+    "fat": 7.5,
+    "ingredients": [
+      "TARİFTARİF",
+      "200 g tavuk",
+      "2 adet yumurta",
+      "1 adet küçük soğan",
+      "2 avuç maydanoz",
+      "Tuz ve istenen baharatlar"
+    ],
+    "page": 43
+  },
+  {
+    "id": "fit_pdf_44",
+    "name": "Humus",
+    "category": "Ana Yemek",
+    "kcal": 260,
+    "carb": 36.7,
+    "protein": 10.4,
+    "fat": 6.4,
+    "ingredients": [
+      "TARİFTARİF",
+      "200 g haşlanmış nohut",
+      "(haşlanmış ağırlık ile)",
+      "1 tk zeytinyağı",
+      "1 yk tahin",
+      "1 adet limon"
+    ],
+    "page": 44
+  },
+  {
+    "id": "fit_pdf_45",
+    "name": "Tavuk Sarma",
+    "category": "Ana Yemek",
+    "kcal": 256,
+    "carb": 4.5,
+    "protein": 32.0,
+    "fat": 9.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "600 g tavuk göğüs",
+      "6 dilim cheddar peyniri",
+      "(farklı bir peynir de kullanabilir-",
+      "siniz)",
+      "ıspanak ve kırmızı biber"
+    ],
+    "page": 45
+  },
+  {
+    "id": "fit_pdf_46",
+    "name": "Pesto Soslu Tavuk",
+    "category": "Atıştırmalık",
+    "kcal": 304,
+    "carb": 3.3,
+    "protein": 34.0,
+    "fat": 17.5,
+    "ingredients": [
+      "TARİFTARİF",
+      "700 g tavuk göğüs",
+      "4 yk zeytinyağı",
+      "2 adet orta boy domates",
+      "2 adet yeşil biber",
+      "3 yk pesto sos"
+    ],
+    "page": 46
+  },
+  {
+    "id": "fit_pdf_47",
+    "name": "Tari̇ftari̇f Fi̇t Soslar",
+    "category": "Atıştırmalık",
+    "kcal": 38,
+    "carb": 0.4,
+    "protein": 1.1,
+    "fat": 3.7,
+    "ingredients": [
+      "TARİFTARİF",
+      "FİT SOSLAR",
+      "PESTO SOS",
+      "1 su bardağı kadar taze",
+      "fesleğen",
+      "1 kibrit kutusu kadar eski kaşar"
+    ],
+    "page": 47
+  },
+  {
+    "id": "fit_pdf_48",
+    "name": "Bağişiklik Çorbasi",
+    "category": "Atıştırmalık",
+    "kcal": 217,
+    "carb": 13.0,
+    "protein": 30.6,
+    "fat": 4.6,
+    "ingredients": [
+      "TARİFTARİF",
+      "2 parça tavuk göğsü",
+      "(yaklaşık 500 gram kadar)",
+      "1 çay bardağı yulaf ezmesi",
+      "1 adet orta boy soğan",
+      "(arttırabilirsiniz.)"
+    ],
+    "page": 48
+  },
+  {
+    "id": "fit_pdf_49",
+    "name": "Di̇yet Ci̇ps",
+    "category": "Atıştırmalık",
+    "kcal": 116,
+    "carb": 16.0,
+    "protein": 3.0,
+    "fat": 4.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "3 adet tam tahıllı lavaş",
+      "5 yk domates püresi",
+      "2 tk zeytinyağı",
+      "bir tutam tuz",
+      "istenilen baharatlar"
+    ],
+    "page": 49
+  },
+  {
+    "id": "fit_pdf_50",
+    "name": "Mozai̇k Pasta",
+    "category": "Atıştırmalık",
+    "kcal": 115,
+    "carb": 14.6,
+    "protein": 8.2,
+    "fat": 2.8,
+    "ingredients": [
+      "TARİFTARİF",
+      "100 g yulaf ezmesi",
+      "1 bardak sıcak su",
+      "1 yk kakao",
+      "1 yk bal (ezilmiş hurma, keçi boy-",
+      "nuzu unu veya pekmez alternatif"
+    ],
+    "page": 50
+  },
+  {
+    "id": "fit_pdf_51",
+    "name": "Fi̇t Waffle",
+    "category": "Atıştırmalık",
+    "kcal": 212,
+    "carb": 28.0,
+    "protein": 11.0,
+    "fat": 6.4,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 bardak yulaf ezmesi",
+      "1 adet yumurta",
+      "100 ml süt",
+      "yarım paket kabartma tozu",
+      "yarım paket vanilya"
+    ],
+    "page": 51
+  },
+  {
+    "id": "fit_pdf_52",
+    "name": "Protei̇n Dondurmasi",
+    "category": "Atıştırmalık",
+    "kcal": 122,
+    "carb": 11.0,
+    "protein": 14.5,
+    "fat": 2.8,
+    "ingredients": [
+      "TARİFTARİF",
+      "400 g yoğurt",
+      "3 ölçek whey protein",
+      "1 adet muz"
+    ],
+    "page": 52
+  },
+  {
+    "id": "fit_pdf_53",
+    "name": "Tari̇ftari̇f Fi̇t Dondurmalar",
+    "category": "Atıştırmalık",
+    "kcal": 122,
+    "carb": 22.5,
+    "protein": 2.5,
+    "fat": 3.4,
+    "ingredients": [
+      "TARİFTARİF",
+      "FİT DONDURMALAR",
+      "ÇİKOLATA & FISTIK",
+      "2 adet muz",
+      "1 yk fıstık ezmesi",
+      "2 yk kakao"
+    ],
+    "page": 53
+  },
+  {
+    "id": "fit_pdf_54",
+    "name": "Protei̇nli̇ Kek",
+    "category": "Atıştırmalık",
+    "kcal": 94,
+    "carb": 9.8,
+    "protein": 12.0,
+    "fat": 1.6,
+    "ingredients": [
+      "TARİFTARİF"
+    ],
+    "page": 54
+  },
+  {
+    "id": "fit_pdf_55",
+    "name": "Yulaf Toplari",
+    "category": "Atıştırmalık",
+    "kcal": 69,
+    "carb": 10.8,
+    "protein": 2.1,
+    "fat": 1.6,
+    "ingredients": [
+      "TARİFTARİF",
+      "100 g yulaf ezmesi",
+      "3/4 su bardağı süt",
+      "1 bardak kuru üzüm/erik",
+      "bir tutam rende hindistan cevizi",
+      "bir tutam tarçın"
+    ],
+    "page": 55
+  },
+  {
+    "id": "fit_pdf_56",
+    "name": "Yulafli Kurabi̇ye",
+    "category": "Atıştırmalık",
+    "kcal": 53,
+    "carb": 7.1,
+    "protein": 2.5,
+    "fat": 1.5,
+    "ingredients": [
+      "TARİFTARİF",
+      "4 adet yumurta (artırılabilir)",
+      "150g yulaf ezmesi",
+      "1 adet muz",
+      "yarım avuç kuru üzüm",
+      "bir tutam tarçın"
+    ],
+    "page": 56
+  },
+  {
+    "id": "fit_pdf_57",
+    "name": "Meyve Pastasi",
+    "category": "Atıştırmalık",
+    "kcal": 130,
+    "carb": 20.3,
+    "protein": 5.2,
+    "fat": 3.8,
+    "ingredients": [
+      "TARİFTARİF",
+      "3 adet muz",
+      "4 adet yumurta",
+      "1 çk kadar sıvı yağ",
+      "10 adet donmuş vişne, ahudu-",
+      "du, böğürtlen, çilek veya farklı"
+    ],
+    "page": 57
+  },
+  {
+    "id": "fit_pdf_58",
+    "name": "Çi̇kolata Toplari",
+    "category": "Atıştırmalık",
+    "kcal": 89,
+    "carb": 8.5,
+    "protein": 2.6,
+    "fat": 5.6,
+    "ingredients": [
+      "TARİFTARİF",
+      "150 g hurma",
+      "75 g çiğ kaju",
+      "50 g bitter çikolata",
+      "(kakao oranı yüksek)",
+      "1 yk kakao"
+    ],
+    "page": 58
+  },
+  {
+    "id": "fit_pdf_59",
+    "name": "Chia Pudi̇ng",
+    "category": "Tatlı / İçecek",
+    "kcal": 323,
+    "carb": 38.8,
+    "protein": 10.5,
+    "fat": 16.2,
+    "ingredients": [
+      "TARİFTARİF",
+      "3 yk chia tohumu",
+      "1 adet şeftali",
+      "(farklı bir meyve de kullanılabilir)",
+      "1 tk rende hindistan cevizi",
+      "1 çay bardağı süt"
+    ],
+    "page": 59
+  },
+  {
+    "id": "fit_pdf_60",
+    "name": "Havuçlu Kek",
+    "category": "Tatlı / İçecek",
+    "kcal": 100,
+    "carb": 12.5,
+    "protein": 4.1,
+    "fat": 4.3,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 adet yumurta",
+      "1/2 çay bardağı süt",
+      "2 çay bardağı yulaf ezmesi",
+      "2 adet havuç",
+      "2 tk keçiboynuzu unu"
+    ],
+    "page": 60
+  },
+  {
+    "id": "fit_pdf_61",
+    "name": "Di̇yet Güllaç",
+    "category": "Tatlı / İçecek",
+    "kcal": 220,
+    "carb": 29.0,
+    "protein": 8.0,
+    "fat": 4.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 adet yumurta",
+      "1/2 çay bardağı süt",
+      "2 çay bardağı yulaf ezmesi",
+      "2 adet havuç",
+      "2 tk keçiboynuzu unu"
+    ],
+    "page": 61
+  },
+  {
+    "id": "fit_pdf_62",
+    "name": "Muz Ekmeği̇",
+    "category": "Tatlı / İçecek",
+    "kcal": 216,
+    "carb": 37.0,
+    "protein": 7.0,
+    "fat": 4.5,
+    "ingredients": [
+      "TARİFTARİF",
+      "3 adet muz",
+      "200 g yulaf ezmesi",
+      "2 adet yumurta",
+      "1 paket kabartma tozu",
+      "20 g bitter damla çikolata"
+    ],
+    "page": 62
+  },
+  {
+    "id": "fit_pdf_63",
+    "name": "Muzlu Mug Cake",
+    "category": "Tatlı / İçecek",
+    "kcal": 247,
+    "carb": 28.0,
+    "protein": 19.7,
+    "fat": 8.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "Yarım adet muz",
+      "Yarım paket kabartma tozu",
+      "1 adet yumurta",
+      "1 yk süt",
+      "1 tk keçiboynuzu unu"
+    ],
+    "page": 63
+  },
+  {
+    "id": "fit_pdf_64",
+    "name": "Di̇yet Çi̇kolata",
+    "category": "Tatlı / İçecek",
+    "kcal": 125,
+    "carb": 18.0,
+    "protein": 4.5,
+    "fat": 6.5,
+    "ingredients": [
+      "TARİFTARİF",
+      "10 adet hurma",
+      "3-4 yk kakao",
+      "1 tk hindistan cevizi yağı",
+      "(veya tuzsuz tereyağı)"
+    ],
+    "page": 64
+  },
+  {
+    "id": "fit_pdf_65",
+    "name": "Yulafli Tart",
+    "category": "Tatlı / İçecek",
+    "kcal": 135,
+    "carb": 26.0,
+    "protein": 4.5,
+    "fat": 2.0,
+    "ingredients": [
+      "TARİFTARİF",
+      "(8 adet tart için)",
+      "2 su bardağı yulaf ezmesi",
+      "2 adet muz",
+      "1 tk tarçın",
+      "2 tk bal"
+    ],
+    "page": 65
+  },
+  {
+    "id": "fit_pdf_66",
+    "name": "Magnolia",
+    "category": "Tatlı / İçecek",
+    "kcal": 210,
+    "carb": 30.8,
+    "protein": 8.0,
+    "fat": 6.5,
+    "ingredients": [
+      "TARİFTARİF",
+      "50 g yulaf ezmesi",
+      "Yarım muz",
+      "1 tk bal",
+      "100g süzme yoğurt",
+      "1 tk keçiboynuzu unu (veya 1"
+    ],
+    "page": 66
+  },
+  {
+    "id": "fit_pdf_67",
+    "name": "Fit Tarif Sayfa 67",
+    "category": "Tatlı / İçecek",
+    "kcal": 527,
+    "carb": 26.5,
+    "protein": 26.4,
+    "fat": 37.5,
+    "ingredients": [],
+    "page": 67
+  },
+  {
+    "id": "fit_pdf_68",
+    "name": "Fit Tarif Sayfa 68",
+    "category": "Tatlı / İçecek",
+    "kcal": 61,
+    "carb": 13.0,
+    "protein": 1.5,
+    "fat": 0.5,
+    "ingredients": [],
+    "page": 68
+  },
+  {
+    "id": "fit_pdf_69",
+    "name": "Fit Tarif Sayfa 69",
+    "category": "Tatlı / İçecek",
+    "kcal": 225,
+    "carb": 33.0,
+    "protein": 10.0,
+    "fat": 5.7,
+    "ingredients": [],
+    "page": 69
+  },
+  {
+    "id": "fit_pdf_70",
+    "name": "Ödem Atan İçecek",
+    "category": "Tatlı / İçecek",
+    "kcal": 97,
+    "carb": 23.0,
+    "protein": 1.8,
+    "fat": 0.5,
+    "ingredients": [
+      "TARİFTARİF",
+      "1 avuç maydanoz",
+      "1 adet elma",
+      "Yarım adet limon",
+      "salatalık"
+    ],
+    "page": 70
+  }
+];

@@ -3298,8 +3298,9 @@ body.keyboard-open .bottom-nav-wrap {
    ========================================================================== */
 .header-quick-menu {
   position: absolute;
-  top: 60px;
-  right: 14px;
+  top: calc(100% + 8px);
+  right: 0;
+  left: auto;
   background: rgba(18, 22, 34, 0.98);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
