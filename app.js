@@ -3517,6 +3517,9 @@ function renderGamificationRank() {
   else if (level >= 4) rankTitle = '⚡ Odaklı Planlayıcı';
 
   badgeEl.textContent = `${rankTitle} — Seviye ${level}`;
+  if (typeof checkLevelUpAndCelebrate === 'function') {
+    checkLevelUpAndCelebrate(level, rankTitle);
+  }
   xpEl.textContent = `${totalXp} XP (%${pct})`;
   fillEl.style.width = `${pct}%`;
 }
@@ -9504,9 +9507,14 @@ function renderFitPdfRecipes(searchQuery = '') {
               </div>
             </div>
           </div>
-          <button type="button" class="btn-cream" style="height:34px;font-size:11.5px;font-weight:900;padding:0 10px;background:linear-gradient(135deg,#95de64,#4ade80);color:#09090d;border-radius:10px;flex-shrink:0;" onclick="addFitPdfRecipeToToday(${origIdx})">
-            ➕ Günüme Ekle
-          </button>
+          <div style="display:flex;gap:5px;align-items:center;">
+            <button type="button" class="pin-btn" style="height:34px;font-size:11px;font-weight:800;padding:0 8px;border-radius:10px;flex-shrink:0;" onclick="addRecipeIngredientsToShoppingList(window.FIT_RECIPES_PDF[${origIdx}].ingredients)" title="Malzemeleri Markete Ekle">
+              🛒 Markete
+            </button>
+            <button type="button" class="btn-cream" style="height:34px;font-size:11.5px;font-weight:900;padding:0 10px;background:linear-gradient(135deg,#95de64,#4ade80);color:#09090d;border-radius:10px;flex-shrink:0;" onclick="addFitPdfRecipeToToday(${origIdx})">
+              ➕ Ekle
+            </button>
+          </div>
         </div>
 
         <!-- Makro Çubuğu -->
@@ -10147,3 +10155,457 @@ function shareMyCodeOnWhatsAppDirect() {
   openWhatsAppOrShareText(msg);
 }
 window.shareMyCodeOnWhatsAppDirect = shareMyCodeOnWhatsAppDirect;
+
+
+// ============================================================================
+// 🎙️ 1. SESLİ ASİSTAN & TÜRKÇE DOĞAL DİLLE GÖREV/BESİN EKLEME
+// ============================================================================
+let speechRecognitionInstance = null;
+let currentVoiceTranscript = '';
+let isVoiceRecordingActive = false;
+
+function toggleVoiceSpeechRecognition() {
+  if (isVoiceRecordingActive) {
+    stopVoiceRecognition();
+  } else {
+    startVoiceRecognition();
+  }
+}
+window.toggleVoiceSpeechRecognition = toggleVoiceSpeechRecognition;
+
+function startVoiceRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    if (typeof showToast === 'function') showToast('⚠️ Tarayıcınız ses tanıma özelliğini desteklemiyor.');
+    else alert('Tarayıcınız ses tanıma özelliğini desteklemiyor.');
+    return;
+  }
+
+  try {
+    speechRecognitionInstance = new SpeechRecognition();
+    speechRecognitionInstance.lang = 'tr-TR';
+    speechRecognitionInstance.continuous = false;
+    speechRecognitionInstance.interimResults = true;
+
+    speechRecognitionInstance.onstart = () => {
+      isVoiceRecordingActive = true;
+      const btn = document.getElementById('headerVoiceMicBtn');
+      if (btn) btn.classList.add('recording');
+      const modal = document.getElementById('voiceAssistantModal');
+      if (modal) modal.classList.remove('hidden');
+      const hint = document.getElementById('voiceStatusHint');
+      if (hint) hint.textContent = 'Dinliyorum... Konuşun!';
+      const tBox = document.getElementById('voiceTranscriptBox');
+      if (tBox) tBox.textContent = '...';
+    };
+
+    speechRecognitionInstance.onresult = (event) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          currentVoiceTranscript = event.results[i][0].transcript;
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      const tBox = document.getElementById('voiceTranscriptBox');
+      if (tBox) {
+        tBox.textContent = currentVoiceTranscript || interim || '...';
+      }
+    };
+
+    speechRecognitionInstance.onerror = (event) => {
+      console.warn('Speech recognition error:', event.error);
+      stopVoiceRecognition();
+      if (typeof showToast === 'function') showToast('⚠️ Ses algılanamadı, lütfen tekrar deneyin.');
+    };
+
+    speechRecognitionInstance.onend = () => {
+      isVoiceRecordingActive = false;
+      const btn = document.getElementById('headerVoiceMicBtn');
+      if (btn) btn.classList.remove('recording');
+      if (currentVoiceTranscript) {
+        processFinalVoiceCommand();
+      }
+    };
+
+    speechRecognitionInstance.start();
+  } catch (e) {
+    console.error('Failed to start speech recognition:', e);
+  }
+}
+window.startVoiceRecognition = startVoiceRecognition;
+
+function stopVoiceRecognition() {
+  if (speechRecognitionInstance) {
+    try { speechRecognitionInstance.stop(); } catch (e) {}
+  }
+  isVoiceRecordingActive = false;
+  const btn = document.getElementById('headerVoiceMicBtn');
+  if (btn) btn.classList.remove('recording');
+  const modal = document.getElementById('voiceAssistantModal');
+  if (modal) modal.classList.add('hidden');
+}
+window.stopVoiceRecognition = stopVoiceRecognition;
+
+function processFinalVoiceCommand() {
+  const text = (currentVoiceTranscript || '').trim();
+  stopVoiceRecognition();
+  if (!text) return;
+
+  const lower = text.toLowerCase();
+  currentVoiceTranscript = '';
+
+  // 1) Su komutu mu? (örn: "2 bardak su içtim", "su ekle")
+  if (lower.includes('su içtim') || lower.includes('bardak su') || lower.includes('şişe su')) {
+    let glasses = 1;
+    const match = lower.match(/(\d+)\s*(bardak|şişe)?/);
+    if (match) glasses = parseInt(match[1], 10);
+    if (lower.includes('şişe')) glasses *= 2;
+    changeWaterCount(glasses);
+    spawnFloatingRewardToast(`💧 Sesli Komutla +${glasses} Bardak Su Eklendi!`);
+    return;
+  }
+
+  // 2) Yemek / Besin komutu mu? (örn: "200 gram tavuk göğsü yedim", "muz yedim")
+  if (lower.includes('yedim') || lower.includes('gram') || lower.includes('porsiyon') || lower.includes('tavuk') || lower.includes('pilav') || lower.includes('yumurta') || lower.includes('yulaf')) {
+    let grams = 150;
+    const gMatch = lower.match(/(\d+)\s*(gram|g|gr)/);
+    if (gMatch) grams = parseInt(gMatch[1], 10);
+
+    const cleanFoodName = text.replace(/(yedim|içtim|ekle|öğle|akşam|kahvaltı|için|tükettim)/gi, '').trim();
+    const all = typeof getCombinedFoodDatabase === 'function' ? getCombinedFoodDatabase() : (window.FOOD_DATABASE_TR || []);
+    let matchFood = all.find(f => lower.includes(f.name.toLowerCase())) || {
+      name: cleanFoodName || 'Sesli Besin',
+      kcal: 165,
+      protein: 20,
+      carbs: 10,
+      fat: 5
+    };
+
+    const ratio = grams / 100;
+    const targetDate = selectedDate || getTodayISO();
+    if (!appData.dailyFoods) appData.dailyFoods = {};
+    if (!appData.dailyFoods[targetDate]) appData.dailyFoods[targetDate] = [];
+
+    appData.dailyFoods[targetDate].unshift({
+      id: 'fd_' + Date.now(),
+      name: matchFood.name,
+      grams: grams,
+      kcal: Math.round(matchFood.kcal * ratio),
+      protein: Number((matchFood.protein * ratio).toFixed(1)),
+      carbs: Number((matchFood.carbs * ratio).toFixed(1)),
+      fat: Number((matchFood.fat * ratio).toFixed(1))
+    });
+
+    if (targetDate === getTodayISO()) {
+      appData.proteinGrams = (appData.proteinGrams || 0) + Number((matchFood.protein * ratio).toFixed(1));
+    }
+    renderDailyFoodsList();
+    renderDailyTotalsBar();
+    saveProfileData();
+    spawnFloatingRewardToast(`🍽️ "${matchFood.name}" (${grams}g) Günlüğünüze Eklendi!`);
+    return;
+  }
+
+  // 3) Görev / Hatırlatıcı komutu (varsayılan: yeni görev)
+  const cleanTitle = text.replace(/(görev ekle|hatırlat|yapılacak|yap)/gi, '').trim() || text;
+  let taskTime = '';
+  const timeMatch = text.match(/(saat|saatinde)?\s*(\d{1,2}[:.]\d{2})/);
+  if (timeMatch) taskTime = timeMatch[2].replace('.', ':');
+
+  const newTask = {
+    id: 't_' + Date.now(),
+    title: cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1),
+    category: lower.includes('antrenman') || lower.includes('spor') || lower.includes('koşu') ? 'Spor ve Sağlık' : 'İş & Proje',
+    priority: lower.includes('acil') || lower.includes('önemli') ? 'high' : 'medium',
+    date: selectedDate || getTodayISO(),
+    time: taskTime,
+    completed: false,
+    createdAt: Date.now()
+  };
+
+  if (!Array.isArray(appData.tasks)) appData.tasks = [];
+  appData.tasks.unshift(newTask);
+  renderAll();
+  saveProfileData();
+  spawnFloatingRewardToast(`✅ Sesli Görev Eklendi: "${newTask.title}"`);
+}
+window.processFinalVoiceCommand = processFinalVoiceCommand;
+
+
+// ============================================================================
+// 📸 2. GÖRSEL GELİŞİM: BEFORE & AFTER SLIDER & FOTOĞRAF ARŞİVİ
+// ============================================================================
+let activeBeforePhotoIdx = 0;
+let activeAfterPhotoIdx = 0;
+
+function openProgressPhotosModal() {
+  const modal = document.getElementById('progressPhotosModal');
+  if (modal) modal.classList.remove('hidden');
+  renderProgressPhotosGallery();
+}
+window.openProgressPhotosModal = openProgressPhotosModal;
+
+function closeProgressPhotosModal() {
+  const modal = document.getElementById('progressPhotosModal');
+  if (modal) modal.classList.add('hidden');
+}
+window.closeProgressPhotosModal = closeProgressPhotosModal;
+
+function handleProgressPhotoSelected(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    const dataUrl = evt.target.result;
+    if (!Array.isArray(appData.progressPhotos)) appData.progressPhotos = [];
+    appData.progressPhotos.unshift({
+      id: 'photo_' + Date.now(),
+      dataUrl: dataUrl,
+      date: selectedDate || getTodayISO(),
+      timestamp: Date.now()
+    });
+    saveProfileData();
+    renderProgressPhotosGallery();
+    spawnFloatingRewardToast('📸 Yeni form fotoğrafınız arşive eklendi!');
+  };
+  reader.readAsDataURL(file);
+}
+window.handleProgressPhotoSelected = handleProgressPhotoSelected;
+
+function renderProgressPhotosGallery() {
+  const grid = document.getElementById('progressPhotosThumbGrid');
+  const sliderBox = document.getElementById('beforeAfterSliderContainer');
+  if (!grid) return;
+
+  const photos = Array.isArray(appData.progressPhotos) ? appData.progressPhotos : [];
+  if (photos.length === 0) {
+    grid.innerHTML = '<div style="grid-column:span 3;font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Henüz kayıtlı vücut fotoğrafı yok. Yukarıdaki butonla ilk fotoğrafını ekle!</div>';
+    if (sliderBox) sliderBox.style.display = 'none';
+    return;
+  }
+
+  grid.innerHTML = photos.map((p, idx) => `
+    <div style="position:relative;border-radius:12px;overflow:hidden;border:1.5px solid ${idx === activeAfterPhotoIdx ? '#95de64' : (idx === activeBeforePhotoIdx ? '#93c5fd' : 'rgba(255,255,255,0.1)')};cursor:pointer;aspect-ratio:3/4;" onclick="selectPhotoForCompare(${idx})">
+      <img src="${p.dataUrl}" style="width:100%;height:100%;object-fit:cover;" alt="Form" />
+      <span style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);font-size:9.5px;color:#fff;padding:2px 4px;text-align:center;font-weight:800;">
+        ${p.date || 'Tarih yok'}
+      </span>
+    </div>
+  `).join('');
+
+  if (photos.length >= 2) {
+    if (sliderBox) sliderBox.style.display = 'block';
+    setupBeforeAfterSlider(photos);
+  } else {
+    if (sliderBox) sliderBox.style.display = 'none';
+  }
+}
+window.renderProgressPhotosGallery = renderProgressPhotosGallery;
+
+function selectPhotoForCompare(idx) {
+  const photos = appData.progressPhotos || [];
+  if (photos.length < 2) return;
+  activeAfterPhotoIdx = idx;
+  activeBeforePhotoIdx = (idx === 0) ? (photos.length - 1) : 0;
+  renderProgressPhotosGallery();
+}
+window.selectPhotoForCompare = selectPhotoForCompare;
+
+function setupBeforeAfterSlider(photos) {
+  const bImg = document.getElementById('beforeImageEl');
+  const aImg = document.getElementById('afterImageEl');
+  const bDate = document.getElementById('beforeLabelDate');
+  const aDate = document.getElementById('afterLabelDate');
+
+  const beforePhoto = photos[activeBeforePhotoIdx] || photos[photos.length - 1];
+  const afterPhoto = photos[activeAfterPhotoIdx] || photos[0];
+
+  if (bImg) bImg.src = beforePhoto.dataUrl;
+  if (aImg) aImg.src = afterPhoto.dataUrl;
+  if (bDate) bDate.textContent = `⏪ Öncesi (${beforePhoto.date})`;
+  if (aDate) aDate.textContent = `Sonrası (${afterPhoto.date}) ⏩`;
+
+  initSliderDragEvents();
+}
+
+function initSliderDragEvents() {
+  const wrapper = document.getElementById('beforeAfterWrapper');
+  const beforeLayer = document.getElementById('beforeImageLayer');
+  const handle = document.getElementById('baDividerHandle');
+  if (!wrapper || !beforeLayer || !handle) return;
+
+  let isDragging = false;
+  const updatePos = (clientX) => {
+    const rect = wrapper.getBoundingClientRect();
+    let x = clientX - rect.left;
+    x = Math.max(0, Math.min(rect.width, x));
+    const pct = (x / rect.width) * 100;
+    beforeLayer.style.width = pct + '%';
+    handle.style.left = pct + '%';
+  };
+
+  wrapper.onmousedown = (e) => { isDragging = true; updatePos(e.clientX); };
+  window.onmousemove = (e) => { if (isDragging) updatePos(e.clientX); };
+  window.onmouseup = () => { isDragging = false; };
+
+  wrapper.ontouchstart = (e) => { isDragging = true; updatePos(e.touches[0].clientX); };
+  window.ontouchmove = (e) => { if (isDragging) updatePos(e.touches[0].clientX); };
+  window.ontouchend = () => { isDragging = false; };
+}
+
+function shareProgressPhotoStory() {
+  const text = `🔥 TaskFlow+ ile Gelişim Sürecim!\nDisiplin serisi: ${appData.streak || 1} Gün • Hedeflerime tam odak devam ediyorum! 💪 🚀 https://alperkoks.github.io/taskflow-pro/`;
+  if (typeof openWhatsAppOrShareText === 'function') openWhatsAppOrShareText(text);
+  else alert('Paylaşım metni panoya kopyalandı!');
+}
+window.shareProgressPhotoStory = shareProgressPhotoStory;
+
+
+// ============================================================================
+// ⏱️ 3. ANTRENMAN İÇİ DİNLENME SAYACI & KRONOMETRE
+// ============================================================================
+let workoutRestTimerInterval = null;
+let workoutRestRemainingSeconds = 0;
+
+function startWorkoutRestTimer(seconds) {
+  stopWorkoutRestTimer();
+  workoutRestRemainingSeconds = seconds;
+  updateRestTimerDisplay();
+
+  workoutRestTimerInterval = setInterval(() => {
+    workoutRestRemainingSeconds--;
+    updateRestTimerDisplay();
+
+    if (workoutRestRemainingSeconds <= 0) {
+      stopWorkoutRestTimer();
+      playRestTimerBeep();
+      if (typeof showToast === 'function') showToast('🔔 Dinlenme Süresi Bitti! Sıradaki Sete Başla!');
+      else alert('Dinlenme Süresi Bitti! Sıradaki Sete Başla!');
+    }
+  }, 1000);
+}
+window.startWorkoutRestTimer = startWorkoutRestTimer;
+
+function stopWorkoutRestTimer() {
+  if (workoutRestTimerInterval) {
+    clearInterval(workoutRestTimerInterval);
+    workoutRestTimerInterval = null;
+  }
+  const disp = document.getElementById('workoutRestTimerDisplay');
+  if (disp && workoutRestRemainingSeconds <= 0) disp.textContent = '00:00';
+}
+window.stopWorkoutRestTimer = stopWorkoutRestTimer;
+
+function updateRestTimerDisplay() {
+  const disp = document.getElementById('workoutRestTimerDisplay');
+  if (!disp) return;
+  const m = Math.floor(workoutRestRemainingSeconds / 60);
+  const s = workoutRestRemainingSeconds % 60;
+  disp.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function playRestTimerBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.4);
+  } catch (e) {}
+}
+
+
+// ============================================================================
+// 🧠 4. AKILLI ALIŞVERİŞ LİSTESİ (FİT TARİFLERİ MARKET LİSTESİNE DÖKME)
+// ============================================================================
+function addRecipeIngredientsToShoppingList(ingredients) {
+  if (!Array.isArray(ingredients) || ingredients.length === 0) return;
+  if (!Array.isArray(appData.shoppingList)) appData.shoppingList = [];
+
+  let addedCount = 0;
+  ingredients.forEach((ing) => {
+    const clean = ing.replace(/^•\s*/, '').trim();
+    if (clean && !appData.shoppingList.some(item => item.text.toLowerCase() === clean.toLowerCase())) {
+      appData.shoppingList.unshift({ text: clean, done: false });
+      addedCount++;
+    }
+  });
+
+  saveProfileData();
+  if (typeof renderShoppingTracker === 'function') renderShoppingTracker();
+  spawnFloatingRewardToast(`🛒 ${addedCount} Adet Malzeme Akıllı Alışveriş Listene Eklendi!`);
+}
+window.addRecipeIngredientsToShoppingList = addRecipeIngredientsToShoppingList;
+
+function openQuickShoppingManager() {
+  openSimpleDrilldown('tools');
+  setTimeout(() => {
+    const sec = document.getElementById('shoppingListContainer');
+    if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 200);
+}
+window.openQuickShoppingManager = openQuickShoppingManager;
+
+
+// ============================================================================
+// ⚔️ 5. GELİŞMİŞ BAHİSLİ / CEZALI 7 GÜNLÜK PVP DÜELLO SİSTEMİ
+// ============================================================================
+function startFriendPvpDuelWithBet(title, punishment = '100 Şınav Videosu Çek') {
+  ensureDefaultAiCoachFriend();
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+  const friend = friends[activeSelectedFriendIdx] || friends[0];
+  const partnerName = friend ? (friend.displayName || friend.username) : 'AI Koç';
+
+  appData.activeFriendDuel = {
+    title,
+    punishment,
+    partnerName,
+    myDays: 1,
+    partnerDays: 1,
+    targetDays: 7,
+    startedAt: getTodayISO()
+  };
+
+  saveProfileData();
+  renderFriendDuelArena();
+  spawnFloatingRewardToast(`⚔️ "${title}" Düellosu Başladı! Ceza: ${punishment}`);
+  appendMessageToActiveFriend(`⚔️ Seninle "${title}" 7 Günlük PVP Düellosu başlattım!\n🏆 Kaybedenin Cezası: "${punishment}"!\nİlk günü tamamladım (1/7), bakalım kim kazanacak! 🔥`);
+}
+window.startFriendPvpDuelWithBet = startFriendPvpDuelWithBet;
+
+
+// ============================================================================
+// 🏆 6. RPG SEVİYE ATLAMA & SANAL ÖDÜL KUTLAMA SİSTEMİ
+// ============================================================================
+let lastKnownUserLevel = 1;
+
+function checkLevelUpAndCelebrate(newLevel, newRankTitle) {
+  if (lastKnownUserLevel && newLevel > lastKnownUserLevel) {
+    const modal = document.getElementById('rpgLevelUpCelebrationModal');
+    const titleEl = document.getElementById('rpgRewardTitle');
+    const subEl = document.getElementById('rpgRewardSubtitle');
+    const descEl = document.getElementById('rpgRewardDesc');
+
+    if (titleEl) titleEl.textContent = `🎉 TEBRİKLER! SEVİYE ${newLevel} OLDUN!`;
+    if (subEl) subEl.textContent = `Yeni Rütbe: ${newRankTitle}`;
+    if (descEl) descEl.textContent = `Harika disiplin sergiledin! Profiline özel '${newRankTitle}' çerçevesi ve +250 Bonus XP kilidi açıldı.`;
+
+    if (modal) modal.classList.remove('hidden');
+    launchLuxuryConfetti();
+  }
+  lastKnownUserLevel = newLevel;
+}
+
+function closeRpgLevelUpModal() {
+  const modal = document.getElementById('rpgLevelUpCelebrationModal');
+  if (modal) modal.classList.add('hidden');
+}
+window.closeRpgLevelUpModal = closeRpgLevelUpModal;

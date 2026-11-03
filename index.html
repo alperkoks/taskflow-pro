@@ -170,7 +170,13 @@
         </div>
 
         <!-- Sağ Üst: Sadece Tek, Lüks Profil Avatarı Butonu (Tıklayınca Şık Menü Açar) -->
-        <div class="header-actions-wrap" style="position:relative;">
+        <!-- 🎙️ SESLİ KOMUT & GÖREV/BESİN EKLEME MİKROFON BUTONU -->
+          <button type="button" class="icon-btn voice-mic-glow-btn" id="headerVoiceMicBtn" onclick="toggleVoiceSpeechRecognition()" title="Sesli Not ile Görev veya Yemek Ekle" style="width:40px;height:40px;border-radius:12px;background:rgba(149,222,100,0.15);border:1.5px solid rgba(149,222,100,0.4);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;">
+            <span id="voiceMicIcon">🎙️</span>
+            <span id="voiceMicPulseDot" class="voice-pulse-ring" style="display:none;"></span>
+          </button>
+          
+          <div class="header-actions-wrap" style="position:relative;">
           <div class="user-avatar-pill" onclick="toggleHeaderProfileDropdown()" title="Profil & Menü">
             <div class="user-avatar-circle" id="headerAvatarLetter" style="overflow:hidden;padding:0;">A</div>
             <span class="avatar-pill-text">Menü</span>
@@ -727,6 +733,10 @@
                   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
                     <div>
                       <h4 style="font-size:14px;font-weight:900;color:var(--accent-cream);margin:0;">📖 Emre Gökgöz Fit Tarifler (62)</h4>
+                    <button type="button" class="tag-badge" id="btnQuickAddRecipeIngredientsToShopping" style="border:none;cursor:pointer;background:rgba(255,215,0,0.18);color:#ffd700;font-weight:800;font-size:11px;" onclick="openQuickShoppingManager()">
+                      🛒 Akıllı Market Listem
+                    </button>
+  
                       <p style="font-size:11px;color:var(--text-muted);margin:2px 0 0;">Kitaptaki orijinal tarifler • Makroları hazır • Tek tıkla gününe ekle</p>
                     </div>
                   </div>
@@ -774,6 +784,25 @@
 
             <!-- ANTRENMAN ALT SEKME 1: BUGÜNÜN İDMANI, MOLA SAYACI & HAFTALIK PROGRAM -->
             <div id="workoutInnerTabPlan">
+              <!-- ⏱️ ANTRENMAN İÇİ CANLI DİNLENME SAYACI & KRONOMETRE -->
+              <div id="workoutRestTimerCard" style="background:linear-gradient(135deg,rgba(255,122,69,0.12),rgba(245,216,181,0.06));border:1.5px solid rgba(255,122,69,0.35);border-radius:16px;padding:12px 14px;margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                  <span style="font-size:13px;font-weight:900;color:#ff9c6e;">⏱️ Set Arası Dinlenme Sayacı</span>
+                  <span id="workoutRestTimerDisplay" style="font-size:18px;font-weight:900;color:var(--text-main);font-family:monospace;">00:00</span>
+                </div>
+                <!-- Hızlı Seçiciler -->
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;">
+                  <button type="button" class="pin-btn" style="height:34px;font-size:11.5px;font-weight:800;" onclick="startWorkoutRestTimer(30)">30s</button>
+                  <button type="button" class="pin-btn" style="height:34px;font-size:11.5px;font-weight:800;" onclick="startWorkoutRestTimer(60)">60s</button>
+                  <button type="button" class="pin-btn" style="height:34px;font-size:11.5px;font-weight:800;" onclick="startWorkoutRestTimer(90)">90s</button>
+                  <button type="button" class="pin-btn" style="height:34px;font-size:11.5px;font-weight:800;" onclick="startWorkoutRestTimer(120)">120s</button>
+                </div>
+                <div style="display:flex;gap:6px;">
+                  <button type="button" class="pin-btn" style="flex:1;height:32px;font-size:11.5px;" onclick="stopWorkoutRestTimer()">⏹️ Durdur</button>
+                  <button type="button" class="btn-cream" style="flex:1;height:32px;font-size:11.5px;font-weight:900;background:rgba(149,222,100,0.2);color:#95de64;border-color:rgba(149,222,100,0.4);" onclick="openProgressPhotosModal()">📸 Form Karşılaştır</button>
+                </div>
+              </div>
+  
               <div class="scratchpad-card" style="padding:14px;border-color:rgba(255,156,110,0.35);margin-bottom:10px;">
                 <div style="font-size:12.5px;font-weight:900;color:var(--accent-cream);margin-bottom:8px;">🏋️ Tek Tıkla Bugüne Hazır Antrenman Görevi Ekle:</div>
                 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;">
@@ -2374,5 +2403,113 @@
       </button>
     </div>
   </div>
+
+  <!-- 🎙️ SESLİ ASİSTAN & DİKTE ARAYÜZÜ MODALI -->
+  <div id="voiceAssistantModal" class="modal-backdrop hidden" style="z-index:28000;" onclick="stopVoiceRecognition()">
+    <div class="modal-sheet spawn-anim" style="max-width:400px;border-radius:24px;text-align:center;" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3 style="font-size:16px;font-weight:900;color:#95de64;margin:0;">🎙️ Sesli Dikte & Komut</h3>
+        <button type="button" class="icon-btn" onclick="stopVoiceRecognition()">✕</button>
+      </div>
+
+      <div style="margin:20px 0;">
+        <div id="voiceWaveAnimation" class="voice-wave-sphere">
+          <span style="font-size:36px;">🎙️</span>
+        </div>
+        <p id="voiceStatusHint" style="font-size:13.5px;font-weight:800;color:var(--text-main);margin-top:14px;">
+          Dinliyorum... Konuşun!
+        </p>
+        <div id="voiceTranscriptBox" style="min-height:50px;padding:10px 12px;background:rgba(255,255,255,0.04);border-radius:12px;border:1px solid rgba(255,255,255,0.08);font-size:13px;color:var(--accent-cream);font-style:italic;margin-top:10px;">
+          "200 gram tavuk yedim" veya "Saat 18:00'de antrenman yap" gibi söyleyebilirsiniz...
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button type="button" class="btn-cream" style="height:42px;font-size:12.5px;font-weight:900;background:#95de64;color:#09090d;" onclick="processFinalVoiceCommand()">
+          ✅ Komutu İşle
+        </button>
+        <button type="button" class="pin-btn" style="height:42px;font-size:12.5px;font-weight:800;" onclick="stopVoiceRecognition()">
+          İptal
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📸 GÖRSEL GELİŞİM: BEFORE & AFTER SLIDER MODALI -->
+  <div id="progressPhotosModal" class="modal-backdrop hidden" style="z-index:27500;">
+    <div class="modal-sheet spawn-anim" style="max-width:480px;border-radius:26px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3 style="font-size:17px;font-weight:900;color:var(--accent-cream);margin:0;">📸 Görsel Gelişim & Karşılaştırma</h3>
+        <button type="button" class="icon-btn" onclick="closeProgressPhotosModal()">✕</button>
+      </div>
+
+      <!-- Fotoğraf Yükleme / Ekleme Barı -->
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:14px;background:rgba(255,255,255,0.03);padding:10px 12px;border-radius:14px;border:1px solid rgba(255,255,255,0.06);">
+        <input type="file" id="progressPhotoInput" accept="image/*" style="display:none;" onchange="handleProgressPhotoSelected(event)" />
+        <div style="flex:1;">
+          <div style="font-size:12px;font-weight:800;color:var(--text-main);">Vücut / Form Fotoğrafı Ekle</div>
+          <div style="font-size:10.5px;color:var(--text-muted);">Tarihli form arşivine kaydolur</div>
+        </div>
+        <button type="button" class="btn-cream" style="height:36px;padding:0 12px;font-size:11.5px;font-weight:900;background:var(--accent-cream);color:#121218;" onclick="document.getElementById('progressPhotoInput').click()">
+          📷 Fotoğraf Seç
+        </button>
+      </div>
+
+      <!-- İNTERAKTİF BEFORE / AFTER SLIDER KUTUSU -->
+      <div id="beforeAfterSliderContainer" style="display:none;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:11.5px;font-weight:800;margin-bottom:6px;">
+          <span style="color:#93c5fd;" id="beforeLabelDate">⏪ Öncesi</span>
+          <span style="color:var(--text-muted);">Parmağınızla Kaydırın ↔️</span>
+          <span style="color:#95de64;" id="afterLabelDate">Sonrası ⏩</span>
+        </div>
+
+        <div class="before-after-wrapper" id="beforeAfterWrapper">
+          <!-- Alttaki Resim (After) -->
+          <img id="afterImageEl" src="" alt="After" class="ba-image after" />
+          
+          <!-- Üstteki Resim (Before - clip-path veya width ile sınırlanır) -->
+          <div class="before-image-layer" id="beforeImageLayer">
+            <img id="beforeImageEl" src="" alt="Before" class="ba-image before" />
+          </div>
+
+          <!-- Ortadaki Ayırıcı Çizgi & Tutacak -->
+          <div class="ba-divider-handle" id="baDividerHandle">
+            <div class="ba-handle-knob">↔</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOTOĞRAF GALERİSİ / TARİH LİSTESİ -->
+      <div>
+        <div style="font-size:12px;font-weight:900;color:var(--accent-cream);margin-bottom:8px;">📁 Kayıtlı Form Fotoğraflarım:</div>
+        <div id="progressPhotosThumbGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-height:180px;overflow-y:auto;"></div>
+      </div>
+
+      <div style="margin-top:14px;display:flex;gap:8px;">
+        <button type="button" class="btn-cream" style="flex:1;height:42px;font-size:12px;font-weight:900;background:#25D366;color:#fff;" onclick="shareProgressPhotoStory()">
+          📲 Story Olarak Paylaş (WP)
+        </button>
+        <button type="button" class="pin-btn" style="height:42px;padding:0 14px;font-size:12px;" onclick="closeProgressPhotosModal()">
+          Kapat
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🏆 RPG SEVİYE ATLAMA & ÖDÜL KUTLAMA MODALI -->
+  <div id="rpgLevelUpCelebrationModal" class="modal-backdrop hidden" style="z-index:29000;" onclick="closeRpgLevelUpModal()">
+    <div class="modal-sheet spawn-anim" style="max-width:380px;border-radius:26px;text-align:center;" onclick="event.stopPropagation()">
+      <div style="font-size:48px;margin-bottom:6px;" id="rpgRewardIcon">🏆</div>
+      <h2 style="font-size:22px;font-weight:900;color:var(--accent-cream);margin:0;" id="rpgRewardTitle">TEBRİKLER! SEVİYE ATLADIN!</h2>
+      <div id="rpgRewardSubtitle" style="font-size:14px;font-weight:800;color:#95de64;margin:6px 0 12px;">Seviye 6 Titan</div>
+      <p id="rpgRewardDesc" style="font-size:12.5px;color:var(--text-muted);line-height:1.45;margin-bottom:16px;">
+        Harika disiplin sergiledin! Yeni rütben ve özel profil çerçeven açıldı.
+      </p>
+      <button type="button" class="btn-cream" style="width:100%;height:44px;font-size:14px;font-weight:900;background:linear-gradient(135deg,var(--accent-cream),#ff9c6e);color:#121218;" onclick="closeRpgLevelUpModal()">
+        🔥 Şampiyon Olarak Devam Et
+      </button>
+    </div>
+  </div>
+
 </body>
 </html>
