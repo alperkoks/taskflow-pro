@@ -1,0 +1,1156 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "usernames": {
+      "$username": {
+        ".read": "auth != null",
+        ".write": "auth != null && $username.matches(/^[a-z0-9_]{3,24}$/) && ((!data.exists() && newData.exists() && newData.child('uid').val() === auth.uid && newData.parent().parent().child('users_public/' + auth.uid + '/username').val() === $username) || (data.exists() && data.child('uid').val() === auth.uid && !newData.exists() && (!newData.parent().parent().child('users_public/' + auth.uid + '/username').exists() || newData.parent().parent().child('users_public/' + auth.uid + '/username').val() !== $username)) || (data.exists() && data.child('uid').val() === auth.uid && newData.exists() && newData.child('uid').val() === auth.uid && newData.parent().parent().child('users_public/' + auth.uid + '/username').val() === $username))",
+        ".validate": "newData.hasChildren(['uid', 'updatedAt'])",
+        "uid": {
+          ".validate": "newData.isString() && newData.val() === auth.uid"
+        },
+        "updatedAt": {
+          ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "invite_codes": {
+      "$code": {
+        ".read": "auth != null",
+        ".write": "auth != null && $code.matches(/^TF-[A-Z0-9]{6}$/) && ((!data.exists() && newData.exists() && newData.child('uid').val() === auth.uid && newData.parent().parent().child('users_public/' + auth.uid + '/inviteCode').val() === $code) || (data.exists() && data.child('uid').val() === auth.uid && !newData.exists() && (!newData.parent().parent().child('users_public/' + auth.uid + '/inviteCode').exists() || newData.parent().parent().child('users_public/' + auth.uid + '/inviteCode').val() !== $code)) || (data.exists() && data.child('uid').val() === auth.uid && newData.exists() && newData.child('uid').val() === auth.uid && newData.parent().parent().child('users_public/' + auth.uid + '/inviteCode').val() === $code))",
+        ".validate": "newData.hasChildren(['uid', 'createdAt'])",
+        "uid": {
+          ".validate": "newData.isString() && newData.val() === auth.uid"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "users_public": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('relationships/' + (auth.uid < $uid ? auth.uid + '_' + $uid : $uid + '_' + auth.uid) + '/status').val() === 'accepted')",
+        ".write": "auth != null && auth.uid === $uid && (!newData.exists() || (newData.child('username').isString() && newData.child('inviteCode').isString() && newData.parent().parent().child('usernames/' + newData.child('username').val() + '/uid').val() === $uid && newData.parent().parent().child('invite_codes/' + newData.child('inviteCode').val() + '/uid').val() === $uid && (!data.exists() || data.child('username').val() === newData.child('username').val() || !newData.parent().parent().child('usernames/' + data.child('username').val()).exists()) && (!data.exists() || data.child('inviteCode').val() === newData.child('inviteCode').val() || !newData.parent().parent().child('invite_codes/' + data.child('inviteCode').val()).exists())))",
+        ".validate": "newData.hasChildren(['uid', 'username', 'displayName', 'inviteCode', 'selfReportedMetrics', 'updatedAt'])",
+        "uid": {
+          ".validate": "newData.isString() && newData.val() === $uid"
+        },
+        "username": {
+          ".validate": "newData.isString() && newData.val().matches(/^[a-z0-9_]{3,24}$/)"
+        },
+        "displayName": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 50"
+        },
+        "bio": {
+          ".validate": "newData.isString() && newData.val().length <= 160"
+        },
+        "inviteCode": {
+          ".validate": "newData.isString() && newData.val().matches(/^TF-[A-Z0-9]{6}$/)"
+        },
+        "avatarThumb": {
+          ".validate": "newData.isString() && newData.val().length <= 65536"
+        },
+        "hideOnlineStatus": {
+          ".validate": "newData.isBoolean()"
+        },
+        "selfReportedMetrics": {
+          ".validate": "newData.hasChildren(['xp', 'streak'])",
+          "xp": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000 && newData.val() % 1 === 0"
+          },
+          "streak": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3650 && newData.val() % 1 === 0"
+          },
+          "waterCount": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 40 && newData.val() % 1 === 0"
+          },
+          "proteinGrams": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000"
+          },
+          "unlockedBadges": {
+            "$idx": {
+              ".validate": "$idx.matches(/^(0|[1-9][0-9]{0,2})$/) && newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+            }
+          },
+          "showcasedBadges": {
+            "$idx": {
+              ".validate": "$idx.matches(/^[0-5]$/) && newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "updatedAt": {
+          ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "relationships": {
+      "$pairId": {
+        ".read": "auth != null && (data.child('uidA').val() === auth.uid || data.child('uidB').val() === auth.uid)",
+        ".write": "auth != null && newData.exists() && newData.child('uidA').isString() && newData.child('uidB').isString() && newData.child('uidA').val() < newData.child('uidB').val() && $pairId === (newData.child('uidA').val() + '_' + newData.child('uidB').val()) && (newData.child('uidA').val() === auth.uid || newData.child('uidB').val() === auth.uid) && ((!data.exists() && newData.child('status').val() === 'requested' && newData.child('initiatorUid').val() === auth.uid) || (data.exists() && data.child('uidA').val() === newData.child('uidA').val() && data.child('uidB').val() === newData.child('uidB').val() && ((data.child('status').val() === 'requested' && data.child('initiatorUid').val() !== auth.uid && (newData.child('status').val() === 'accepted' || newData.child('status').val() === 'rejected') && newData.child('initiatorUid').val() === data.child('initiatorUid').val()) || (data.child('status').val() === 'requested' && data.child('initiatorUid').val() === auth.uid && newData.child('status').val() === 'cancelled' && newData.child('initiatorUid').val() === auth.uid) || (data.child('status').val() === 'accepted' && newData.child('status').val() === 'removed' && newData.child('initiatorUid').val() === auth.uid) || (data.child('status').val() === 'accepted' && newData.child('status').val() === 'accepted' && newData.child('initiatorUid').val() === data.child('initiatorUid').val()) || ((data.child('status').val() === 'rejected' || data.child('status').val() === 'cancelled' || data.child('status').val() === 'removed') && newData.child('status').val() === 'requested' && newData.child('initiatorUid').val() === auth.uid))))",
+        ".validate": "newData.hasChildren(['uidA', 'uidB', 'status', 'initiatorUid', 'updatedAt'])",
+        "uidA": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128"
+        },
+        "uidB": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128"
+        },
+        "status": {
+          ".validate": "newData.isString() && (newData.val() === 'requested' || newData.val() === 'accepted' || newData.val() === 'rejected' || newData.val() === 'cancelled' || newData.val() === 'removed')"
+        },
+        "initiatorUid": {
+          ".validate": "newData.isString() && (newData.val() === newData.parent().child('uidA').val() || newData.val() === newData.parent().child('uidB').val())"
+        },
+        "updatedAt": {
+          ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+        },
+        "duoStreak": {
+          ".validate": "newData.parent().child('status').val() === 'accepted' && newData.hasChildren(['days', 'lastIgnitedDate', 'uidADoneToday', 'uidBDoneToday', 'updatedAt'])",
+          "days": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3650 && newData.val() % 1 === 0"
+          },
+          "lastIgnitedDate": {
+            ".validate": "newData.isString() && (newData.val() === '' || newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/))"
+          },
+          "uidADoneToday": {
+            ".validate": "newData.isBoolean() && (auth.uid === newData.parent().parent().child('uidA').val() || newData.val() === data.val())"
+          },
+          "uidBDoneToday": {
+            ".validate": "newData.isBoolean() && (auth.uid === newData.parent().parent().child('uidB').val() || newData.val() === data.val())"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "user_relationships": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$otherUid": {
+          ".write": "auth != null && $uid !== $otherUid && (auth.uid === $uid || auth.uid === $otherUid) && ((newData.exists() && newData.parent().parent().parent().child('relationships/' + ($uid < $otherUid ? $uid + '_' + $otherUid : $otherUid + '_' + $uid)).exists() && newData.child('pairId').val() === ($uid < $otherUid ? $uid + '_' + $otherUid : $otherUid + '_' + $uid) && newData.child('status').val() === newData.parent().parent().parent().child('relationships/' + ($uid < $otherUid ? $uid + '_' + $otherUid : $otherUid + '_' + $uid) + '/status').val() && newData.child('initiatorUid').val() === newData.parent().parent().parent().child('relationships/' + ($uid < $otherUid ? $uid + '_' + $otherUid : $otherUid + '_' + $uid) + '/initiatorUid').val() && (newData.child('status').val() === 'requested' || newData.child('status').val() === 'accepted')) || (!newData.exists() && (!newData.parent().parent().parent().child('relationships/' + ($uid < $otherUid ? $uid + '_' + $otherUid : $otherUid + '_' + $uid)).exists() || newData.parent().parent().parent().child('relationships/' + ($uid < $otherUid ? $uid + '_' + $otherUid : $otherUid + '_' + $uid) + '/status').val() === 'rejected' || newData.parent().parent().parent().child('relationships/' + ($uid < $otherUid ? $uid + '_' + $otherUid : $otherUid + '_' + $uid) + '/status').val() === 'cancelled' || newData.parent().parent().parent().child('relationships/' + ($uid < $otherUid ? $uid + '_' + $otherUid : $otherUid + '_' + $uid) + '/status').val() === 'removed')))",
+          ".validate": "newData.hasChildren(['pairId', 'status', 'initiatorUid', 'updatedAt'])",
+          "pairId": {
+            ".validate": "newData.isString() && newData.val() === ($uid < $otherUid ? $uid + '_' + $otherUid : $otherUid + '_' + $uid)"
+          },
+          "status": {
+            ".validate": "newData.isString() && (newData.val() === 'requested' || newData.val() === 'accepted')"
+          },
+          "initiatorUid": {
+            ".validate": "newData.isString() && (newData.val() === $uid || newData.val() === $otherUid)"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "chats": {
+      "$chatId": {
+        ".read": "auth != null && data.exists() && (data.child('uidA').val() === auth.uid || data.child('uidB').val() === auth.uid) && root.child('relationships/' + $chatId + '/status').val() === 'accepted'",
+        "uidA": {
+          ".write": "auth != null && !data.exists() && newData.isString() && root.child('relationships/' + $chatId + '/status').val() === 'accepted' && root.child('relationships/' + $chatId + '/uidA').val() === newData.val() && (root.child('relationships/' + $chatId + '/uidA').val() === auth.uid || root.child('relationships/' + $chatId + '/uidB').val() === auth.uid)",
+          ".validate": "newData.isString() && newData.val() === root.child('relationships/' + $chatId + '/uidA').val()"
+        },
+        "uidB": {
+          ".write": "auth != null && !data.exists() && newData.isString() && root.child('relationships/' + $chatId + '/status').val() === 'accepted' && root.child('relationships/' + $chatId + '/uidB').val() === newData.val() && (root.child('relationships/' + $chatId + '/uidA').val() === auth.uid || root.child('relationships/' + $chatId + '/uidB').val() === auth.uid)",
+          ".validate": "newData.isString() && newData.val() === root.child('relationships/' + $chatId + '/uidB').val()"
+        },
+        "messages": {
+          "$msgId": {
+            ".write": "auth != null && root.child('relationships/' + $chatId + '/status').val() === 'accepted' && (root.child('relationships/' + $chatId + '/uidA').val() === auth.uid || root.child('relationships/' + $chatId + '/uidB').val() === auth.uid) && ((!data.exists() && newData.exists() && newData.child('msgId').val() === $msgId && newData.child('senderUid').val() === auth.uid && newData.child('status').val() === 'sent' && newData.child('deleted').val() === false) || (data.exists() && newData.exists() && data.child('senderUid').val() === auth.uid && newData.child('msgId').val() === data.child('msgId').val() && newData.child('senderUid').val() === data.child('senderUid').val() && newData.child('createdAt').val() === data.child('createdAt').val() && newData.child('status').val() === data.child('status').val() && data.child('deleted').val() === false && newData.child('deleted').val() === true && newData.child('text').val() === '' && !newData.child('mediaId').exists()) || (data.exists() && newData.exists() && data.child('senderUid').val() !== auth.uid && newData.child('msgId').val() === data.child('msgId').val() && newData.child('senderUid').val() === data.child('senderUid').val() && newData.child('createdAt').val() === data.child('createdAt').val() && newData.child('text').val() === data.child('text').val() && newData.child('deleted').val() === data.child('deleted').val() && ((!data.child('mediaId').exists() && !newData.child('mediaId').exists()) || (data.child('mediaId').exists() && newData.child('mediaId').val() === data.child('mediaId').val())) && ((data.child('status').val() === 'sent' && (newData.child('status').val() === 'delivered' || newData.child('status').val() === 'read')) || (data.child('status').val() === 'delivered' && newData.child('status').val() === 'read'))))",
+            ".validate": "newData.hasChildren(['msgId', 'senderUid', 'text', 'status', 'deleted', 'createdAt']) && newData.parent().parent().child('uidA').exists() && newData.parent().parent().child('uidB').exists()",
+            "msgId": {
+              ".validate": "newData.isString() && newData.val() === $msgId && newData.val().length >= 1 && newData.val().length <= 64"
+            },
+            "senderUid": {
+              ".validate": "newData.isString() && (newData.val() === root.child('relationships/' + $chatId + '/uidA').val() || newData.val() === root.child('relationships/' + $chatId + '/uidB').val())"
+            },
+            "text": {
+              ".validate": "newData.isString() && ((newData.parent().child('deleted').val() === true && newData.val() === '') || (newData.parent().child('deleted').val() === false && newData.val().length >= 1 && newData.val().length <= 2000))"
+            },
+            "mediaId": {
+              ".validate": "newData.isString() && newData.parent().child('deleted').val() === false && newData.val().length >= 1 && newData.val().length <= 64"
+            },
+            "status": {
+              ".validate": "newData.isString() && (newData.val() === 'sent' || newData.val() === 'delivered' || newData.val() === 'read')"
+            },
+            "deleted": {
+              ".validate": "newData.isBoolean()"
+            },
+            "createdAt": {
+              ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "duels": {
+      "$duelId": {
+        ".read": "auth != null && (data.child('challengerUid').val() === auth.uid || data.child('opponentUid').val() === auth.uid)",
+        ".write": "auth != null && newData.exists() && ((!data.exists() && newData.child('challengerUid').val() === auth.uid && newData.child('opponentUid').val() !== auth.uid && root.child('relationships/' + (newData.child('challengerUid').val() < newData.child('opponentUid').val() ? newData.child('challengerUid').val() + '_' + newData.child('opponentUid').val() : newData.child('opponentUid').val() + '_' + newData.child('challengerUid').val()) + '/status').val() === 'accepted' && newData.child('status').val() === 'invited' && newData.child('challengerScore').val() === 0 && newData.child('opponentScore').val() === 0 && newData.child('challengerSubmitted').val() === false && newData.child('opponentSubmitted').val() === false && !newData.child('winnerUid').exists()) || (data.exists() && newData.child('challengerUid').val() === data.child('challengerUid').val() && newData.child('opponentUid').val() === data.child('opponentUid').val() && newData.child('title').val() === data.child('title').val() && ((!data.child('punishment').exists() && !newData.child('punishment').exists()) || newData.child('punishment').val() === data.child('punishment').val()) && newData.child('targetDays').val() === data.child('targetDays').val() && newData.child('createdAt').val() === data.child('createdAt').val() && ((data.child('status').val() === 'invited' && auth.uid === data.child('opponentUid').val() && newData.child('status').val() === 'active' && newData.child('challengerScore').val() === 0 && newData.child('opponentScore').val() === 0 && newData.child('challengerSubmitted').val() === false && newData.child('opponentSubmitted').val() === false && !newData.child('winnerUid').exists()) || (data.child('status').val() === 'invited' && auth.uid === data.child('opponentUid').val() && newData.child('status').val() === 'declined' && newData.child('challengerScore').val() === 0 && newData.child('opponentScore').val() === 0 && newData.child('challengerSubmitted').val() === false && newData.child('opponentSubmitted').val() === false && !newData.child('winnerUid').exists()) || (data.child('status').val() === 'invited' && auth.uid === data.child('challengerUid').val() && newData.child('status').val() === 'cancelled' && newData.child('challengerScore').val() === 0 && newData.child('opponentScore').val() === 0 && newData.child('challengerSubmitted').val() === false && newData.child('opponentSubmitted').val() === false && !newData.child('winnerUid').exists()) || (data.child('status').val() === 'active' && (auth.uid === data.child('challengerUid').val() || auth.uid === data.child('opponentUid').val()) && newData.child('status').val() === 'cancelled' && newData.child('challengerScore').val() === data.child('challengerScore').val() && newData.child('opponentScore').val() === data.child('opponentScore').val() && newData.child('challengerSubmitted').val() === data.child('challengerSubmitted').val() && newData.child('opponentSubmitted').val() === data.child('opponentSubmitted').val() && !newData.child('winnerUid').exists()) || (data.child('status').val() === 'active' && auth.uid === data.child('challengerUid').val() && newData.child('status').val() === 'active' && data.child('challengerSubmitted').val() === false && newData.child('opponentScore').val() === data.child('opponentScore').val() && newData.child('opponentSubmitted').val() === data.child('opponentSubmitted').val() && newData.child('challengerScore').val() >= data.child('challengerScore').val() && newData.child('challengerScore').val() <= data.child('targetDays').val() && !newData.child('winnerUid').exists()) || (data.child('status').val() === 'active' && auth.uid === data.child('opponentUid').val() && newData.child('status').val() === 'active' && data.child('opponentSubmitted').val() === false && newData.child('challengerScore').val() === data.child('challengerScore').val() && newData.child('challengerSubmitted').val() === data.child('challengerSubmitted').val() && newData.child('opponentScore').val() >= data.child('opponentScore').val() && newData.child('opponentScore').val() <= data.child('targetDays').val() && !newData.child('winnerUid').exists()) || (data.child('status').val() === 'active' && (auth.uid === data.child('challengerUid').val() || auth.uid === data.child('opponentUid').val()) && newData.child('status').val() === 'completed' && data.child('challengerSubmitted').val() === true && data.child('opponentSubmitted').val() === true && newData.child('challengerSubmitted').val() === true && newData.child('opponentSubmitted').val() === true && newData.child('challengerScore').val() === data.child('challengerScore').val() && newData.child('opponentScore').val() === data.child('opponentScore').val() && ((newData.child('challengerScore').val() > newData.child('opponentScore').val() && newData.child('winnerUid').val() === data.child('challengerUid').val()) || (newData.child('opponentScore').val() > newData.child('challengerScore').val() && newData.child('winnerUid').val() === data.child('opponentUid').val()) || (newData.child('challengerScore').val() === newData.child('opponentScore').val() && newData.child('winnerUid').val() === 'TIE'))))))",
+        ".validate": "newData.hasChildren(['duelId', 'challengerUid', 'opponentUid', 'title', 'targetDays', 'challengerScore', 'opponentScore', 'challengerSubmitted', 'opponentSubmitted', 'status', 'createdAt', 'updatedAt'])",
+        "duelId": {
+          ".validate": "newData.isString() && newData.val() === $duelId"
+        },
+        "challengerUid": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128"
+        },
+        "opponentUid": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128"
+        },
+        "title": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
+        },
+        "punishment": {
+          ".validate": "newData.isString() && newData.val().length <= 200"
+        },
+        "targetDays": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 365 && newData.val() % 1 === 0"
+        },
+        "challengerScore": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= newData.parent().child('targetDays').val() && newData.val() % 1 === 0"
+        },
+        "opponentScore": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= newData.parent().child('targetDays').val() && newData.val() % 1 === 0"
+        },
+        "challengerSubmitted": {
+          ".validate": "newData.isBoolean()"
+        },
+        "opponentSubmitted": {
+          ".validate": "newData.isBoolean()"
+        },
+        "status": {
+          ".validate": "newData.isString() && (newData.val() === 'invited' || newData.val() === 'active' || newData.val() === 'declined' || newData.val() === 'cancelled' || newData.val() === 'completed')"
+        },
+        "winnerUid": {
+          ".validate": "newData.isString() && (newData.val() === newData.parent().child('challengerUid').val() || newData.val() === newData.parent().child('opponentUid').val() || newData.val() === 'TIE')"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+        },
+        "updatedAt": {
+          ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "users_private": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "settings": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['theme', 'nightLight', 'updatedAt'])",
+          "theme": {
+            ".validate": "newData.isString() && (newData.val() === 'dark' || newData.val() === 'light' || newData.val() === 'midnight' || newData.val() === 'emerald')"
+          },
+          "nightLight": {
+            ".validate": "newData.isBoolean()"
+          },
+          "coachMuted": {
+            ".validate": "newData.isBoolean()"
+          },
+          "lastSyncedAt": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "account": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['updatedAt'])",
+          "email": {
+            ".validate": "newData.isString() && newData.val().length <= 120"
+          },
+          "linkedProvider": {
+            ".validate": "newData.isString() && (newData.val() === 'anonymous' || newData.val() === 'password')"
+          },
+          "migrationVersion": {
+            ".validate": "newData.isNumber() && newData.val() === 2"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "gamification": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['streak', 'lastCompletedDate', 'xp', 'bonusXp', 'challengeBonusXp', 'updatedAt'])",
+          "streak": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3650 && newData.val() % 1 === 0"
+          },
+          "lastCompletedDate": {
+            ".validate": "newData.isString() && (newData.val() === '' || newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/))"
+          },
+          "xp": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000 && newData.val() % 1 === 0"
+          },
+          "bonusXp": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000 && newData.val() % 1 === 0"
+          },
+          "challengeBonusXp": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000 && newData.val() % 1 === 0"
+          },
+          "unlockedBadges": {
+            "$idx": {
+              ".validate": "$idx.matches(/^(0|[1-9][0-9]{0,2})$/) && newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+            }
+          },
+          "showcasedBadges": {
+            "$idx": {
+              ".validate": "$idx.matches(/^[0-5]$/) && newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+            }
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "habits": {
+          ".write": "auth != null && auth.uid === $uid",
+          "$habitId": {
+            ".validate": "newData.hasChildren(['id', 'title', 'done'])",
+            "id": {
+              ".validate": "newData.isString() && newData.val() === $habitId && newData.val().length >= 1 && newData.val().length <= 64"
+            },
+            "title": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
+            },
+            "done": {
+              ".validate": "newData.isBoolean()"
+            },
+            "custom": {
+              ".validate": "newData.isBoolean()"
+            },
+            "updatedAt": {
+              ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "routines": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['routineCheckDate', 'updatedAt'])",
+          "routineCheckDate": {
+            ".validate": "newData.isString() && (newData.val() === '' || newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/))"
+          },
+          "morningRoutine": {
+            "$idx": {
+              ".validate": "$idx.matches(/^(0|[1-9][0-9]?)$/) && newData.hasChildren(['text', 'done'])",
+              "text": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200"
+              },
+              "done": {
+                ".validate": "newData.isBoolean()"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "eveningRoutine": {
+            "$idx": {
+              ".validate": "$idx.matches(/^(0|[1-9][0-9]?)$/) && newData.hasChildren(['text', 'done'])",
+              "text": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200"
+              },
+              "done": {
+                ".validate": "newData.isBoolean()"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "weeklySchedule": {
+            "$dayIdx": {
+              ".validate": "$dayIdx.matches(/^[0-6]$/) && newData.hasChildren(['day', 'plan'])",
+              "day": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 20"
+              },
+              "plan": {
+                ".validate": "newData.isString() && newData.val().length <= 500"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "dailyWater": {
+          ".write": "auth != null && auth.uid === $uid",
+          "$dateISO": {
+            ".validate": "$dateISO.matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) && newData.hasChildren(['waterDate', 'waterCount', 'waterTarget', 'coffeeCount'])",
+            "waterDate": {
+              ".validate": "newData.isString() && newData.val() === $dateISO"
+            },
+            "waterCount": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 40 && newData.val() % 1 === 0"
+            },
+            "waterTarget": {
+              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 40 && newData.val() % 1 === 0"
+            },
+            "coffeeCount": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30 && newData.val() % 1 === 0"
+            },
+            "updatedAt": {
+              ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "nutrition": {
+          ".write": "auth != null && auth.uid === $uid",
+          "targets": {
+            ".validate": "newData.hasChildren(['proteinDate', 'proteinGrams', 'proteinTarget'])",
+            "proteinDate": {
+              ".validate": "newData.isString() && (newData.val() === '' || newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/))"
+            },
+            "proteinGrams": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000"
+            },
+            "proteinTarget": {
+              ".validate": "newData.isNumber() && newData.val() >= 10 && newData.val() <= 1000"
+            },
+            "updatedAt": {
+              ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          "dailyFoods": {
+            "$dateISO": {
+              ".validate": "$dateISO.matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)",
+              "$entryId": {
+                ".validate": "newData.hasChildren(['id', 'name', 'grams', 'kcal', 'protein', 'carbs', 'fat'])",
+                "id": {
+                  ".validate": "newData.isString() && newData.val() === $entryId && newData.val().length >= 1 && newData.val().length <= 64"
+                },
+                "name": {
+                  ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 150"
+                },
+                "grams": {
+                  ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000"
+                },
+                "kcal": {
+                  ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 20000"
+                },
+                "protein": {
+                  ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2000"
+                },
+                "carbs": {
+                  ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2000"
+                },
+                "fat": {
+                  ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2000"
+                },
+                "mealSlot": {
+                  ".validate": "newData.isString() && newData.val().length <= 32"
+                },
+                "time": {
+                  ".validate": "newData.isString() && newData.val().length <= 16"
+                },
+                "updatedAt": {
+                  ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              }
+            }
+          },
+          "customFoodDB": {
+            "$foodId": {
+              ".validate": "newData.hasChildren(['id', 'name', 'cat', 'kcal', 'protein', 'carbs', 'fat', 'defGrams'])",
+              "id": {
+                ".validate": "newData.isString() && newData.val() === $foodId && newData.val().length >= 1 && newData.val().length <= 64"
+              },
+              "name": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 150"
+              },
+              "cat": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 64"
+              },
+              "kcal": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 20000"
+              },
+              "protein": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2000"
+              },
+              "carbs": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2000"
+              },
+              "fat": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2000"
+              },
+              "fiber": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000"
+              },
+              "defGrams": {
+                ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10000"
+              },
+              "micros": {
+                ".validate": "newData.isString() && newData.val().length <= 500"
+              },
+              "notes": {
+                ".validate": "newData.isString() && newData.val().length <= 2000"
+              },
+              "hint": {
+                ".validate": "newData.isString() && newData.val().length <= 200"
+              },
+              "instructions": {
+                ".validate": "newData.isString() && newData.val().length <= 3000"
+              },
+              "photoMediaId": {
+                ".validate": "newData.isString() && newData.val().length <= 64"
+              },
+              "updatedAt": {
+                ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "favoriteMealCombos": {
+            "$comboId": {
+              ".validate": "newData.hasChildren(['id', 'title', 'items'])",
+              "id": {
+                ".validate": "newData.isString() && newData.val() === $comboId && newData.val().length >= 1 && newData.val().length <= 64"
+              },
+              "title": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
+              },
+              "items": {
+                "$idx": {
+                  ".validate": "$idx.matches(/^(0|[1-9]|1[0-9]|2[0-9])$/) && newData.hasChildren(['name', 'grams', 'kcal', 'protein', 'carbs', 'fat'])",
+                  "name": {
+                    ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 150"
+                  },
+                  "grams": {
+                    ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000"
+                  },
+                  "kcal": {
+                    ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 20000"
+                  },
+                  "protein": {
+                    ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2000"
+                  },
+                  "carbs": {
+                    ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2000"
+                  },
+                  "fat": {
+                    ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2000"
+                  },
+                  "$other": {
+                    ".validate": false
+                  }
+                }
+              },
+              "updatedAt": {
+                ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "workouts": {
+          ".write": "auth != null && auth.uid === $uid",
+          "setsLog": {
+            "$logId": {
+              ".validate": "newData.hasChildren(['id', 'date', 'exercise', 'weight', 'reps', 'volume'])",
+              "id": {
+                ".validate": "newData.isString() && newData.val() === $logId && newData.val().length >= 1 && newData.val().length <= 64"
+              },
+              "date": {
+                ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)"
+              },
+              "exercise": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
+              },
+              "weight": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2000"
+              },
+              "reps": {
+                ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 1000 && newData.val() % 1 === 0"
+              },
+              "volume": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 500000"
+              },
+              "time": {
+                ".validate": "newData.isString() && newData.val().length <= 16"
+              },
+              "updatedAt": {
+                ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "bodyPrRecords": {
+            "$prId": {
+              ".validate": "newData.hasChildren(['id', 'type', 'value', 'date'])",
+              "id": {
+                ".validate": "newData.isString() && newData.val() === $prId && newData.val().length >= 1 && newData.val().length <= 64"
+              },
+              "type": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+              },
+              "value": {
+                ".validate": "(newData.isString() && newData.val().length >= 1 && newData.val().length <= 50) || (newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000)"
+              },
+              "date": {
+                ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)"
+              },
+              "updatedAt": {
+                ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "customTemplates": {
+            "$tplKey": {
+              ".validate": "$tplKey.matches(/^[A-Za-z0-9_-]{1,32}$/) && newData.hasChildren(['title', 'exercises'])",
+              "title": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+              },
+              "exercises": {
+                "$idx": {
+                  ".validate": "$idx.matches(/^(0|[1-9]|1[0-9]|2[0-9])$/) && newData.hasChildren(['name', 'sets'])",
+                  "name": {
+                    ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100"
+                  },
+                  "sets": {
+                    ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30"
+                  },
+                  "$other": {
+                    ".validate": false
+                  }
+                }
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "budgetItems": {
+          ".write": "auth != null && auth.uid === $uid",
+          "$itemId": {
+            ".validate": "newData.hasChildren(['id', 'title', 'amount', 'type', 'paid'])",
+            "id": {
+              ".validate": "newData.isString() && newData.val() === $itemId && newData.val().length >= 1 && newData.val().length <= 64"
+            },
+            "title": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
+            },
+            "amount": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000"
+            },
+            "type": {
+              ".validate": "newData.isString() && (newData.val() === 'sub' || newData.val() === 'exp')"
+            },
+            "paid": {
+              ".validate": "newData.isBoolean()"
+            },
+            "updatedAt": {
+              ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "tasks": {
+          ".write": "auth != null && auth.uid === $uid",
+          "$taskId": {
+            ".validate": "newData.hasChildren(['id', 'title', 'date', 'priority', 'completed'])",
+            "id": {
+              ".validate": "newData.isString() && newData.val() === $taskId && newData.val().length >= 1 && newData.val().length <= 64"
+            },
+            "title": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 250"
+            },
+            "desc": {
+              ".validate": "newData.isString() && newData.val().length <= 2000"
+            },
+            "date": {
+              ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)"
+            },
+            "time": {
+              ".validate": "newData.isString() && (newData.val() === '' || newData.val().matches(/^[0-9]{2}:[0-9]{2}$/))"
+            },
+            "pinned": {
+              ".validate": "newData.isBoolean()"
+            },
+            "alarmEnabled": {
+              ".validate": "newData.isBoolean()"
+            },
+            "alarmSound": {
+              ".validate": "newData.isString() && newData.val().length <= 32"
+            },
+            "priority": {
+              ".validate": "newData.isString() && (newData.val() === 'low' || newData.val() === 'medium' || newData.val() === 'high' || newData.val() === 'urgent')"
+            },
+            "category": {
+              ".validate": "newData.isString() && newData.val().length <= 64"
+            },
+            "repeat": {
+              ".validate": "newData.isString() && (newData.val() === 'none' || newData.val() === 'daily' || newData.val() === 'weekly' || newData.val() === 'monthly')"
+            },
+            "location": {
+              ".validate": "newData.isString() && newData.val().length <= 300"
+            },
+            "link": {
+              ".validate": "newData.isString() && newData.val().length <= 500"
+            },
+            "tags": {
+              "$tagIdx": {
+                ".validate": "$tagIdx.matches(/^(0|[1-9]|1[0-9])$/) && newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+              }
+            },
+            "subtasks": {
+              "$subId": {
+                ".validate": "$subId.matches(/^sub_(0|[1-9][0-9]?)$/) && newData.hasChildren(['text', 'done'])",
+                "id": {
+                  ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 64"
+                },
+                "text": {
+                  ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 300"
+                },
+                "done": {
+                  ".validate": "newData.isBoolean()"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              }
+            },
+            "mediaIds": {
+              "$mediaIdx": {
+                ".validate": "$mediaIdx.matches(/^(0|[1-9]|1[0-9])$/) && newData.isString() && newData.val().length <= 64"
+              }
+            },
+            "completed": {
+              ".validate": "newData.isBoolean()"
+            },
+            "completedAt": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "completionEmoji": {
+              ".validate": "newData.isString() && newData.val().length <= 16"
+            },
+            "completionComment": {
+              ".validate": "newData.isString() && newData.val().length <= 500"
+            },
+            "notified": {
+              ".validate": "newData.isBoolean()"
+            },
+            "updatedAt": {
+              ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "goals": {
+          ".write": "auth != null && auth.uid === $uid",
+          "$goalId": {
+            ".validate": "newData.hasChildren(['id', 'title', 'category', 'progress', 'achieved'])",
+            "id": {
+              ".validate": "newData.isString() && newData.val() === $goalId && newData.val().length >= 1 && newData.val().length <= 64"
+            },
+            "title": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200"
+            },
+            "category": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 64"
+            },
+            "desc": {
+              ".validate": "newData.isString() && newData.val().length <= 1000"
+            },
+            "progress": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100"
+            },
+            "achieved": {
+              ".validate": "newData.isBoolean()"
+            },
+            "steps": {
+              "$stepId": {
+                ".validate": "$stepId.matches(/^step_(0|[1-9][0-9]?)$/) && newData.hasChildren(['text', 'done'])",
+                "id": {
+                  ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 64"
+                },
+                "text": {
+                  ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 300"
+                },
+                "done": {
+                  ".validate": "newData.isBoolean()"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              }
+            },
+            "updatedAt": {
+              ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "countdowns": {
+          ".write": "auth != null && auth.uid === $uid",
+          "$cdId": {
+            ".validate": "newData.hasChildren(['id', 'title', 'date'])",
+            "id": {
+              ".validate": "newData.isString() && newData.val() === $cdId && newData.val().length >= 1 && newData.val().length <= 64"
+            },
+            "title": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
+            },
+            "date": {
+              ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)"
+            },
+            "updatedAt": {
+              ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "fastingState": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['active', 'startTimeMs', 'targetHours'])",
+          "active": {
+            ".validate": "newData.isBoolean()"
+          },
+          "startTimeMs": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= now + 300000"
+          },
+          "targetHours": {
+            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 168"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "dailyLogs": {
+          ".write": "auth != null && auth.uid === $uid",
+          "$dateISO": {
+            ".validate": "$dateISO.matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) && newData.hasChildren(['waterCount', 'waterTarget', 'coffeeCount', 'proteinGrams', 'proteinTarget', 'dailyCalories', 'sleepHours', 'energyLevel'])",
+            "waterCount": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 40"
+            },
+            "waterTarget": {
+              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 40"
+            },
+            "coffeeCount": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30"
+            },
+            "proteinGrams": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000"
+            },
+            "proteinTarget": {
+              ".validate": "newData.isNumber() && newData.val() >= 10 && newData.val() <= 1000"
+            },
+            "dailyCalories": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30000"
+            },
+            "dailyCarbs": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 5000"
+            },
+            "dailyFat": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 5000"
+            },
+            "sleepHours": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 24"
+            },
+            "energyLevel": {
+              ".validate": "newData.isString() && (newData.val() === 'Yüksek' || newData.val() === 'Orta' || newData.val() === 'Düşük')"
+            },
+            "habitsTotal": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 200"
+            },
+            "habitsDone": {
+              "$idx": {
+                ".validate": "$idx.matches(/^(0|[1-9][0-9]?)$/) && newData.isString() && newData.val().length <= 120"
+              }
+            },
+            "completedTasksSnapshot": {
+              "$idx": {
+                ".validate": "$idx.matches(/^(0|[1-9][0-9]?)$/) && newData.isString() && newData.val().length <= 250"
+              }
+            },
+            "updatedAt": {
+              ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "vitals": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['sleepHours', 'energyLevel'])",
+          "sleepHours": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 24"
+          },
+          "energyLevel": {
+            ".validate": "newData.isString() && (newData.val() === 'Yüksek' || newData.val() === 'Orta' || newData.val() === 'Düşük')"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "tools": {
+          ".write": "auth != null && auth.uid === $uid",
+          "shoppingList": {
+            "$idx": {
+              ".validate": "$idx.matches(/^(0|[1-9][0-9]?)$/) && newData.hasChildren(['text', 'done'])",
+              "text": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200"
+              },
+              "done": {
+                ".validate": "newData.isBoolean()"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "libraryItems": {
+            "$itemId": {
+              ".validate": "newData.hasChildren(['id', 'title', 'current', 'total'])",
+              "id": {
+                ".validate": "newData.isString() && newData.val() === $itemId && newData.val().length >= 1 && newData.val().length <= 64"
+              },
+              "title": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 150"
+              },
+              "current": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000 && newData.val() % 1 === 0"
+              },
+              "total": {
+                ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 100000 && newData.val() % 1 === 0"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "microJournal": {
+            "$entryId": {
+              ".validate": "newData.hasChildren(['id', 'date', 'sentence', 'score'])",
+              "id": {
+                ".validate": "newData.isString() && newData.val() === $entryId && newData.val().length >= 1 && newData.val().length <= 64"
+              },
+              "date": {
+                ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)"
+              },
+              "sentence": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 500"
+              },
+              "score": {
+                ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10 && newData.val() % 1 === 0"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "scratchpad": {
+            ".validate": "newData.isString() && newData.val().length <= 10000"
+          },
+          "customQuotes": {
+            "$idx": {
+              ".validate": "$idx.matches(/^(0|[1-9][0-9]?)$/) && newData.isString() && newData.val().length >= 1 && newData.val().length <= 300"
+            }
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "vault": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['ciphertext', 'iv', 'salt', 'kdfIterations', 'updatedAt'])",
+          "ciphertext": {
+            ".validate": "newData.isString() && newData.val().length <= 100000"
+          },
+          "iv": {
+            ".validate": "newData.isString() && newData.val().length >= 12 && newData.val().length <= 32"
+          },
+          "salt": {
+            ".validate": "newData.isString() && newData.val().length >= 16 && newData.val().length <= 44"
+          },
+          "kdfIterations": {
+            ".validate": "newData.isNumber() && newData.val() >= 310000 && newData.val() % 1 === 0"
+          },
+          "photosMeta": {
+            "$photoId": {
+              ".validate": "newData.hasChildren(['id', 'label', 'date', 'mediaId', 'iv'])",
+              "id": {
+                ".validate": "newData.isString() && newData.val() === $photoId && newData.val().length >= 1 && newData.val().length <= 64"
+              },
+              "label": {
+                ".validate": "newData.isString() && newData.val().length <= 120"
+              },
+              "date": {
+                ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)"
+              },
+              "mediaId": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 64"
+              },
+              "iv": {
+                ".validate": "newData.isString() && newData.val().length >= 12 && newData.val().length <= 32"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "aiCoachMessages": {
+          ".write": "auth != null && auth.uid === $uid",
+          "$msgId": {
+            ".validate": "newData.hasChildren(['id', 'sender', 'text', 'time'])",
+            "id": {
+              ".validate": "newData.isString() && newData.val() === $msgId && newData.val().length >= 1 && newData.val().length <= 64"
+            },
+            "sender": {
+              ".validate": "newData.isString() && (newData.val() === 'me' || newData.val() === 'ai_spor_kocu')"
+            },
+            "text": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 2000"
+            },
+            "time": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 16"
+            },
+            "createdAt": {
+              ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "legacySocialArchive": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['updatedAt'])",
+          "friends": {
+            "$friendUser": {
+              ".validate": "newData.hasChildren(['username', 'displayName'])",
+              "username": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 50"
+              },
+              "displayName": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+              },
+              "phone": {
+                ".validate": "newData.isString() && newData.val().length <= 32"
+              },
+              "rank": {
+                ".validate": "newData.isString() && newData.val().length <= 80"
+              },
+              "bio": {
+                ".validate": "newData.isString() && newData.val().length <= 200"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 300000"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "$other": {
+      ".validate": false
+    }
+  }
+}
