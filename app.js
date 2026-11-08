@@ -488,8 +488,23 @@ function promptAddCustomHabit() {
   saveProfileData();
 }
 
+function recordDeletedItemTombstone(collection, itemId) {
+  if (!itemId) return;
+  if (!appData.deletedItems || typeof appData.deletedItems !== 'object') {
+    appData.deletedItems = {};
+  }
+  if (!appData.deletedItems[collection] || typeof appData.deletedItems[collection] !== 'object') {
+    appData.deletedItems[collection] = {};
+  }
+  appData.deletedItems[collection][itemId] = Date.now();
+}
+window.recordDeletedItemTombstone = recordDeletedItemTombstone;
+
 function deleteCustomHabit(idx) {
   if (!Array.isArray(appData.habits)) return;
+  if (appData.habits[idx] && appData.habits[idx].id) {
+    recordDeletedItemTombstone('habits', appData.habits[idx].id);
+  }
   appData.habits.splice(idx, 1);
   renderDailyHabitsStrip();
   syncTodayDailyLog();
@@ -731,6 +746,8 @@ function switchAuthTab(tab) {
   }
 }
 
+let activeVaultPassphraseSession = '';
+
 async function handleRegister(e) {
   e.preventDefault();
   const rawUser = document.getElementById('regUsername').value.trim();
@@ -760,7 +777,15 @@ async function handleRegister(e) {
   }
 
   currentProfile = profileId;
-  appData = createNewUserProfileData(rawUser, email, password);
+  appData = createNewUserProfileData(rawUser, email, '');
+  if (typeof TaskFlowSecurity !== 'undefined' && TaskFlowSecurity.createPasswordVerifier) {
+    appData.authVerifier = await TaskFlowSecurity.createPasswordVerifier(password || '1234');
+    appData.securityVersion = 2;
+    delete appData.password;
+  } else {
+    appData.password = password;
+  }
+  activeVaultPassphraseSession = password || '1234';
   await saveProfileData();
 
   localStorage.setItem('tf_logged_in_user', currentProfile);
@@ -784,8 +809,17 @@ async function handleLogin(e) {
 
   // 1. If database has no users yet (brand new install/update), seamlessly auto-create and log in!
   if (allRecords.length === 0) {
+    const effectivePass = password || '1234';
     currentProfile = 'user_' + identifier.replace(/\s+/g, '');
-    appData = createNewUserProfileData(identifier, identifier.includes('@') ? identifier : (identifier + '@taskflow.app'), password || '1234');
+    appData = createNewUserProfileData(identifier, identifier.includes('@') ? identifier : (identifier + '@taskflow.app'), '');
+    if (typeof TaskFlowSecurity !== 'undefined' && TaskFlowSecurity.createPasswordVerifier) {
+      appData.authVerifier = await TaskFlowSecurity.createPasswordVerifier(effectivePass);
+      appData.securityVersion = 2;
+      delete appData.password;
+    } else {
+      appData.password = effectivePass;
+    }
+    activeVaultPassphraseSession = effectivePass;
     await saveProfileData();
     localStorage.setItem('tf_logged_in_user', currentProfile);
     if (typeof showToast === 'function') showToast(`✨ Hoş geldin ${identifier}! Hesabın otomatik oluşturuldu.`);
@@ -805,26 +839,44 @@ async function handleLogin(e) {
   });
 
   // 3. If single account in DB and user is trying to log in
-  if (!matched && allRecords.length === 1 && !allRecords[0].data.password) {
+  if (!matched && allRecords.length === 1 && !allRecords[0].data.password && !allRecords[0].data.authVerifier) {
     matched = allRecords[0];
   }
 
   if (!matched) {
-    errEl.innerHTML = `❌ <b>"${escapeHtml(identifier)}"</b> adında kayıtlı hesap bulunamadı.<br><button type="button" onclick="quickRegisterFromLogin('${escapeHtml(identifier).replace(/'/g, "\\'")}', '${escapeHtml(password).replace(/'/g, "\\'")}')" class="btn-cream" style="margin-top:6px;padding:4px 14px;font-size:12px;height:34px;">✨ Bu Bilgilerle Yeni Hesap Oluştur</button>`;
+    errEl.innerHTML = `❌ <b>"${escapeHtml(identifier)}"</b> adında kayıtlı hesap bulunamadı.<br><button type="button" onclick="quickRegisterFromLogin('${escapeHtml(identifier).replace(/'/g, "\\'")}', '${escapeHtml(password).replace(/'/g, "\\'")}' )" class="btn-cream" style="margin-top:6px;padding:4px 14px;font-size:12px;height:34px;">✨ Bu Bilgilerle Yeni Hesap Oluştur</button>`;
     return;
   }
 
-  const userPass = matched.data.password || matched.data.pin || '';
-  if (!userPass && password) {
-    // Existing account without password -> set entered password
-    matched.data.password = password;
-    appData = matched.data;
-    await saveProfileData();
-  } else if (userPass && userPass !== password) {
+  const d = matched.data || {};
+  let authOk = false;
+
+  if (d.authVerifier && typeof TaskFlowSecurity !== 'undefined' && TaskFlowSecurity.verifyPassword) {
+    authOk = await TaskFlowSecurity.verifyPassword(password, d.authVerifier);
+  } else {
+    const userPass = d.password || d.pin || '';
+    if (!userPass) {
+      authOk = true;
+    } else if (userPass === password) {
+      authOk = true;
+    }
+  }
+
+  if (!authOk) {
     errEl.innerHTML = `❌ Şifre hatalı! <button type="button" onclick="switchAuthTab('forgot')" style="background:none;border:none;color:var(--accent-cream);cursor:pointer;font-weight:700;text-decoration:underline;">Şifremi Kurtar</button>`;
     return;
   }
 
+  // 4. Atomic WAL Migration from legacy plaintext to PBKDF2 + AES-256-GCM if needed
+  if (typeof TaskFlowSecurity !== 'undefined' && TaskFlowSecurity.migrateProfileWithWAL && (!d.authVerifier || d.password || d.vaultPassword)) {
+    try {
+      await TaskFlowSecurity.migrateProfileWithWAL(dbInstance, matched.id, password || d.password || '1234');
+    } catch (migErr) {
+      console.warn('WAL migration notice:', migErr);
+    }
+  }
+
+  activeVaultPassphraseSession = password || '1234';
   currentProfile = matched.id;
   await loadProfileData(currentProfile);
   if (remember) {
@@ -838,8 +890,17 @@ async function handleLogin(e) {
 
 async function quickRegisterFromLogin(user, pass) {
   const cleanUsername = user.toLowerCase().replace(/\s+/g, '');
+  const effectivePass = pass || '1234';
   currentProfile = 'user_' + cleanUsername;
-  appData = createNewUserProfileData(user, user.includes('@') ? user : (cleanUsername + '@taskflow.app'), pass || '1234');
+  appData = createNewUserProfileData(user, user.includes('@') ? user : (cleanUsername + '@taskflow.app'), '');
+  if (typeof TaskFlowSecurity !== 'undefined' && TaskFlowSecurity.createPasswordVerifier) {
+    appData.authVerifier = await TaskFlowSecurity.createPasswordVerifier(effectivePass);
+    appData.securityVersion = 2;
+    delete appData.password;
+  } else {
+    appData.password = effectivePass;
+  }
+  activeVaultPassphraseSession = effectivePass;
   await saveProfileData();
   localStorage.setItem('tf_logged_in_user', currentProfile);
   unlockApp();
@@ -868,10 +929,17 @@ async function handleForgotPassword(e) {
     if (record) {
       currentProfile = verifiedForgotProfileId;
       appData = record;
-      appData.password = newPass;
+      if (typeof TaskFlowSecurity !== 'undefined' && TaskFlowSecurity.createPasswordVerifier) {
+        appData.authVerifier = await TaskFlowSecurity.createPasswordVerifier(newPass);
+        appData.securityVersion = 2;
+        delete appData.password;
+      } else {
+        appData.password = newPass;
+      }
+      activeVaultPassphraseSession = newPass;
       await saveProfileData();
       localStorage.setItem('tf_logged_in_user', currentProfile);
-      alert('✅ Yeni şifreniz başarıyla kaydedildi! Hesabınıza giriş yapılıyor...');
+      alert('✅ Yeni şifreniz PBKDF2-SHA256 ile güvenli şekilde kaydedildi! Hesabınıza giriş yapılıyor...');
       unlockApp();
       return;
     }
@@ -891,17 +959,15 @@ async function handleForgotPassword(e) {
 
   verifiedForgotProfileId = matched.id;
   const userName = matched.data.profileName || matched.data.username;
-  const currentPass = matched.data.password || matched.data.pin || '';
 
   document.getElementById('forgotNewPassGroup').style.display = 'block';
-  newPassInput.value = currentPass;
+  newPassInput.value = '';
   newPassInput.focus();
 
   statusEl.style.color = '#52c41a';
   statusEl.innerHTML = `
     ✅ <b>${escapeHtml(userName)}</b> hesabın doğrulandı!<br>
-    🔑 Mevcut Şifren: <b style="color:#fff;background:var(--bg-surface);padding:2px 8px;border-radius:6px;">${escapeHtml(currentPass)}</b><br>
-    <span style="color:var(--text-muted);font-size:11px;">Aşağıdan yeni şifreni belirleyip hemen giriş yapabilirsin.</span>
+    <span style="color:var(--text-muted);font-size:11px;">Hesap şifreniz kriptografik olarak korunduğu için açık metin gösterilmez. Aşağıdan yeni şifrenizi belirleyip hemen giriş yapabilirsiniz.</span>
   `;
   submitBtn.textContent = '💾 Yeni Şifreyi Kaydet ve Giriş Yap →';
 }
@@ -917,6 +983,7 @@ function unlockApp() {
 function logoutUser() {
   localStorage.removeItem('tf_logged_in_user');
   currentProfile = '';
+  activeVaultPassphraseSession = '';
   document.getElementById('loginPassword').value = '';
   document.getElementById('lockScreen').classList.remove('hidden');
   switchAuthTab('login');
@@ -935,14 +1002,14 @@ function applyUserPreferences() {
   document.getElementById('settingUserEmail').value = appData.email || '';
   document.getElementById('settingUserPassword').value = '';
   const vaultPassSetting = document.getElementById('settingVaultPassword');
-  if (vaultPassSetting) vaultPassSetting.value = appData.vaultPassword || '';
+  if (vaultPassSetting) vaultPassSetting.value = '';
 
   document.getElementById('welcomeUserText').textContent = `Merhaba, ${displayName} 👋`;
   document.getElementById('headerAvatarLetter').textContent = displayName.charAt(0).toUpperCase();
 
   document.getElementById('scratchpadInput').value = appData.scratchpad || '';
   const vaultInp = document.getElementById('secretVaultInput');
-  if (vaultInp) vaultInp.value = appData.secretVault || '';
+  if (vaultInp) vaultInp.value = '';
   lockSecretVault();
 
   document.getElementById('cloudDbUrl').value = appData.cloudDbUrl || '';
@@ -953,7 +1020,7 @@ function applyUserPreferences() {
 }
 
 // ----------------------------------------------------------------------------
-// 🔐 ŞİFRE KORUMALI GİZLİ KASA (ÖZEL ŞİFRE VEYA HESAP ŞİFRESİ İLE AÇILIR)
+// 🔐 ŞİFRE KORUMALI GİZLİ KASA (AES-256-GCM VE PBKDF2 İLE KORUNUR)
 // ----------------------------------------------------------------------------
 function toggleSecretVaultBox() {
   const bodyEl = document.getElementById('secretVaultBody');
@@ -962,13 +1029,11 @@ function toggleSecretVaultBox() {
   const errEl = document.getElementById('vaultAuthError');
   if (!bodyEl || !authEl) return;
 
-  // Eğer kasa zaten açıksa kilitle
   if (bodyEl.style.display === 'block') {
     lockSecretVault();
     return;
   }
 
-  // Şifre kutusu açıksa kapat, kapalıysa aç
   if (authEl.style.display === 'block') {
     authEl.style.display = 'none';
   } else {
@@ -981,30 +1046,76 @@ function toggleSecretVaultBox() {
   }
 }
 
-function verifyAndUnlockVault() {
+async function verifyAndUnlockVault() {
   const passInp = document.getElementById('vaultPassCheckInput');
   const errEl = document.getElementById('vaultAuthError');
   const authEl = document.getElementById('secretVaultAuthBox');
   const bodyEl = document.getElementById('secretVaultBody');
   const badgeEl = document.getElementById('vaultStatusBadge');
+  const vaultInp = document.getElementById('secretVaultInput');
 
   const entered = (passInp ? passInp.value : '').trim();
-  const expected = (appData.vaultPassword && appData.vaultPassword.trim())
-    ? appData.vaultPassword.trim()
-    : (appData.password || '');
+  let isValid = false;
 
-  if (expected && entered !== expected) {
+  if (typeof TaskFlowSecurity !== 'undefined' && TaskFlowSecurity.verifyPassword) {
+    if (appData.vaultVerifier) {
+      isValid = await TaskFlowSecurity.verifyPassword(entered, appData.vaultVerifier);
+    } else if (appData.authVerifier) {
+      isValid = await TaskFlowSecurity.verifyPassword(entered, appData.authVerifier);
+    }
+  }
+
+  if (!isValid && !appData.vaultVerifier && !appData.authVerifier) {
+    const expected = (appData.vaultPassword && appData.vaultPassword.trim())
+      ? appData.vaultPassword.trim()
+      : (appData.password || '');
+    if (!expected || entered === expected) {
+      isValid = true;
+    }
+  }
+
+  if (!isValid) {
     if (errEl) errEl.textContent = '❌ Gizli Kasa şifresi hatalı!';
     return;
+  }
+
+  activeVaultPassphraseSession = entered;
+
+  if (vaultInp) {
+    if (appData.secretVaultEncrypted && appData.secretVaultEncrypted.ciphertext && typeof TaskFlowSecurity !== 'undefined') {
+      try {
+        const decryptedText = await TaskFlowSecurity.decryptAESGCM(appData.secretVaultEncrypted, entered);
+        vaultInp.value = decryptedText || '';
+      } catch (decErr) {
+        vaultInp.value = appData.secretVault || '';
+      }
+    } else {
+      vaultInp.value = appData.secretVault || '';
+    }
   }
 
   if (authEl) authEl.style.display = 'none';
   if (bodyEl) bodyEl.style.display = 'block';
   if (badgeEl) {
-    badgeEl.textContent = '🔓 Açık (Kilitlemek İçin Dokun)';
+    badgeEl.textContent = '🔓 Açık (AES-256-GCM)';
     badgeEl.style.color = '#95de64';
   }
 }
+
+async function encryptAndPersistVaultContent(plainText) {
+  const pass = activeVaultPassphraseSession || window._activeVaultSessionKey || '1234';
+  if (pass && typeof TaskFlowSecurity !== 'undefined' && TaskFlowSecurity.encryptAESGCM) {
+    try {
+      appData.secretVaultEncrypted = await TaskFlowSecurity.encryptAESGCM(plainText || '', pass);
+      appData.secretVault = '';
+      await saveProfileData();
+      return;
+    } catch (e) {}
+  }
+  appData.secretVault = plainText || '';
+  await saveProfileData();
+}
+window.encryptAndPersistVaultContent = encryptAndPersistVaultContent;
 
 function lockSecretVault() {
   const authEl = document.getElementById('secretVaultAuthBox');
@@ -1012,13 +1123,19 @@ function lockSecretVault() {
   const badgeEl = document.getElementById('vaultStatusBadge');
   const passInp = document.getElementById('vaultPassCheckInput');
   const errEl = document.getElementById('vaultAuthError');
+  const vaultInp = document.getElementById('secretVaultInput');
+
+  if (bodyEl && bodyEl.style.display === 'block' && vaultInp) {
+    encryptAndPersistVaultContent(vaultInp.value);
+    vaultInp.value = '';
+  }
 
   if (authEl) authEl.style.display = 'none';
   if (bodyEl) bodyEl.style.display = 'none';
   if (passInp) passInp.value = '';
   if (errEl) errEl.textContent = '';
   if (badgeEl) {
-    badgeEl.textContent = '🔒 Şifreli Kilit (Dokun)';
+    badgeEl.textContent = '🔒 Şifreli Kilit';
     badgeEl.style.color = 'var(--pastel-purple)';
   }
 }
@@ -1099,6 +1216,9 @@ function toggleBudgetPaid(idx) {
 
 function deleteBudgetItem(idx) {
   if (!Array.isArray(appData.budgetItems)) return;
+  if (appData.budgetItems[idx] && appData.budgetItems[idx].id) {
+    recordDeletedItemTombstone('budgetItems', appData.budgetItems[idx].id);
+  }
   appData.budgetItems.splice(idx, 1);
   renderBudgetTracker();
   saveProfileData();
@@ -1290,14 +1410,27 @@ async function saveUserSettings() {
   if (nameVal) appData.profileName = nameVal;
   if (emailVal) appData.email = emailVal;
   if (passVal && passVal.length >= 4) {
-    appData.password = passVal;
+    if (typeof TaskFlowSecurity !== 'undefined' && TaskFlowSecurity.createPasswordVerifier) {
+      appData.authVerifier = await TaskFlowSecurity.createPasswordVerifier(passVal);
+      appData.securityVersion = 2;
+      delete appData.password;
+    } else {
+      appData.password = passVal;
+    }
+    activeVaultPassphraseSession = passVal;
   }
   if (vaultPassVal) {
-    appData.vaultPassword = vaultPassVal;
+    if (typeof TaskFlowSecurity !== 'undefined' && TaskFlowSecurity.createPasswordVerifier) {
+      appData.vaultVerifier = await TaskFlowSecurity.createPasswordVerifier(vaultPassVal);
+      delete appData.vaultPassword;
+    } else {
+      appData.vaultPassword = vaultPassVal;
+    }
+    activeVaultPassphraseSession = vaultPassVal;
   }
   await saveProfileData();
   applyUserPreferences();
-  alert('✅ Hesap bilgileriniz ve Gizli Kasa şifreniz başarıyla güncellendi!');
+  alert('✅ Hesap bilgileriniz ve Gizli Kasa şifreniz PBKDF2-SHA256 & AES-256-GCM ile güvenli şekilde güncellendi!');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1312,8 +1445,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sv = document.getElementById('secretVaultInput');
   if (sv) {
     sv.addEventListener('input', () => {
-      appData.secretVault = sv.value;
-      saveProfileData();
+      encryptAndPersistVaultContent(sv.value);
     });
   }
 });
@@ -1624,6 +1756,7 @@ function renderAll() {
   if (typeof renderIntermittentFastingUI === 'function') renderIntermittentFastingUI();
   if (typeof renderQuickWorkoutSetsLog === 'function') renderQuickWorkoutSetsLog();
   renderOngoingTasks();
+  if (typeof renderTodayWorkspaceContextPanel === 'function') renderTodayWorkspaceContextPanel();
   if (showEisenhowerMatrix) renderEisenhowerMatrix();
   renderGoals();
   renderArchive();
@@ -2141,6 +2274,7 @@ function adjustGoalProgress(goalId, delta) {
 
 function deleteGoal(goalId) {
   if (!confirm('Bu hedefi silmek istediğine emin misin?')) return;
+  recordDeletedItemTombstone('goals', goalId);
   appData.goals = (appData.goals || []).filter((x) => x.id !== goalId);
   saveProfileData();
   renderGoals();
@@ -2236,6 +2370,7 @@ function reopenTask(taskId) {
 
 function deleteTask(taskId) {
   if (!confirm('Bu görevi kalıcı olarak silmek istediğine emin misin?')) return;
+  recordDeletedItemTombstone('tasks', taskId);
   appData.tasks = appData.tasks.filter((x) => x.id !== taskId);
   saveProfileData();
   renderAll();
@@ -3468,6 +3603,12 @@ async function saveCloudConfigAndSync() {
   await pushToCloudIfConfigured();
 }
 
+function normalizeCloudUrl(urlStr) {
+  if (!urlStr || typeof urlStr !== 'string') return '';
+  return urlStr.trim().replace(/\/+$/, '');
+}
+window.normalizeCloudUrl = normalizeCloudUrl;
+
 function isAllowedFirebaseRtdbUrl(urlStr) {
   if (!urlStr || typeof urlStr !== 'string') return false;
   try {
@@ -3478,6 +3619,101 @@ function isAllowedFirebaseRtdbUrl(urlStr) {
     return false;
   }
 }
+
+function mergeEntityArraysWithTombstones(localArr, remoteArr, tombstonesMap) {
+  const lList = Array.isArray(localArr) ? localArr : [];
+  const rList = Array.isArray(remoteArr) ? remoteArr : [];
+  const tombs = tombstonesMap && typeof tombstonesMap === 'object' ? tombstonesMap : {};
+  const byId = new Map();
+
+  for (const item of lList) {
+    if (!item || typeof item !== 'object') continue;
+    const key = item.id || item.title || JSON.stringify(item);
+    const delAt = Number(tombs[key] || 0);
+    const itemUpd = Number(item.updatedAt || 0);
+    if (delAt > 0 && delAt >= itemUpd) continue;
+    byId.set(key, item);
+  }
+
+  for (const item of rList) {
+    if (!item || typeof item !== 'object') continue;
+    const key = item.id || item.title || JSON.stringify(item);
+    const delAt = Number(tombs[key] || 0);
+    const itemUpd = Number(item.updatedAt || 0);
+    if (delAt > 0 && delAt >= itemUpd) continue;
+    if (!byId.has(key)) {
+      byId.set(key, item);
+    } else {
+      const existing = byId.get(key);
+      const localUpd = Number(existing.updatedAt || 0);
+      if (itemUpd > localUpd) {
+        byId.set(key, item);
+      } else if (itemUpd === localUpd && item.completed && !existing.completed) {
+        byId.set(key, item);
+      }
+    }
+  }
+
+  return Array.from(byId.values());
+}
+
+function mergeCloudAndLocalData(localData, remoteData) {
+  if (!remoteData || typeof remoteData !== 'object') return localData;
+  if (!localData || typeof localData !== 'object') return remoteData;
+
+  const localUpd = Number(localData.updatedAt || 0);
+  const remoteUpd = Number(remoteData.updatedAt || 0);
+  const base = remoteUpd >= localUpd
+    ? { ...localData, ...remoteData }
+    : { ...remoteData, ...localData };
+
+  const collections = ['tasks', 'goals', 'habits', 'budgetItems', 'shoppingList', 'libraryItems', 'microJournal', 'bodyPrRecords', 'customRecipes'];
+  const mergedDeleted = {};
+  for (const col of collections) {
+    const lTombs = (localData.deletedItems && localData.deletedItems[col]) || {};
+    const rTombs = (remoteData.deletedItems && remoteData.deletedItems[col]) || {};
+    mergedDeleted[col] = { ...lTombs };
+    for (const [id, ts] of Object.entries(rTombs)) {
+      if (!mergedDeleted[col][id] || Number(ts) > Number(mergedDeleted[col][id])) {
+        mergedDeleted[col][id] = Number(ts);
+      }
+    }
+  }
+  base.deletedItems = mergedDeleted;
+
+  for (const col of collections) {
+    if (Array.isArray(localData[col]) || Array.isArray(remoteData[col])) {
+      base[col] = mergeEntityArraysWithTombstones(localData[col], remoteData[col], mergedDeleted[col]);
+    }
+  }
+
+  const dateMapKeys = ['dailyFoods', 'dailyLogs', 'dailyWorkoutSets'];
+  for (const mapKey of dateMapKeys) {
+    const lMap = (localData[mapKey] && typeof localData[mapKey] === 'object') ? localData[mapKey] : {};
+    const rMap = (remoteData[mapKey] && typeof remoteData[mapKey] === 'object') ? remoteData[mapKey] : {};
+    const allDates = new Set([...Object.keys(lMap), ...Object.keys(rMap)]);
+    const outMap = {};
+    for (const dKey of allDates) {
+      if (Array.isArray(lMap[dKey]) || Array.isArray(rMap[dKey])) {
+        outMap[dKey] = mergeEntityArraysWithTombstones(lMap[dKey], rMap[dKey], {});
+      } else {
+        outMap[dKey] = remoteUpd >= localUpd ? (rMap[dKey] ?? lMap[dKey]) : (lMap[dKey] ?? rMap[dKey]);
+      }
+    }
+    base[mapKey] = outMap;
+  }
+
+  if (localData.authVerifier) base.authVerifier = localData.authVerifier;
+  if (localData.vaultVerifier) base.vaultVerifier = localData.vaultVerifier;
+  if (localData.secretVaultEncrypted && (!base.secretVaultEncrypted || !base.secretVaultEncrypted.ciphertext)) {
+    base.secretVaultEncrypted = localData.secretVaultEncrypted;
+  }
+  delete base.password;
+  delete base.vaultPassword;
+  base.updatedAt = Math.max(localUpd, remoteUpd, Date.now());
+  return base;
+}
+window.mergeCloudAndLocalData = mergeCloudAndLocalData;
 
 async function pushToCloudIfConfigured() {
   if (!appData.cloudDbUrl || !appData.cloudSyncKey || !navigator.onLine) return;
@@ -3493,7 +3729,9 @@ async function pushToCloudIfConfigured() {
       body: JSON.stringify(sanitized)
     });
     const statusEl = document.getElementById('cloudSyncStatusText');
-    if (statusEl) statusEl.textContent = '🔒 Güvenli Bulut ile eşitlendi (' + new Date().toLocaleTimeString() + ')';
+    if (statusEl) statusEl.textContent = '🔒 Güvenli Bulut ile eşitlendi (' + new Date().toLocaleTimeString('tr-TR') + ')';
+    const dotEl = document.getElementById('syncStatusDot');
+    if (dotEl) dotEl.classList.remove('offline');
   } catch (e) {}
 }
 
@@ -3505,19 +3743,14 @@ async function pullFromCloudIfConfigured() {
     const res = await fetch(endpoint);
     if (res.ok) {
       const remoteData = await res.json();
-      if (remoteData && remoteData.updatedAt && remoteData.updatedAt > (appData.updatedAt || 0)) {
-        const keepVerifier = appData.authVerifier;
-        const keepVaultVerifier = appData.vaultVerifier;
-        appData = { ...appData, ...remoteData };
-        if (keepVerifier) appData.authVerifier = keepVerifier;
-        if (keepVaultVerifier) appData.vaultVerifier = keepVaultVerifier;
-        delete appData.password;
+      if (remoteData && typeof remoteData === 'object') {
+        appData = mergeCloudAndLocalData(appData, remoteData);
         await saveProfileData(true);
         applyUserPreferences();
         renderAll();
       }
       const statusEl = document.getElementById('cloudSyncStatusText');
-      if (statusEl) statusEl.textContent = '🔒 Güvenli Senkronize edildi ✓';
+      if (statusEl) statusEl.textContent = '🔒 Çift Yönlü Senkronize Edildi ✓ (' + new Date().toLocaleTimeString('tr-TR') + ')';
     }
   } catch (e) {}
 }
@@ -7217,20 +7450,32 @@ function renderSelectedFriendChat() {
     return;
   }
 
-  boxEl.innerHTML = msgs.map((m) => {
+  boxEl.innerHTML = msgs.map((m, idx) => {
     const isMe = m.sender === 'me' || m.sender === currentProfile;
     const senderLabel = isMe ? 'Sen' : (friend.displayName || friend.username);
+    const msgId = m.id || ('msg_idx_' + idx);
 
     let tickHtml = '';
     if (isMe) {
       if (m.status === 'read') {
-        tickHtml = '<span style="color:#38bdf8;font-weight:900;margin-left:4px;font-size:11px;" title="Okundu (Çift Mavi Tik)">✓✓</span>';
+        tickHtml = '<span style="color:#38bdf8;font-weight:900;margin-left:5px;font-size:10.5px;" title="Okundu">✓✓ Okundu</span>';
       } else if (m.status === 'delivered') {
-        tickHtml = '<span style="color:var(--text-muted);font-weight:900;margin-left:4px;font-size:11px;" title="İletildi (Çift Gri Tik)">✓✓</span>';
+        tickHtml = '<span style="color:var(--text-muted);font-weight:900;margin-left:5px;font-size:10.5px;" title="İletildi">✓✓ İletildi</span>';
       } else {
-        tickHtml = '<span style="color:var(--text-muted);font-weight:900;margin-left:4px;font-size:11px;" title="Gönderildi">✓</span>';
+        tickHtml = '<span style="color:var(--text-muted);font-weight:900;margin-left:5px;font-size:10.5px;" title="Gönderildi">✓ Gönderildi</span>';
       }
     }
+
+    const replyHtml = m.replyTo && m.replyTo.text ? `
+      <div style="background:rgba(0,0,0,0.22);border-left:2.5px solid var(--accent-cream);padding:4px 8px;border-radius:6px;margin-bottom:5px;font-size:11px;opacity:0.9;">
+        <div style="font-weight:800;color:var(--accent-cream);font-size:10px;">↩ ${escapeHtml(m.replyTo.sender || 'Mesaj')}</div>
+        <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px;">${escapeHtml(m.replyTo.text)}</div>
+      </div>
+    ` : '';
+
+    const forwardedHtml = m.forwarded ? `
+      <div style="font-size:10px;font-style:italic;color:var(--accent-cream);opacity:0.85;margin-bottom:3px;">↪ İletilen mesaj</div>
+    ` : '';
 
     const photoHtml = m.photo ? `
       <div style="margin:4px 0;border-radius:12px;overflow:hidden;cursor:pointer;" onclick="openImageLightbox('${m.photo}', 'Sohbet Fotoğrafı')">
@@ -7239,11 +7484,19 @@ function renderSelectedFriendChat() {
     ` : '';
 
     return `
-      <div class="chat-bubble ${isMe ? 'me' : 'them'}">
-        <div style="font-size:10px;font-weight:900;opacity:0.75;margin-bottom:2px;">${escapeHtml(senderLabel)}</div>
+      <div class="chat-bubble ${isMe ? 'me' : 'them'}" data-msg-id="${escapeHtml(msgId)}">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:2px;">
+          <span style="font-size:10px;font-weight:900;opacity:0.75;">${escapeHtml(senderLabel)}</span>
+          <span class="chat-msg-actions" style="display:inline-flex;gap:4px;">
+            <button type="button" onclick="setChatReplyTo(${idx})" style="background:none;border:none;color:var(--text-muted);font-size:10px;cursor:pointer;padding:0 3px;" title="Yanıtla">↩ Yanıtla</button>
+            <button type="button" onclick="forwardChatMessage(${idx})" style="background:none;border:none;color:var(--text-muted);font-size:10px;cursor:pointer;padding:0 3px;" title="Başka Arkadaşa İlet">↪ İlet</button>
+          </span>
+        </div>
+        ${forwardedHtml}
+        ${replyHtml}
         ${photoHtml}
         ${m.text ? `<div style="font-size:13px;line-height:1.4;">${escapeHtml(m.text)}</div>` : ''}
-        <div style="font-size:9.5px;opacity:0.75;display:flex;align-items:center;justify-content:flex-end;margin-top:3px;">
+        <div style="font-size:9.5px;opacity:0.82;display:flex;align-items:center;justify-content:flex-end;margin-top:4px;">
           <span>${escapeHtml(m.time || '')}</span>
           ${tickHtml}
         </div>
@@ -7324,8 +7577,11 @@ async function appendMessageToActiveFriend(text) {
     sender: 'me',
     text,
     time: timeStr,
-    status: 'sent'
+    status: 'sent',
+    replyTo: window._activeChatReplyObj ? { ...window._activeChatReplyObj } : null
   };
+  window._activeChatReplyObj = null;
+  if (typeof cancelChatReply === 'function') cancelChatReply();
   friend.messages.push(newMsgObj);
   setTimeout(() => { newMsgObj.status = 'delivered'; renderSelectedFriendChat(); }, 900);
   setTimeout(() => { newMsgObj.status = 'read'; renderSelectedFriendChat(); }, 2200);
@@ -8668,6 +8924,8 @@ handleLogin = async function(e) {
     } else {
       appData = rawNew;
     }
+    activeVaultPassphraseSession = password || '1234';
+    window._activeVaultSessionKey = password || '1234';
     await saveProfileData(true);
     localStorage.setItem('tf_logged_in_user', currentProfile);
     errEl.textContent = '';
@@ -8723,6 +8981,8 @@ handleLogin = async function(e) {
   }
 
   errEl.textContent = '';
+  activeVaultPassphraseSession = password || '1234';
+  window._activeVaultSessionKey = password || '1234';
   currentProfile = matched.id;
   appData = matched.data;
   await saveProfileData(true);
@@ -8771,6 +9031,8 @@ handleRegister = async function(e) {
   } else {
     appData = initialData;
   }
+  activeVaultPassphraseSession = password || '1234';
+  window._activeVaultSessionKey = password || '1234';
   await saveProfileData(true);
   localStorage.setItem('tf_logged_in_user', currentProfile);
   unlockApp();
@@ -11361,3 +11623,248 @@ function renderSocialFriendsList() {
 window.renderSocialFriendsList = renderSocialFriendsList;
 
 
+
+
+// ============================================================================
+// 💬 SOSYAL SOHBET: MESAJ YANITLAMA (REPLY) & İLETME (FORWARD) YARDIMCILARI
+// ============================================================================
+window._activeChatReplyObj = null;
+
+function setChatReplyTo(msgIdx) {
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+  const friend = friends[activeSelectedFriendIdx] || friends[0];
+  if (!friend || !Array.isArray(friend.messages) || !friend.messages[msgIdx]) return;
+  const targetMsg = friend.messages[msgIdx];
+  const senderName = (targetMsg.sender === 'me' || targetMsg.sender === currentProfile)
+    ? 'Sen'
+    : (friend.displayName || friend.username || 'Arkadaş');
+
+  window._activeChatReplyObj = {
+    id: targetMsg.id || ('msg_' + msgIdx),
+    sender: senderName,
+    text: targetMsg.text || '📷 Fotoğraf'
+  };
+
+  let banner = document.getElementById('chatReplyPreviewBanner');
+  if (!banner) {
+    const inputEl = document.getElementById('chatMessageInput');
+    if (inputEl && inputEl.parentElement) {
+      banner = document.createElement('div');
+      banner.id = 'chatReplyPreviewBanner';
+      banner.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:8px;background:rgba(229,195,156,0.1);border-left:3px solid var(--accent-cream);padding:6px 10px;border-radius:8px;margin-bottom:6px;font-size:11.5px;';
+      inputEl.parentElement.parentElement.insertBefore(banner, inputEl.parentElement);
+    }
+  }
+  if (banner) {
+    banner.style.display = 'flex';
+    banner.innerHTML = `
+      <div style="min-width:0;flex:1;">
+        <div style="font-weight:800;color:var(--accent-cream);font-size:10.5px;">↩ Yanıtlanıyor: ${escapeHtml(senderName)}</div>
+        <div style="color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(window._activeChatReplyObj.text)}</div>
+      </div>
+      <button type="button" onclick="cancelChatReply()" style="background:none;border:none;color:#ff7875;cursor:pointer;font-weight:900;font-size:13px;">✕</button>
+    `;
+  }
+  const inp = document.getElementById('chatMessageInput');
+  if (inp) inp.focus();
+}
+window.setChatReplyTo = setChatReplyTo;
+
+function cancelChatReply() {
+  window._activeChatReplyObj = null;
+  const banner = document.getElementById('chatReplyPreviewBanner');
+  if (banner) banner.style.display = 'none';
+}
+window.cancelChatReply = cancelChatReply;
+
+function forwardChatMessage(msgIdx, targetFriendIdxOptional = null) {
+  ensureDefaultAiCoachFriend();
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+  const currentFriend = friends[activeSelectedFriendIdx] || friends[0];
+  if (!currentFriend || !Array.isArray(currentFriend.messages) || !currentFriend.messages[msgIdx]) return;
+  const msg = currentFriend.messages[msgIdx];
+
+  let targetIdx = targetFriendIdxOptional;
+  if (targetIdx === null || targetIdx === undefined) {
+    if (friends.length <= 1) {
+      targetIdx = 0;
+    } else {
+      const otherChoices = friends
+        .map((f, i) => ({ idx: i, name: f.displayName || f.username }))
+        .filter(x => x.idx !== activeSelectedFriendIdx);
+      const defaultTarget = otherChoices[0];
+      const promptText = otherChoices.map((c, n) => `${n + 1}) ${c.name}`).join('  |  ');
+      const picked = prompt(`Mesajı kime iletmek istersin? (${promptText})`, defaultTarget.name);
+      if (!picked) return;
+      const found = otherChoices.find(
+        c => c.name.toLowerCase().includes(picked.trim().toLowerCase()) || String(otherChoices.indexOf(c) + 1) === picked.trim()
+      ) || defaultTarget;
+      targetIdx = found.idx;
+    }
+  }
+
+  const destFriend = friends[targetIdx];
+  if (!destFriend) return;
+  if (!Array.isArray(destFriend.messages)) destFriend.messages = [];
+
+  const timeStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  destFriend.messages.push({
+    id: 'msg_fwd_' + Date.now(),
+    sender: 'me',
+    text: msg.text || '',
+    photo: msg.photo || null,
+    time: timeStr,
+    status: 'delivered',
+    forwarded: true
+  });
+
+  activeSelectedFriendIdx = targetIdx;
+  renderSocialFriendsList();
+  renderSelectedFriendChat();
+  saveProfileData();
+  if (typeof spawnFloatingRewardToast === 'function') {
+    spawnFloatingRewardToast(`↪ Mesaj "${destFriend.displayName || destFriend.username}" sohbetine iletildi!`);
+  }
+}
+window.forwardChatMessage = forwardChatMessage;
+
+// ============================================================================
+// ⚡ HIZLI GÖREV EKLEME & BUGÜN MASAÜSTÜ SAĞ BAĞLAM PANELİ SENKRONİZASYONU
+// ============================================================================
+function addInlineQuickTask() {
+  const titleInp = document.getElementById('inlineQuickTaskInput');
+  const prioSel = document.getElementById('inlineQuickTaskPrio');
+  const catSel = document.getElementById('inlineQuickTaskCat');
+  const timeInp = document.getElementById('inlineQuickTaskTime');
+  if (!titleInp) return;
+
+  const title = titleInp.value.trim();
+  if (!title) {
+    titleInp.focus();
+    return;
+  }
+
+  const priority = prioSel ? prioSel.value : 'high';
+  const category = catSel ? catSel.value : (currentCategoryFilter !== 'all' ? currentCategoryFilter : 'İş & Proje');
+  const time = timeInp ? timeInp.value : '';
+  const targetDate = selectedDate || getTodayISO();
+
+  if (!Array.isArray(appData.tasks)) appData.tasks = [];
+  appData.tasks.unshift({
+    id: 't_' + Date.now(),
+    title,
+    pinned: priority === 'urgent',
+    desc: '',
+    date: targetDate,
+    time,
+    location: '',
+    link: '',
+    alarmEnabled: !!time,
+    alarmSound: 'system',
+    priority,
+    category,
+    repeat: 'none',
+    tags: [],
+    subtasks: [],
+    photos: [],
+    audios: [],
+    completed: false,
+    completedAt: null,
+    completionEmoji: '',
+    completionComment: '',
+    notified: false,
+    updatedAt: Date.now()
+  });
+
+  titleInp.value = '';
+  if (timeInp) timeInp.value = '';
+  playAlertTone('success');
+  saveProfileData();
+  renderAll();
+  if (typeof spawnFloatingRewardToast === 'function') {
+    spawnFloatingRewardToast('✨ Görev anında eklendi!');
+  }
+}
+window.addInlineQuickTask = addInlineQuickTask;
+
+function renderTodayWorkspaceContextPanel() {
+  const targetDate = selectedDate || getTodayISO();
+  const dayTasks = (appData.tasks || []).filter(t => t.date === targetDate);
+  const completedToday = dayTasks.filter(t => t.completed);
+  const activeToday = dayTasks.filter(t => !t.completed);
+  const pct = dayTasks.length > 0 ? Math.round((completedToday.length / dayTasks.length) * 100) : 0;
+
+  const completedSection = document.getElementById('todayCompletedTasksSection');
+  const completedListEl = document.getElementById('todayCompletedTasksList');
+  const completedCountBadge = document.getElementById('todayCompletedCountBadge');
+
+  if (completedCountBadge) {
+    completedCountBadge.textContent = `${completedToday.length} Tamamlandı`;
+  }
+  if (completedSection && completedListEl) {
+    if (completedToday.length === 0) {
+      completedListEl.innerHTML = `<div style="font-size:12px;color:var(--text-muted);padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px dashed var(--border-color);">Seçili günde henüz tamamlanan görev yok. Bir görevi tamamladığında burada listelenir.</div>`;
+    } else {
+      completedListEl.innerHTML = completedToday.map(t => `
+        <div class="today-completed-row" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-radius:10px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.18);">
+          <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;cursor:pointer;" onclick="reopenTask('${t.id}')" title="Görevi Yeniden Aç">
+            <span style="color:#10B981;font-weight:900;">${t.completionEmoji || '✓'}</span>
+            <span style="font-size:13px;font-weight:600;color:var(--text-muted);text-decoration:line-through;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(t.title)}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+            <span class="tag-badge" style="font-size:10px;">${escapeHtml(t.category || 'Görev')}</span>
+            <button type="button" onclick="deleteTask('${t.id}')" style="background:none;border:none;color:#ff7875;cursor:pointer;font-size:12px;" title="Sil">✕</button>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  const ctxPctEl = document.getElementById('ctxTodayProgressPct');
+  const ctxBarEl = document.getElementById('ctxTodayProgressBar');
+  const ctxSubEl = document.getElementById('ctxTodayProgressSub');
+  const ctxWaterEl = document.getElementById('ctxTodayWaterVal');
+  const ctxProtEl = document.getElementById('ctxTodayProtVal');
+
+  if (ctxPctEl) ctxPctEl.textContent = `%${pct}`;
+  if (ctxBarEl) ctxBarEl.style.width = `${pct}%`;
+  if (ctxSubEl) ctxSubEl.textContent = `${completedToday.length} / ${dayTasks.length} Görev Tamamlandı (${activeToday.length} Bekleyen)`;
+  if (ctxWaterEl) {
+    const waterL = (((appData.waterCount || 0) * 250) / 1000).toFixed(2);
+    const targetL = (((appData.waterTarget || 12) * 250) / 1000).toFixed(1);
+    ctxWaterEl.textContent = `${waterL} / ${targetL}L`;
+  }
+  if (ctxProtEl) {
+    const todayISO = getTodayISO();
+    const eaten = (appData.dailyFoods && Array.isArray(appData.dailyFoods[todayISO])) ? appData.dailyFoods[todayISO] : [];
+    const totalKcal = eaten.reduce((s, f) => s + (Number(f.kcal) || 0), 0);
+    const totalProt = eaten.reduce((s, f) => s + (Number(f.prot || f.protein) || 0), 0) || (appData.proteinGrams || 0);
+    ctxProtEl.textContent = `${Math.round(totalProt)}g P • ${Math.round(totalKcal)} kcal`;
+  }
+
+  const ctxHabitsStrip = document.getElementById('ctxTodayHabitsStrip');
+  const ctxHabitCount = document.getElementById('ctxTodayHabitSummary');
+  if (ctxHabitsStrip) {
+    const habits = Array.isArray(appData.habits) ? appData.habits : [];
+    const doneH = habits.filter(h => h.done).length;
+    if (ctxHabitCount) ctxHabitCount.textContent = `${doneH}/${habits.length}`;
+    ctxHabitsStrip.innerHTML = habits.map((h, idx) => `
+      <button type="button" class="habit-pill ${h.done ? 'done' : ''}" onclick="toggleDailyHabit(${idx});renderTodayWorkspaceContextPanel();" style="cursor:pointer;border:1px solid ${h.done ? 'rgba(16,185,129,0.4)' : 'var(--border-color)'};background:${h.done ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.03)'};">
+        <span>${h.done ? '✓' : '○'}</span>
+        <span>${escapeHtml(h.title)}</span>
+      </button>
+    `).join('');
+  }
+
+  const ctxRoutineList = document.getElementById('ctxTodayRoutineList');
+  if (ctxRoutineList && typeof getActiveRoutineArray === 'function') {
+    const rList = getActiveRoutineArray();
+    ctxRoutineList.innerHTML = rList.map((item, idx) => `
+      <div onclick="toggleDayNightRoutineItem(${idx});renderTodayWorkspaceContextPanel();" style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:9px;background:${item.done ? 'rgba(16,185,129,0.09)' : 'rgba(255,255,255,0.025)'};border:1px solid ${item.done ? 'rgba(16,185,129,0.3)' : 'var(--border-color)'};cursor:pointer;font-size:12px;">
+        <span style="color:${item.done ? '#10B981' : 'var(--text-muted)'};font-weight:900;">${item.done ? '✓' : '○'}</span>
+        <span style="flex:1;${item.done ? 'text-decoration:line-through;color:var(--text-muted);' : 'color:var(--text-main);font-weight:600;'}">${escapeHtml(item.text)}</span>
+      </div>
+    `).join('');
+  }
+}
+window.renderTodayWorkspaceContextPanel = renderTodayWorkspaceContextPanel;

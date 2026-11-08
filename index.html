@@ -161,7 +161,9 @@
     <!-- MASAÜSTÜ OBSIDIAN SOL NAVİGASYON BAR (4 ANA MERKEZ: BUGÜN | BEDEN | GELİŞİM | SOSYAL) -->
     <aside class="obsidian-sidebar" id="obsidianDesktopSidebar">
       <div class="obs-brand">
-        <div class="obs-brand-mark">TF</div>
+        <div class="obs-brand-mark">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
         <div class="obs-brand-copy">
           <span class="obs-brand-title">TaskFlow<span style="color:var(--accent-cream);">+</span></span>
           <span class="obs-brand-sub">Obsidian v2.0</span>
@@ -171,28 +173,36 @@
       <nav class="obs-nav-group" aria-label="Ana Merkezler">
         <div class="obs-nav-label">4 ANA MERKEZ</div>
         <button type="button" class="obsidian-nav-btn active" id="deskNavToday" onclick="switchPillar('today')">
-          <span class="obs-nav-icon">📋</span>
+          <span class="obs-nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
+          </span>
           <span class="obs-nav-text">
             <strong>Bugün</strong>
             <small>Görev, Rutin & Alışkanlık</small>
           </span>
         </button>
         <button type="button" class="obsidian-nav-btn" id="deskNavBody" onclick="switchPillar('body')">
-          <span class="obs-nav-icon">💪</span>
+          <span class="obs-nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </span>
           <span class="obs-nav-text">
             <strong>Beden</strong>
             <small>Besin, Su, Oruç & İdman</small>
           </span>
         </button>
         <button type="button" class="obsidian-nav-btn" id="deskNavGrowth" onclick="switchPillar('growth')">
-          <span class="obs-nav-icon">🎯</span>
+          <span class="obs-nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          </span>
           <span class="obs-nav-text">
             <strong>Gelişim</strong>
             <small>Hedef, Odak, Karne & Arşiv</small>
           </span>
         </button>
         <button type="button" class="obsidian-nav-btn" id="deskNavSocial" onclick="switchPillar('social')">
-          <span class="obs-nav-icon">👥</span>
+          <span class="obs-nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
           <span class="obs-nav-text">
             <strong>Sosyal</strong>
             <small>Sohbet, Düello & 120 Rozet</small>
@@ -202,16 +212,36 @@
 
       <div class="obs-nav-group obs-quick-tools">
         <div class="obs-nav-label">HIZLI MODÜLLER</div>
-        <button type="button" class="obs-sub-btn" onclick="openTaskModal()">＋ Yeni Görev Planla</button>
-        <button type="button" class="obs-sub-btn" onclick="switchPillar('growth','focus')">⏱️ Pomodoro & Kronometre</button>
-        <button type="button" class="obs-sub-btn" onclick="openDopamineDetoxModal()">🩸 Dopamin Detoksu (Monk)</button>
-        <button type="button" class="obs-sub-btn" onclick="openAiWeeklyReportModal()">📊 AI Haftalık Karne</button>
-        <button type="button" class="obs-sub-btn" onclick="openBarcodeScannerModal()">🎯 Barkod & Besin Tara</button>
-        <button type="button" class="obs-sub-btn" onclick="switchPillar('today','tools')">🧰 Araçlar & Şifreli Kasa</button>
-        <button type="button" class="obs-sub-btn" onclick="switchView('settings')">⚙️ Ayarlar & Güvenli Yedek</button>
+        <button type="button" class="obs-sub-btn" onclick="openTaskModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Yeni Görev Planla</span>
+        </button>
+        <button type="button" class="obs-sub-btn" onclick="switchPillar('growth','focus')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Pomodoro & Kronometre</span>
+        </button>
+        <button type="button" class="obs-sub-btn" onclick="openDopamineDetoxModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Dopamin Detoksu (Monk)</span>
+        </button>
+        <button type="button" class="obs-sub-btn" onclick="openAiWeeklyReportModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span>AI Haftalık Karne</span>
+        </button>
+        <button type="button" class="obs-sub-btn" onclick="openBarcodeScannerModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v14"/><path d="M8 5v14"/><path d="M12 5v14"/><path d="M17 5v14"/><path d="M21 5v14"/></svg>
+          <span>Barkod & Besin Tara</span>
+        </button>
+        <button type="button" class="obs-sub-btn" onclick="switchPillar('today','tools')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>Araçlar & Şifreli Kasa</span>
+        </button>
+        <button type="button" class="obs-sub-btn" id="deskNavSettings" onclick="switchView('settings')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Ayarlar & Güvenli Yedek</span>
+        </button>
       </div>
     </aside>
-
     <!-- SOL SÜTUN: ÜST BAR, GÜNLÜK İLERLEME HALKASI, SU TAKİPÇİSİ, 4 ANA KATEGORİ -->
     <aside class="left-panel">
       <!-- 📱 CANLI KİLİT EKRANI / DYNAMIC ISLAND / LIVE WIDGET KAPSÜLÜ -->
@@ -1192,15 +1222,130 @@
         <!-- Gizli günlük özet barı (Kalabalık yapmaması için gizlendi, DOM uyumluluğu korundu) -->
         <div id="selectedDayDailyValuesBar" style="display:none !important;"></div>
 
-        <div class="section-header" style="margin-top:6px;margin-bottom:8px;">
-          <h2 class="section-title" id="activeListTitle" style="font-size:14.5px;">📋 Günün Görevleri</h2>
-          <span style="font-size:11.5px;color:var(--text-muted);" id="activeListSubtitle">Seçili gün</span>
+        <!-- ⚡ HIZLI GÖREV EKLEME ÇUBUĞU (THINGS 3 / LINEAR STİLİ) -->
+        <div class="inline-quick-task-bar" id="inlineQuickTaskBar">
+          <div class="iqt-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cream)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <input type="text" id="inlineQuickTaskInput" placeholder="Hızlı görev ekle... (Yaz ve Enter'a bas)" onkeydown="if(event.key==='Enter'){event.preventDefault();addInlineQuickTask();}" />
+          </div>
+          <div class="iqt-controls">
+            <select id="inlineQuickTaskCat" class="iqt-select" title="Kategori">
+              <option value="İş & Proje">💼 İş & Proje</option>
+              <option value="Rutin İşler">🔄 Rutin İşler</option>
+              <option value="Spor ve Sağlık">🏋️ Spor & Sağlık</option>
+              <option value="Kişisel Gelişim">📚 Gelişim</option>
+            </select>
+            <select id="inlineQuickTaskPrio" class="iqt-select" title="Öncelik">
+              <option value="urgent">🚨 Acil</option>
+              <option value="high" selected>🔥 Yüksek</option>
+              <option value="medium">⚡ Orta</option>
+              <option value="low">🌱 Düşük</option>
+            </select>
+            <input type="time" id="inlineQuickTaskTime" class="iqt-time" title="Saat (Opsiyonel)" />
+            <button type="button" class="btn-cream iqt-submit-btn" onclick="addInlineQuickTask()">Ekle</button>
+          </div>
         </div>
 
-        <!-- 🧊 EISENHOWER 4'LÜ MATRİS GÖRÜNÜMÜ -->
-        <div id="eisenhowerContainer" class="eisenhower-grid" style="display:none;"></div>
+        <!-- 🏛️ MASAÜSTÜ 2 SÜTUNLU DENGELİ ÇALIŞMA ALANI (SOL: GÖREVLER & TAMAMLANANLAR | SAĞ: GÜNLÜK ÖZET, ALIŞKANLIK & RUTİN) -->
+        <div class="today-desktop-workspace-grid" id="todayWorkspaceGrid">
+          <!-- SOL / ANA ODAK SÜTUNU: AKTİF GÖREVLER + BUGÜN TAMAMLANANLAR -->
+          <div class="today-main-tasks-col" id="todayMainTasksCol">
+            <div class="section-header" style="margin-top:2px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <h2 class="section-title" id="activeListTitle" style="font-size:15px;margin:0;">Günün Görevleri</h2>
+                <span style="font-size:11.5px;color:var(--text-muted);font-weight:600;" id="activeListSubtitle">Seçili gün</span>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <button type="button" class="pin-btn" style="height:28px;padding:0 9px;font-size:11px;font-weight:700;" onclick="toggleEisenhowerMatrixView()" title="4'lü Öncelik Matrisi">🧊 Matris</button>
+                <button type="button" class="pin-btn" style="height:28px;padding:0 9px;font-size:11px;font-weight:700;" onclick="shareOrCopyDailyPlan()" title="Günlük Planı Kopyala / Paylaş">📤 Planı Paylaş</button>
+              </div>
+            </div>
 
-        <div id="ongoingTaskList" class="task-list"></div>
+            <!-- 🧊 EISENHOWER 4'LÜ MATRİS GÖRÜNÜMÜ -->
+            <div id="eisenhowerContainer" class="eisenhower-grid" style="display:none;"></div>
+
+            <div id="ongoingTaskList" class="task-list"></div>
+
+            <!-- ✅ BUGÜN TAMAMLANAN GÖREVLER & ARŞİV ÖZETİ -->
+            <div id="todayCompletedTasksSection" class="today-completed-section" style="margin-top:16px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:13px;font-weight:800;color:var(--text-main);">✅ Tamamlanan Görevler</span>
+                  <span id="todayCompletedCountBadge" style="font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;background:rgba(16,185,129,0.14);color:#10B981;">0 Tamamlandı</span>
+                </div>
+                <button type="button" class="pin-btn" style="height:28px;padding:0 10px;font-size:11px;font-weight:700;color:var(--accent-cream);" onclick="switchPillar('growth','archive')">
+                  📦 Tam Arşivi Aç →
+                </button>
+              </div>
+              <div id="todayCompletedTasksList" style="display:flex;flex-direction:column;gap:6px;"></div>
+            </div>
+          </div>
+
+          <!-- SAĞ BAĞLAMSAL PANEL: GÜNLÜK PLAN ÖZETİ, ALIŞKANLIK ZİNCİRİ & SABAH/AKŞAM RUTİNLERİ -->
+          <aside class="today-right-context-col" id="todayRightContextCol">
+            <!-- KART 1: GÜNLÜK PLAN & VİTAL ÖZET -->
+            <div class="obs-context-card" id="todayContextSummaryCard">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="font-size:12.5px;font-weight:800;color:var(--accent-cream);letter-spacing:0.2px;">GÜNLÜK PLAN & İLERLEME</span>
+                <span id="ctxTodayProgressPct" style="font-size:15px;font-weight:900;color:#10B981;">%0</span>
+              </div>
+              <div class="progress-bar-track" style="height:6px;margin-bottom:6px;">
+                <div class="progress-bar-fill" id="ctxTodayProgressBar" style="width:0%;background:linear-gradient(90deg,var(--accent-cream),#10B981);"></div>
+              </div>
+              <div id="ctxTodayProgressSub" style="font-size:11.5px;color:var(--text-muted);margin-bottom:12px;">0 / 0 Görev Tamamlandı</div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div style="background:rgba(255,255,255,0.025);border:1px solid var(--border-color);border-radius:10px;padding:9px 10px;">
+                  <div style="font-size:10.5px;color:var(--text-muted);font-weight:700;">💧 HİDRASYON</div>
+                  <div id="ctxTodayWaterVal" style="font-size:13.5px;font-weight:800;color:#60A5FA;margin:3px 0 6px;">0.50 / 3.0L</div>
+                  <div style="display:flex;gap:4px;">
+                    <button type="button" class="pin-btn" style="flex:1;height:26px;font-size:10.5px;padding:0;" onclick="changeWaterCount(1);renderTodayWorkspaceContextPanel();">+250ml</button>
+                    <button type="button" class="pin-btn" style="flex:1;height:26px;font-size:10.5px;padding:0;color:#60A5FA;" onclick="changeWaterCount(2);renderTodayWorkspaceContextPanel();">+500ml</button>
+                  </div>
+                </div>
+                <div style="background:rgba(255,255,255,0.025);border:1px solid var(--border-color);border-radius:10px;padding:9px 10px;">
+                  <div style="font-size:10.5px;color:var(--text-muted);font-weight:700;">🥩 BESİN & MAKRO</div>
+                  <div id="ctxTodayProtVal" style="font-size:13.5px;font-weight:800;color:#10B981;margin:3px 0 6px;">0g P • 0 kcal</div>
+                  <div style="display:flex;gap:4px;">
+                    <button type="button" class="pin-btn" style="flex:1;height:26px;font-size:10.5px;padding:0;" onclick="switchPillar('body','food')">+Öğün</button>
+                    <button type="button" class="pin-btn" style="flex:1;height:26px;font-size:10.5px;padding:0;color:var(--accent-cream);" onclick="openBarcodeScannerModal()">Barkod</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- KART 2: GÜNLÜK ALIŞKANLIKLAR & SABAH/AKŞAM RUTİNLERİ -->
+            <div class="obs-context-card" id="todayContextHabitsCard">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="font-size:12.5px;font-weight:800;color:var(--text-main);">🔥 Alışkanlık Zinciri (<b id="ctxTodayHabitSummary" style="color:#10B981;">0/5</b>)</span>
+                <button type="button" class="pin-btn" style="height:24px;padding:0 8px;font-size:10.5px;color:var(--accent-cream);" onclick="promptAddCustomHabit();renderTodayWorkspaceContextPanel();">+ Ekle</button>
+              </div>
+              <div id="ctxTodayHabitsStrip" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;"></div>
+
+              <div style="border-top:1px solid var(--border-color);padding-top:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                  <span style="font-size:12px;font-weight:800;color:var(--text-main);">☀️ Sabah & 🌙 Akşam Rutini</span>
+                  <div style="display:flex;gap:4px;">
+                    <button type="button" class="pin-btn" style="height:24px;padding:0 8px;font-size:10.5px;" onclick="switchDayNightRoutine('morning');renderTodayWorkspaceContextPanel();">Sabah</button>
+                    <button type="button" class="pin-btn" style="height:24px;padding:0 8px;font-size:10.5px;" onclick="switchDayNightRoutine('evening');renderTodayWorkspaceContextPanel();">Akşam</button>
+                  </div>
+                </div>
+                <div id="ctxTodayRoutineList" style="display:flex;flex-direction:column;gap:5px;"></div>
+              </div>
+            </div>
+
+            <!-- KART 3: ODAK & ARAÇLAR HIZLI BAŞLATICI -->
+            <div class="obs-context-card" id="todayContextFocusCard">
+              <div style="font-size:12px;font-weight:800;color:var(--text-muted);margin-bottom:8px;">⚡ HIZLI ODAK & ARAÇLAR</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <button type="button" class="pin-btn" style="height:34px;font-size:11.5px;font-weight:700;justify-content:flex-start;padding:0 10px;" onclick="switchPillar('growth','focus')">⏱️ 25dk Pomodoro</button>
+                <button type="button" class="pin-btn" style="height:34px;font-size:11.5px;font-weight:700;justify-content:flex-start;padding:0 10px;" onclick="openDopamineDetoxModal()">🩸 Monk Detoks</button>
+                <button type="button" class="pin-btn" style="height:34px;font-size:11.5px;font-weight:700;justify-content:flex-start;padding:0 10px;" onclick="switchPillar('today','tools')">🔐 Şifreli Kasa</button>
+                <button type="button" class="pin-btn" style="height:34px;font-size:11.5px;font-weight:700;justify-content:flex-start;padding:0 10px;" onclick="openAiWeeklyReportModal()">📊 AI Karne</button>
+              </div>
+            </div>
+          </aside>
+        </div>
       </section>
 
       <!-- ================================================================== -->
@@ -1212,11 +1357,12 @@
           <span style="font-size:12px;background:rgba(0,0,0,0.28);padding:4px 10px;border-radius:99px;">Bugün 🏠</span>
         </button>
         <!-- GELİŞİM MERKEZİ 4'LÜ ALT SEKME SEÇİCİSİ -->
-        <div class="sub-tab-switcher growth-pillar-switcher" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;">
-          <button type="button" class="sub-tab-btn active" data-growth-sub="goals" style="font-weight:900;font-size:12px;" onclick="switchPillar('growth','goals')">🎯 Hedefler</button>
-          <button type="button" class="sub-tab-btn" data-growth-sub="stats" style="font-weight:900;font-size:12px;" onclick="switchPillar('growth','focus')">⏱️ Odak & Karne</button>
-          <button type="button" class="sub-tab-btn" data-growth-sub="archive" style="font-weight:900;font-size:12px;" onclick="switchPillar('growth','archive')">📦 Arşiv</button>
-          <button type="button" class="sub-tab-btn" style="font-weight:900;font-size:12px;" onclick="openDopamineDetoxModal()">🩸 Detoks</button>
+        <div class="sub-tab-switcher growth-pillar-switcher" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px;">
+          <button type="button" class="sub-tab-btn active" data-growth-sub="goals" style="font-weight:800;font-size:12px;" onclick="switchPillar('growth','goals')">🎯 Hedefler</button>
+          <button type="button" class="sub-tab-btn" data-growth-sub="stats" style="font-weight:800;font-size:12px;" onclick="switchPillar('growth','focus')">⏱️ Odak & İstatistik</button>
+          <button type="button" class="sub-tab-btn" data-growth-sub="archive" style="font-weight:800;font-size:12px;" onclick="switchPillar('growth','archive')">📦 Arşiv</button>
+          <button type="button" class="sub-tab-btn" style="font-weight:800;font-size:12px;" onclick="switchPillar('today','tools')">🧰 Araçlar & Kasa</button>
+          <button type="button" class="sub-tab-btn" style="font-weight:800;font-size:12px;" onclick="openDopamineDetoxModal()">🩸 Detoks</button>
         </div>
         <div class="task-card" style="background:linear-gradient(135deg, rgba(216,208,248,0.16), rgba(200,244,236,0.1));margin-bottom:14px;">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
@@ -1715,19 +1861,27 @@
   <div class="bottom-nav-wrap">
     <nav class="bottom-nav" style="grid-template-columns:repeat(4,1fr) !important;max-width:540px;">
       <button class="nav-item active" id="navTasks" onclick="switchPillar('today')">
-        <span class="nav-icon">📋</span>
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
+        </span>
         <span>Bugün</span>
       </button>
       <button class="nav-item" id="navFoodQuick" onclick="switchPillar('body')">
-        <span class="nav-icon">💪</span>
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </span>
         <span>Beden</span>
       </button>
       <button class="nav-item" id="navGoals" onclick="switchPillar('growth')">
-        <span class="nav-icon">🎯</span>
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        </span>
         <span>Gelişim</span>
       </button>
       <button class="nav-item" id="navSocial" onclick="switchPillar('social')">
-        <span class="nav-icon">👥</span>
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </span>
         <span>Sosyal</span>
       </button>
     </nav>

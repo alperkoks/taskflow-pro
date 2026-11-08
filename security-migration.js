@@ -146,6 +146,8 @@
         return {
             version: 2,
             kdf: 'PBKDF2-HMAC-SHA256',
+            algo: 'PBKDF2-HMAC-SHA256',
+            algorithm: 'PBKDF2-HMAC-SHA256',
             iterations: iterations,
             saltB64: derived.saltB64,
             verifierB64: derived.verifierB64,
@@ -194,6 +196,7 @@
             utf8Encode(plaintextStr)
         );
 
+        const ctB64 = bytesToBase64(new Uint8Array(cipherBuffer));
         return {
             v: 2,
             alg: 'AES-256-GCM',
@@ -201,7 +204,8 @@
             iter: iterations,
             salt: saltB64,
             iv: bytesToBase64(ivBytes),
-            ct: bytesToBase64(new Uint8Array(cipherBuffer)),
+            ct: ctB64,
+            ciphertext: ctB64,
             ts: Date.now()
         };
     }

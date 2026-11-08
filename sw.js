@@ -1,10 +1,12 @@
-const CACHE_NAME = 'taskflow-pro-live-v25';
+const CACHE_NAME = 'taskflow-pro-obsidian-v26.2';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=25',
-  './app.js?v=25',
-  './manifest.json?v=25',
+  './styles.css?v=26',
+  './security-migration.js?v=26',
+  './app.js?v=26',
+  './fit_recipes_data.js?v=26',
+  './manifest.json?v=26',
   './icon-192.png',
   './icon-512.png'
 ];
