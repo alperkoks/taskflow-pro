@@ -8036,6 +8036,8 @@ function renderFriendsLeaderboard() {
       <div class="leaderboard-score">${item.score} Puan</div>
     </div>
   `).join('');
+
+  if (typeof renderDuoStreakBanner === 'function') renderDuoStreakBanner();
 }
 
 // 🔥 ARKADAŞLA ORTAK 7 GÜNLÜK DÜELLO / CHALLENGE SİSTEMİ
@@ -10609,3 +10611,837 @@ function closeRpgLevelUpModal() {
   if (modal) modal.classList.add('hidden');
 }
 window.closeRpgLevelUpModal = closeRpgLevelUpModal;
+
+
+// ============================================================================
+// 🔍 ULTRA SADE ARAMA ÇUBUĞU AÇ/KAPAT (MİNİMAL ARAYÜZ)
+// ============================================================================
+function toggleMinimalSearchBar() {
+  const wrap = document.getElementById('minimalSearchBarWrap');
+  if (!wrap) return;
+  const isHidden = wrap.style.display === 'none' || !wrap.style.display;
+  wrap.style.display = isHidden ? 'flex' : 'none';
+  if (isHidden) {
+    const inp = document.getElementById('searchInput');
+    if (inp) setTimeout(() => inp.focus(), 60);
+  }
+}
+window.toggleMinimalSearchBar = toggleMinimalSearchBar;
+
+
+// ============================================================================
+// 📱 7. CANLI KİLİT EKRANI / DYNAMIC ISLAND & WIDGET SİSTEMİ (LIVE ACTIVITIES)
+// ============================================================================
+function toggleDynamicIslandSheet(forceState) {
+  const sheet = document.getElementById('dynamicIslandExpandedCard');
+  if (!sheet) return;
+  const shouldOpen = typeof forceState === 'boolean' ? forceState : sheet.classList.contains('hidden');
+  if (shouldOpen) {
+    updateDynamicIslandLive();
+    sheet.classList.remove('hidden');
+  } else {
+    sheet.classList.add('hidden');
+  }
+}
+window.toggleDynamicIslandSheet = toggleDynamicIslandSheet;
+
+function updateDynamicIslandLive() {
+  try {
+    const waterGlasses = Number(appData.waterCount) || 0;
+    const waterLiters = (waterGlasses * 0.25).toFixed(1);
+    const waterTargetL = ((Number(appData.waterTarget) || 12) * 0.25).toFixed(1);
+
+    // Calculate today's protein from dailyFoods or proteinGrams
+    const todayISO = typeof getTodayISO === 'function' ? getTodayISO() : new Date().toISOString().slice(0, 10);
+    const todayFoods = (appData.dailyFoods && Array.isArray(appData.dailyFoods[todayISO])) ? appData.dailyFoods[todayISO] : [];
+    const foodProtSum = todayFoods.reduce((acc, item) => acc + (Number(item.prot) || 0), 0);
+    const totalProt = Math.max(Number(appData.proteinGrams) || 0, Math.round(foodProtSum));
+
+    // Calculate today's task completion %
+    const allTasks = Array.isArray(appData.tasks) ? appData.tasks : [];
+    const todayTasks = allTasks.filter(t => !t.dueDate || t.dueDate === todayISO);
+    const doneCount = todayTasks.filter(t => t.completed).length;
+    const totalCount = todayTasks.length;
+    const taskPct = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
+
+    // Duo streak count
+    const duoDays = (appData.duoStreak && Number(appData.duoStreak.days)) ? Number(appData.duoStreak.days) : Math.max(1, Number(appData.streak) || 1);
+
+    // 1. Update 3'lü Hızlı Özet Kapsülü on Home Screen
+    const miniWaterEl = document.getElementById('miniWaterQuickText');
+    if (miniWaterEl) miniWaterEl.textContent = `${waterLiters}L`;
+
+    const miniFoodEl = document.getElementById('miniFoodQuickSubText');
+    if (miniFoodEl) miniFoodEl.textContent = `${totalProt}g P`;
+
+    const miniTaskEl = document.getElementById('dailyProgressMiniBadge');
+    if (miniTaskEl) miniTaskEl.textContent = `%${taskPct}`;
+
+    // 2. Update Dynamic Island Top Pill
+    const diMetricsEl = document.getElementById('diSummaryMetrics');
+    if (diMetricsEl) {
+      diMetricsEl.textContent = `💧 ${waterLiters}L • 🥩 ${totalProt}g • ⚡ %${taskPct}`;
+    }
+
+    const diTimerBadge = document.getElementById('diActiveTimerBadge');
+    const diStatusLabel = document.getElementById('diStatusLabel');
+    if (diTimerBadge && diStatusLabel) {
+      if (typeof detoxRemainingSeconds === 'number' && detoxTimerInterval && detoxRemainingSeconds > 0) {
+        const dm = String(Math.floor(detoxRemainingSeconds / 60)).padStart(2, '0');
+        const ds = String(detoxRemainingSeconds % 60).padStart(2, '0');
+        diTimerBadge.style.display = 'inline-block';
+        diTimerBadge.textContent = `🩸 ${dm}:${ds}`;
+        diStatusLabel.textContent = 'Detoks Modu';
+      } else if (typeof workoutRestRemainingSeconds === 'number' && workoutRestTimerInterval && workoutRestRemainingSeconds > 0) {
+        const rm = String(Math.floor(workoutRestRemainingSeconds / 60)).padStart(2, '0');
+        const rs = String(workoutRestRemainingSeconds % 60).padStart(2, '0');
+        diTimerBadge.style.display = 'inline-block';
+        diTimerBadge.textContent = `⏱️ ${rm}:${rs}`;
+        diStatusLabel.textContent = 'Dinlenme';
+      } else {
+        diTimerBadge.style.display = 'none';
+        diStatusLabel.textContent = `🔥 ${duoDays}G Seri`;
+      }
+    }
+
+    // 3. Update Expanded Dynamic Island Widget Preview
+    const wWater = document.getElementById('diWidgetWaterVal');
+    if (wWater) wWater.textContent = `${waterLiters} / ${waterTargetL}L`;
+
+    const wProt = document.getElementById('diWidgetProtVal');
+    if (wProt) wProt.textContent = `${totalProt}g`;
+
+    const wTask = document.getElementById('diWidgetTaskVal');
+    if (wTask) wTask.textContent = `%${taskPct} (${doneCount}/${totalCount})`;
+
+    const wDuo = document.getElementById('diWidgetDuoFlame');
+    if (wDuo) wDuo.textContent = `🔥 ${duoDays}G Duo`;
+
+    const nextTaskEl = document.getElementById('diWidgetNextTaskText');
+    if (nextTaskEl) {
+      const nextPending = todayTasks.find(t => !t.completed);
+      nextTaskEl.textContent = nextPending ? `🎯 Sıradaki: ${nextPending.title}` : '✅ Bugünün Tüm Görevleri Tamamlandı!';
+    }
+  } catch (e) {}
+}
+window.updateDynamicIslandLive = updateDynamicIslandLive;
+
+function pushLiveLockScreenNotification() {
+  updateDynamicIslandLive();
+  const waterGlasses = Number(appData.waterCount) || 0;
+  const waterLiters = (waterGlasses * 0.25).toFixed(1);
+  const todayISO = typeof getTodayISO === 'function' ? getTodayISO() : new Date().toISOString().slice(0, 10);
+  const todayFoods = (appData.dailyFoods && Array.isArray(appData.dailyFoods[todayISO])) ? appData.dailyFoods[todayISO] : [];
+  const totalProt = Math.max(Number(appData.proteinGrams) || 0, Math.round(todayFoods.reduce((a, b) => a + (Number(b.prot) || 0), 0)));
+  const allTasks = Array.isArray(appData.tasks) ? appData.tasks : [];
+  const pending = allTasks.filter(t => (!t.dueDate || t.dueDate === todayISO) && !t.completed);
+  const nextTitle = pending.length > 0 ? pending[0].title : 'Tüm görevler tamamlandı!';
+
+  const bodyText = `💧 Su: ${waterLiters}L | 🥩 Protein: ${totalProt}g | 📋 Kalan: ${pending.length} Görev\n🎯 Odak: ${nextTitle}`;
+
+  if (!('Notification' in window)) {
+    if (typeof spawnFloatingRewardToast === 'function') spawnFloatingRewardToast('📱 Canlı Özet Kilit Ekranı Widget\'ı Güncellendi!');
+    return;
+  }
+
+  if (Notification.permission === 'granted') {
+    try {
+      new Notification('⚡ TaskFlow+ Canlı Kilit Ekranı Özeti', {
+        body: bodyText,
+        tag: 'taskflow-live-activity',
+        renotify: true
+      });
+    } catch (e) {}
+    if (typeof spawnFloatingRewardToast === 'function') spawnFloatingRewardToast('📲 Kilit Ekranı Canlı Bildirimi Sabitlendi!');
+  } else {
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') {
+        try {
+          new Notification('⚡ TaskFlow+ Canlı Kilit Ekranı Özeti', {
+            body: bodyText,
+            tag: 'taskflow-live-activity'
+          });
+        } catch (e) {}
+        if (typeof spawnFloatingRewardToast === 'function') spawnFloatingRewardToast('📲 Kilit Ekranı Canlı Bildirimi Aktif!');
+      } else {
+        if (typeof spawnFloatingRewardToast === 'function') spawnFloatingRewardToast('📱 Dynamic Island Canlı Widget Aktif!');
+      }
+    });
+  }
+}
+window.pushLiveLockScreenNotification = pushLiveLockScreenNotification;
+
+
+// ============================================================================
+// 🩸 8. DOPAMİN & ODAK DETOKSU MODU (MONK MODE + ZEN SES FREKANSI)
+// ============================================================================
+let detoxTimerInterval = null;
+let detoxRemainingSeconds = 25 * 60;
+let detoxSelectedMinutes = 25;
+let detoxAudioCtx = null;
+let detoxAudioOsc = null;
+let detoxAudioGain = null;
+let isDetoxZenPlaying = false;
+
+function openDopamineDetoxModal() {
+  const modal = document.getElementById('dopamineDetoxModal');
+  if (!modal) return;
+
+  const focusInp = document.getElementById('detoxFocusTaskInput');
+  if (focusInp && !focusInp.value.trim()) {
+    const todayISO = typeof getTodayISO === 'function' ? getTodayISO() : new Date().toISOString().slice(0, 10);
+    const pending = (Array.isArray(appData.tasks) ? appData.tasks : []).find(t => (!t.dueDate || t.dueDate === todayISO) && !t.completed);
+    focusInp.value = pending ? pending.title : 'Derin Odak & Dopamin Detoksu';
+  }
+
+  updateDetoxTimerUI();
+  modal.classList.remove('hidden');
+}
+window.openDopamineDetoxModal = openDopamineDetoxModal;
+
+function closeDopamineDetoxModal() {
+  const modal = document.getElementById('dopamineDetoxModal');
+  if (modal) modal.classList.add('hidden');
+  stopDetoxZenAudio();
+}
+window.closeDopamineDetoxModal = closeDopamineDetoxModal;
+
+function setDetoxDurationMinutes(mins) {
+  if (detoxTimerInterval) {
+    clearInterval(detoxTimerInterval);
+    detoxTimerInterval = null;
+  }
+  detoxSelectedMinutes = mins;
+  detoxRemainingSeconds = mins * 60;
+
+  document.querySelectorAll('.detox-dur-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.includes(String(mins)));
+  });
+
+  const circle = document.getElementById('detoxBreathingCircle');
+  if (circle) circle.classList.remove('running');
+
+  const btn = document.getElementById('detoxStartStopBtn');
+  if (btn) btn.textContent = '▶️ Detoks Sayacını Başlat';
+
+  updateDetoxTimerUI();
+  updateDynamicIslandLive();
+}
+window.setDetoxDurationMinutes = setDetoxDurationMinutes;
+
+function updateDetoxTimerUI() {
+  const disp = document.getElementById('detoxTimerDisplay');
+  if (!disp) return;
+  const m = Math.floor(detoxRemainingSeconds / 60);
+  const s = detoxRemainingSeconds % 60;
+  disp.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function toggleDopamineDetoxTimer() {
+  const btn = document.getElementById('detoxStartStopBtn');
+  const circle = document.getElementById('detoxBreathingCircle');
+  const sub = document.getElementById('detoxStatusSubtext');
+
+  if (detoxTimerInterval) {
+    clearInterval(detoxTimerInterval);
+    detoxTimerInterval = null;
+    if (btn) btn.textContent = '▶️ Devam Et';
+    if (circle) circle.classList.remove('running');
+    if (sub) sub.textContent = 'Duraklatıldı';
+    updateDynamicIslandLive();
+    return;
+  }
+
+  if (detoxRemainingSeconds <= 0) {
+    detoxRemainingSeconds = detoxSelectedMinutes * 60;
+  }
+
+  if (btn) btn.textContent = '⏸️ Duraklat';
+  if (circle) circle.classList.add('running');
+  if (sub) sub.textContent = 'Savaş / Monk Modu Aktif • Dikkat Dağıtıcılar Kapalı';
+
+  detoxTimerInterval = setInterval(() => {
+    detoxRemainingSeconds--;
+    updateDetoxTimerUI();
+    updateDynamicIslandLive();
+
+    if (detoxRemainingSeconds <= 0) {
+      clearInterval(detoxTimerInterval);
+      detoxTimerInterval = null;
+      if (circle) circle.classList.remove('running');
+      if (btn) btn.textContent = '✅ Tamamlandı! Yeniden Başlat';
+      stopDetoxZenAudio();
+      playRestTimerBeep();
+
+      appData.xp = (Number(appData.xp) || 0) + 100;
+      if (typeof saveProfileData === 'function') saveProfileData();
+      if (typeof launchLuxuryConfetti === 'function') launchLuxuryConfetti();
+      if (typeof spawnFloatingRewardToast === 'function') {
+        spawnFloatingRewardToast('🩸 Dopamin Detoksu Tamamlandı! +100 XP Kazandın!');
+      }
+    }
+  }, 1000);
+}
+window.toggleDopamineDetoxTimer = toggleDopamineDetoxTimer;
+
+function toggleDetoxZenAudio() {
+  if (isDetoxZenPlaying) {
+    stopDetoxZenAudio();
+  } else {
+    startDetoxZenAudio();
+  }
+}
+window.toggleDetoxZenAudio = toggleDetoxZenAudio;
+
+function startDetoxZenAudio() {
+  try {
+    detoxAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    detoxAudioOsc = detoxAudioCtx.createOscillator();
+    const osc2 = detoxAudioCtx.createOscillator();
+    detoxAudioGain = detoxAudioCtx.createGain();
+
+    // 432Hz + 436Hz calming binaural alpha wave
+    detoxAudioOsc.type = 'sine';
+    detoxAudioOsc.frequency.setValueAtTime(216, detoxAudioCtx.currentTime);
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(220, detoxAudioCtx.currentTime);
+
+    detoxAudioGain.gain.setValueAtTime(0.04, detoxAudioCtx.currentTime);
+    detoxAudioOsc.connect(detoxAudioGain);
+    osc2.connect(detoxAudioGain);
+    detoxAudioGain.connect(detoxAudioCtx.destination);
+
+    detoxAudioOsc.start();
+    osc2.start();
+    detoxAudioOsc._secondOsc = osc2;
+    isDetoxZenPlaying = true;
+
+    const btn = document.getElementById('detoxAmbientSoundBtn');
+    if (btn) {
+      btn.textContent = '🎧 Zen Sesi: Açık';
+      btn.style.borderColor = '#ffffff';
+      btn.style.color = '#ffffff';
+    }
+  } catch (e) {}
+}
+
+function stopDetoxZenAudio() {
+  try {
+    if (detoxAudioOsc) {
+      detoxAudioOsc.stop();
+      if (detoxAudioOsc._secondOsc) detoxAudioOsc._secondOsc.stop();
+      detoxAudioOsc.disconnect();
+      detoxAudioOsc = null;
+    }
+    if (detoxAudioCtx) {
+      detoxAudioCtx.close();
+      detoxAudioCtx = null;
+    }
+  } catch (e) {}
+  isDetoxZenPlaying = false;
+  const btn = document.getElementById('detoxAmbientSoundBtn');
+  if (btn) {
+    btn.textContent = '🎧 Zen Sesi: Kapalı';
+    btn.style.borderColor = '#333';
+    btn.style.color = '#ccc';
+  }
+}
+
+
+// ============================================================================
+// 📊 9. YAPAY ZEKA HAFTALIK PERFORMANS KARNESİ & SESLİ DEĞERLENDİRME
+// ============================================================================
+let lastGeneratedAiReportSpeechText = '';
+
+function generateAiWeeklyReportData() {
+  const allTasks = Array.isArray(appData.tasks) ? appData.tasks : [];
+  const completedTasks = allTasks.filter(t => t.completed).length;
+  const totalTasks = allTasks.length;
+  const taskRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 80;
+
+  const waterGlasses = Number(appData.waterCount) || 0;
+  const waterLiters = (waterGlasses * 0.25).toFixed(1);
+  const waterTargetL = ((Number(appData.waterTarget) || 12) * 0.25).toFixed(1);
+
+  const todayISO = typeof getTodayISO === 'function' ? getTodayISO() : new Date().toISOString().slice(0, 10);
+  const todayFoods = (appData.dailyFoods && Array.isArray(appData.dailyFoods[todayISO])) ? appData.dailyFoods[todayISO] : [];
+  const totalProt = Math.max(Number(appData.proteinGrams) || 0, Math.round(todayFoods.reduce((a, b) => a + (Number(b.prot) || 0), 0)));
+
+  const streak = Math.max(1, Number(appData.streak) || 1);
+
+  // Calculate overall score (0-100)
+  const waterScore = Math.min(100, Math.round((waterGlasses / Math.max(1, Number(appData.waterTarget) || 12)) * 100));
+  const protScore = Math.min(100, Math.round((totalProt / 120) * 100));
+  const overallScore = Math.min(100, Math.max(55, Math.round(taskRate * 0.45 + waterScore * 0.25 + protScore * 0.2 + Math.min(100, streak * 15) * 0.1)));
+
+  let grade = 'A';
+  let headline = 'Güçlü İlerleme & Yüksek Disiplin!';
+  if (overallScore >= 90) {
+    grade = 'A+';
+    headline = 'Şampiyon Seviyesi! Olağanüstü Disiplin 🏆';
+  } else if (overallScore >= 80) {
+    grade = 'A';
+    headline = 'Harika Tempo! Hedeflerine Çok Yakınsın 🔥';
+  } else if (overallScore >= 70) {
+    grade = 'B+';
+    headline = 'İstikrarlı Gidişat, Küçük Dokunuşlarla Zirveye! ⚡';
+  } else {
+    grade = 'B';
+    headline = 'Potansiyelin Yüksek! Vitesi Artırma Zamanı 💪';
+  }
+
+  const userName = appData.profileName || appData.username || 'Şampiyon';
+  const strengthText = taskRate >= 70
+    ? `Görev bitirme oranın %${taskRate} ile oldukça güçlü (${completedTasks} görev tamamlandı).`
+    : `Toplamda ${completedTasks} görevi başarıyla bitirdin, ancak bekleyen görevleri ertelememek için günün ilk saatlerinde 25 dakikalık Dopamin Detoksu modunu kullanmalısın.`;
+
+  const nutritionText = totalProt >= 100
+    ? `Günlük protein alımın ${totalProt} gram ile kas gelişimi ve tokluk hedefin için mükemmel seviyede.`
+    : `Bugünkü protein kaydın ${totalProt} gram; akşam öğününe yüksek proteinli bir besin veya hızlı tarif ekleyerek 120 gram barajını aşmanı öneririm.`;
+
+  const waterAdvice = Number(waterLiters) >= 2.0
+    ? `Su tüketimin ${waterLiters} litre ile odaklanmanı doğrudan destekliyor.`
+    : `Su tüketimin şu an ${waterLiters} litre; zihinsel performans düşüşü yaşamamak için bugün hedef ${waterTargetL} litreye ulaşmalısın.`;
+
+  const coachParagraph = `Merhaba ${userName}! Bu haftaki genel performans notun ${grade} (${overallScore} puan). ${strengthText} ${nutritionText} ${waterAdvice} ${streak} günlük disiplin serini bozmadan devam et!`;
+
+  lastGeneratedAiReportSpeechText = coachParagraph;
+
+  return {
+    grade,
+    headline,
+    overallScore,
+    taskRate,
+    completedTasks,
+    waterLiters,
+    waterTargetL,
+    totalProt,
+    streak,
+    coachParagraph
+  };
+}
+
+function openAiWeeklyReportModal() {
+  const modal = document.getElementById('aiWeeklyReportModal');
+  if (!modal) return;
+
+  const data = generateAiWeeklyReportData();
+
+  const gradeEl = document.getElementById('aiReportGradeCircle');
+  if (gradeEl) gradeEl.textContent = data.grade;
+
+  const headEl = document.getElementById('aiReportHeadline');
+  if (headEl) headEl.textContent = data.headline;
+
+  const subEl = document.getElementById('aiReportSubline');
+  if (subEl) subEl.textContent = `Haftalık Disiplin & Odak Puanın: ${data.overallScore} / 100`;
+
+  const taskEl = document.getElementById('aiReportTaskRate');
+  if (taskEl) taskEl.textContent = `%${data.taskRate} (${data.completedTasks} Biten)`;
+
+  const waterEl = document.getElementById('aiReportWaterAvg');
+  if (waterEl) waterEl.textContent = `${data.waterLiters} / ${data.waterTargetL} L`;
+
+  const protEl = document.getElementById('aiReportProtAvg');
+  if (protEl) protEl.textContent = `${data.totalProt}g Protein`;
+
+  const streakEl = document.getElementById('aiReportStreakVal');
+  if (streakEl) streakEl.textContent = `🔥 ${data.streak} Gün Seri`;
+
+  const paraEl = document.getElementById('aiReportCoachParagraph');
+  if (paraEl) paraEl.textContent = data.coachParagraph;
+
+  modal.classList.remove('hidden');
+}
+window.openAiWeeklyReportModal = openAiWeeklyReportModal;
+
+function closeAiWeeklyReportModal() {
+  const modal = document.getElementById('aiWeeklyReportModal');
+  if (modal) modal.classList.add('hidden');
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  const btn = document.getElementById('aiReportSpeakBtn');
+  if (btn) btn.textContent = '🔊 Karneyi Sesli Dinle (AI Koç)';
+}
+window.closeAiWeeklyReportModal = closeAiWeeklyReportModal;
+
+function speakAiWeeklyReport() {
+  if (!('speechSynthesis' in window)) {
+    if (typeof spawnFloatingRewardToast === 'function') spawnFloatingRewardToast('⚠️ Cihazınız sesli okumayı desteklemiyor.');
+    return;
+  }
+
+  const btn = document.getElementById('aiReportSpeakBtn');
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    if (btn) btn.textContent = '🔊 Karneyi Sesli Dinle (AI Koç)';
+    return;
+  }
+
+  if (!lastGeneratedAiReportSpeechText) generateAiWeeklyReportData();
+
+  const utter = new SpeechSynthesisUtterance(lastGeneratedAiReportSpeechText);
+  utter.lang = 'tr-TR';
+  utter.rate = 1.02;
+  utter.onstart = () => {
+    if (btn) btn.textContent = '⏹️ Sesli Okumayı Durdur';
+  };
+  utter.onend = () => {
+    if (btn) btn.textContent = '🔊 Karneyi Sesli Dinle (AI Koç)';
+  };
+  utter.onerror = () => {
+    if (btn) btn.textContent = '🔊 Karneyi Sesli Dinle (AI Koç)';
+  };
+
+  window.speechSynthesis.speak(utter);
+}
+window.speakAiWeeklyReport = speakAiWeeklyReport;
+
+function shareAiWeeklyReportOnWP() {
+  const data = generateAiWeeklyReportData();
+  const msg = `📊 *TaskFlow+ AI Haftalık Performans Karnem*\n\n🏆 *Genel Notum:* ${data.grade} (${data.overallScore}/100)\n✅ *Görev Başarısı:* %${data.taskRate}\n💧 *Su:* ${data.waterLiters}L\n🥩 *Protein:* ${data.totalProt}g\n🔥 *Seri:* ${data.streak} Gün\n\n🧠 *AI Koç Özeti:* "${data.coachParagraph}"`;
+  if (typeof openWhatsAppOrShareText === 'function') openWhatsAppOrShareText(msg);
+}
+window.shareAiWeeklyReportOnWP = shareAiWeeklyReportOnWP;
+
+
+// ============================================================================
+// 👥 10. ARKADAŞLA ORTAK "ZİNCİRİ KIRMA" (STREAKS DUO) SİSTEMİ
+// ============================================================================
+function ensureDuoStreakState() {
+  if (!appData.duoStreak || typeof appData.duoStreak !== 'object') {
+    appData.duoStreak = {
+      days: Math.max(1, Number(appData.streak) || 4),
+      lastIgnitedDate: '',
+      myDoneToday: true,
+      partnerDoneToday: false
+    };
+  }
+  return appData.duoStreak;
+}
+
+function renderDuoStreakBanner() {
+  const duo = ensureDuoStreakState();
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+  const activeFriend = friends[typeof activeSelectedFriendIdx === 'number' ? activeSelectedFriendIdx : 0] || friends[0];
+  const partnerName = activeFriend ? (activeFriend.displayName || activeFriend.username || 'Partnerin') : 'Partnerin';
+
+  const badgeEl = document.getElementById('duoStreakCountBadge');
+  if (badgeEl) badgeEl.textContent = `🔥 ${duo.days} Gün Duo`;
+
+  const myNameEl = document.getElementById('duoMyNameLabel');
+  if (myNameEl) myNameEl.textContent = appData.profileName || appData.username || 'Sen';
+
+  const partnerNameEl = document.getElementById('duoPartnerNameLabel');
+  if (partnerNameEl) partnerNameEl.textContent = partnerName;
+
+  const todayISO = typeof getTodayISO === 'function' ? getTodayISO() : new Date().toISOString().slice(0, 10);
+  const isIgnitedToday = duo.lastIgnitedDate === todayISO;
+
+  const myStatEl = document.getElementById('duoMyStatusText');
+  if (myStatEl) {
+    myStatEl.textContent = isIgnitedToday ? '✅ Bugün Ateşlendi' : '🔥 Ateşlemeye Hazır';
+    myStatEl.style.color = '#95de64';
+  }
+
+  const partnerStatEl = document.getElementById('duoPartnerStatusText');
+  if (partnerStatEl) {
+    partnerStatEl.textContent = isIgnitedToday ? '✅ Partner Tamamladı' : '⏳ Partner Bekleniyor';
+    partnerStatEl.style.color = isIgnitedToday ? '#95de64' : '#ffc069';
+  }
+
+  updateDynamicIslandLive();
+}
+window.renderDuoStreakBanner = renderDuoStreakBanner;
+
+function igniteDuoStreakToday() {
+  const duo = ensureDuoStreakState();
+  const todayISO = typeof getTodayISO === 'function' ? getTodayISO() : new Date().toISOString().slice(0, 10);
+
+  if (duo.lastIgnitedDate === todayISO) {
+    if (typeof spawnFloatingRewardToast === 'function') {
+      spawnFloatingRewardToast(`🔥 Bugünkü Ortak Seri Zaten Ateşlendi! (${duo.days} Gün Duo)`);
+    }
+    return;
+  }
+
+  duo.days = (Number(duo.days) || 1) + 1;
+  duo.lastIgnitedDate = todayISO;
+  duo.myDoneToday = true;
+  duo.partnerDoneToday = true;
+
+  if (typeof saveProfileData === 'function') saveProfileData();
+  renderDuoStreakBanner();
+  if (typeof launchLuxuryConfetti === 'function') launchLuxuryConfetti();
+  if (typeof spawnFloatingRewardToast === 'function') {
+    spawnFloatingRewardToast(`🔥 Ortak Seri Büyüdü! ${duo.days} Gün Streaks Duo! (+50 XP)`);
+  }
+  if (typeof appendMessageToActiveFriend === 'function') {
+    appendMessageToActiveFriend(`🔥 Bugünkü görevlerimi tamamladım ve ortak "Zinciri Kırma" serimizi ${duo.days}. güne taşıdım! Zinciri sakın kırma! 💪`);
+  }
+}
+window.igniteDuoStreakToday = igniteDuoStreakToday;
+
+function nudgeFriendForDuoStreak() {
+  const duo = ensureDuoStreakState();
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+  const activeFriend = friends[typeof activeSelectedFriendIdx === 'number' ? activeSelectedFriendIdx : 0] || friends[0];
+  const partnerName = activeFriend ? (activeFriend.displayName || activeFriend.username || 'Dostum') : 'Dostum';
+
+  const msg = `⚡ Hey ${partnerName}! 🔥 ${duo.days} günlük ortak TaskFlow+ disiplin serimizin (Streaks Duo) sönmemesi için bugünkü görevlerini ve su hedefini tamamlamayı unutma! Zinciri kırmayalım! 💪`;
+  if (typeof appendMessageToActiveFriend === 'function') {
+    appendMessageToActiveFriend(msg);
+  }
+  if (typeof spawnFloatingRewardToast === 'function') {
+    spawnFloatingRewardToast(`⚡ ${partnerName} dürtüldü! Sohbete mesaj eklendi.`);
+  }
+}
+window.nudgeFriendForDuoStreak = nudgeFriendForDuoStreak;
+
+
+// ============================================================================
+// 🎯 11. AKILLI BARKOD OKUYUCU & TÜRKİYE MARKET ÜRÜNLERİ VERİTABANI
+// ============================================================================
+const TURKISH_FITNESS_BARCODE_PRODUCTS = [
+  { code: '8690565018815', name: 'Pınar Protein Süt (Kakaolu / Vanilyalı 500ml)', grams: 500, kcal: 250, prot: 35, carb: 20, fat: 2.5 },
+  { code: '8690526014212', name: 'Sütaş Süzme Peynir (100g Porsiyon)', grams: 100, kcal: 217, prot: 15, carb: 3.8, fat: 16 },
+  { code: '8690572001105', name: 'Dardanel Ton Balığı (Poşet / Zeytinyağlı Süzülmüş 80g)', grams: 80, kcal: 156, prot: 21, carb: 0, fat: 8 },
+  { code: '8690526098120', name: 'Eti Lifalif Yulaf Ezmesi (1 Kase / 60g)', grams: 60, kcal: 219, prot: 7.6, carb: 36, fat: 4.2 },
+  { code: '8690504055105', name: 'İçim Fit Yüksek Proteinli Kahveli Süt (500ml)', grams: 500, kcal: 245, prot: 30, carb: 24, fat: 2.5 },
+  { code: '8691234500112', name: 'Züber Yüksek Proteinli Fıstıklı Bar (45g)', grams: 45, kcal: 172, prot: 10, carb: 16, fat: 7.5 },
+  { code: '8690698002109', name: 'Altınkılıç Sade Kefir (1 Şişe / 250ml)', grams: 250, kcal: 115, prot: 7.5, carb: 10, fat: 5 },
+  { code: '8697435900115', name: 'Hardline Whey 3Matrix Protein (1 Ölçek / 30g)', grams: 30, kcal: 118, prot: 24, carb: 2.1, fat: 1.4 },
+  { code: '8690766010221', name: 'Uno Denge Tam Buğday Ekmeği (2 Dilim / 76g)', grams: 76, kcal: 184, prot: 7.8, carb: 31, fat: 2.4 },
+  { code: '8690000112233', name: 'Tavuk Göğsü Bonfile (Market Paket 200g Pişmiş)', grams: 200, kcal: 330, prot: 62, carb: 0, fat: 7 }
+];
+
+let barcodeVideoStream = null;
+let barcodeScanLoopId = null;
+
+function openBarcodeScannerModal() {
+  const modal = document.getElementById('barcodeScannerModal');
+  if (!modal) return;
+  renderPopularBarcodeProducts();
+  modal.classList.remove('hidden');
+}
+window.openBarcodeScannerModal = openBarcodeScannerModal;
+
+function closeBarcodeScannerModal() {
+  stopBarcodeCameraStream();
+  const modal = document.getElementById('barcodeScannerModal');
+  if (modal) modal.classList.add('hidden');
+}
+window.closeBarcodeScannerModal = closeBarcodeScannerModal;
+
+function renderPopularBarcodeProducts() {
+  const grid = document.getElementById('popularBarcodeProductsGrid');
+  if (!grid) return;
+
+  grid.innerHTML = TURKISH_FITNESS_BARCODE_PRODUCTS.map((item, idx) => `
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between;gap:6px;">
+      <div>
+        <div style="font-size:11.5px;font-weight:900;color:var(--text-main);line-height:1.3;">${escapeHtml(item.name)}</div>
+        <div style="font-size:10.5px;color:#95de64;font-weight:800;margin-top:3px;">🔥 ${item.kcal} kcal • 🥩 ${item.prot}g P</div>
+        <div style="font-size:9.5px;color:var(--text-muted);">Barkod: ${item.code}</div>
+      </div>
+      <button type="button" class="btn-cream" style="width:100%;height:30px;font-size:11px;font-weight:900;background:rgba(149,222,100,0.2);color:#95de64;border:1px solid rgba(149,222,100,0.4);" onclick="quickAddBarcodeProductToToday(${idx})">
+        ➕ Bugüne Ekle
+      </button>
+    </div>
+  `).join('');
+}
+
+function quickAddBarcodeProductToToday(idx) {
+  const item = TURKISH_FITNESS_BARCODE_PRODUCTS[idx];
+  if (!item) return;
+  addScannedProductObjectToLog(item);
+}
+window.quickAddBarcodeProductToToday = quickAddBarcodeProductToToday;
+
+function addScannedProductObjectToLog(item) {
+  const todayISO = typeof getTodayISO === 'function' ? getTodayISO() : new Date().toISOString().slice(0, 10);
+  if (!appData.dailyFoods || typeof appData.dailyFoods !== 'object') appData.dailyFoods = {};
+  if (!Array.isArray(appData.dailyFoods[todayISO])) appData.dailyFoods[todayISO] = [];
+
+  appData.dailyFoods[todayISO].unshift({
+    id: 'bf_' + Date.now(),
+    name: item.name,
+    grams: Number(item.grams) || 100,
+    kcal: Math.round(Number(item.kcal) || 0),
+    prot: Math.round(Number(item.prot) || 0),
+    carb: Math.round(Number(item.carb) || 0),
+    fat: Math.round(Number(item.fat) || 0),
+    time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+  });
+
+  appData.proteinGrams = (Number(appData.proteinGrams) || 0) + Math.round(Number(item.prot) || 0);
+
+  if (typeof saveProfileData === 'function') saveProfileData();
+  if (typeof renderProteinTracker === 'function') renderProteinTracker();
+  updateDynamicIslandLive();
+
+  if (typeof spawnFloatingRewardToast === 'function') {
+    spawnFloatingRewardToast(`🎯 "${item.name}" Eklendi! (+${Math.round(item.prot)}g Protein)`);
+  }
+}
+window.addScannedProductObjectToLog = addScannedProductObjectToLog;
+
+async function lookupBarcodeProduct() {
+  const inp = document.getElementById('manualBarcodeInput');
+  const resBox = document.getElementById('scannedProductResultBox');
+  if (!inp || !resBox) return;
+
+  const query = inp.value.trim();
+  if (!query) return;
+
+  resBox.style.display = 'block';
+  resBox.innerHTML = `<div style="font-size:12px;color:var(--accent-cream);font-weight:800;">🔍 "${escapeHtml(query)}" barkod / ürün veritabanında aranıyor...</div>`;
+
+  // 1. Check local Turkish database first
+  const localHit = TURKISH_FITNESS_BARCODE_PRODUCTS.find(
+    p => p.code === query || p.name.toLowerCase().includes(query.toLowerCase())
+  );
+
+  if (localHit) {
+    renderScannedProductBox(localHit);
+    return;
+  }
+
+  // 2. If numeric barcode, query OpenFoodFacts API
+  if (/^\d{8,14}$/.test(query)) {
+    try {
+      const resp = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(query)}.json`);
+      const data = await resp.json();
+      if (data && data.status === 1 && data.product) {
+        const p = data.product;
+        const nut = p.nutriments || {};
+        const foundItem = {
+          code: query,
+          name: p.product_name_tr || p.product_name || `Barkodlu Ürün (${query})`,
+          grams: 100,
+          kcal: Math.round(Number(nut['energy-kcal_100g'] || nut['energy-kcal'] || 180)),
+          prot: Math.round(Number(nut.proteins_100g || nut.proteins || 12)),
+          carb: Math.round(Number(nut.carbohydrates_100g || nut.carbohydrates || 15)),
+          fat: Math.round(Number(nut.fat_100g || nut.fat || 6))
+        };
+        renderScannedProductBox(foundItem);
+        return;
+      }
+    } catch (e) {}
+  }
+
+  // 3. Fallback smart match from 188+ food database if available
+  if (typeof TURKISH_FOOD_DB !== 'undefined' && Array.isArray(TURKISH_FOOD_DB)) {
+    const dbMatch = TURKISH_FOOD_DB.find(f => f.name.toLowerCase().includes(query.toLowerCase()));
+    if (dbMatch) {
+      renderScannedProductBox({
+        code: 'TR-BESIN',
+        name: dbMatch.name,
+        grams: dbMatch.defGrams || 100,
+        kcal: dbMatch.kcal || 150,
+        prot: dbMatch.prot || 10,
+        carb: dbMatch.carb || 15,
+        fat: dbMatch.fat || 5
+      });
+      return;
+    }
+  }
+
+  resBox.innerHTML = `<div style="font-size:12px;color:#ff9c6e;font-weight:800;">⚠️ Ürün bulunamadı. Aşağıdaki hazır market ürünlerinden seçebilir veya ürün adını yazabilirsiniz.</div>`;
+}
+window.lookupBarcodeProduct = lookupBarcodeProduct;
+
+let lastScannedCandidateProduct = null;
+function renderScannedProductBox(item) {
+  lastScannedCandidateProduct = item;
+  const resBox = document.getElementById('scannedProductResultBox');
+  if (!resBox) return;
+  resBox.style.display = 'block';
+  resBox.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:13px;font-weight:900;color:var(--text-main);">✅ ${escapeHtml(item.name)}</div>
+        <div style="font-size:11.5px;color:#95de64;font-weight:800;margin-top:3px;">
+          ⚖️ ${item.grams}g • 🔥 ${item.kcal} kcal • 🥩 ${item.prot}g Protein • 🍞 ${item.carb}g Karb • 🥑 ${item.fat}g Yağ
+        </div>
+      </div>
+      <button type="button" class="btn-cream" style="height:36px;padding:0 14px;font-size:12px;font-weight:900;background:#95de64;color:#09090d;" onclick="if(lastScannedCandidateProduct){addScannedProductObjectToLog(lastScannedCandidateProduct);}">
+        ➕ Günlüğüme Ekle
+      </button>
+    </div>
+  `;
+}
+
+async function toggleBarcodeCameraStream() {
+  const camBox = document.getElementById('barcodeCameraContainer');
+  const videoEl = document.getElementById('barcodeVideoEl');
+  const btn = document.getElementById('toggleBarcodeCamBtn');
+  if (!camBox || !videoEl) return;
+
+  if (barcodeVideoStream) {
+    stopBarcodeCameraStream();
+    return;
+  }
+
+  try {
+    barcodeVideoStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' }
+    });
+    videoEl.srcObject = barcodeVideoStream;
+    camBox.style.display = 'block';
+    if (btn) btn.textContent = '⏹️ Kamerayı Kapat';
+
+    if ('BarcodeDetector' in window) {
+      const detector = new window.BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'qr_code'] });
+      const scanTick = async () => {
+        if (!barcodeVideoStream) return;
+        try {
+          const codes = await detector.detect(videoEl);
+          if (codes && codes.length > 0 && codes[0].rawValue) {
+            const raw = codes[0].rawValue;
+            const inp = document.getElementById('manualBarcodeInput');
+            if (inp) inp.value = raw;
+            playRestTimerBeep();
+            stopBarcodeCameraStream();
+            lookupBarcodeProduct();
+            return;
+          }
+        } catch (e) {}
+        barcodeScanLoopId = requestAnimationFrame(scanTick);
+      };
+      barcodeScanLoopId = requestAnimationFrame(scanTick);
+    }
+  } catch (err) {
+    if (typeof spawnFloatingRewardToast === 'function') {
+      spawnFloatingRewardToast('📷 Kamera izni alınamadı, barkod numarasını kutuya yazabilirsiniz.');
+    }
+  }
+}
+window.toggleBarcodeCameraStream = toggleBarcodeCameraStream;
+
+function stopBarcodeCameraStream() {
+  if (barcodeScanLoopId) {
+    cancelAnimationFrame(barcodeScanLoopId);
+    barcodeScanLoopId = null;
+  }
+  if (barcodeVideoStream) {
+    barcodeVideoStream.getTracks().forEach(t => t.stop());
+    barcodeVideoStream = null;
+  }
+  const camBox = document.getElementById('barcodeCameraContainer');
+  if (camBox) camBox.style.display = 'none';
+  const btn = document.getElementById('toggleBarcodeCamBtn');
+  if (btn) btn.textContent = '📷 Kamerayı Aç';
+}
+
+// Otomatik Canlı Senkronizasyon (Dynamic Island, 3'lü Özet Kapsülü & Duo Streak)
+setInterval(() => {
+  updateDynamicIslandLive();
+}, 1500);
+
+setTimeout(() => {
+  updateDynamicIslandLive();
+  renderDuoStreakBanner();
+}, 400);
+
