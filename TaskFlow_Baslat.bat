@@ -1,27 +1,23 @@
 @echo off
 chcp 65001 >nul
 title TaskFlow Pro+ Bagimsiz Masaustu
-echo ===================================================
-echo     TaskFlow Pro+ Bagimsiz Masaustu Baslatiliyor...
-echo     (Google Chrome bagimsiz - Ozgun Native App)
-echo ===================================================
-
 cd /d "%~dp0"
 
-:: 1. Eger dist klasorunde .exe derlenmisse dogrudan onu calistir
-if exist "dist\TaskFlow Pro+ 26.0.0.exe" (
-    start "" "dist\TaskFlow Pro+ 26.0.0.exe"
+:: 1. Her zaman en guncel yerel dosyalari (index.html / app.js) aninda ac (Sifir bekleme, her zaman guncel!)
+if exist "node_modules\electron\dist\electron.exe" (
+    start "" "node_modules\electron\dist\electron.exe" .
+    exit
+)
+
+:: 2. Yedek: Paketlenmis .exe varsa calistir
+if exist "TaskFlow+.exe" (
+    start "" "TaskFlow+.exe"
     exit
 )
 if exist "dist\win-unpacked\TaskFlow Pro+.exe" (
     start "" "dist\win-unpacked\TaskFlow Pro+.exe"
     exit
 )
-if exist "dist\TaskFlow Pro+.exe" (
-    start "" "dist\TaskFlow Pro+.exe"
-    exit
-)
 
-:: 2. Node/Electron ile bagimsiz masaustu penceresini baslat
 call npx electron .
 exit

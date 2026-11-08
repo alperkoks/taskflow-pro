@@ -479,10 +479,10 @@
                 <span id="proteinCountText" style="display:none;">0 / 160g</span>
               </div>
 
-              <!-- ⏳ 16:8 ARALIKLI ORUÇ (INTERMITTENT FASTING) & YAĞ YAKIM EVRESİ SAYACI -->
-              <div class="luxury-spawn-box open" id="spawnBoxFastingTracker" style="margin-top:10px;">
+              <!-- ⏳ 16:8 ARALIKLI ORUÇ SAYACI (VARSAYILAN KAPALI — SADECE İSTEYEN AÇAR) -->
+              <div class="luxury-spawn-box" id="spawnBoxFastingTracker" style="margin-top:8px;">
                 <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxFastingTracker')">
-                  <span style="color:#ffc069;">⏳ 16:8 Aralıklı Oruç & Yağ Yakım Evresi Sayacı</span>
+                  <span style="color:#ffc069;">⏳ 16:8 Aralıklı Oruç Sayacı</span>
                   <span class="luxury-spawn-chevron">▾</span>
                 </button>
                 <div class="luxury-spawn-body">
@@ -558,98 +558,51 @@
                 </div>
               </div>
 
-              <!-- 🍱 ÖĞÜN ZAMANI SEÇİCİ (KAHVALTI | ÖĞLE | AKŞAM | ARA ÖĞÜN) -->
-              <div class="meal-slot-bar" id="mealSlotSelectorBar">
+              <!-- 🍱 ÖĞÜN ZAMANI SEÇİCİ (GİZLİ UYUMLULUK — EKRANDA KALABALIK YAPMAZ) -->
+              <div class="meal-slot-bar" id="mealSlotSelectorBar" style="display:none;">
                 <button type="button" class="meal-slot-btn active" data-slot="☀️ Kahvaltı" onclick="selectActiveMealSlot('☀️ Kahvaltı', this)">☀️ Kahvaltı</button>
                 <button type="button" class="meal-slot-btn" data-slot="🌤️ Öğle" onclick="selectActiveMealSlot('🌤️ Öğle', this)">🌤️ Öğle</button>
                 <button type="button" class="meal-slot-btn" data-slot="🌙 Akşam" onclick="selectActiveMealSlot('🌙 Akşam', this)">🌙 Akşam</button>
                 <button type="button" class="meal-slot-btn" data-slot="⚡ Ara Öğün" onclick="selectActiveMealSlot('⚡ Ara Öğün', this)">⚡ Ara Öğün</button>
               </div>
 
-              <!-- 1.5. 🕒 TEK TIKLA "DÜN NE YEDİYSEM AYNISINI BUGÜNE KOPYALA" + 📸 STORY KARTI BARI -->
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-                <button type="button" class="btn-cream" style="min-height:44px;font-size:12px;font-weight:900;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(135deg,rgba(245,216,181,0.22),rgba(216,208,248,0.16));color:var(--accent-cream);border:1.5px solid rgba(245,216,181,0.45);" onclick="copyYesterdayFoodsToToday()">
-                  🕒 Dünü Kopyala
-                </button>
-                <button type="button" class="btn-cream" style="min-height:44px;font-size:12px;font-weight:900;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(135deg,rgba(82,196,26,0.22),rgba(37,211,102,0.14));color:#95de64;border:1.5px solid rgba(149,222,100,0.45);" onclick="openStoryGeneratorModal()">
-                  📸 Story Paylaş
-                </button>
-              </div>
-
-              <!-- 2. 4 EŞİT BÜYÜK SEKME SEÇİCİ (FIT TARİFLER DAHİL!) -->
-              <div class="sub-tab-switcher" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;">
-                <button type="button" class="sub-tab-btn active" id="foodTabBtnAdd" onclick="switchFoodInnerTab('add')">🍽️ Yemek Ekle</button>
-                <button type="button" class="sub-tab-btn" id="foodTabBtnFitPdf" onclick="switchFoodInnerTab('fitPdf')">📖 Fit Tarifler (62)</button>
-                <button type="button" class="sub-tab-btn" id="foodTabBtnRecipe" onclick="switchFoodInnerTab('recipe')">👨‍🍳 Kendi Tarifim</button>
-                <button type="button" class="sub-tab-btn" id="foodTabBtnCombos" onclick="switchFoodInnerTab('combos')">🍱 Hazır Menüler</button>
+              <!-- KOMPAKT 4 SEKME SEÇİCİ -->
+              <div class="sub-tab-switcher" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px;">
+                <button type="button" class="sub-tab-btn active" id="foodTabBtnAdd" onclick="switchFoodInnerTab('add')" style="height:34px;font-size:11.5px;">🍽️ Ekle</button>
+                <button type="button" class="sub-tab-btn" id="foodTabBtnFitPdf" onclick="switchFoodInnerTab('fitPdf')" style="height:34px;font-size:11.5px;">📖 62 Tarif</button>
+                <button type="button" class="sub-tab-btn" id="foodTabBtnRecipe" onclick="switchFoodInnerTab('recipe')" style="height:34px;font-size:11.5px;">👨‍🍳 Tarif Üret</button>
+                <button type="button" class="sub-tab-btn" id="foodTabBtnCombos" onclick="switchFoodInnerTab('combos')" style="height:34px;font-size:11.5px;">🍱 Menüler</button>
               </div>
 
               <!-- ======================================================== -->
-              <!-- YEMEK ALT SEKME 1: 🍽️ HIZLI YEMEK EKLE & ARAMA (SPAWN BAŞLIKLI!) -->
+              <!-- YEMEK ALT SEKME 1: 🍽️ ULTRA SADE YEMEK ARAMA & EKLEME -->
               <!-- ======================================================== -->
               <div id="foodInnerTabAdd">
-                <!-- 🎯 AKILLI BARKOD OKUYUCU HIZLI BUTONU -->
-                <div style="display:flex;gap:8px;margin-bottom:10px;">
-                  <button type="button" class="btn-cream" style="flex:1;height:44px;font-size:13px;font-weight:900;background:linear-gradient(135deg,#60a5fa,#3b82f6);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;" onclick="openBarcodeScannerModal()">
-                    <span>🎯</span>
-                    <span>Barkod Okut / Market Ürünü Tara</span>
-                  </button>
+                <!-- 1. DOĞRUDAN YEMEK ARAMA + GRAMAJ + EKLE -->
+                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px;margin-bottom:8px;">
+                  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                    <input type="text" id="foodSearchInput" class="form-input" style="flex:2;min-width:150px;height:40px;font-size:13px;" placeholder="🔍 Yemek ara (örn: tavuk, yumurta, pilav...)" oninput="onFoodSearchInput()" onclick="onFoodSearchInput()" autocomplete="off" />
+                    <div style="display:flex;align-items:center;gap:4px;">
+                      <button type="button" class="lux-stepper-btn minus" style="height:40px !important;width:36px !important;" onclick="stepFoodGrams(-25)">➖</button>
+                      <input type="number" id="foodGramsInput" class="form-input" style="height:40px;font-size:13.5px;font-weight:900;text-align:center;width:64px;" value="100" min="1" max="3000" oninput="updateFoodLiveMacroPreview()" placeholder="Gram" />
+                      <button type="button" class="lux-stepper-btn plus" style="height:40px !important;width:36px !important;" onclick="stepFoodGrams(25)">➕</button>
+                    </div>
+                    <button type="button" class="btn-cream" style="height:40px;padding:0 14px;font-size:13px;font-weight:900;background:#95de64;color:#09090d;flex-shrink:0;" onclick="addSelectedFoodToDailyLog()">➕ Ekle</button>
+                  </div>
+
+                  <div id="foodSearchDropdown" class="food-search-dropdown"></div>
+                  <div id="foodLiveMacroPreview" style="margin-top:6px;font-size:11.5px;color:var(--accent-cream);"></div>
                 </div>
 
-                <!-- BAŞLIK 1: ⚡ TEK DOKUNUŞLA EN SIK YENİLEN 8 BESİN (BAŞLIĞA TIKLAYINCA SPAWNLANIR) -->
-                <div class="luxury-spawn-box" id="spawnBoxQuickFoods">
-                  <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxQuickFoods')">
-                    <span>⚡ Tek Dokunuşla Hızlı Yemek Ekle (8 Popüler Besin)</span>
-                    <span class="luxury-spawn-chevron">▾</span>
-                  </button>
-                  <div class="luxury-spawn-body">
-                    <div class="instant-food-grid" style="margin-top:6px;">
-                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Haşlanmış Yumurta (Tam)', 100)">🥚 2 Yumurta<span>➕ 155 kcal • 13g P</span></button>
-                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Tavuk Göğsü (Haşlama / Izgara Pişmiş)', 200)">🍗 200g Tavuk<span>➕ 330 kcal • 62g P</span></button>
-                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Tavuk Sote (Biberli Domatesli Soğanlı)', 250)">🍲 Tavuk Sote<span>➕ 363 kcal • 48g P</span></button>
-                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Pirinç Pilavı (Tereyağlı / Şehriyeli)', 180)">🍚 1 Pors. Pilav<span>➕ 284 kcal • 5g P</span></button>
-                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Yulaf Ezmesi (Kuru Tartım)', 60)">🥣 60g Yulaf<span>➕ 225 kcal • 8g P</span></button>
-                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Izgara Köfte / Anne Köftesi', 180)">🥩 Pors. Köfte<span>➕ 441 kcal • 38g P</span></button>
-                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Whey Protein Tozu (1 Ölçek ≈ 30g)', 30)">🥛 1 Ölçek Whey<span>➕ 117 kcal • 23g P</span></button>
-                      <button type="button" class="instant-food-btn" onclick="quickAddPopularFood('Muz', 120)">🍌 1 Adet Muz<span>➕ 107 kcal • 27g K</span></button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- BAŞLIK 2: 🔍 188+ YEMEK LİSTESİNDEN ARA & BÜYÜK +/- GRAMAJLA EKLE -->
-                <div class="luxury-spawn-box open" id="spawnBoxSearchFoods">
-                  <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxSearchFoods')">
-                    <span style="color:#95de64;">🔍 188+ Yemek & Besin Ara (Gramajlı Hesapla)</span>
-                    <span class="luxury-spawn-chevron">▾</span>
-                  </button>
-                  <div class="luxury-spawn-body">
-                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px;">
-                      <input type="text" id="foodSearchInput" class="form-input" style="flex:2;min-width:175px;height:48px;font-size:14px;" placeholder="🔍 Yemek yaz (Örn: Mercimek, peynir, makarna...)" oninput="onFoodSearchInput()" onclick="onFoodSearchInput()" autocomplete="off" />
-                      <!-- Büyük Dokunmatik -25g / Gram / +25g Stepper -->
-                      <div style="display:flex;align-items:center;gap:6px;flex:1.2;min-width:170px;">
-                        <button type="button" class="lux-stepper-btn minus" onclick="stepFoodGrams(-25)" title="25 Gram Azalt">➖</button>
-                        <input type="number" id="foodGramsInput" class="form-input" style="height:48px;font-size:15px;font-weight:900;text-align:center;min-width:70px;" value="100" min="1" max="3000" oninput="updateFoodLiveMacroPreview()" placeholder="Gram" />
-                        <button type="button" class="lux-stepper-btn plus" onclick="stepFoodGrams(25)" title="25 Gram Artır">➕</button>
-                      </div>
-                      <button type="button" class="btn-cream" style="height:48px;padding:0 20px;font-size:14.5px;font-weight:900;background:#95de64;color:#09090d;flex-shrink:0;" onclick="addSelectedFoodToDailyLog()">➕ Bugüne Ekle</button>
-                    </div>
-
-                    <!-- Arama Sonucu Açılır Liste -->
-                    <div id="foodSearchDropdown" class="food-search-dropdown"></div>
-
-                    <!-- 4 Akıllı Porsiyon / Adet Butonu -->
-                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;">
-                      <button type="button" class="quick-chip" style="font-weight:800;" onclick="stepFoodPortion(-1)">➖ 1 Adet / Pors.</button>
-                      <button type="button" class="quick-chip" style="font-weight:800;color:#95de64;" onclick="setQuickFoodGrams(selectedFoodObj ? selectedFoodObj.defGrams || 100 : 100)">🎯 1 Porsiyon</button>
-                      <button type="button" class="quick-chip" style="font-weight:800;color:#60a5fa;" onclick="setQuickFoodGrams((selectedFoodObj ? selectedFoodObj.defGrams || 100 : 100) * 2)">✌️ 2 Porsiyon</button>
-                      <button type="button" class="quick-chip" style="font-weight:800;" onclick="stepFoodPortion(1)">➕ 1 Adet / Pors.</button>
-                    </div>
-
-                    <!-- Canlı Gramaj Hesaplama Önizlemesi -->
-                    <div id="foodLiveMacroPreview" style="margin-top:8px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px dashed var(--border-color);font-size:12.5px;color:var(--accent-cream);">
-                      👆 Yukarıdan bir yemek seç, değerleri anında hesaplansın!
-                    </div>
-                  </div>
+                <!-- 2. TEK SATIR HIZLI POPÜLER BESİNLER & BARKOD ŞERİDİ -->
+                <div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;">
+                  <button type="button" class="mqa-chip" style="color:#60a5fa;border-color:rgba(96,165,250,0.4);" onclick="openBarcodeScannerModal()">🎯 Barkod Okut</button>
+                  <button type="button" class="mqa-chip" onclick="quickAddPopularFood('Haşlanmış Yumurta (Tam)', 100)">🥚 2 Yumurta</button>
+                  <button type="button" class="mqa-chip" onclick="quickAddPopularFood('Tavuk Göğsü (Haşlama / Izgara Pişmiş)', 200)">🍗 200g Tavuk</button>
+                  <button type="button" class="mqa-chip" onclick="quickAddPopularFood('Pirinç Pilavı (Tereyağlı / Şehriyeli)', 180)">🍚 Pilav</button>
+                  <button type="button" class="mqa-chip" onclick="quickAddPopularFood('Yulaf Ezmesi (Kuru Tartım)', 60)">🥣 60g Yulaf</button>
+                  <button type="button" class="mqa-chip" onclick="quickAddPopularFood('Whey Protein Tozu (1 Ölçek ≈ 30g)', 30)">🥛 1 Ölçek Whey</button>
+                  <button type="button" class="mqa-chip" onclick="copyYesterdayFoodsToToday()">🕒 Dünü Kopyala</button>
                 </div>
               </div>
 
@@ -842,22 +795,13 @@
                 </div>
               </div>
   
-              <div class="scratchpad-card" style="padding:14px;border-color:rgba(255,156,110,0.35);margin-bottom:10px;">
-                <div style="font-size:12.5px;font-weight:900;color:var(--accent-cream);margin-bottom:8px;">🏋️ Tek Tıkla Bugüne Hazır Antrenman Görevi Ekle:</div>
-                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;">
-                  <button type="button" class="quick-chip" onclick="quickAddWorkoutTask('push')">💪 İtiş (Push)</button>
-                  <button type="button" class="quick-chip" onclick="quickAddWorkoutTask('pull')">🏋️ Çekiş (Pull)</button>
-                  <button type="button" class="quick-chip" onclick="quickAddWorkoutTask('legs')">🦵 Bacak & Kardiyo</button>
-                  <button type="button" class="quick-chip" onclick="quickAddWorkoutTask('fullbody')">🔥 Full Body</button>
-                </div>
-                <div class="vital-mini-box" style="padding:10px 12px;">
-                  <span id="restTimerStatusText" style="font-weight:800;color:#60a5fa;">⏱️ Set Arası Dinlenme Sayacı:</span>
-                  <div style="display:flex;gap:6px;">
-                    <button type="button" class="tag-badge" style="border:none;cursor:pointer;background:rgba(96,165,250,0.2);color:#93c5fd;" onclick="startQuickRestTimer(60)">60 sn Başlat</button>
-                    <button type="button" class="tag-badge" style="border:none;cursor:pointer;background:rgba(96,165,250,0.2);color:#93c5fd;" onclick="startQuickRestTimer(90)">90 sn Başlat</button>
-                  </div>
-                </div>
+              <div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;scrollbar-width:none;">
+                <button type="button" class="mqa-chip" onclick="quickAddWorkoutTask('push')">💪 İtiş (Push)</button>
+                <button type="button" class="mqa-chip" onclick="quickAddWorkoutTask('pull')">🏋️ Çekiş (Pull)</button>
+                <button type="button" class="mqa-chip" onclick="quickAddWorkoutTask('legs')">🦵 Bacak</button>
+                <button type="button" class="mqa-chip" onclick="quickAddWorkoutTask('fullbody')">🔥 Full Body</button>
               </div>
+              <span id="restTimerStatusText" style="display:none;"></span>
 
               <!-- 🏋️ CANLI SET & AĞIRLIK DEFTERİ (QUICK SET LOGGER & TOPLAM TONAJ) -->
               <div class="luxury-spawn-box open" id="spawnBoxQuickSetLogger" style="margin-bottom:10px;">
@@ -1502,248 +1446,192 @@
       <!-- SEKME 6: 🏆 120 MİSYON / CHALLENGE, KİŞİSEL PROFİL VİTRİNİ & ARKADAŞLARLA SOHBET -->
       <!-- ================================================================== -->
       <section id="viewSocial" style="display:none;">
-        <button type="button" class="big-back-nav-btn" onclick="switchView('tasks')">
-          <span>⬅️ Ana Ekrana & Görevlere Geri Dön</span>
-          <span style="font-size:12px;background:rgba(0,0,0,0.28);padding:4px 10px;border-radius:99px;">Ana Sayfa 🏠</span>
-        </button>
-        <!-- LÜKS SOSYAL MEDYA PROFİL KARTI (INSTAGRAM & WHOOP TARZI) -->
-        <div class="social-profile-banner" style="background:linear-gradient(145deg,rgba(26,29,42,0.95),rgba(14,16,24,0.98));border:1.5px solid rgba(255,255,255,0.12);border-radius:26px;padding:20px 18px;margin-bottom:16px;box-shadow:0 16px 40px rgba(0,0,0,0.45);">
-          <!-- Üst Bilgi Satırı: Avatar + İsim + Düzenle -->
-          <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap;">
-            <div id="socialProfileAvatar" class="social-profile-avatar-box" onclick="triggerProfilePhotoPicker()" title="Profil Fotoğrafını Değiştir" style="width:72px;height:72px;border-radius:50%;border:2.5px solid var(--accent-cream);box-shadow:0 0 16px rgba(245,216,181,0.25);position:relative;cursor:pointer;flex-shrink:0;">
-              <span id="socialProfileAvatarText" style="font-size:26px;font-weight:900;">A</span>
-              <div class="avatar-edit-badge" style="position:absolute;bottom:-4px;right:-4px;background:#60a5fa;color:#09090d;font-size:9.5px;font-weight:900;padding:2px 6px;border-radius:99px;">📷 Fotoğraf</div>
-            </div>
-            <div style="flex:1;min-width:180px;">
-              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                <h2 id="socialProfileName" style="font-size:20px;font-weight:900;color:var(--text-main);letter-spacing:-0.3px;">alperkoksal</h2>
-                <span id="socialProfileRankBadge" class="tag-badge" style="background:linear-gradient(135deg,rgba(245,216,181,0.25),rgba(255,122,69,0.2));color:var(--accent-cream);font-weight:900;font-size:11px;border:1px solid rgba(245,216,181,0.35);">⚡ Seviye 6</span>
-              </div>
-              <div id="socialProfileBioText" style="font-size:12px;color:var(--text-muted);margin-top:4px;font-style:italic;line-height:1.4;">"Disiplin, hedefler ve sağlıklı yaşam yolculuğum! 💪"</div>
-            </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button type="button" class="pin-btn" style="height:36px;padding:0 12px;font-size:12px;font-weight:800;" onclick="promptEditProfileBio()">✏️ Durum/Bio Düzenle</button>
-              <button type="button" class="btn-cream" style="height:36px;padding:0 12px;font-size:12px;font-weight:900;background:linear-gradient(135deg,#60a5fa,#3b82f6);color:#fff;" onclick="previewMyOwnProfileAsFriend()">👁️ Arkadaş Görünümü (Önizleme)</button>
-            </div>
-          </div>
-
-          <!-- 3'LÜ LÜKS STATS GÖSTERGE ÇUBUĞU (SERİ, XP, ROZET SAYISI) -->
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:rgba(0,0,0,0.35);padding:10px 12px;border-radius:16px;border:1px solid rgba(255,255,255,0.06);margin-bottom:14px;text-align:center;">
-            <div>
-              <div style="font-size:10px;color:var(--text-muted);font-weight:800;text-transform:uppercase;">Disiplin Serisi</div>
-              <div id="socialStatStreak" style="font-size:16px;font-weight:900;color:#ff9c6e;margin-top:2px;">🔥 4 Gün</div>
-            </div>
-            <div style="border-left:1px solid rgba(255,255,255,0.08);border-right:1px solid rgba(255,255,255,0.08);">
-              <div style="font-size:10px;color:var(--text-muted);font-weight:800;text-transform:uppercase;">Toplam Tecrübe</div>
-              <div id="socialStatXp" style="font-size:16px;font-weight:900;color:#93c5fd;margin-top:2px;">⚡ 795 XP</div>
-            </div>
-            <div>
-              <div style="font-size:10px;color:var(--text-muted);font-weight:800;text-transform:uppercase;">Kazanılan Rozet</div>
-              <div id="socialStatBadges" style="font-size:16px;font-weight:900;color:#facc15;margin-top:2px;">🏆 8/120</div>
-            </div>
-          </div>
-
-          <!-- 📌 PROFİLDE SERGİLENEN VİTRİN ROZETLERİ -->
-          <div style="padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-              <span style="font-size:12px;font-weight:900;color:var(--accent-cream);">🏅 Sergilediğim Vitrin Rozetlerim (Arkadaşların Burayı Görür):</span>
-              <div style="display:flex;gap:6px;">
-                <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:4px 10px;color:#93c5fd;font-weight:800;background:rgba(96,165,250,0.12);" onclick="copyMyFriendInviteCode()">🔗 Profil Kodumu Kopyala</button>
-                <button type="button" class="tag-badge" style="border:none;cursor:pointer;padding:4px 10px;color:#25D366;font-weight:800;background:rgba(37,211,102,0.12);" onclick="shareMyProfileAndShowcaseOnWP()">📲 WP Paylaş</button>
-              </div>
-            </div>
-            <div id="socialShowcaseBadgesGrid" class="showcase-badges-strip" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;min-height:48px;"></div>
+        <!-- Üst Kompakt Geri Dön & Başlık Barı -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <button type="button" class="pin-btn" style="height:34px;padding:0 12px;font-size:12px;font-weight:900;" onclick="switchView('tasks')">
+            ⬅️ Görevlere Dön
+          </button>
+          <div style="display:flex;gap:6px;">
+            <button type="button" class="pin-btn" style="height:34px;padding:0 10px;font-size:11.5px;font-weight:800;color:#93c5fd;" onclick="copyMyFriendInviteCode()">🔗 Davet Kodum</button>
+            <button type="button" class="pin-btn" style="height:34px;padding:0 10px;font-size:11.5px;font-weight:800;color:#25D366;border-color:rgba(37,211,102,0.35);" onclick="shareMyCodeOnWhatsAppDirect()">📲 WP Davet</button>
           </div>
         </div>
 
-        <!-- 2'Lİ EŞİT BÜYÜK SEKME SEÇİCİ: 💬 ARKADAŞLAR & SOHBET | 🏆 120 ROZET & MİSYON -->
-        <div class="sub-tab-switcher" style="grid-template-columns:repeat(2,1fr);margin-bottom:14px;">
-          <button type="button" class="sub-tab-btn active" id="socialSubBtnFriends" onclick="switchSocialSubTab('friends')">💬 Arkadaşlarım & Mesajlaşma</button>
-          <button type="button" class="sub-tab-btn" id="socialSubBtnMissions" onclick="switchSocialSubTab('missions')">🏆 120 Rozet & Görevler</button>
+        <!-- ✨ ULTRA SADE VE ZARİF PROFİL KARTI -->
+        <div class="social-profile-banner" style="background:rgba(20,22,32,0.95);border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:12px 14px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
+              <div id="socialProfileAvatar" class="social-profile-avatar-box" onclick="triggerProfilePhotoPicker()" title="Profil Fotoğrafını Değiştir" style="width:48px;height:48px;border-radius:50%;border:2px solid var(--accent-cream);position:relative;cursor:pointer;flex-shrink:0;">
+                <span id="socialProfileAvatarText" style="font-size:18px;font-weight:900;">A</span>
+              </div>
+              <div style="min-width:0;flex:1;">
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <h2 id="socialProfileName" style="font-size:16px;font-weight:900;color:var(--text-main);margin:0;">alperkoksal</h2>
+                  <span id="socialProfileRankBadge" style="background:rgba(245,216,181,0.15);color:var(--accent-cream);font-weight:800;font-size:10.5px;padding:2px 8px;border-radius:99px;">⚡ Seviye 6</span>
+                </div>
+                <div id="socialProfileBioText" style="font-size:11.5px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">"Disiplin, hedefler ve sağlıklı yaşam yolculuğum! 💪"</div>
+                <!-- Tek Satır Kompakt İstatistikler -->
+                <div style="display:flex;align-items:center;gap:10px;margin-top:4px;font-size:11px;font-weight:800;">
+                  <span id="socialStatStreak" style="color:#ff9c6e;">🔥 4 Gün</span>
+                  <span style="color:rgba(255,255,255,0.2);">•</span>
+                  <span id="socialStatXp" style="color:#93c5fd;">⚡ 795 XP</span>
+                  <span style="color:rgba(255,255,255,0.2);">•</span>
+                  <span id="socialStatBadges" style="color:#facc15;">🏆 8/120</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:5px;flex-shrink:0;">
+              <button type="button" class="pin-btn" style="height:32px;padding:0 10px;font-size:11px;font-weight:800;" onclick="promptEditProfileBio()">✏️ Bio</button>
+              <button type="button" class="pin-btn" style="height:32px;padding:0 10px;font-size:11px;font-weight:800;" onclick="previewMyOwnProfileAsFriend()">👁️ Önizle</button>
+            </div>
+          </div>
+
+          <!-- Vitrin Rozetleri (Gizli/Açılır İnce Çekmece - Kalabalık Yapmaz) -->
+          <details style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06);font-size:11.5px;">
+            <summary style="cursor:pointer;color:var(--accent-cream);font-weight:800;outline:none;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+              <span>🏅 Vitrin Rozetlerim</span>
+              <span style="font-size:10px;color:var(--text-muted);">Göster / Gizle ▾</span>
+            </summary>
+            <div id="socialShowcaseBadgesGrid" class="showcase-badges-strip" style="display:flex;gap:6px;overflow-x:auto;padding-top:8px;min-height:40px;"></div>
+          </details>
         </div>
 
-        <!-- ALT BÖLÜM 1: 💬 MODERN ARKADAŞLAR, LİDERLİK TABLOSU, 7 GÜNLÜK DÜELLO & SOHBET -->
+        <!-- 3'LÜ KOMPAKT SEKME SEÇİCİ: 💬 SOHBET & ARKADAŞLAR | 🔥 ORTAK SERİ & DÜELLO | 🏆 ROZETLER -->
+        <div class="sub-tab-switcher" style="grid-template-columns:repeat(3,1fr);margin-bottom:10px;gap:6px;">
+          <button type="button" class="sub-tab-btn active" id="socialSubBtnFriends" onclick="switchSocialSubTab('friends')" style="height:36px;font-size:12px;">💬 Arkadaş & Sohbet</button>
+          <button type="button" class="sub-tab-btn" id="socialSubBtnArenas" onclick="switchSocialSubTab('arenas')" style="height:36px;font-size:12px;">🔥 Seri & Düello</button>
+          <button type="button" class="sub-tab-btn" id="socialSubBtnMissions" onclick="switchSocialSubTab('missions')" style="height:36px;font-size:12px;">🏆 Rozetler (120)</button>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- ALT BÖLÜM 1: 💬 EN SADE ARKADAŞ EKLEME + LİSTE + ANINDA MESAJLAŞMA -->
+        <!-- ================================================================== -->
         <div id="socialSubFriends">
-          <!-- 🔥 YENİ: 👥 ARKADAŞLA ORTAK "ZİNCİRİ KIRMA" (STREAKS DUO) KARTI -->
-          <div class="task-card" id="duoStreakBannerCard" style="margin-bottom:12px;background:linear-gradient(135deg,rgba(255,156,110,0.16),rgba(245,216,181,0.06));border:1.5px solid rgba(255,156,110,0.45);padding:14px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-              <div style="display:flex;align-items:center;gap:8px;">
-                <span style="font-size:22px;">🔥</span>
-                <div>
-                  <div style="font-size:14px;font-weight:900;color:var(--accent-cream);">Ortak "Zinciri Kırma" (Streaks Duo)</div>
-                  <div style="font-size:11px;color:var(--text-muted);" id="duoStreakSubtitleText">İkiniz de günlük hedefi tamamladıkça ortak alev büyür!</div>
-                </div>
-              </div>
-              <div id="duoStreakCountBadge" style="background:linear-gradient(135deg,#ff9c6e,#ff4d4f);color:#fff;font-weight:900;font-size:13px;padding:5px 12px;border-radius:99px;box-shadow:0 4px 12px rgba(255,77,79,0.35);">
-                🔥 4 Gün Duo
-              </div>
+          <!-- 1. TEK SATIRDA ANINDA ARKADAŞ EKLE (İSİM VEYA DAVET KODU TEK KUTUDA!) -->
+          <div style="background:rgba(20,22,32,0.92);border:1px solid rgba(149,222,100,0.3);border-radius:16px;padding:10px 12px;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:12px;font-weight:900;color:#95de64;">➕ Hızlı Arkadaş Ekle (İsim veya TF-... Kodu)</span>
+              <button type="button" class="tag-badge" style="border:none;cursor:pointer;background:rgba(255,255,255,0.06);color:var(--text-muted);font-size:10.5px;padding:2px 8px;" onclick="pasteInviteCodeFromClipboard()">📋 Panodan Yapıştır</button>
             </div>
-
-            <div style="display:flex;align-items:center;justify-content:space-around;background:rgba(0,0,0,0.3);padding:10px 12px;border-radius:14px;margin-bottom:10px;">
-              <div style="text-align:center;">
-                <div style="font-size:12px;font-weight:900;color:var(--text-main);" id="duoMyNameLabel">Sen</div>
-                <div style="font-size:11px;color:#95de64;font-weight:800;margin-top:2px;" id="duoMyStatusText">✅ Bugün Hazır</div>
-              </div>
-              <div style="font-size:18px;letter-spacing:2px;color:#ff9c6e;font-weight:900;">━━ 🔥 ━━</div>
-              <div style="text-align:center;">
-                <div style="font-size:12px;font-weight:900;color:var(--text-main);" id="duoPartnerNameLabel">Partnerin</div>
-                <div style="font-size:11px;color:#ffc069;font-weight:800;margin-top:2px;" id="duoPartnerStatusText">⏳ Bekleniyor</div>
-              </div>
-            </div>
-
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button type="button" class="btn-cream" style="flex:1.2;height:40px;font-size:12px;font-weight:900;background:linear-gradient(135deg,#ff9c6e,#ff7a45);color:#09090d;" onclick="igniteDuoStreakToday()">
-                🔥 Ortak Seriyi Ateşle (+1 Gün)
-              </button>
-              <button type="button" class="pin-btn" style="flex:1;height:40px;font-size:12px;font-weight:800;border-color:rgba(255,156,110,0.4);color:#ff9c6e;" onclick="nudgeFriendForDuoStreak()">
-                ⚡ Arkadaşı Dürt (Zinciri Kırma!)
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="text" id="addFriendInviteCodeInput" class="form-input" style="height:38px;font-size:12.5px;flex:1;" placeholder="Arkadaşının adını (örn: Ahmet) veya TF-... kodunu yaz..." onkeydown="if(event.key==='Enter'){event.preventDefault();smartAddFriendUnified();}" />
+              <button type="button" class="btn-cream" style="height:38px;padding:0 14px;font-size:12px;font-weight:900;background:#95de64;color:#09090d;flex-shrink:0;" onclick="smartAddFriendUnified()">
+                ➕ Ekle
               </button>
             </div>
+            <!-- Gizli uyumluluk inputları -->
+            <input type="hidden" id="addFriendInput" />
+            <input type="hidden" id="addFriendPhoneInput" />
+            <input type="hidden" id="myShareableCodeDisplayInput" />
           </div>
 
-          <!-- BAŞLIK 1: 🏆 HAFTALIK LİDERLİK TABLOSU (PUAN SIRALAMASI) -->
-          <div class="luxury-spawn-box open" id="spawnBoxLeaderboard">
-            <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxLeaderboard')">
-              <span style="color:#ffd700;">🏆 Haftalık Arkadaş Liderlik Tablosu (Puan Sıralaması)</span>
-              <span class="luxury-spawn-chevron">▾</span>
-            </button>
-            <div class="luxury-spawn-body">
-              <div style="font-size:12px;color:var(--text-muted);margin:6px 0 10px;">
-                İçilen su, alınan protein, biten görevler ve disiplin serisine göre canlı haftalık sıralama:
+          <!-- 2. KOMPAKT ARKADAŞ LİSTESİ (KİŞİYE DOKUN -> HEMEN ALTTA SOHBET ET) -->
+          <div style="background:rgba(20,22,32,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:10px 12px;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:12.5px;font-weight:900;color:var(--text-main);">👥 Arkadaşlarım <small style="color:var(--text-muted);font-weight:700;">(Sohbet için kişiye dokun)</small></span>
+              <button type="button" class="tag-badge" style="border:none;cursor:pointer;background:rgba(255,255,255,0.06);color:var(--text-muted);font-size:10.5px;" onclick="syncSocialFriendsAndMessages()">🔄 Yenile</button>
+            </div>
+            <div id="friendsListContainer" style="display:flex;flex-direction:column;gap:6px;max-height:175px;overflow-y:auto;"></div>
+          </div>
+
+          <!-- 3. TERTEMİZ SOHBET EKRANI (HEMEN GÖZ ÖNÜNDE!) -->
+          <div class="task-card" id="activeChatCardBox" style="padding:12px;border-radius:18px;border-color:rgba(245,216,181,0.3);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <h4 id="activeChatFriendTitle" style="font-size:14px;font-weight:900;color:var(--accent-cream);margin:0;">💬 Sohbet</h4>
+                <button type="button" class="tag-badge" style="border:none;cursor:pointer;background:rgba(255,156,110,0.18);color:#ff9c6e;font-size:10.5px;font-weight:900;padding:3px 8px;" onclick="igniteDuoStreakToday()" title="Ortak Seriyi Ateşle">🔥 Seri Ateşle</button>
               </div>
-              <div id="friendsLeaderboardContainer"></div>
-            </div>
-          </div>
-
-          <!-- BAŞLIK 2: 🔥 ARKADAŞLA ORTAK 7 GÜNLÜK DÜELLO / CHALLENGE BAŞLATMA -->
-          <div class="luxury-spawn-box open" id="spawnBoxFriendDuel">
-            <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxFriendDuel')">
-              <span style="color:#ff9c6e;">🔥 Arkadaşla "Ortak 7 Günlük Düello / Challenge"</span>
-              <span class="luxury-spawn-chevron">▾</span>
-            </button>
-            <div class="luxury-spawn-body">
-              <div id="activeFriendDuelBox" style="margin-top:6px;"></div>
-              <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px;">
-                <button type="button" class="quick-chat-btn" onclick="startFriendSevenDayDuel('💧 7 Gün Günde 3L Su Düellosu')">💧 7 Gün 3L Su Düellosu</button>
-                <button type="button" class="quick-chat-btn" onclick="startFriendSevenDayDuel('🏋️ 7 Gün 5 Antrenman Düellosu')">🏋️ 7 Gün 5 İdman Düellosu</button>
-                <button type="button" class="quick-chat-btn" onclick="startFriendSevenDayDuel('🍬 7 Gün Şekersiz & Fit Düello')">🍬 7 Gün Şekersiz Düello</button>
-                <button type="button" class="quick-chat-btn" onclick="startFriendSevenDayDuel('🔥 7 Gün %100 Görev Düellosu')">🔥 7 Gün %100 Görev Düellosu</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- BAŞLIK 3: 🤝 YENİ ARKADAŞ EKLE & DAVET KODU -->
-          <div class="luxury-spawn-box open" id="spawnBoxAddFriend">
-            <button type="button" class="luxury-spawn-header" onclick="toggleLuxurySpawnBox('spawnBoxAddFriend')">
-              <span style="color:#95de64;font-weight:900;">🤝 Arkadaş Ekle & Davet Kodu</span>
-              <span class="luxury-spawn-chevron">▾</span>
-            </button>
-            <div class="luxury-spawn-body">
-              <!-- BÖLÜM 1: 🔑 ARKADAŞININ DAVET KODUNU YAPIŞTIRIP EKLEME -->
-              <div style="background:linear-gradient(135deg,rgba(149,222,100,0.1),rgba(96,165,250,0.06));border:1.5px solid rgba(149,222,100,0.35);border-radius:16px;padding:14px;margin-bottom:12px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:4px;">
-                  <span style="font-size:13px;font-weight:900;color:#95de64;">🔑 1. Arkadaşının Davet Kodu ile Ekle (Önerilen)</span>
-                  <span style="font-size:10.5px;color:var(--text-muted);">TF-... Kodu</span>
-                </div>
-                <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
-                  <input type="text" id="addFriendInviteCodeInput" class="form-input" style="height:44px;font-size:13px;flex:1;" placeholder="Arkadaşının TF-... kodunu buraya yapıştır..." onkeydown="if(event.key==='Enter'){event.preventDefault();addFriendByPastedInviteCode();}" />
-                  <button type="button" class="pin-btn" style="height:44px;padding:0 14px;font-size:12px;font-weight:800;flex-shrink:0;" onclick="pasteInviteCodeFromClipboard()" title="Panodaki Kodu Yapıştır">📋 Yapıştır</button>
-                </div>
-                <button type="button" class="btn-cream" style="width:100%;height:44px;font-size:13.5px;font-weight:900;background:linear-gradient(135deg,#95de64,#52c41a);color:#09090d;" onclick="addFriendByPastedInviteCode()">
-                  🤝 Kodu Doğrula ve Arkadaş Ekle
-                </button>
-              </div>
-
-              <!-- BÖLÜM 2: 👑 SENİN DAVET KODUN (ARKADAŞINA GÖNDER) -->
-              <div style="background:rgba(245,216,181,0.06);border:1px solid rgba(245,216,181,0.25);border-radius:14px;padding:12px;margin-bottom:12px;">
-                <div style="font-size:12px;font-weight:900;color:var(--accent-cream);margin-bottom:6px;">👑 Senin Davet Kodun (Arkadaşına Gönder):</div>
-                <div style="display:flex;gap:6px;align-items:center;">
-                  <input type="text" id="myShareableCodeDisplayInput" readonly class="form-input" style="height:40px;font-size:11.5px;color:var(--text-muted);background:rgba(0,0,0,0.3);flex:1;" value="" placeholder="Kodunuz üretiliyor..." />
-                  <button type="button" class="btn-cream" style="height:40px;padding:0 12px;font-size:12px;font-weight:900;" onclick="copyMyFriendInviteCode()">📋 Kopyala</button>
-                  <button type="button" class="tag-badge" style="height:40px;padding:0 12px;font-size:12px;font-weight:900;background:#25D366;color:#fff;border:none;cursor:pointer;border-radius:10px;" onclick="shareMyCodeOnWhatsAppDirect()">📲 WP At</button>
-                </div>
-              </div>
-
-              <!-- BÖLÜM 3: ✍️ İSİM & WHATSAPP İLE MANUEL EKLE -->
-              <details style="font-size:12px;color:var(--text-muted);cursor:pointer;">
-                <summary style="font-weight:800;color:var(--text-main);outline:none;padding:4px 0;">✍️ Veya İsim / WhatsApp No Yazarak Hızlı Ekle ▾</summary>
-                <div style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(255,255,255,0.08);">
-                  <div class="form-row stack-mobile" style="margin-bottom:8px;">
-                    <input type="text" id="addFriendInput" class="form-input" style="height:42px;font-size:13px;" placeholder="👤 Arkadaşının Adı (Örn: Ahmet, Berk)..." />
-                    <input type="tel" id="addFriendPhoneInput" class="form-input" style="height:42px;font-size:13px;" placeholder="📱 WhatsApp No (Opsiyonel: 05...)" />
-                  </div>
-                  <button type="button" class="pin-btn" style="width:100%;height:40px;font-size:12.5px;font-weight:800;" onclick="addFriendByCodeOrUsername()">
-                    ➕ İsimle Listeye Ekle
-                  </button>
-                </div>
-              </details>
-            </div>
-          </div>
-
-          <!-- KART 2: 👥 ARKADAŞ LİSTEM (DOKUN VE SOHBET ET) -->
-          <div class="task-card" style="margin-bottom:14px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-              <h4 style="font-size:15px;font-weight:900;">👥 Arkadaşlarım (Mesaj Atmak İçin Kişiye Dokun)</h4>
-              <button type="button" class="pin-btn" style="height:36px;padding:0 12px;font-size:12px;" onclick="syncSocialFriendsAndMessages()">🔄 Yenile</button>
-            </div>
-            <div id="friendsListContainer" style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;"></div>
-          </div>
-
-          <!-- KART 3: 💬 SEÇİLİ ARKADAŞLA MESAJLAŞMA & WHATSAPP GÖNDERİMİ -->
-          <div class="task-card" id="activeChatCardBox" style="border-color:rgba(245,216,181,0.4);">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap;">
-              <h4 id="activeChatFriendTitle" style="font-size:15.5px;font-weight:900;color:var(--accent-cream);">💬 Sohbet & Motivasyon</h4>
-              <button type="button" class="btn-cream" style="height:38px;padding:0 14px;font-size:12.5px;background:#25D366;color:#fff;font-weight:900;" onclick="sendChatToWhatsAppDirect()">📲 WhatsApp'tan Gönder</button>
+              <button type="button" class="tag-badge" style="border:none;cursor:pointer;height:28px;padding:0 10px;font-size:11px;background:#25D366;color:#fff;font-weight:900;border-radius:8px;" onclick="sendChatToWhatsAppDirect()">📲 WhatsApp'a Aktar</button>
             </div>
 
-            <div id="activeChatFriendBadgesBar" style="font-size:12px;color:var(--text-muted);margin-bottom:10px;padding:8px 11px;background:var(--bg-surface);border-radius:11px;">
-              Yukarıdan bir arkadaşına dokun ve hemen aşağıdan mesaj yaz!
-            </div>
+            <div id="activeChatFriendBadgesBar" style="display:none;"></div>
 
             <!-- Sohbet Baloncukları -->
-            <div id="chatMessagesContainer" class="chat-messages-box" style="height:240px;"></div>
+            <div id="chatMessagesContainer" class="chat-messages-box" style="height:210px;margin-bottom:8px;"></div>
 
-            <!-- 4 Eşit Boyutlu Tek Tıkla Hazır Mesaj Butonu -->
-            <div style="font-size:11.5px;font-weight:800;color:var(--text-muted);margin-bottom:6px;">⚡ Tek Dokunuşla Hızlı Mesaj Gönder:</div>
-            <div class="quick-chat-grid">
-              <button type="button" class="quick-chat-btn" onclick="sendQuickSocialMessage('💪 Bugün antrenmanımı tamamladım, sıra sende şampiyon!')">💪 Antrenman Bitti!</button>
-              <button type="button" class="quick-chat-btn" onclick="sendQuickSocialMessage('💧 Su hedefimi devirdim, bugün kaç bardak su içtin?')">💧 Su İçtin mi?</button>
-              <button type="button" class="quick-chat-btn" onclick="sendQuickSocialMessage('🥩 Protein ve beslenme tam gaz! Pes etmek yok 🔥')">🥩 Beslenme Tam Gaz!</button>
-              <button type="button" class="quick-chat-btn" onclick="sendQuickDailyReportToFriendChat()">📊 Günlük Özetimi At</button>
+            <!-- Tek Satır Yatay Hızlı Mesaj Chip'leri (Yer Kaplamaz!) -->
+            <div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;">
+              <button type="button" class="mqa-chip" onclick="sendQuickSocialMessage('💪 Antrenman bitti, sıra sende!')">💪 İdman Bitti</button>
+              <button type="button" class="mqa-chip" onclick="sendQuickSocialMessage('💧 Su hedefini tamamladın mı?')">💧 Su İçtin mi?</button>
+              <button type="button" class="mqa-chip" onclick="nudgeFriendForDuoStreak()">🔥 Zinciri Kırma!</button>
+              <button type="button" class="mqa-chip" onclick="sendQuickDailyReportToFriendChat()">📊 Günlük Özetim</button>
             </div>
 
-            <!-- Büyük Mesaj Yazma ve Gönderme Alanı (Fotoğraf Gönderme Özellikli) -->
-            <div style="display:flex;gap:6px;margin-top:6px;align-items:center;">
+            <!-- Mesaj Yazma Kutusu -->
+            <div style="display:flex;gap:6px;align-items:center;">
               <input type="file" id="chatPhotoFileInput" accept="image/*" style="display:none;" onchange="handleChatPhotoUpload(event)" />
-              <button type="button" class="icon-btn" style="height:48px;width:48px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);font-size:20px;flex-shrink:0;cursor:pointer;" onclick="document.getElementById('chatPhotoFileInput').click()" title="Fotoğraf Gönder">📷</button>
-              <input type="text" id="chatMessageInput" class="form-input" style="flex:1;height:48px;font-size:14px;" placeholder="💬 Mesajını buraya yaz..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendSocialChatMessage();}" />
-              <button type="button" class="btn-cream" style="height:48px;padding:0 18px;font-size:14px;font-weight:900;border-radius:14px;" onclick="sendSocialChatMessage()">Gönder ➤</button>
+              <button type="button" class="icon-btn" style="height:40px;width:40px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);font-size:16px;flex-shrink:0;cursor:pointer;" onclick="document.getElementById('chatPhotoFileInput').click()" title="Fotoğraf Gönder">📷</button>
+              <input type="text" id="chatMessageInput" class="form-input" style="flex:1;height:40px;font-size:13px;" placeholder="💬 Mesaj yaz..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendSocialChatMessage();}" />
+              <button type="button" class="btn-cream" style="height:40px;padding:0 14px;font-size:12.5px;font-weight:900;border-radius:12px;" onclick="sendSocialChatMessage()">Gönder ➤</button>
             </div>
           </div>
         </div>
 
-        <!-- ALT BÖLÜM 2: 🏆 120 MİSYON & CHALLENGE MERKEZİ -->
-        <div id="socialSubMissions" style="display:none;">
-          <div class="task-card" style="margin-bottom:12px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-              <div>
-                <h3 style="font-size:16px;font-weight:900;">🏆 120 Kademeli Misyon & Challenge Merkezi</h3>
-                <p style="font-size:12px;color:var(--text-muted);">Hangi görevi tamamlarsan hangi rozeti ve kaç XP kazanacağın aşağıda tek tek yazar!</p>
+        <!-- ================================================================== -->
+        <!-- ALT BÖLÜM 2: 🔥 ORTAK SERİ (STREAKS DUO), 7 GÜNLÜK DÜELLO & LİDERLİK -->
+        <!-- ================================================================== -->
+        <div id="socialSubArenas" style="display:none;">
+          <!-- 1. 👥 ARKADAŞLA ORTAK "ZİNCİRİ KIRMA" (STREAKS DUO) -->
+          <div class="task-card" id="duoStreakBannerCard" style="margin-bottom:10px;background:linear-gradient(135deg,rgba(255,156,110,0.14),rgba(245,216,181,0.05));border:1px solid rgba(255,156,110,0.4);padding:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
+              <div style="font-size:13.5px;font-weight:900;color:var(--accent-cream);">🔥 Ortak "Zinciri Kırma" (Streaks Duo)</div>
+              <div id="duoStreakCountBadge" style="background:#ff7a45;color:#fff;font-weight:900;font-size:11.5px;padding:3px 10px;border-radius:99px;">🔥 4 Gün Duo</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-around;background:rgba(0,0,0,0.3);padding:8px 10px;border-radius:12px;margin-bottom:8px;">
+              <div style="text-align:center;">
+                <div style="font-size:11.5px;font-weight:900;" id="duoMyNameLabel">Sen</div>
+                <div style="font-size:10.5px;color:#95de64;font-weight:800;" id="duoMyStatusText">✅ Hazır</div>
               </div>
-              <span id="missionsTotalUnlockedText" style="font-size:12.5px;font-weight:900;padding:6px 12px;border-radius:99px;background:rgba(82,196,26,0.18);color:#95de64;">0 / 120 Tamamlandı</span>
+              <div style="font-size:15px;color:#ff9c6e;font-weight:900;">━━ 🔥 ━━</div>
+              <div style="text-align:center;">
+                <div style="font-size:11.5px;font-weight:900;" id="duoPartnerNameLabel">Partnerin</div>
+                <div style="font-size:10.5px;color:#ffc069;font-weight:800;" id="duoPartnerStatusText">⏳ Bekleniyor</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button type="button" class="btn-cream" style="flex:1;height:36px;font-size:11.5px;font-weight:900;background:#ff9c6e;color:#09090d;" onclick="igniteDuoStreakToday()">🔥 Seriyi Ateşle (+1)</button>
+              <button type="button" class="pin-btn" style="flex:1;height:36px;font-size:11.5px;font-weight:800;color:#ff9c6e;" onclick="nudgeFriendForDuoStreak()">⚡ Arkadaşı Dürt</button>
+            </div>
+          </div>
+
+          <!-- 2. ⚔️ 7 GÜNLÜK ORTAK DÜELLO -->
+          <div class="task-card" style="padding:12px;margin-bottom:10px;">
+            <div style="font-size:13px;font-weight:900;color:#ff9c6e;margin-bottom:8px;">⚔️ 7 Günlük Ortak Düello Başlat</div>
+            <div id="activeFriendDuelBox" style="margin-bottom:8px;"></div>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
+              <button type="button" class="quick-chat-btn" onclick="startFriendSevenDayDuel('💧 7 Gün 3L Su Düellosu')">💧 3L Su Düellosu</button>
+              <button type="button" class="quick-chat-btn" onclick="startFriendSevenDayDuel('🏋️ 7 Gün 5 İdman Düellosu')">🏋️ 5 İdman Düellosu</button>
+              <button type="button" class="quick-chat-btn" onclick="startFriendSevenDayDuel('🍬 7 Gün Şekersiz Düello')">🍬 Şekersiz Düello</button>
+              <button type="button" class="quick-chat-btn" onclick="startFriendSevenDayDuel('🔥 7 Gün %100 Görev Düellosu')">🔥 %100 Görev Düellosu</button>
+            </div>
+          </div>
+
+          <!-- 3. 🏆 HAFTALIK PUAN SIRALAMASI -->
+          <div class="task-card" style="padding:12px;">
+            <div style="font-size:13px;font-weight:900;color:#ffd700;margin-bottom:8px;">🏆 Haftalık Arkadaş Sıralaması</div>
+            <div id="friendsLeaderboardContainer"></div>
+          </div>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- ALT BÖLÜM 3: 🏆 120 MİSYON & ROZET MERKEZİ -->
+        <!-- ================================================================== -->
+        <div id="socialSubMissions" style="display:none;">
+          <div class="task-card" style="padding:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
+              <span style="font-size:14px;font-weight:900;">🏆 120 Rozet & Görevler</span>
+              <span id="missionsTotalUnlockedText" style="font-size:11.5px;font-weight:900;padding:4px 10px;border-radius:99px;background:rgba(82,196,26,0.18);color:#95de64;">0 / 120</span>
             </div>
 
-            <!-- Challenge Kategori Filtresi -->
-            <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;scrollbar-width:none;">
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="all" style="border:none;cursor:pointer;background:var(--accent-cream);color:#121218;font-weight:800;flex-shrink:0;" onclick="setMissionCategoryFilter('all', this)">🌟 Tümü (120)</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="closest" style="border:none;cursor:pointer;color:#ffc069;font-weight:800;flex-shrink:0;" onclick="setMissionCategoryFilter('closest', this)">🎯 Kazanmaya En Yakınlar</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="unlocked" style="border:none;cursor:pointer;color:#95de64;font-weight:800;flex-shrink:0;" onclick="setMissionCategoryFilter('unlocked', this)">✅ Kazanılan Rozetlerim</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="water" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('water', this)">💧 Su (20)</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="sport" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('sport', this)">🏋️ Spor & PR (20)</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="nutrition" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('nutrition', this)">🍽️ Beslenme (20)</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="tasks" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('tasks', this)">📋 Görevler (20)</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="streak" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('streak', this)">🔥 Seri (20)</button>
-              <button type="button" class="tag-badge mission-cat-btn" data-cat="growth" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('growth', this)">🧠 Gelişim (20)</button>
+            <div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;scrollbar-width:none;">
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="all" style="border:none;cursor:pointer;background:var(--accent-cream);color:#121218;font-weight:800;flex-shrink:0;" onclick="setMissionCategoryFilter('all', this)">🌟 Tümü</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="closest" style="border:none;cursor:pointer;color:#ffc069;font-weight:800;flex-shrink:0;" onclick="setMissionCategoryFilter('closest', this)">🎯 En Yakınlar</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="unlocked" style="border:none;cursor:pointer;color:#95de64;font-weight:800;flex-shrink:0;" onclick="setMissionCategoryFilter('unlocked', this)">✅ Kazanılanlar</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="water" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('water', this)">💧 Su</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="sport" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('sport', this)">🏋️ Spor</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="nutrition" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('nutrition', this)">🍽️ Besin</button>
+              <button type="button" class="tag-badge mission-cat-btn" data-cat="tasks" style="border:none;cursor:pointer;flex-shrink:0;" onclick="setMissionCategoryFilter('tasks', this)">📋 Görev</button>
             </div>
 
             <div id="missionsCardsContainer" class="challenge-card-grid"></div>

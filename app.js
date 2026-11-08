@@ -11445,3 +11445,124 @@ setTimeout(() => {
   renderDuoStreakBanner();
 }, 400);
 
+
+// ============================================================================
+// ✨ ULTRA SADE SOSYAL PROFİL, TEK KUTUDA ARKADAŞ EKLEME & KOMPAKT ARKADAŞ LİSTESİ
+// ============================================================================
+function switchSocialSubTab(tab) {
+  activeSocialSubTab = (tab === 'missions' || tab === 'arenas') ? tab : 'friends';
+
+  const fPane = document.getElementById('socialSubFriends');
+  const aPane = document.getElementById('socialSubArenas');
+  const mPane = document.getElementById('socialSubMissions');
+
+  if (fPane) fPane.style.display = activeSocialSubTab === 'friends' ? 'block' : 'none';
+  if (aPane) aPane.style.display = activeSocialSubTab === 'arenas' ? 'block' : 'none';
+  if (mPane) mPane.style.display = activeSocialSubTab === 'missions' ? 'block' : 'none';
+
+  const bF = document.getElementById('socialSubBtnFriends');
+  const bA = document.getElementById('socialSubBtnArenas');
+  const bM = document.getElementById('socialSubBtnMissions');
+
+  if (bF) bF.classList.toggle('active', activeSocialSubTab === 'friends');
+  if (bA) bA.classList.toggle('active', activeSocialSubTab === 'arenas');
+  if (bM) bM.classList.toggle('active', activeSocialSubTab === 'missions');
+
+  if (activeSocialSubTab === 'friends') {
+    ensureDefaultAiCoachFriend();
+    renderSocialFriendsList();
+    renderSelectedFriendChat();
+  } else if (activeSocialSubTab === 'arenas') {
+    renderDuoStreakBanner();
+    if (typeof renderFriendDuelArena === 'function') renderFriendDuelArena();
+    if (typeof renderFriendsLeaderboard === 'function') renderFriendsLeaderboard();
+  }
+}
+window.switchSocialSubTab = switchSocialSubTab;
+
+function copyMyFriendInviteCode() {
+  const code = generateMyShareableFriendCode();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).catch(() => {});
+  }
+  const inp = document.getElementById('myShareableCodeDisplayInput');
+  if (inp) inp.value = code;
+  if (typeof spawnFloatingRewardToast === 'function') {
+    spawnFloatingRewardToast('🔑 Davet Kodun Panoya Kopyalandı! Arkadaşına Gönder.');
+  }
+}
+window.copyMyFriendInviteCode = copyMyFriendInviteCode;
+
+function smartAddFriendUnified() {
+  const codeInp = document.getElementById('addFriendInviteCodeInput');
+  const legacyInp = document.getElementById('addFriendInput');
+  const raw = ((codeInp && codeInp.value) || (legacyInp && legacyInp.value) || '').trim();
+
+  if (!raw) {
+    if (typeof spawnFloatingRewardToast === 'function') {
+      spawnFloatingRewardToast('⚠️ Lütfen arkadaşının adını (örn: Ahmet) veya TF-... kodunu yaz!');
+    }
+    if (codeInp) codeInp.focus();
+    return;
+  }
+
+  // Put into addFriendInput so addFriendByCodeOrUsername handles both TF-... and plain names
+  if (legacyInp) legacyInp.value = raw;
+  if (codeInp && raw.startsWith('TF-') && typeof addFriendByPastedInviteCode === 'function') {
+    addFriendByPastedInviteCode();
+    codeInp.value = '';
+    return;
+  }
+
+  addFriendByCodeOrUsername();
+  if (codeInp) codeInp.value = '';
+}
+window.smartAddFriendUnified = smartAddFriendUnified;
+
+function renderSocialFriendsList() {
+  ensureDefaultAiCoachFriend();
+  const listEl = document.getElementById('friendsListContainer') || document.getElementById('socialFriendsList');
+  if (!listEl) return;
+
+  const friends = Array.isArray(appData.socialFriends) ? appData.socialFriends : [];
+  if (activeSelectedFriendIdx < 0 || activeSelectedFriendIdx >= friends.length) {
+    activeSelectedFriendIdx = 0;
+  }
+
+  listEl.innerHTML = friends.map((f, idx) => {
+    const active = idx === activeSelectedFriendIdx;
+    const dispName = f.displayName || f.username || 'Arkadaş';
+    const initial = f.isAiCoach ? '🤖' : dispName.replace(/^[^\p{L}\p{N}]+/u, '').charAt(0).toUpperCase() || '👤';
+    const waterL = ((Number(f.waterCount) || 0) * 0.25).toFixed(1);
+    const protG = Number(f.proteinGrams) || 0;
+
+    return `
+      <div onclick="selectFriendForChat(${idx})" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:12px;background:${active ? 'rgba(149,222,100,0.12)' : 'rgba(255,255,255,0.03)'};border:1.5px solid ${active ? 'rgba(149,222,100,0.5)' : 'rgba(255,255,255,0.07)'};cursor:pointer;transition:all 0.15s ease;">
+        <div style="display:flex;align-items:center;gap:9px;min-width:0;flex:1;">
+          <div onclick="openFriendProfileModalByIdx(${idx});event.stopPropagation();" style="width:34px;height:34px;border-radius:10px;background:${active ? '#95de64' : 'var(--accent-cream)'};color:#09090d;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;" title="Profili Gör">
+            ${initial}
+          </div>
+          <div style="min-width:0;flex:1;">
+            <div style="font-size:13px;font-weight:900;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              ${escapeHtml(dispName)}
+            </div>
+            <div style="font-size:10.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              💧 ${waterL}L • 🥩 ${protG}g P
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;" onclick="event.stopPropagation()">
+          <button type="button" class="pin-btn" style="height:28px;padding:0 8px;font-size:11px;font-weight:800;" onclick="openFriendProfileModalByIdx(${idx})" title="Profil">👁️</button>
+          <button type="button" class="btn-cream" style="height:28px;padding:0 10px;font-size:11px;font-weight:900;background:${active ? '#95de64' : 'rgba(96,165,250,0.2)'};color:${active ? '#09090d' : '#93c5fd'};" onclick="selectFriendForChat(${idx}, true)">
+            ${active ? '💬 Açık' : '💬 Yaz'}
+          </button>
+          ${!f.isAiCoach ? `<button type="button" class="pin-btn" style="height:28px;width:28px;padding:0;font-size:11px;color:#ff7875;border-color:rgba(255,120,117,0.3);" onclick="deleteSocialFriend(${idx}, event)" title="Sil">✕</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+window.renderSocialFriendsList = renderSocialFriendsList;
+
+
