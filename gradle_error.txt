@@ -1,28 +1,142 @@
-Downloading https://services.gradle.org/distributions/gradle-8.9-all.zip
+Downloading https://services.gradle.org/distributions/gradle-8.9-bin.zip
+............10%.............20%.............30%.............40%.............50%.............60%.............70%.............80%.............90%.............100%
 
-Exception in thread "main" java.io.IOException: Downloading from https://services.gradle.org/distributions/gradle-8.9-all.zip failed: timeout (10000ms)
-	at org.gradle.wrapper.Install.forceFetch(SourceFile:4)
-	at org.gradle.wrapper.Install$1.call(SourceFile:8)
-	at org.gradle.wrapper.GradleWrapperMain.main(SourceFile:67)
-Caused by: java.net.SocketTimeoutException: Read timed out
-	at java.base/sun.nio.ch.NioSocketImpl.timedRead(NioSocketImpl.java:278)
-	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:304)
-	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:346)
-	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:796)
-	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:1099)
-	at java.base/sun.security.ssl.SSLSocketInputRecord.read(SSLSocketInputRecord.java:489)
-	at java.base/sun.security.ssl.SSLSocketInputRecord.readHeader(SSLSocketInputRecord.java:483)
-	at java.base/sun.security.ssl.SSLSocketInputRecord.bytesInCompletePacket(SSLSocketInputRecord.java:70)
-	at java.base/sun.security.ssl.SSLSocketImpl.readApplicationRecord(SSLSocketImpl.java:1460)
-	at java.base/sun.security.ssl.SSLSocketImpl$AppInputStream.read(SSLSocketImpl.java:1066)
-	at java.base/java.io.BufferedInputStream.fill(BufferedInputStream.java:291)
-	at java.base/java.io.BufferedInputStream.read1(BufferedInputStream.java:347)
-	at java.base/java.io.BufferedInputStream.implRead(BufferedInputStream.java:420)
-	at java.base/java.io.BufferedInputStream.read(BufferedInputStream.java:399)
-	at java.base/sun.net.www.http.HttpClient.parseHTTPHeader(HttpClient.java:835)
-	at java.base/sun.net.www.http.HttpClient.parseHTTP(HttpClient.java:767)
-	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1730)
-	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1632)
-	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:223)
-	at org.gradle.wrapper.Install.forceFetch(SourceFile:2)
-	... 2 more
+Welcome to Gradle 8.9!
+
+Here are the highlights of this release:
+ - Enhanced Error and Warning Messages
+ - IDE Integration Improvements
+ - Daemon JVM Information
+
+For more details see https://docs.gradle.org/8.9/release-notes.html
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.9/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :app
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :capacitor-android:preBuild UP-TO-DATE
+> Task :capacitor-android:preDebugBuild UP-TO-DATE
+> Task :capacitor-keyboard:preBuild UP-TO-DATE
+> Task :capacitor-keyboard:preDebugBuild UP-TO-DATE
+> Task :capacitor-keyboard:writeDebugAarMetadata
+> Task :capacitor-android:writeDebugAarMetadata
+> Task :app:javaPreCompileDebug
+> Task :app:generateDebugResValues
+> Task :capacitor-android:generateDebugResValues
+> Task :capacitor-android:generateDebugResources
+> Task :app:checkDebugAarMetadata
+> Task :capacitor-android:packageDebugResources
+> Task :capacitor-keyboard:generateDebugResValues
+> Task :capacitor-keyboard:generateDebugResources
+> Task :capacitor-keyboard:packageDebugResources
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:mergeDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :capacitor-android:extractDeepLinksDebug
+> Task :capacitor-keyboard:extractDeepLinksDebug
+> Task :app:parseDebugLocalResources
+> Task :capacitor-keyboard:processDebugManifest
+> Task :capacitor-android:processDebugManifest
+> Task :capacitor-android:compileDebugLibraryResources
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :capacitor-keyboard:compileDebugLibraryResources
+> Task :capacitor-android:parseDebugLocalResources
+> Task :capacitor-keyboard:parseDebugLocalResources
+> Task :capacitor-android:javaPreCompileDebug
+> Task :capacitor-keyboard:javaPreCompileDebug
+> Task :capacitor-keyboard:generateDebugRFile
+> Task :app:mergeDebugShaders
+> Task :capacitor-android:generateDebugRFile
+> Task :app:processDebugResources
+
+> Task :capacitor-android:compileDebugJavaWithJavac
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :capacitor-android:mergeDebugShaders
+> Task :capacitor-android:compileDebugShaders NO-SOURCE
+> Task :capacitor-android:generateDebugAssets UP-TO-DATE
+> Task :capacitor-android:bundleLibCompileToJarDebug
+> Task :capacitor-android:packageDebugAssets
+> Task :capacitor-keyboard:compileDebugJavaWithJavac
+> Task :capacitor-keyboard:bundleLibCompileToJarDebug
+> Task :capacitor-keyboard:mergeDebugShaders
+> Task :capacitor-keyboard:compileDebugShaders NO-SOURCE
+
+> Task :app:compileDebugJavaWithJavac
+Note: /home/runner/work/taskflow-pro/taskflow-pro/android/app/src/main/java/com/alperkoks/taskflowpro/MainActivity.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :capacitor-keyboard:generateDebugAssets UP-TO-DATE
+> Task :capacitor-keyboard:packageDebugAssets
+> Task :app:mergeDebugAssets
+> Task :capacitor-keyboard:bundleLibRuntimeToJarDebug
+> Task :capacitor-android:bundleLibRuntimeToJarDebug
+> Task :app:compressDebugAssets
+> Task :app:desugarDebugFileDependencies
+> Task :app:dexBuilderDebug
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :capacitor-android:processDebugJavaRes NO-SOURCE
+> Task :capacitor-keyboard:processDebugJavaRes NO-SOURCE
+> Task :capacitor-keyboard:bundleLibRuntimeToDirDebug
+> Task :app:checkDebugDuplicateClasses
+> Task :app:mergeDebugJavaResource
+> Task :app:mergeDebugGlobalSynthetics
+> Task :capacitor-android:bundleLibRuntimeToDirDebug
+> Task :app:mergeDebugJniLibFolders
+> Task :capacitor-android:mergeDebugJniLibFolders
+> Task :capacitor-android:mergeDebugNativeLibs NO-SOURCE
+> Task :app:mergeProjectDexDebug
+> Task :capacitor-android:copyDebugJniLibsProjectOnly
+> Task :capacitor-keyboard:mergeDebugJniLibFolders
+> Task :capacitor-keyboard:mergeDebugNativeLibs NO-SOURCE
+> Task :capacitor-keyboard:copyDebugJniLibsProjectOnly
+> Task :app:mergeExtDexDebug
+> Task :app:validateSigningDebug
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:writeDebugAppMetadata
+> Task :app:mergeLibDexDebug
+> Task :app:writeDebugSigningConfigVersions
+> Task :capacitor-android:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-android:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-android:extractDebugAnnotations
+> Task :capacitor-android:extractDeepLinksForAarDebug
+> Task :capacitor-android:mergeDebugGeneratedProguardFiles
+> Task :capacitor-android:mergeDebugConsumerProguardFiles
+> Task :capacitor-android:prepareDebugArtProfile
+> Task :capacitor-android:prepareLintJarForPublish
+> Task :capacitor-android:mergeDebugJavaResource
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
+> Task :capacitor-android:syncDebugLibJars
+> Task :capacitor-android:bundleDebugAar
+> Task :capacitor-android:assembleDebug
+> Task :capacitor-keyboard:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-keyboard:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-keyboard:extractDebugAnnotations
+> Task :capacitor-keyboard:extractDeepLinksForAarDebug
+> Task :capacitor-keyboard:mergeDebugGeneratedProguardFiles
+> Task :capacitor-keyboard:mergeDebugConsumerProguardFiles
+> Task :capacitor-keyboard:prepareDebugArtProfile
+> Task :capacitor-keyboard:prepareLintJarForPublish
+> Task :capacitor-keyboard:mergeDebugJavaResource
+> Task :capacitor-keyboard:syncDebugLibJars
+> Task :capacitor-keyboard:bundleDebugAar
+> Task :capacitor-keyboard:assembleDebug
+
+BUILD SUCCESSFUL in 1m 26s
+88 actionable tasks: 88 executed
