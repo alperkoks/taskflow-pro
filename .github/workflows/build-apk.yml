@@ -22,6 +22,11 @@ jobs:
         distribution: 'temurin'
         java-version: '21'
 
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.9'
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
